@@ -32,6 +32,9 @@ Thumbs.db
 linctl
 dist/
 
+# Worktrees
+.worktrees/
+
 # Config files (may contain sensitive data)
 .linctl.yaml
 .linctl-auth.json
