@@ -1,0 +1,338 @@
+# GraphQL operations for Issue entity
+# These operations will replace hand-written queries in pkg/api/queries.go
+
+# Fragment for basic issue fields used in list views
+fragment IssueListFields on Issue {
+  id
+  identifier
+  title
+  description
+  priority
+  estimate
+  createdAt
+  updatedAt
+  dueDate
+  url
+  state {
+    id
+    name
+    type
+    color
+  }
+  assignee {
+    id
+    name
+    email
+  }
+  team {
+    id
+    key
+    name
+  }
+  labels {
+    nodes {
+      id
+      name
+      color
+    }
+  }
+}
+
+# Fragment for detailed issue fields used in single issue view
+fragment IssueDetailFields on Issue {
+  id
+  identifier
+  number
+  title
+  description
+  priority
+  priorityLabel
+  estimate
+  boardOrder
+  subIssueSortOrder
+  createdAt
+  updatedAt
+  dueDate
+  url
+  branchName
+  snoozedUntilAt
+  completedAt
+  canceledAt
+  archivedAt
+  triagedAt
+  customerTicketCount
+  previousIdentifiers
+  integrationSourceType
+  state {
+    id
+    name
+    type
+    color
+    description
+    position
+  }
+  assignee {
+    id
+    name
+    email
+    avatarUrl
+    displayName
+    active
+    admin
+    createdAt
+  }
+  creator {
+    id
+    name
+    email
+    avatarUrl
+    displayName
+    active
+  }
+  team {
+    id
+    key
+    name
+    description
+    icon
+    color
+    cyclesEnabled
+    cycleStartDay
+    cycleDuration
+    upcomingCycleCount
+  }
+  labels {
+    nodes {
+      id
+      name
+      color
+      description
+      parent {
+        id
+        name
+      }
+    }
+  }
+  parent {
+    id
+    identifier
+    title
+    state {
+      name
+      type
+    }
+  }
+  children {
+    nodes {
+      id
+      identifier
+      title
+      priority
+      createdAt
+      state {
+        name
+        type
+        color
+      }
+      assignee {
+        name
+        email
+      }
+    }
+  }
+  cycle {
+    id
+    number
+    name
+    description
+    startsAt
+    endsAt
+    progress
+    completedAt
+    scopeHistory
+  }
+  project {
+    id
+    name
+    description
+    state
+    progress
+    startDate
+    targetDate
+    health
+    lead {
+      name
+      email
+    }
+  }
+  attachments(first: 20) {
+    nodes {
+      id
+      title
+      subtitle
+      url
+      metadata
+      createdAt
+      creator {
+        name
+        email
+      }
+    }
+  }
+  comments(first: 10) {
+    nodes {
+      id
+      body
+      createdAt
+      updatedAt
+      editedAt
+      user {
+        name
+        email
+        avatarUrl
+      }
+      parent {
+        id
+      }
+      children {
+        nodes {
+          id
+          body
+          user {
+            name
+          }
+        }
+      }
+    }
+  }
+  subscribers {
+    nodes {
+      id
+      name
+      email
+      avatarUrl
+    }
+  }
+  relations {
+    nodes {
+      id
+      type
+      relatedIssue {
+        id
+        identifier
+        title
+        state {
+          name
+          type
+        }
+      }
+    }
+  }
+  history(first: 10) {
+    nodes {
+      id
+      createdAt
+      updatedAt
+      actor {
+        name
+        email
+      }
+      fromAssignee {
+        name
+      }
+      toAssignee {
+        name
+      }
+      fromState {
+        name
+      }
+      toState {
+        name
+      }
+      fromPriority
+      toPriority
+      fromTitle
+      toTitle
+      fromCycle {
+        name
+      }
+      toCycle {
+        name
+      }
+      fromProject {
+        name
+      }
+      toProject {
+        name
+      }
+      addedLabelIds
+      removedLabelIds
+    }
+  }
+  reactions {
+    id
+    emoji
+    user {
+      name
+      email
+    }
+    createdAt
+  }
+  externalUserCreator {
+    id
+    name
+    email
+    avatarUrl
+  }
+}
+
+# Query: Get paginated list of issues with optional filtering
+query ListIssues($filter: IssueFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
+  issues(filter: $filter, first: $first, after: $after, orderBy: $orderBy) {
+    nodes {
+      ...IssueListFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+# Query: Search issues using full-text search
+query SearchIssues($term: String!, $filter: IssueFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy, $includeArchived: Boolean) {
+  searchIssues(term: $term, filter: $filter, first: $first, after: $after, orderBy: $orderBy, includeArchived: $includeArchived) {
+    nodes {
+      ...IssueListFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+# Query: Get a single issue by ID with all details
+query GetIssue($id: String!) {
+  issue(id: $id) {
+    ...IssueDetailFields
+  }
+}
+
+# Mutation: Create a new issue
+mutation CreateIssue($input: IssueCreateInput!) {
+  issueCreate(input: $input) {
+    issue {
+      ...IssueListFields
+    }
+  }
+}
+
+# Mutation: Update an existing issue
+mutation UpdateIssue($id: String!, $input: IssueUpdateInput!) {
+  issueUpdate(id: $id, input: $input) {
+    issue {
+      ...IssueListFields
+    }
+  }
+}
