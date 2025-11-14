@@ -69,7 +69,7 @@ var commentListCmd = &cobra.Command{
 		}
 
 		// Get comments
-		comments, err := client.GetIssueComments(context.Background(), issueID, limit, "", orderBy)
+		comments, err := client.GetIssueCommentsNew(context.Background(), issueID, limit, "", orderBy)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to list comments: %v", err), plaintext, jsonOut)
 			os.Exit(1)
@@ -149,7 +149,7 @@ var commentCreateCmd = &cobra.Command{
 		}
 
 		// Create comment
-		comment, err := client.CreateComment(context.Background(), issueID, body)
+		comment, err := client.CreateCommentNew(context.Background(), issueID, body)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to create comment: %v", err), plaintext, jsonOut)
 			os.Exit(1)

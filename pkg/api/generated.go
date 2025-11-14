@@ -235,6 +235,224 @@ func (v *CommentCollectionFilter) GetUpdatedAt() *DateComparator { return v.Upda
 // GetUser returns CommentCollectionFilter.User, and is useful for accessing the field via an interface.
 func (v *CommentCollectionFilter) GetUser() *UserFilter { return v.User }
 
+type CommentCreateInput struct {
+	// The comment content in markdown format.
+	Body *string `json:"body"`
+	// [Internal] The comment content as a Prosemirror document.
+	BodyData *interface{} `json:"bodyData"`
+	// Create comment as a user with the provided name. This option is only available
+	// to OAuth applications creating comments in `actor=app` mode.
+	CreateAsUser *string `json:"createAsUser"`
+	// The date when the comment was created (e.g. if importing from another system).
+	// Must be a date in the past. If none is provided, the backend will generate the time as now.
+	CreatedAt *time.Time `json:"createdAt"`
+	// Flag to indicate this comment should be created on the issue's synced Slack
+	// comment thread. If no synced Slack comment thread exists, the mutation will fail.
+	CreateOnSyncedSlackThread *bool `json:"createOnSyncedSlackThread"`
+	// Provide an external user avatar URL. Can only be used in conjunction with the
+	// `createAsUser` options. This option is only available to OAuth applications
+	// creating comments in `actor=app` mode.
+	DisplayIconUrl *string `json:"displayIconUrl"`
+	// The document content to associate the comment with.
+	DocumentContentId *string `json:"documentContentId"`
+	// Flag to prevent auto subscription to the issue the comment is created on.
+	DoNotSubscribeToIssue *bool `json:"doNotSubscribeToIssue"`
+	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
+	Id *string `json:"id"`
+	// The initiative update to associate the comment with.
+	InitiativeUpdateId *string `json:"initiativeUpdateId"`
+	// The issue to associate the comment with.
+	IssueId *string `json:"issueId"`
+	// The parent comment under which to nest a current comment.
+	ParentId *string `json:"parentId"`
+	// The post to associate the comment with.
+	PostId *string `json:"postId"`
+	// The project update to associate the comment with.
+	ProjectUpdateId *string `json:"projectUpdateId"`
+	// The text that this comment references. Only defined for inline comments.
+	QuotedText *string `json:"quotedText"`
+	// [INTERNAL] The identifiers of the users subscribing to this comment thread.
+	SubscriberIds []string `json:"subscriberIds"`
+}
+
+// GetBody returns CommentCreateInput.Body, and is useful for accessing the field via an interface.
+func (v *CommentCreateInput) GetBody() *string { return v.Body }
+
+// GetBodyData returns CommentCreateInput.BodyData, and is useful for accessing the field via an interface.
+func (v *CommentCreateInput) GetBodyData() *interface{} { return v.BodyData }
+
+// GetCreateAsUser returns CommentCreateInput.CreateAsUser, and is useful for accessing the field via an interface.
+func (v *CommentCreateInput) GetCreateAsUser() *string { return v.CreateAsUser }
+
+// GetCreatedAt returns CommentCreateInput.CreatedAt, and is useful for accessing the field via an interface.
+func (v *CommentCreateInput) GetCreatedAt() *time.Time { return v.CreatedAt }
+
+// GetCreateOnSyncedSlackThread returns CommentCreateInput.CreateOnSyncedSlackThread, and is useful for accessing the field via an interface.
+func (v *CommentCreateInput) GetCreateOnSyncedSlackThread() *bool { return v.CreateOnSyncedSlackThread }
+
+// GetDisplayIconUrl returns CommentCreateInput.DisplayIconUrl, and is useful for accessing the field via an interface.
+func (v *CommentCreateInput) GetDisplayIconUrl() *string { return v.DisplayIconUrl }
+
+// GetDocumentContentId returns CommentCreateInput.DocumentContentId, and is useful for accessing the field via an interface.
+func (v *CommentCreateInput) GetDocumentContentId() *string { return v.DocumentContentId }
+
+// GetDoNotSubscribeToIssue returns CommentCreateInput.DoNotSubscribeToIssue, and is useful for accessing the field via an interface.
+func (v *CommentCreateInput) GetDoNotSubscribeToIssue() *bool { return v.DoNotSubscribeToIssue }
+
+// GetId returns CommentCreateInput.Id, and is useful for accessing the field via an interface.
+func (v *CommentCreateInput) GetId() *string { return v.Id }
+
+// GetInitiativeUpdateId returns CommentCreateInput.InitiativeUpdateId, and is useful for accessing the field via an interface.
+func (v *CommentCreateInput) GetInitiativeUpdateId() *string { return v.InitiativeUpdateId }
+
+// GetIssueId returns CommentCreateInput.IssueId, and is useful for accessing the field via an interface.
+func (v *CommentCreateInput) GetIssueId() *string { return v.IssueId }
+
+// GetParentId returns CommentCreateInput.ParentId, and is useful for accessing the field via an interface.
+func (v *CommentCreateInput) GetParentId() *string { return v.ParentId }
+
+// GetPostId returns CommentCreateInput.PostId, and is useful for accessing the field via an interface.
+func (v *CommentCreateInput) GetPostId() *string { return v.PostId }
+
+// GetProjectUpdateId returns CommentCreateInput.ProjectUpdateId, and is useful for accessing the field via an interface.
+func (v *CommentCreateInput) GetProjectUpdateId() *string { return v.ProjectUpdateId }
+
+// GetQuotedText returns CommentCreateInput.QuotedText, and is useful for accessing the field via an interface.
+func (v *CommentCreateInput) GetQuotedText() *string { return v.QuotedText }
+
+// GetSubscriberIds returns CommentCreateInput.SubscriberIds, and is useful for accessing the field via an interface.
+func (v *CommentCreateInput) GetSubscriberIds() []string { return v.SubscriberIds }
+
+// Fragment for comment fields
+type CommentFields struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The comment content in markdown format.
+	Body string `json:"body"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+	// been updated after creation.
+	UpdatedAt time.Time `json:"updatedAt"`
+	// The time user edited the comment.
+	EditedAt *time.Time `json:"editedAt"`
+	// The user who wrote the comment.
+	User *CommentFieldsUser `json:"user"`
+	// The parent comment under which the current comment is nested.
+	Parent *CommentFieldsParentComment `json:"parent"`
+	// The children of the comment.
+	Children *CommentFieldsChildrenCommentConnection `json:"children"`
+}
+
+// GetId returns CommentFields.Id, and is useful for accessing the field via an interface.
+func (v *CommentFields) GetId() string { return v.Id }
+
+// GetBody returns CommentFields.Body, and is useful for accessing the field via an interface.
+func (v *CommentFields) GetBody() string { return v.Body }
+
+// GetCreatedAt returns CommentFields.CreatedAt, and is useful for accessing the field via an interface.
+func (v *CommentFields) GetCreatedAt() time.Time { return v.CreatedAt }
+
+// GetUpdatedAt returns CommentFields.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *CommentFields) GetUpdatedAt() time.Time { return v.UpdatedAt }
+
+// GetEditedAt returns CommentFields.EditedAt, and is useful for accessing the field via an interface.
+func (v *CommentFields) GetEditedAt() *time.Time { return v.EditedAt }
+
+// GetUser returns CommentFields.User, and is useful for accessing the field via an interface.
+func (v *CommentFields) GetUser() *CommentFieldsUser { return v.User }
+
+// GetParent returns CommentFields.Parent, and is useful for accessing the field via an interface.
+func (v *CommentFields) GetParent() *CommentFieldsParentComment { return v.Parent }
+
+// GetChildren returns CommentFields.Children, and is useful for accessing the field via an interface.
+func (v *CommentFields) GetChildren() *CommentFieldsChildrenCommentConnection { return v.Children }
+
+// CommentFieldsChildrenCommentConnection includes the requested fields of the GraphQL type CommentConnection.
+type CommentFieldsChildrenCommentConnection struct {
+	Nodes []*CommentFieldsChildrenCommentConnectionNodesComment `json:"nodes"`
+}
+
+// GetNodes returns CommentFieldsChildrenCommentConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *CommentFieldsChildrenCommentConnection) GetNodes() []*CommentFieldsChildrenCommentConnectionNodesComment {
+	return v.Nodes
+}
+
+// CommentFieldsChildrenCommentConnectionNodesComment includes the requested fields of the GraphQL type Comment.
+// The GraphQL type's documentation follows.
+//
+// A comment associated with an issue.
+type CommentFieldsChildrenCommentConnectionNodesComment struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The comment content in markdown format.
+	Body string `json:"body"`
+	// The user who wrote the comment.
+	User *CommentFieldsChildrenCommentConnectionNodesCommentUser `json:"user"`
+}
+
+// GetId returns CommentFieldsChildrenCommentConnectionNodesComment.Id, and is useful for accessing the field via an interface.
+func (v *CommentFieldsChildrenCommentConnectionNodesComment) GetId() string { return v.Id }
+
+// GetBody returns CommentFieldsChildrenCommentConnectionNodesComment.Body, and is useful for accessing the field via an interface.
+func (v *CommentFieldsChildrenCommentConnectionNodesComment) GetBody() string { return v.Body }
+
+// GetUser returns CommentFieldsChildrenCommentConnectionNodesComment.User, and is useful for accessing the field via an interface.
+func (v *CommentFieldsChildrenCommentConnectionNodesComment) GetUser() *CommentFieldsChildrenCommentConnectionNodesCommentUser {
+	return v.User
+}
+
+// CommentFieldsChildrenCommentConnectionNodesCommentUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that has access to the the resources of an organization.
+type CommentFieldsChildrenCommentConnectionNodesCommentUser struct {
+	// The user's full name.
+	Name string `json:"name"`
+}
+
+// GetName returns CommentFieldsChildrenCommentConnectionNodesCommentUser.Name, and is useful for accessing the field via an interface.
+func (v *CommentFieldsChildrenCommentConnectionNodesCommentUser) GetName() string { return v.Name }
+
+// CommentFieldsParentComment includes the requested fields of the GraphQL type Comment.
+// The GraphQL type's documentation follows.
+//
+// A comment associated with an issue.
+type CommentFieldsParentComment struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+}
+
+// GetId returns CommentFieldsParentComment.Id, and is useful for accessing the field via an interface.
+func (v *CommentFieldsParentComment) GetId() string { return v.Id }
+
+// CommentFieldsUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that has access to the the resources of an organization.
+type CommentFieldsUser struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The user's full name.
+	Name string `json:"name"`
+	// The user's email address.
+	Email string `json:"email"`
+	// An URL to the user's avatar image.
+	AvatarUrl *string `json:"avatarUrl"`
+}
+
+// GetId returns CommentFieldsUser.Id, and is useful for accessing the field via an interface.
+func (v *CommentFieldsUser) GetId() string { return v.Id }
+
+// GetName returns CommentFieldsUser.Name, and is useful for accessing the field via an interface.
+func (v *CommentFieldsUser) GetName() string { return v.Name }
+
+// GetEmail returns CommentFieldsUser.Email, and is useful for accessing the field via an interface.
+func (v *CommentFieldsUser) GetEmail() string { return v.Email }
+
+// GetAvatarUrl returns CommentFieldsUser.AvatarUrl, and is useful for accessing the field via an interface.
+func (v *CommentFieldsUser) GetAvatarUrl() *string { return v.AvatarUrl }
+
 // Comment filtering options.
 type CommentFilter struct {
 	// Compound filters, all of which need to be matched by the comment.
@@ -304,6 +522,44 @@ func (v *CommentFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
 // GetUser returns CommentFilter.User, and is useful for accessing the field via an interface.
 func (v *CommentFilter) GetUser() *UserFilter { return v.User }
 
+type CommentUpdateInput struct {
+	// The comment content.
+	Body *string `json:"body"`
+	// [Internal] The comment content as a Prosemirror document.
+	BodyData *interface{} `json:"bodyData"`
+	// [INTERNAL] Flag to prevent auto subscription to the issue the comment is updated on.
+	DoNotSubscribeToIssue *bool `json:"doNotSubscribeToIssue"`
+	// The text that this comment references. Only defined for inline comments.
+	QuotedText *string `json:"quotedText"`
+	// [INTERNAL] The child comment that resolves this thread.
+	ResolvingCommentId *string `json:"resolvingCommentId"`
+	// [INTERNAL] The user who resolved this thread.
+	ResolvingUserId *string `json:"resolvingUserId"`
+	// [INTERNAL] The identifiers of the users subscribing to this comment.
+	SubscriberIds []string `json:"subscriberIds"`
+}
+
+// GetBody returns CommentUpdateInput.Body, and is useful for accessing the field via an interface.
+func (v *CommentUpdateInput) GetBody() *string { return v.Body }
+
+// GetBodyData returns CommentUpdateInput.BodyData, and is useful for accessing the field via an interface.
+func (v *CommentUpdateInput) GetBodyData() *interface{} { return v.BodyData }
+
+// GetDoNotSubscribeToIssue returns CommentUpdateInput.DoNotSubscribeToIssue, and is useful for accessing the field via an interface.
+func (v *CommentUpdateInput) GetDoNotSubscribeToIssue() *bool { return v.DoNotSubscribeToIssue }
+
+// GetQuotedText returns CommentUpdateInput.QuotedText, and is useful for accessing the field via an interface.
+func (v *CommentUpdateInput) GetQuotedText() *string { return v.QuotedText }
+
+// GetResolvingCommentId returns CommentUpdateInput.ResolvingCommentId, and is useful for accessing the field via an interface.
+func (v *CommentUpdateInput) GetResolvingCommentId() *string { return v.ResolvingCommentId }
+
+// GetResolvingUserId returns CommentUpdateInput.ResolvingUserId, and is useful for accessing the field via an interface.
+func (v *CommentUpdateInput) GetResolvingUserId() *string { return v.ResolvingUserId }
+
+// GetSubscriberIds returns CommentUpdateInput.SubscriberIds, and is useful for accessing the field via an interface.
+func (v *CommentUpdateInput) GetSubscriberIds() []string { return v.SubscriberIds }
+
 // [Internal] Comparator for content.
 type ContentComparator struct {
 	// [Internal] Contains constraint.
@@ -317,6 +573,139 @@ func (v *ContentComparator) GetContains() *string { return v.Contains }
 
 // GetNotContains returns ContentComparator.NotContains, and is useful for accessing the field via an interface.
 func (v *ContentComparator) GetNotContains() *string { return v.NotContains }
+
+// CreateCommentCommentCreateCommentPayload includes the requested fields of the GraphQL type CommentPayload.
+type CreateCommentCommentCreateCommentPayload struct {
+	// The comment that was created or updated.
+	Comment *CreateCommentCommentCreateCommentPayloadComment `json:"comment"`
+}
+
+// GetComment returns CreateCommentCommentCreateCommentPayload.Comment, and is useful for accessing the field via an interface.
+func (v *CreateCommentCommentCreateCommentPayload) GetComment() *CreateCommentCommentCreateCommentPayloadComment {
+	return v.Comment
+}
+
+// CreateCommentCommentCreateCommentPayloadComment includes the requested fields of the GraphQL type Comment.
+// The GraphQL type's documentation follows.
+//
+// A comment associated with an issue.
+type CreateCommentCommentCreateCommentPayloadComment struct {
+	CommentFields `json:"-"`
+}
+
+// GetId returns CreateCommentCommentCreateCommentPayloadComment.Id, and is useful for accessing the field via an interface.
+func (v *CreateCommentCommentCreateCommentPayloadComment) GetId() string { return v.CommentFields.Id }
+
+// GetBody returns CreateCommentCommentCreateCommentPayloadComment.Body, and is useful for accessing the field via an interface.
+func (v *CreateCommentCommentCreateCommentPayloadComment) GetBody() string {
+	return v.CommentFields.Body
+}
+
+// GetCreatedAt returns CreateCommentCommentCreateCommentPayloadComment.CreatedAt, and is useful for accessing the field via an interface.
+func (v *CreateCommentCommentCreateCommentPayloadComment) GetCreatedAt() time.Time {
+	return v.CommentFields.CreatedAt
+}
+
+// GetUpdatedAt returns CreateCommentCommentCreateCommentPayloadComment.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *CreateCommentCommentCreateCommentPayloadComment) GetUpdatedAt() time.Time {
+	return v.CommentFields.UpdatedAt
+}
+
+// GetEditedAt returns CreateCommentCommentCreateCommentPayloadComment.EditedAt, and is useful for accessing the field via an interface.
+func (v *CreateCommentCommentCreateCommentPayloadComment) GetEditedAt() *time.Time {
+	return v.CommentFields.EditedAt
+}
+
+// GetUser returns CreateCommentCommentCreateCommentPayloadComment.User, and is useful for accessing the field via an interface.
+func (v *CreateCommentCommentCreateCommentPayloadComment) GetUser() *CommentFieldsUser {
+	return v.CommentFields.User
+}
+
+// GetParent returns CreateCommentCommentCreateCommentPayloadComment.Parent, and is useful for accessing the field via an interface.
+func (v *CreateCommentCommentCreateCommentPayloadComment) GetParent() *CommentFieldsParentComment {
+	return v.CommentFields.Parent
+}
+
+// GetChildren returns CreateCommentCommentCreateCommentPayloadComment.Children, and is useful for accessing the field via an interface.
+func (v *CreateCommentCommentCreateCommentPayloadComment) GetChildren() *CommentFieldsChildrenCommentConnection {
+	return v.CommentFields.Children
+}
+
+func (v *CreateCommentCommentCreateCommentPayloadComment) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CreateCommentCommentCreateCommentPayloadComment
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CreateCommentCommentCreateCommentPayloadComment = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.CommentFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCreateCommentCommentCreateCommentPayloadComment struct {
+	Id string `json:"id"`
+
+	Body string `json:"body"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	EditedAt *time.Time `json:"editedAt"`
+
+	User *CommentFieldsUser `json:"user"`
+
+	Parent *CommentFieldsParentComment `json:"parent"`
+
+	Children *CommentFieldsChildrenCommentConnection `json:"children"`
+}
+
+func (v *CreateCommentCommentCreateCommentPayloadComment) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CreateCommentCommentCreateCommentPayloadComment) __premarshalJSON() (*__premarshalCreateCommentCommentCreateCommentPayloadComment, error) {
+	var retval __premarshalCreateCommentCommentCreateCommentPayloadComment
+
+	retval.Id = v.CommentFields.Id
+	retval.Body = v.CommentFields.Body
+	retval.CreatedAt = v.CommentFields.CreatedAt
+	retval.UpdatedAt = v.CommentFields.UpdatedAt
+	retval.EditedAt = v.CommentFields.EditedAt
+	retval.User = v.CommentFields.User
+	retval.Parent = v.CommentFields.Parent
+	retval.Children = v.CommentFields.Children
+	return &retval, nil
+}
+
+// CreateCommentResponse is returned by CreateComment on success.
+type CreateCommentResponse struct {
+	// Creates a new comment.
+	CommentCreate *CreateCommentCommentCreateCommentPayload `json:"commentCreate"`
+}
+
+// GetCommentCreate returns CreateCommentResponse.CommentCreate, and is useful for accessing the field via an interface.
+func (v *CreateCommentResponse) GetCommentCreate() *CreateCommentCommentCreateCommentPayload {
+	return v.CommentCreate
+}
 
 // CreateIssueIssueCreateIssuePayload includes the requested fields of the GraphQL type IssuePayload.
 type CreateIssueIssueCreateIssuePayload struct {
@@ -5296,6 +5685,126 @@ func (v *IssueUpdateInput) GetTitle() *string { return v.Title }
 
 // GetTrashed returns IssueUpdateInput.Trashed, and is useful for accessing the field via an interface.
 func (v *IssueUpdateInput) GetTrashed() *bool { return v.Trashed }
+
+// ListCommentsIssue includes the requested fields of the GraphQL type Issue.
+// The GraphQL type's documentation follows.
+//
+// An issue.
+type ListCommentsIssue struct {
+	// Comments associated with the issue.
+	Comments *ListCommentsIssueCommentsCommentConnection `json:"comments"`
+}
+
+// GetComments returns ListCommentsIssue.Comments, and is useful for accessing the field via an interface.
+func (v *ListCommentsIssue) GetComments() *ListCommentsIssueCommentsCommentConnection {
+	return v.Comments
+}
+
+// ListCommentsIssueCommentsCommentConnection includes the requested fields of the GraphQL type CommentConnection.
+type ListCommentsIssueCommentsCommentConnection struct {
+	Nodes    []*ListCommentsIssueCommentsCommentConnectionNodesComment `json:"nodes"`
+	PageInfo *ListCommentsIssueCommentsCommentConnectionPageInfo       `json:"pageInfo"`
+}
+
+// GetNodes returns ListCommentsIssueCommentsCommentConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ListCommentsIssueCommentsCommentConnection) GetNodes() []*ListCommentsIssueCommentsCommentConnectionNodesComment {
+	return v.Nodes
+}
+
+// GetPageInfo returns ListCommentsIssueCommentsCommentConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *ListCommentsIssueCommentsCommentConnection) GetPageInfo() *ListCommentsIssueCommentsCommentConnectionPageInfo {
+	return v.PageInfo
+}
+
+// ListCommentsIssueCommentsCommentConnectionNodesComment includes the requested fields of the GraphQL type Comment.
+// The GraphQL type's documentation follows.
+//
+// A comment associated with an issue.
+type ListCommentsIssueCommentsCommentConnectionNodesComment struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The comment content in markdown format.
+	Body string `json:"body"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+	// been updated after creation.
+	UpdatedAt time.Time `json:"updatedAt"`
+	// The user who wrote the comment.
+	User *ListCommentsIssueCommentsCommentConnectionNodesCommentUser `json:"user"`
+}
+
+// GetId returns ListCommentsIssueCommentsCommentConnectionNodesComment.Id, and is useful for accessing the field via an interface.
+func (v *ListCommentsIssueCommentsCommentConnectionNodesComment) GetId() string { return v.Id }
+
+// GetBody returns ListCommentsIssueCommentsCommentConnectionNodesComment.Body, and is useful for accessing the field via an interface.
+func (v *ListCommentsIssueCommentsCommentConnectionNodesComment) GetBody() string { return v.Body }
+
+// GetCreatedAt returns ListCommentsIssueCommentsCommentConnectionNodesComment.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ListCommentsIssueCommentsCommentConnectionNodesComment) GetCreatedAt() time.Time {
+	return v.CreatedAt
+}
+
+// GetUpdatedAt returns ListCommentsIssueCommentsCommentConnectionNodesComment.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ListCommentsIssueCommentsCommentConnectionNodesComment) GetUpdatedAt() time.Time {
+	return v.UpdatedAt
+}
+
+// GetUser returns ListCommentsIssueCommentsCommentConnectionNodesComment.User, and is useful for accessing the field via an interface.
+func (v *ListCommentsIssueCommentsCommentConnectionNodesComment) GetUser() *ListCommentsIssueCommentsCommentConnectionNodesCommentUser {
+	return v.User
+}
+
+// ListCommentsIssueCommentsCommentConnectionNodesCommentUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that has access to the the resources of an organization.
+type ListCommentsIssueCommentsCommentConnectionNodesCommentUser struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The user's full name.
+	Name string `json:"name"`
+	// The user's email address.
+	Email string `json:"email"`
+}
+
+// GetId returns ListCommentsIssueCommentsCommentConnectionNodesCommentUser.Id, and is useful for accessing the field via an interface.
+func (v *ListCommentsIssueCommentsCommentConnectionNodesCommentUser) GetId() string { return v.Id }
+
+// GetName returns ListCommentsIssueCommentsCommentConnectionNodesCommentUser.Name, and is useful for accessing the field via an interface.
+func (v *ListCommentsIssueCommentsCommentConnectionNodesCommentUser) GetName() string { return v.Name }
+
+// GetEmail returns ListCommentsIssueCommentsCommentConnectionNodesCommentUser.Email, and is useful for accessing the field via an interface.
+func (v *ListCommentsIssueCommentsCommentConnectionNodesCommentUser) GetEmail() string {
+	return v.Email
+}
+
+// ListCommentsIssueCommentsCommentConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+type ListCommentsIssueCommentsCommentConnectionPageInfo struct {
+	// Indicates if there are more results when paginating forward.
+	HasNextPage bool `json:"hasNextPage"`
+	// Cursor representing the last result in the paginated results.
+	EndCursor *string `json:"endCursor"`
+}
+
+// GetHasNextPage returns ListCommentsIssueCommentsCommentConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *ListCommentsIssueCommentsCommentConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// GetEndCursor returns ListCommentsIssueCommentsCommentConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *ListCommentsIssueCommentsCommentConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// ListCommentsResponse is returned by ListComments on success.
+type ListCommentsResponse struct {
+	// One specific issue.
+	Issue *ListCommentsIssue `json:"issue"`
+}
+
+// GetIssue returns ListCommentsResponse.Issue, and is useful for accessing the field via an interface.
+func (v *ListCommentsResponse) GetIssue() *ListCommentsIssue { return v.Issue }
 
 // ListIssuesIssuesIssueConnection includes the requested fields of the GraphQL type IssueConnection.
 type ListIssuesIssuesIssueConnection struct {
@@ -10350,6 +10859,139 @@ func (v *TeamListFields) GetPrivate() bool { return v.Private }
 // GetIssueCount returns TeamListFields.IssueCount, and is useful for accessing the field via an interface.
 func (v *TeamListFields) GetIssueCount() int { return v.IssueCount }
 
+// UpdateCommentCommentUpdateCommentPayload includes the requested fields of the GraphQL type CommentPayload.
+type UpdateCommentCommentUpdateCommentPayload struct {
+	// The comment that was created or updated.
+	Comment *UpdateCommentCommentUpdateCommentPayloadComment `json:"comment"`
+}
+
+// GetComment returns UpdateCommentCommentUpdateCommentPayload.Comment, and is useful for accessing the field via an interface.
+func (v *UpdateCommentCommentUpdateCommentPayload) GetComment() *UpdateCommentCommentUpdateCommentPayloadComment {
+	return v.Comment
+}
+
+// UpdateCommentCommentUpdateCommentPayloadComment includes the requested fields of the GraphQL type Comment.
+// The GraphQL type's documentation follows.
+//
+// A comment associated with an issue.
+type UpdateCommentCommentUpdateCommentPayloadComment struct {
+	CommentFields `json:"-"`
+}
+
+// GetId returns UpdateCommentCommentUpdateCommentPayloadComment.Id, and is useful for accessing the field via an interface.
+func (v *UpdateCommentCommentUpdateCommentPayloadComment) GetId() string { return v.CommentFields.Id }
+
+// GetBody returns UpdateCommentCommentUpdateCommentPayloadComment.Body, and is useful for accessing the field via an interface.
+func (v *UpdateCommentCommentUpdateCommentPayloadComment) GetBody() string {
+	return v.CommentFields.Body
+}
+
+// GetCreatedAt returns UpdateCommentCommentUpdateCommentPayloadComment.CreatedAt, and is useful for accessing the field via an interface.
+func (v *UpdateCommentCommentUpdateCommentPayloadComment) GetCreatedAt() time.Time {
+	return v.CommentFields.CreatedAt
+}
+
+// GetUpdatedAt returns UpdateCommentCommentUpdateCommentPayloadComment.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *UpdateCommentCommentUpdateCommentPayloadComment) GetUpdatedAt() time.Time {
+	return v.CommentFields.UpdatedAt
+}
+
+// GetEditedAt returns UpdateCommentCommentUpdateCommentPayloadComment.EditedAt, and is useful for accessing the field via an interface.
+func (v *UpdateCommentCommentUpdateCommentPayloadComment) GetEditedAt() *time.Time {
+	return v.CommentFields.EditedAt
+}
+
+// GetUser returns UpdateCommentCommentUpdateCommentPayloadComment.User, and is useful for accessing the field via an interface.
+func (v *UpdateCommentCommentUpdateCommentPayloadComment) GetUser() *CommentFieldsUser {
+	return v.CommentFields.User
+}
+
+// GetParent returns UpdateCommentCommentUpdateCommentPayloadComment.Parent, and is useful for accessing the field via an interface.
+func (v *UpdateCommentCommentUpdateCommentPayloadComment) GetParent() *CommentFieldsParentComment {
+	return v.CommentFields.Parent
+}
+
+// GetChildren returns UpdateCommentCommentUpdateCommentPayloadComment.Children, and is useful for accessing the field via an interface.
+func (v *UpdateCommentCommentUpdateCommentPayloadComment) GetChildren() *CommentFieldsChildrenCommentConnection {
+	return v.CommentFields.Children
+}
+
+func (v *UpdateCommentCommentUpdateCommentPayloadComment) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*UpdateCommentCommentUpdateCommentPayloadComment
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.UpdateCommentCommentUpdateCommentPayloadComment = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.CommentFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalUpdateCommentCommentUpdateCommentPayloadComment struct {
+	Id string `json:"id"`
+
+	Body string `json:"body"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	EditedAt *time.Time `json:"editedAt"`
+
+	User *CommentFieldsUser `json:"user"`
+
+	Parent *CommentFieldsParentComment `json:"parent"`
+
+	Children *CommentFieldsChildrenCommentConnection `json:"children"`
+}
+
+func (v *UpdateCommentCommentUpdateCommentPayloadComment) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *UpdateCommentCommentUpdateCommentPayloadComment) __premarshalJSON() (*__premarshalUpdateCommentCommentUpdateCommentPayloadComment, error) {
+	var retval __premarshalUpdateCommentCommentUpdateCommentPayloadComment
+
+	retval.Id = v.CommentFields.Id
+	retval.Body = v.CommentFields.Body
+	retval.CreatedAt = v.CommentFields.CreatedAt
+	retval.UpdatedAt = v.CommentFields.UpdatedAt
+	retval.EditedAt = v.CommentFields.EditedAt
+	retval.User = v.CommentFields.User
+	retval.Parent = v.CommentFields.Parent
+	retval.Children = v.CommentFields.Children
+	return &retval, nil
+}
+
+// UpdateCommentResponse is returned by UpdateComment on success.
+type UpdateCommentResponse struct {
+	// Updates a comment.
+	CommentUpdate *UpdateCommentCommentUpdateCommentPayload `json:"commentUpdate"`
+}
+
+// GetCommentUpdate returns UpdateCommentResponse.CommentUpdate, and is useful for accessing the field via an interface.
+func (v *UpdateCommentResponse) GetCommentUpdate() *UpdateCommentCommentUpdateCommentPayload {
+	return v.CommentUpdate
+}
+
 // UpdateIssueIssueUpdateIssuePayload includes the requested fields of the GraphQL type IssuePayload.
 type UpdateIssueIssueUpdateIssuePayload struct {
 	// The issue that was created or updated.
@@ -10860,6 +11502,14 @@ func (v *WorkflowStateFilter) GetType() *StringComparator { return v.Type }
 // GetUpdatedAt returns WorkflowStateFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *WorkflowStateFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
 
+// __CreateCommentInput is used internally by genqlient
+type __CreateCommentInput struct {
+	Input *CommentCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __CreateCommentInput.Input, and is useful for accessing the field via an interface.
+func (v *__CreateCommentInput) GetInput() *CommentCreateInput { return v.Input }
+
 // __CreateIssueInput is used internally by genqlient
 type __CreateIssueInput struct {
 	Input *IssueCreateInput `json:"input,omitempty"`
@@ -10915,6 +11565,26 @@ type __GetUserByEmailInput struct {
 
 // GetFilter returns __GetUserByEmailInput.Filter, and is useful for accessing the field via an interface.
 func (v *__GetUserByEmailInput) GetFilter() *UserFilter { return v.Filter }
+
+// __ListCommentsInput is used internally by genqlient
+type __ListCommentsInput struct {
+	Id      string             `json:"id"`
+	First   *int               `json:"first"`
+	After   *string            `json:"after"`
+	OrderBy *PaginationOrderBy `json:"orderBy"`
+}
+
+// GetId returns __ListCommentsInput.Id, and is useful for accessing the field via an interface.
+func (v *__ListCommentsInput) GetId() string { return v.Id }
+
+// GetFirst returns __ListCommentsInput.First, and is useful for accessing the field via an interface.
+func (v *__ListCommentsInput) GetFirst() *int { return v.First }
+
+// GetAfter returns __ListCommentsInput.After, and is useful for accessing the field via an interface.
+func (v *__ListCommentsInput) GetAfter() *string { return v.After }
+
+// GetOrderBy returns __ListCommentsInput.OrderBy, and is useful for accessing the field via an interface.
+func (v *__ListCommentsInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy }
 
 // __ListIssuesInput is used internally by genqlient
 type __ListIssuesInput struct {
@@ -11016,6 +11686,18 @@ func (v *__SearchIssuesInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy
 // GetIncludeArchived returns __SearchIssuesInput.IncludeArchived, and is useful for accessing the field via an interface.
 func (v *__SearchIssuesInput) GetIncludeArchived() *bool { return v.IncludeArchived }
 
+// __UpdateCommentInput is used internally by genqlient
+type __UpdateCommentInput struct {
+	Id    string              `json:"id"`
+	Input *CommentUpdateInput `json:"input,omitempty"`
+}
+
+// GetId returns __UpdateCommentInput.Id, and is useful for accessing the field via an interface.
+func (v *__UpdateCommentInput) GetId() string { return v.Id }
+
+// GetInput returns __UpdateCommentInput.Input, and is useful for accessing the field via an interface.
+func (v *__UpdateCommentInput) GetInput() *CommentUpdateInput { return v.Input }
+
 // __UpdateIssueInput is used internally by genqlient
 type __UpdateIssueInput struct {
 	Id    string            `json:"id"`
@@ -11027,6 +11709,68 @@ func (v *__UpdateIssueInput) GetId() string { return v.Id }
 
 // GetInput returns __UpdateIssueInput.Input, and is useful for accessing the field via an interface.
 func (v *__UpdateIssueInput) GetInput() *IssueUpdateInput { return v.Input }
+
+// The mutation executed by CreateComment.
+const CreateComment_Operation = `
+mutation CreateComment ($input: CommentCreateInput!) {
+	commentCreate(input: $input) {
+		comment {
+			... CommentFields
+		}
+	}
+}
+fragment CommentFields on Comment {
+	id
+	body
+	createdAt
+	updatedAt
+	editedAt
+	user {
+		id
+		name
+		email
+		avatarUrl
+	}
+	parent {
+		id
+	}
+	children {
+		nodes {
+			id
+			body
+			user {
+				name
+			}
+		}
+	}
+}
+`
+
+// Mutation: Create a new comment
+func CreateComment(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *CommentCreateInput,
+) (data_ *CreateCommentResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "CreateComment",
+		Query:  CreateComment_Operation,
+		Variables: &__CreateCommentInput{
+			Input: input,
+		},
+	}
+
+	data_ = &CreateCommentResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
 
 // The mutation executed by CreateIssue.
 const CreateIssue_Operation = `
@@ -11783,6 +12527,63 @@ func GetViewer(
 	return data_, err_
 }
 
+// The query executed by ListComments.
+const ListComments_Operation = `
+query ListComments ($id: String!, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
+	issue(id: $id) {
+		comments(first: $first, after: $after, orderBy: $orderBy) {
+			nodes {
+				id
+				body
+				createdAt
+				updatedAt
+				user {
+					id
+					name
+					email
+				}
+			}
+			pageInfo {
+				hasNextPage
+				endCursor
+			}
+		}
+	}
+}
+`
+
+// Query: Get comments for an issue
+func ListComments(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	first *int,
+	after *string,
+	orderBy *PaginationOrderBy,
+) (data_ *ListCommentsResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ListComments",
+		Query:  ListComments_Operation,
+		Variables: &__ListCommentsInput{
+			Id:      id,
+			First:   first,
+			After:   after,
+			OrderBy: orderBy,
+		},
+	}
+
+	data_ = &ListCommentsResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The query executed by ListIssues.
 const ListIssues_Operation = `
 query ListIssues ($filter: IssueFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
@@ -12115,6 +12916,70 @@ func SearchIssues(
 	}
 
 	data_ = &SearchIssuesResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by UpdateComment.
+const UpdateComment_Operation = `
+mutation UpdateComment ($id: String!, $input: CommentUpdateInput!) {
+	commentUpdate(id: $id, input: $input) {
+		comment {
+			... CommentFields
+		}
+	}
+}
+fragment CommentFields on Comment {
+	id
+	body
+	createdAt
+	updatedAt
+	editedAt
+	user {
+		id
+		name
+		email
+		avatarUrl
+	}
+	parent {
+		id
+	}
+	children {
+		nodes {
+			id
+			body
+			user {
+				name
+			}
+		}
+	}
+}
+`
+
+// Mutation: Update an existing comment
+func UpdateComment(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	input *CommentUpdateInput,
+) (data_ *UpdateCommentResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "UpdateComment",
+		Query:  UpdateComment_Operation,
+		Variables: &__UpdateCommentInput{
+			Id:    id,
+			Input: input,
+		},
+	}
+
+	data_ = &UpdateCommentResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(

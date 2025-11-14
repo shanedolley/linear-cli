@@ -1,0 +1,70 @@
+# GraphQL operations for Comment entity
+# These operations will replace hand-written queries in pkg/api/queries.go
+
+# Fragment for comment fields
+fragment CommentFields on Comment {
+  id
+  body
+  createdAt
+  updatedAt
+  editedAt
+  user {
+    id
+    name
+    email
+    avatarUrl
+  }
+  parent {
+    id
+  }
+  children {
+    nodes {
+      id
+      body
+      user {
+        name
+      }
+    }
+  }
+}
+
+# Query: Get comments for an issue
+query ListComments($id: String!, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
+  issue(id: $id) {
+    comments(first: $first, after: $after, orderBy: $orderBy) {
+      nodes {
+        id
+        body
+        createdAt
+        updatedAt
+        user {
+          id
+          name
+          email
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+}
+
+# Mutation: Create a new comment
+mutation CreateComment($input: CommentCreateInput!) {
+  commentCreate(input: $input) {
+    comment {
+      ...CommentFields
+    }
+  }
+}
+
+# Mutation: Update an existing comment
+mutation UpdateComment($id: String!, $input: CommentUpdateInput!) {
+  commentUpdate(id: $id, input: $input) {
+    comment {
+      ...CommentFields
+    }
+  }
+}

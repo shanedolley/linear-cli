@@ -1457,3 +1457,147 @@ func convertToLegacyUser(fields *UserDetailFields) *User {
 		CreatedAt:   &fields.CreatedAt,
 	}
 }
+
+// ==============================================================================
+// Comment Adapters
+// ==============================================================================
+
+// GetIssueCommentsNew wraps the generated ListComments function
+func (c *Client) GetIssueCommentsNew(ctx context.Context, issueID string, first int, after string, orderBy string) (*Comments, error) {
+	// Convert orderBy string to PaginationOrderBy
+	orderByEnum := convertOrderBy(orderBy)
+
+	// Convert parameters to pointers for genqlient
+	var firstPtr *int
+	if first > 0 {
+		firstPtr = &first
+	}
+
+	var afterPtr *string
+	if after != "" {
+		afterPtr = &after
+	}
+
+	// Call generated function
+	resp, err := ListComments(ctx, c, issueID, firstPtr, afterPtr, orderByEnum)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert generated response to legacy Comments type
+	return convertToLegacyComments(resp), nil
+}
+
+// CreateCommentNew wraps the generated CreateComment function
+func (c *Client) CreateCommentNew(ctx context.Context, issueID string, body string) (*Comment, error) {
+	// Create input
+	input := &CommentCreateInput{
+		IssueId: &issueID,
+		Body:    &body,
+	}
+
+	// Call generated function
+	resp, err := CreateComment(ctx, c, input)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert generated response to legacy Comment type
+	return convertToLegacyCommentFromCreate(resp), nil
+}
+
+// UpdateCommentNew wraps the generated UpdateComment function
+func (c *Client) UpdateCommentNew(ctx context.Context, id string, body string) (*Comment, error) {
+	// Create input
+	input := &CommentUpdateInput{
+		Body: &body,
+	}
+
+	// Call generated function
+	resp, err := UpdateComment(ctx, c, id, input)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert generated response to legacy Comment type
+	return convertToLegacyCommentFromUpdate(resp), nil
+}
+
+// Helper conversion functions for Comments
+
+// convertToLegacyComments converts ListCommentsResponse to legacy Comments type
+func convertToLegacyComments(resp *ListCommentsResponse) *Comments {
+	if resp == nil || resp.Issue.Comments.Nodes == nil {
+		return &Comments{
+			Nodes:    []Comment{},
+			PageInfo: PageInfo{},
+		}
+	}
+
+	comments := make([]Comment, len(resp.Issue.Comments.Nodes))
+	for i, node := range resp.Issue.Comments.Nodes {
+		comments[i] = Comment{
+			ID:        node.Id,
+			Body:      node.Body,
+			CreatedAt: node.CreatedAt,
+			UpdatedAt: node.UpdatedAt,
+			User: &User{
+				ID:    node.User.Id,
+				Name:  node.User.Name,
+				Email: node.User.Email,
+			},
+		}
+	}
+
+	return &Comments{
+		Nodes: comments,
+		PageInfo: PageInfo{
+			HasNextPage: resp.Issue.Comments.PageInfo.HasNextPage,
+			EndCursor:   ptrToString(resp.Issue.Comments.PageInfo.EndCursor),
+		},
+	}
+}
+
+// convertToLegacyCommentFromCreate converts CreateCommentResponse to legacy Comment type
+func convertToLegacyCommentFromCreate(resp *CreateCommentResponse) *Comment {
+	if resp == nil || resp.CommentCreate.Comment == nil {
+		return nil
+	}
+
+	fields := resp.CommentCreate.Comment
+	return &Comment{
+		ID:        fields.Id,
+		Body:      fields.Body,
+		CreatedAt: fields.CreatedAt,
+		UpdatedAt: fields.UpdatedAt,
+		EditedAt:  fields.EditedAt,
+		User: &User{
+			ID:        fields.User.Id,
+			Name:      fields.User.Name,
+			Email:     fields.User.Email,
+			AvatarURL: ptrToString(fields.User.AvatarUrl),
+		},
+	}
+}
+
+// convertToLegacyCommentFromUpdate converts UpdateCommentResponse to legacy Comment type
+func convertToLegacyCommentFromUpdate(resp *UpdateCommentResponse) *Comment {
+	if resp == nil || resp.CommentUpdate.Comment == nil {
+		return nil
+	}
+
+	fields := resp.CommentUpdate.Comment
+	return &Comment{
+		ID:        fields.Id,
+		Body:      fields.Body,
+		CreatedAt: fields.CreatedAt,
+		UpdatedAt: fields.UpdatedAt,
+		EditedAt:  fields.EditedAt,
+		User: &User{
+			ID:        fields.User.Id,
+			Name:      fields.User.Name,
+			Email:     fields.User.Email,
+			AvatarURL: ptrToString(fields.User.AvatarUrl),
+		},
+	}
+}
