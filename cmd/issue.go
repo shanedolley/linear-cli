@@ -48,39 +48,126 @@ var issueListCmd = &cobra.Command{
 
 		client := api.NewClient(authHeader)
 
-		// Build filter from flags
-		filter := buildIssueFilter(cmd)
+		// Build typed filter from flags
+		filterTyped := buildIssueFilterTyped(cmd)
 
 		limit, _ := cmd.Flags().GetInt("limit")
 		if limit == 0 {
 			limit = 50
 		}
 
-		// Get sort option
+		// Get sort option and convert to enum
 		sortBy, _ := cmd.Flags().GetString("sort")
-		orderBy := ""
+		var orderByEnum *api.PaginationOrderBy
 		if sortBy != "" {
 			switch sortBy {
 			case "created", "createdAt":
-				orderBy = "createdAt"
+				val := api.PaginationOrderByCreatedat
+				orderByEnum = &val
 			case "updated", "updatedAt":
-				orderBy = "updatedAt"
+				val := api.PaginationOrderByUpdatedat
+				orderByEnum = &val
 			case "linear":
-				// Use empty string for Linear's default sort
-				orderBy = ""
+				// Use nil for Linear's default sort
+				orderByEnum = nil
 			default:
 				output.Error(fmt.Sprintf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy), plaintext, jsonOut)
 				os.Exit(1)
 			}
 		}
 
-		issues, err := client.GetIssues(context.Background(), filter, limit, "", orderBy)
+		// Convert limit to pointer
+		var limitPtr *int
+		if limit > 0 {
+			limitPtr = &limit
+		}
+
+		resp, err := api.ListIssues(context.Background(), client, filterTyped, limitPtr, nil, orderByEnum)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to fetch issues: %v", err), plaintext, jsonOut)
 			os.Exit(1)
 		}
 
-		renderIssueCollection(issues, plaintext, jsonOut, "No issues found", "issues", "# Issues")
+		// Check if empty
+		if len(resp.Issues.Nodes) == 0 {
+			output.Info("No issues found", plaintext, jsonOut)
+			return
+		}
+
+		// JSON output
+		if jsonOut {
+			output.JSON(resp.Issues.Nodes)
+			return
+		}
+
+		// Plaintext output
+		if plaintext {
+			fmt.Println("# Issues")
+			for _, node := range resp.Issues.Nodes {
+				f := node.IssueListFields
+				fmt.Printf("## %s\n", f.Title)
+				fmt.Printf("- **ID**: %s\n", f.Identifier)
+				if f.State != nil {
+					fmt.Printf("- **State**: %s\n", f.State.Name)
+				}
+				if f.Assignee != nil {
+					fmt.Printf("- **Assignee**: %s\n", f.Assignee.Name)
+				} else {
+					fmt.Printf("- **Assignee**: Unassigned\n")
+				}
+				if f.Team != nil {
+					fmt.Printf("- **Team**: %s\n", f.Team.Key)
+				}
+				fmt.Printf("- **Created**: %s\n", f.CreatedAt.Format("2006-01-02"))
+				fmt.Printf("- **URL**: %s\n", f.Url)
+				if f.Description != nil && *f.Description != "" {
+					fmt.Printf("- **Description**: %s\n", *f.Description)
+				}
+				fmt.Println()
+			}
+			fmt.Printf("\nTotal: %d issues\n", len(resp.Issues.Nodes))
+			return
+		}
+
+		// Table output
+		headers := []string{"Title", "State", "Assignee", "Team", "Created", "URL"}
+		rows := make([][]string, len(resp.Issues.Nodes))
+
+		for i, node := range resp.Issues.Nodes {
+			f := node.IssueListFields
+
+			assignee := "Unassigned"
+			if f.Assignee != nil {
+				assignee = f.Assignee.Name
+			}
+
+			team := ""
+			if f.Team != nil {
+				team = f.Team.Key
+			}
+
+			state := ""
+			if f.State != nil {
+				state = f.State.Name
+			}
+
+			rows[i] = []string{
+				truncateString(f.Title, 50),
+				state,
+				assignee,
+				team,
+				f.CreatedAt.Format("2006-01-02"),
+				f.Url,
+			}
+		}
+
+		tableData := output.TableData{
+			Headers: headers,
+			Rows:    rows,
+		}
+
+		output.Table(tableData, false, false)
+		fmt.Printf("\nTotal: %d issues\n", len(resp.Issues.Nodes))
 	},
 }
 
@@ -1129,4 +1216,90 @@ func init() {
 	issueUpdateCmd.Flags().StringP("state", "s", "", "State name (e.g., 'Todo', 'In Progress', 'Done')")
 	issueUpdateCmd.Flags().Int("priority", -1, "Priority (0=None, 1=Urgent, 2=High, 3=Normal, 4=Low)")
 	issueUpdateCmd.Flags().String("due-date", "", "Due date (YYYY-MM-DD format, or empty to remove)")
+}
+
+// Filter helper functions for type-safe filter building
+func stringEq(val string) *api.StringComparator {
+	return &api.StringComparator{Eq: &val}
+}
+
+func stringIn(vals []string) *api.StringComparator {
+	return &api.StringComparator{In: vals}
+}
+
+func stringNin(vals []string) *api.StringComparator {
+	return &api.StringComparator{Nin: vals}
+}
+
+func boolEq(val bool) *api.BooleanComparator {
+	return &api.BooleanComparator{Eq: &val}
+}
+
+func numberEq(val float64) *api.NullableNumberComparator {
+	return &api.NullableNumberComparator{Eq: &val}
+}
+
+func dateGte(val string) *api.DateComparator {
+	return &api.DateComparator{Gte: &val}
+}
+
+// buildIssueFilterTyped builds a typed IssueFilter from command flags
+func buildIssueFilterTyped(cmd *cobra.Command) *api.IssueFilter {
+	filter := &api.IssueFilter{}
+
+	// Assignee filter
+	if assignee, _ := cmd.Flags().GetString("assignee"); assignee != "" {
+		if assignee == "me" {
+			filter.Assignee = &api.NullableUserFilter{
+				IsMe: boolEq(true),
+			}
+		} else {
+			filter.Assignee = &api.NullableUserFilter{
+				Email: stringEq(assignee),
+			}
+		}
+	}
+
+	// State filter
+	state, _ := cmd.Flags().GetString("state")
+	if state != "" {
+		filter.State = &api.WorkflowStateFilter{
+			Name: stringEq(state),
+		}
+	} else {
+		// Exclude completed/canceled unless explicitly included
+		includeCompleted, _ := cmd.Flags().GetBool("include-completed")
+		if !includeCompleted {
+			filter.State = &api.WorkflowStateFilter{
+				Type: stringNin([]string{"completed", "canceled"}),
+			}
+		}
+	}
+
+	// Team filter
+	if team, _ := cmd.Flags().GetString("team"); team != "" {
+		filter.Team = &api.TeamFilter{
+			Key: stringEq(team),
+		}
+	}
+
+	// Priority filter
+	if priority, _ := cmd.Flags().GetInt("priority"); priority != -1 {
+		filter.Priority = numberEq(float64(priority))
+	}
+
+	// Time filter
+	newerThan, _ := cmd.Flags().GetString("newer-than")
+	createdAt, err := utils.ParseTimeExpression(newerThan)
+	if err != nil {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+		output.Error(fmt.Sprintf("Invalid newer-than value: %v", err), plaintext, jsonOut)
+		os.Exit(1)
+	}
+	if createdAt != "" {
+		filter.CreatedAt = dateGte(createdAt)
+	}
+
+	return filter
 }
