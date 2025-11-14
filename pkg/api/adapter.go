@@ -11,7 +11,7 @@ import (
 // type-safe genqlient types.
 
 // GetIssuesNew wraps the generated ListIssues function
-func (c *Client) GetIssuesNew(ctx context.Context, filter map[string]interface{}, first int, after string, orderBy string) (*Issues, error) {
+func (c *Client) GetIssues(ctx context.Context, filter map[string]interface{}, first int, after string, orderBy string) (*Issues, error) {
 	// Convert map filter to typed IssueFilter
 	issueFilter, err := convertToIssueFilter(filter)
 	if err != nil {
@@ -43,7 +43,7 @@ func (c *Client) GetIssuesNew(ctx context.Context, filter map[string]interface{}
 }
 
 // GetIssueNew wraps the generated GetIssue function
-func (c *Client) GetIssueNew(ctx context.Context, id string) (*Issue, error) {
+func (c *Client) GetIssue(ctx context.Context, id string) (*Issue, error) {
 	// Call generated function
 	resp, err := GetIssue(ctx, c, id)
 	if err != nil {
@@ -55,7 +55,7 @@ func (c *Client) GetIssueNew(ctx context.Context, id string) (*Issue, error) {
 }
 
 // IssueSearchNew wraps the generated SearchIssues function
-func (c *Client) IssueSearchNew(ctx context.Context, term string, filter map[string]interface{}, first int, after string, orderBy string, includeArchived bool) (*Issues, error) {
+func (c *Client) IssueSearch(ctx context.Context, term string, filter map[string]interface{}, first int, after string, orderBy string, includeArchived bool) (*Issues, error) {
 	// Convert map filter to typed IssueFilter
 	issueFilter, err := convertToIssueFilter(filter)
 	if err != nil {
@@ -89,7 +89,7 @@ func (c *Client) IssueSearchNew(ctx context.Context, term string, filter map[str
 }
 
 // CreateIssueNew wraps the generated CreateIssue function
-func (c *Client) CreateIssueNew(ctx context.Context, input map[string]interface{}) (*Issue, error) {
+func (c *Client) CreateIssue(ctx context.Context, input map[string]interface{}) (*Issue, error) {
 	// Convert map input to typed IssueCreateInput
 	createInput, err := convertToIssueCreateInput(input)
 	if err != nil {
@@ -107,7 +107,7 @@ func (c *Client) CreateIssueNew(ctx context.Context, input map[string]interface{
 }
 
 // UpdateIssueNew wraps the generated UpdateIssue function
-func (c *Client) UpdateIssueNew(ctx context.Context, id string, input map[string]interface{}) (*Issue, error) {
+func (c *Client) UpdateIssue(ctx context.Context, id string, input map[string]interface{}) (*Issue, error) {
 	// Convert map input to typed IssueUpdateInput
 	updateInput, err := convertToIssueUpdateInput(input)
 	if err != nil {
@@ -856,7 +856,7 @@ func convertHealthToString(h *ProjectUpdateHealthType) string {
 // ========== Project Adapters ==========
 
 // GetProjectsNew wraps the generated ListProjects function
-func (c *Client) GetProjectsNew(ctx context.Context, filter map[string]interface{}, first int, after string, orderBy string) (*Projects, error) {
+func (c *Client) GetProjects(ctx context.Context, filter map[string]interface{}, first int, after string, orderBy string) (*Projects, error) {
 	// Convert map filter to typed ProjectFilter
 	projectFilter, err := convertToProjectFilter(filter)
 	if err != nil {
@@ -888,7 +888,7 @@ func (c *Client) GetProjectsNew(ctx context.Context, filter map[string]interface
 }
 
 // GetProjectNew wraps the generated GetProject function
-func (c *Client) GetProjectNew(ctx context.Context, id string) (*Project, error) {
+func (c *Client) GetProject(ctx context.Context, id string) (*Project, error) {
 	// Call generated function
 	resp, err := GetProject(ctx, c, id)
 	if err != nil {
@@ -1213,7 +1213,7 @@ func convertToLegacyProject(resp *GetProjectResponse) *Project {
 // ========== Team Adapters ==========
 
 // GetTeamsNew wraps the generated ListTeams function
-func (c *Client) GetTeamsNew(ctx context.Context, first int, after string, orderBy string) (*Teams, error) {
+func (c *Client) GetTeams(ctx context.Context, first int, after string, orderBy string) (*Teams, error) {
 	// Convert orderBy string to PaginationOrderBy
 	orderByEnum := convertOrderBy(orderBy)
 
@@ -1239,7 +1239,7 @@ func (c *Client) GetTeamsNew(ctx context.Context, first int, after string, order
 }
 
 // GetTeamNew wraps the generated GetTeam function
-func (c *Client) GetTeamNew(ctx context.Context, key string) (*Team, error) {
+func (c *Client) GetTeam(ctx context.Context, key string) (*Team, error) {
 	// Call generated function
 	resp, err := GetTeam(ctx, c, key)
 	if err != nil {
@@ -1337,7 +1337,7 @@ func convertToLegacyTeam(resp *GetTeamResponse) *Team {
 // ========== User Adapters ==========
 
 // GetUsersNew wraps the generated ListUsers function
-func (c *Client) GetUsersNew(ctx context.Context, first int, after string, orderBy string) (*Users, error) {
+func (c *Client) GetUsers(ctx context.Context, first int, after string, orderBy string) (*Users, error) {
 	// Convert orderBy string to PaginationOrderBy
 	orderByEnum := convertOrderBy(orderBy)
 
@@ -1363,7 +1363,7 @@ func (c *Client) GetUsersNew(ctx context.Context, first int, after string, order
 }
 
 // GetUserNew wraps the generated GetUserByEmail function
-func (c *Client) GetUserNew(ctx context.Context, email string) (*User, error) {
+func (c *Client) GetUser(ctx context.Context, email string) (*User, error) {
 	// Create filter for email lookup
 	filter := &UserFilter{
 		Email: &StringComparator{
@@ -1387,7 +1387,7 @@ func (c *Client) GetUserNew(ctx context.Context, email string) (*User, error) {
 }
 
 // GetViewerNew wraps the generated GetViewer function
-func (c *Client) GetViewerNew(ctx context.Context) (*User, error) {
+func (c *Client) GetViewer(ctx context.Context) (*User, error) {
 	// Call generated function
 	resp, err := GetViewer(ctx, c)
 	if err != nil {
@@ -1463,7 +1463,7 @@ func convertToLegacyUser(fields *UserDetailFields) *User {
 // ==============================================================================
 
 // GetIssueCommentsNew wraps the generated ListComments function
-func (c *Client) GetIssueCommentsNew(ctx context.Context, issueID string, first int, after string, orderBy string) (*Comments, error) {
+func (c *Client) GetIssueComments(ctx context.Context, issueID string, first int, after string, orderBy string) (*Comments, error) {
 	// Convert orderBy string to PaginationOrderBy
 	orderByEnum := convertOrderBy(orderBy)
 
@@ -1489,7 +1489,7 @@ func (c *Client) GetIssueCommentsNew(ctx context.Context, issueID string, first 
 }
 
 // CreateCommentNew wraps the generated CreateComment function
-func (c *Client) CreateCommentNew(ctx context.Context, issueID string, body string) (*Comment, error) {
+func (c *Client) CreateComment(ctx context.Context, issueID string, body string) (*Comment, error) {
 	// Create input
 	input := &CommentCreateInput{
 		IssueId: &issueID,
@@ -1507,7 +1507,7 @@ func (c *Client) CreateCommentNew(ctx context.Context, issueID string, body stri
 }
 
 // UpdateCommentNew wraps the generated UpdateComment function
-func (c *Client) UpdateCommentNew(ctx context.Context, id string, body string) (*Comment, error) {
+func (c *Client) UpdateComment(ctx context.Context, id string, body string) (*Comment, error) {
 	// Create input
 	input := &CommentUpdateInput{
 		Body: &body,
