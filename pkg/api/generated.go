@@ -4726,6 +4726,8 @@ type IssueDetailFieldsTeam struct {
 	CycleDuration float64 `json:"cycleDuration"`
 	// How many upcoming cycles to create.
 	UpcomingCycleCount float64 `json:"upcomingCycleCount"`
+	// The states that define the workflow associated with the team.
+	States *IssueDetailFieldsTeamStatesWorkflowStateConnection `json:"states"`
 }
 
 // GetId returns IssueDetailFieldsTeam.Id, and is useful for accessing the field via an interface.
@@ -4757,6 +4759,70 @@ func (v *IssueDetailFieldsTeam) GetCycleDuration() float64 { return v.CycleDurat
 
 // GetUpcomingCycleCount returns IssueDetailFieldsTeam.UpcomingCycleCount, and is useful for accessing the field via an interface.
 func (v *IssueDetailFieldsTeam) GetUpcomingCycleCount() float64 { return v.UpcomingCycleCount }
+
+// GetStates returns IssueDetailFieldsTeam.States, and is useful for accessing the field via an interface.
+func (v *IssueDetailFieldsTeam) GetStates() *IssueDetailFieldsTeamStatesWorkflowStateConnection {
+	return v.States
+}
+
+// IssueDetailFieldsTeamStatesWorkflowStateConnection includes the requested fields of the GraphQL type WorkflowStateConnection.
+type IssueDetailFieldsTeamStatesWorkflowStateConnection struct {
+	Nodes []*IssueDetailFieldsTeamStatesWorkflowStateConnectionNodesWorkflowState `json:"nodes"`
+}
+
+// GetNodes returns IssueDetailFieldsTeamStatesWorkflowStateConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *IssueDetailFieldsTeamStatesWorkflowStateConnection) GetNodes() []*IssueDetailFieldsTeamStatesWorkflowStateConnectionNodesWorkflowState {
+	return v.Nodes
+}
+
+// IssueDetailFieldsTeamStatesWorkflowStateConnectionNodesWorkflowState includes the requested fields of the GraphQL type WorkflowState.
+// The GraphQL type's documentation follows.
+//
+// A state in a team workflow.
+type IssueDetailFieldsTeamStatesWorkflowStateConnectionNodesWorkflowState struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The state's name.
+	Name string `json:"name"`
+	// The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled".
+	Type string `json:"type"`
+	// The state's UI color as a HEX string.
+	Color string `json:"color"`
+	// Description of the state.
+	Description *string `json:"description"`
+	// The position of the state in the team flow.
+	Position float64 `json:"position"`
+}
+
+// GetId returns IssueDetailFieldsTeamStatesWorkflowStateConnectionNodesWorkflowState.Id, and is useful for accessing the field via an interface.
+func (v *IssueDetailFieldsTeamStatesWorkflowStateConnectionNodesWorkflowState) GetId() string {
+	return v.Id
+}
+
+// GetName returns IssueDetailFieldsTeamStatesWorkflowStateConnectionNodesWorkflowState.Name, and is useful for accessing the field via an interface.
+func (v *IssueDetailFieldsTeamStatesWorkflowStateConnectionNodesWorkflowState) GetName() string {
+	return v.Name
+}
+
+// GetType returns IssueDetailFieldsTeamStatesWorkflowStateConnectionNodesWorkflowState.Type, and is useful for accessing the field via an interface.
+func (v *IssueDetailFieldsTeamStatesWorkflowStateConnectionNodesWorkflowState) GetType() string {
+	return v.Type
+}
+
+// GetColor returns IssueDetailFieldsTeamStatesWorkflowStateConnectionNodesWorkflowState.Color, and is useful for accessing the field via an interface.
+func (v *IssueDetailFieldsTeamStatesWorkflowStateConnectionNodesWorkflowState) GetColor() string {
+	return v.Color
+}
+
+// GetDescription returns IssueDetailFieldsTeamStatesWorkflowStateConnectionNodesWorkflowState.Description, and is useful for accessing the field via an interface.
+func (v *IssueDetailFieldsTeamStatesWorkflowStateConnectionNodesWorkflowState) GetDescription() *string {
+	return v.Description
+}
+
+// GetPosition returns IssueDetailFieldsTeamStatesWorkflowStateConnectionNodesWorkflowState.Position, and is useful for accessing the field via an interface.
+func (v *IssueDetailFieldsTeamStatesWorkflowStateConnectionNodesWorkflowState) GetPosition() float64 {
+	return v.Position
+}
 
 // Issue filtering options.
 type IssueFilter struct {
@@ -11912,6 +11978,16 @@ fragment IssueDetailFields on Issue {
 		cycleStartDay
 		cycleDuration
 		upcomingCycleCount
+		states {
+			nodes {
+				id
+				name
+				type
+				color
+				description
+				position
+			}
+		}
 	}
 	labels {
 		nodes {

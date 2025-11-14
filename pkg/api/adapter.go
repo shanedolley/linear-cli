@@ -663,7 +663,7 @@ func convertToLegacyIssue(resp *GetIssueResponse) *Issue {
 	}
 
 	if fields.Team != nil {
-		issue.Team = &Team{
+		team := &Team{
 			ID:                 fields.Team.Id,
 			Key:                fields.Team.Key,
 			Name:               fields.Team.Name,
@@ -675,6 +675,23 @@ func convertToLegacyIssue(resp *GetIssueResponse) *Issue {
 			CycleDuration:      int(fields.Team.CycleDuration),
 			UpcomingCycleCount: int(fields.Team.UpcomingCycleCount),
 		}
+
+		// Convert team states if present
+		if fields.Team.States != nil && len(fields.Team.States.Nodes) > 0 {
+			team.States = make([]State, len(fields.Team.States.Nodes))
+			for i, stateNode := range fields.Team.States.Nodes {
+				team.States[i] = State{
+					ID:          stateNode.Id,
+					Name:        stateNode.Name,
+					Type:        stateNode.Type,
+					Color:       stateNode.Color,
+					Description: stateNode.Description,
+					Position:    stateNode.Position,
+				}
+			}
+		}
+
+		issue.Team = team
 	}
 
 	// Additional conversions for detailed fields can be added here as needed
@@ -1600,4 +1617,41 @@ func convertToLegacyCommentFromUpdate(resp *UpdateCommentResponse) *Comment {
 			AvatarURL: ptrToString(fields.User.AvatarUrl),
 		},
 	}
+}
+
+// GetTeamMembers wraps the generated GetTeamMembers function
+func (c *Client) GetTeamMembers(ctx context.Context, teamKey string) (*Users, error) {
+	resp, err := GetTeamMembers(ctx, c, teamKey)
+	if err != nil {
+		return nil, err
+	}
+	return convertTeamMembersToLegacyUsers(resp), nil
+}
+
+// convertTeamMembersToLegacyUsers converts GetTeamMembers response to legacy Users type
+func convertTeamMembersToLegacyUsers(resp *GetTeamMembersResponse) *Users {
+	users := &Users{
+		Nodes: make([]User, len(resp.Team.Members.Nodes)),
+	}
+
+	for i, member := range resp.Team.Members.Nodes {
+		users.Nodes[i] = User{
+			ID:        member.Id,
+			Name:      member.Name,
+			Email:     member.Email,
+			AvatarURL: ptrToString(member.AvatarUrl),
+			IsMe:      member.IsMe,
+			Active:    member.Active,
+			Admin:     member.Admin,
+		}
+	}
+
+	if resp.Team.Members.PageInfo != nil {
+		users.PageInfo.HasNextPage = resp.Team.Members.PageInfo.HasNextPage
+		if resp.Team.Members.PageInfo.EndCursor != nil {
+			users.PageInfo.EndCursor = *resp.Team.Members.PageInfo.EndCursor
+		}
+	}
+
+	return users
 }
