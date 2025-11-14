@@ -1,0 +1,56 @@
+# GraphQL operations for User entity
+# These operations will replace hand-written queries in pkg/api/queries.go
+
+# Fragment for basic user fields used in list views
+fragment UserListFields on User {
+  id
+  name
+  email
+  avatarUrl
+  isMe
+  active
+  admin
+}
+
+# Fragment for detailed user fields (if needed in the future)
+fragment UserDetailFields on User {
+  id
+  name
+  email
+  avatarUrl
+  displayName
+  isMe
+  active
+  admin
+  createdAt
+}
+
+# Query: Get paginated list of users
+query ListUsers($first: Int, $after: String, $orderBy: PaginationOrderBy) {
+  users(first: $first, after: $after, orderBy: $orderBy) {
+    nodes {
+      ...UserListFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+# Query: Get a single user by email using filter
+# Note: Linear's user query takes id, not email, so we use users with filter
+query GetUserByEmail($filter: UserFilter!) {
+  users(filter: $filter, first: 1) {
+    nodes {
+      ...UserDetailFields
+    }
+  }
+}
+
+# Query: Get the current authenticated user (viewer)
+query GetViewer {
+  viewer {
+    ...UserDetailFields
+  }
+}

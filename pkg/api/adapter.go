@@ -1333,3 +1333,127 @@ func convertToLegacyTeam(resp *GetTeamResponse) *Team {
 		UpcomingCycleCount: int(fields.UpcomingCycleCount),
 	}
 }
+
+// ========== User Adapters ==========
+
+// GetUsersNew wraps the generated ListUsers function
+func (c *Client) GetUsersNew(ctx context.Context, first int, after string, orderBy string) (*Users, error) {
+	// Convert orderBy string to PaginationOrderBy
+	orderByEnum := convertOrderBy(orderBy)
+
+	// Convert parameters to pointers for genqlient
+	var firstPtr *int
+	if first > 0 {
+		firstPtr = &first
+	}
+
+	var afterPtr *string
+	if after != "" {
+		afterPtr = &after
+	}
+
+	// Call generated function
+	resp, err := ListUsers(ctx, c, firstPtr, afterPtr, orderByEnum)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert generated response to legacy Users type
+	return convertToLegacyUsers(resp), nil
+}
+
+// GetUserNew wraps the generated GetUserByEmail function
+func (c *Client) GetUserNew(ctx context.Context, email string) (*User, error) {
+	// Create filter for email lookup
+	filter := &UserFilter{
+		Email: &StringComparator{
+			Eq: &email,
+		},
+	}
+
+	// Call generated function
+	resp, err := GetUserByEmail(ctx, c, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert generated response to legacy User type
+	// Since we're filtering by email with eq, we should get exactly one result
+	if len(resp.Users.Nodes) == 0 {
+		return nil, fmt.Errorf("user not found with email: %s", email)
+	}
+
+	return convertToLegacyUser(&resp.Users.Nodes[0].UserDetailFields), nil
+}
+
+// GetViewerNew wraps the generated GetViewer function
+func (c *Client) GetViewerNew(ctx context.Context) (*User, error) {
+	// Call generated function
+	resp, err := GetViewer(ctx, c)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert generated response to legacy User type
+	return convertToLegacyUser(&resp.Viewer.UserDetailFields), nil
+}
+
+// convertToLegacyUsers converts a ListUsersResponse to legacy Users type
+func convertToLegacyUsers(resp *ListUsersResponse) *Users {
+	if resp == nil || resp.Users == nil {
+		return &Users{
+			Nodes:    []User{},
+			PageInfo: PageInfo{},
+		}
+	}
+
+	users := make([]User, len(resp.Users.Nodes))
+	for i, node := range resp.Users.Nodes {
+		users[i] = convertUserListFieldsToLegacy(&node.UserListFields)
+	}
+
+	endCursor := ""
+	if resp.Users.PageInfo.EndCursor != nil {
+		endCursor = *resp.Users.PageInfo.EndCursor
+	}
+
+	return &Users{
+		Nodes: users,
+		PageInfo: PageInfo{
+			HasNextPage: resp.Users.PageInfo.HasNextPage,
+			EndCursor:   endCursor,
+		},
+	}
+}
+
+// convertUserListFieldsToLegacy converts UserListFields to legacy User
+func convertUserListFieldsToLegacy(fields *UserListFields) User {
+	return User{
+		ID:        fields.Id,
+		Name:      fields.Name,
+		Email:     fields.Email,
+		AvatarURL: ptrToString(fields.AvatarUrl),
+		IsMe:      fields.IsMe,
+		Active:    fields.Active,
+		Admin:     fields.Admin,
+	}
+}
+
+// convertToLegacyUser converts UserDetailFields to legacy User type
+func convertToLegacyUser(fields *UserDetailFields) *User {
+	if fields == nil {
+		return nil
+	}
+
+	return &User{
+		ID:          fields.Id,
+		Name:        fields.Name,
+		Email:       fields.Email,
+		AvatarURL:   ptrToString(fields.AvatarUrl),
+		DisplayName: fields.DisplayName,
+		IsMe:        fields.IsMe,
+		Active:      fields.Active,
+		Admin:       fields.Admin,
+		CreatedAt:   &fields.CreatedAt,
+	}
+}

@@ -68,7 +68,7 @@ var userListCmd = &cobra.Command{
 		}
 
 		// Get users
-		users, err := client.GetUsers(context.Background(), limit, "", orderBy)
+		users, err := client.GetUsersNew(context.Background(), limit, "", orderBy)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to list users: %v", err), plaintext, jsonOut)
 			os.Exit(1)
@@ -169,7 +169,7 @@ var userGetCmd = &cobra.Command{
 		client := api.NewClient(authHeader)
 
 		// Get user details
-		user, err := client.GetUser(context.Background(), email)
+		user, err := client.GetUserNew(context.Background(), email)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to get user: %v", err), plaintext, jsonOut)
 			os.Exit(1)
@@ -245,7 +245,7 @@ var userMeCmd = &cobra.Command{
 		client := api.NewClient(authHeader)
 
 		// Get current user
-		user, err := client.GetViewer(context.Background())
+		user, err := client.GetViewerNew(context.Background())
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to get current user: %v", err), plaintext, jsonOut)
 			os.Exit(1)
