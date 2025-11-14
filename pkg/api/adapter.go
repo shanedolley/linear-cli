@@ -1209,3 +1209,127 @@ func convertToLegacyProject(resp *GetProjectResponse) *Project {
 
 	return &project
 }
+
+// ========== Team Adapters ==========
+
+// GetTeamsNew wraps the generated ListTeams function
+func (c *Client) GetTeamsNew(ctx context.Context, first int, after string, orderBy string) (*Teams, error) {
+	// Convert orderBy string to PaginationOrderBy
+	orderByEnum := convertOrderBy(orderBy)
+
+	// Convert parameters to pointers for genqlient
+	var firstPtr *int
+	if first > 0 {
+		firstPtr = &first
+	}
+
+	var afterPtr *string
+	if after != "" {
+		afterPtr = &after
+	}
+
+	// Call generated function
+	resp, err := ListTeams(ctx, c, firstPtr, afterPtr, orderByEnum)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert generated response to legacy Teams type
+	return convertToLegacyTeams(resp), nil
+}
+
+// GetTeamNew wraps the generated GetTeam function
+func (c *Client) GetTeamNew(ctx context.Context, key string) (*Team, error) {
+	// Call generated function
+	resp, err := GetTeam(ctx, c, key)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert generated response to legacy Team type
+	return convertToLegacyTeam(resp), nil
+}
+
+// convertToLegacyTeams converts a ListTeamsResponse to legacy Teams type
+func convertToLegacyTeams(resp *ListTeamsResponse) *Teams {
+	if resp == nil || resp.Teams == nil {
+		return &Teams{
+			Nodes:    []Team{},
+			PageInfo: PageInfo{},
+		}
+	}
+
+	teams := make([]Team, len(resp.Teams.Nodes))
+	for i, node := range resp.Teams.Nodes {
+		teams[i] = convertTeamListFieldsToLegacy(&node.TeamListFields)
+	}
+
+	endCursor := ""
+	if resp.Teams.PageInfo.EndCursor != nil {
+		endCursor = *resp.Teams.PageInfo.EndCursor
+	}
+
+	return &Teams{
+		Nodes: teams,
+		PageInfo: PageInfo{
+			HasNextPage: resp.Teams.PageInfo.HasNextPage,
+			EndCursor:   endCursor,
+		},
+	}
+}
+
+// convertTeamListFieldsToLegacy converts TeamListFields to legacy Team
+func convertTeamListFieldsToLegacy(fields *TeamListFields) Team {
+	description := ""
+	if fields.Description != nil {
+		description = *fields.Description
+	}
+
+	return Team{
+		ID:          fields.Id,
+		Key:         fields.Key,
+		Name:        fields.Name,
+		Description: description,
+		Private:     fields.Private,
+		IssueCount:  fields.IssueCount,
+	}
+}
+
+// convertToLegacyTeam converts a GetTeamResponse to legacy Team type
+func convertToLegacyTeam(resp *GetTeamResponse) *Team {
+	if resp == nil || resp.Team == nil {
+		return &Team{}
+	}
+
+	fields := resp.Team
+
+	description := ""
+	if fields.Description != nil {
+		description = *fields.Description
+	}
+
+	var icon *string
+	if fields.Icon != nil {
+		icon = fields.Icon
+	}
+
+	color := ""
+	if fields.Color != nil {
+		color = *fields.Color
+	}
+
+	return &Team{
+		ID:                 fields.Id,
+		Key:                fields.Key,
+		Name:               fields.Name,
+		Description:        description,
+		Icon:               icon,
+		Color:              color,
+		Private:            fields.Private,
+		IssueCount:         fields.IssueCount,
+		CyclesEnabled:      fields.CyclesEnabled,
+		CycleStartDay:      int(fields.CycleStartDay),
+		CycleDuration:      int(fields.CycleDuration),
+		UpcomingCycleCount: int(fields.UpcomingCycleCount),
+	}
+}

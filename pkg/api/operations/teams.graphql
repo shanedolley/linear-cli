@@ -1,0 +1,85 @@
+# GraphQL operations for Team entity
+# These operations will replace hand-written queries in pkg/api/queries.go
+
+# Fragment for basic team fields used in list views
+fragment TeamListFields on Team {
+  id
+  key
+  name
+  description
+  private
+  issueCount
+}
+
+# Fragment for detailed team fields used in single team view
+fragment TeamDetailFields on Team {
+  id
+  key
+  name
+  description
+  icon
+  color
+  private
+  issueCount
+  cyclesEnabled
+  cycleStartDay
+  cycleDuration
+  upcomingCycleCount
+}
+
+# Query: Get paginated list of teams
+query ListTeams($first: Int, $after: String, $orderBy: PaginationOrderBy) {
+  teams(first: $first, after: $after, orderBy: $orderBy) {
+    nodes {
+      ...TeamListFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+# Query: Get a single team by key (ID)
+query GetTeam($key: String!) {
+  team(id: $key) {
+    ...TeamDetailFields
+  }
+}
+
+# Query: Get team members
+query GetTeamMembers($key: String!) {
+  team(id: $key) {
+    members {
+      nodes {
+        id
+        name
+        email
+        avatarUrl
+        isMe
+        active
+        admin
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+}
+
+# Query: Get team workflow states
+query GetTeamStates($key: String!) {
+  team(id: $key) {
+    states {
+      nodes {
+        id
+        name
+        type
+        color
+        description
+        position
+      }
+    }
+  }
+}

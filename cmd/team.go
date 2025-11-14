@@ -67,7 +67,7 @@ var teamListCmd = &cobra.Command{
 		}
 
 		// Get teams
-		teams, err := client.GetTeams(context.Background(), limit, "", orderBy)
+		teams, err := client.GetTeamsNew(context.Background(), limit, "", orderBy)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to list teams: %v", err), plaintext, jsonOut)
 			os.Exit(1)
@@ -154,7 +154,7 @@ var teamGetCmd = &cobra.Command{
 		client := api.NewClient(authHeader)
 
 		// Get team details
-		team, err := client.GetTeam(context.Background(), teamKey)
+		team, err := client.GetTeamNew(context.Background(), teamKey)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to get team: %v", err), plaintext, jsonOut)
 			os.Exit(1)
