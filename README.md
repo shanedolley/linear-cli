@@ -1,5 +1,6 @@
 # 🚀 lincli - Linear CLI Tool
 
+> **Note**: This is a personal fork of [dorkitude/linctl](https://github.com/dorkitude/linctl), renamed to lincli for personal use.
 
 A comprehensive command-line interface for Linear's API, built with agents in mind (but nice for humans too).
 
@@ -33,14 +34,7 @@ A comprehensive command-line interface for Linear's API, built with agents in mi
 
 ## 🛠️ Installation
 
-### Homebrew (macOS/Linux)
-```bash
-brew tap shanedolley/lincli
-brew install lincli
-lincli docs      # Render the README.md
-```
-
-### From Source
+### From Source (Recommended)
 ```bash
 git clone https://github.com/shanedolley/lincli.git
 cd lincli
@@ -722,13 +716,9 @@ Linear has the following rate limits:
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
+This is a personal fork maintained for individual use. The original project is at [dorkitude/linctl](https://github.com/dorkitude/linctl).
 
-See CONTRIBUTING.md for a detailed release checklist and the Homebrew tap auto-bump workflow.
+If you'd like to contribute to the Linear CLI ecosystem, please consider contributing to the upstream project instead.
 
 ## 📄 License
 
@@ -737,8 +727,8 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## 🔗 Links
 
 - [Linear API Documentation](https://developers.linear.app/)
-- [GitHub Repository](https://github.com/shanedolley/lincli)
-- [Issue Tracker](https://github.com/shanedolley/lincli/issues)
+- [Upstream Project](https://github.com/dorkitude/linctl)
+- [This Fork](https://github.com/shanedolley/lincli)
 
 ---
 
