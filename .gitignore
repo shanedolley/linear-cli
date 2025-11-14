@@ -38,6 +38,8 @@ dist/
 # Config files (may contain sensitive data)
 .linctl.yaml
 .linctl-auth.json
+.lincli.yaml
+.lincli-auth.json
 
 # Log files
 *.log
