@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Smoke test for linctl - tests all READ commands
+# Smoke test for lincli - tests all READ commands
 # This script runs through all the read-only commands to ensure basic functionality
 
 set -e  # Exit on error
@@ -60,7 +60,7 @@ get_first_id() {
     echo "$output" | grep -E -o '([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}|[A-Z]+-[0-9]+)' | head -1
 }
 
-echo "🚀 Starting linctl smoke tests..."
+echo "🚀 Starting lincli smoke tests..."
 echo "================================"
 
 # Check if authenticated
@@ -69,7 +69,7 @@ run_test "auth status" "go run main.go auth status" "Authenticated"
 
 # If not authenticated, skip tests
 if [ $TESTS_FAILED -gt 0 ]; then
-    echo -e "\n${RED}Not authenticated. Please run 'linctl auth' first.${NC}"
+    echo -e "\n${RED}Not authenticated. Please run 'lincli auth' first.${NC}"
     exit 1
 fi
 

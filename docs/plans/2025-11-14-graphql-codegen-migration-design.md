@@ -6,7 +6,7 @@
 
 ## Problem Statement
 
-The current linctl codebase maintains 1515 lines of hand-written GraphQL types and queries in `pkg/api/queries.go`. As Linear's API evolves and new fields are added, these types must be manually updated, leading to:
+The current lincli codebase maintains 1515 lines of hand-written GraphQL types and queries in `pkg/api/queries.go`. As Linear's API evolves and new fields are added, these types must be manually updated, leading to:
 
 - Maintenance burden when Linear adds/changes fields
 - Risk of runtime errors from type mismatches

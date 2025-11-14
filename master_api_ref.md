@@ -1,6 +1,6 @@
 # Linear API Master Reference
 
-> Comprehensive reference for Linear's GraphQL API endpoints and features for the `linctl` CLI tool
+> Comprehensive reference for Linear's GraphQL API endpoints and features for the `lincli` CLI tool
 
 ## Table of Contents
 - [Authentication](#authentication)
@@ -506,90 +506,90 @@ mutation WebhookCreate($input: WebhookCreateInput!) {
 ### Issue Commands
 ```bash
 # List issues
-linctl issue list --assignee me --state "In Progress"
-linctl issue ls -a me -s "In Progress"
+lincli issue list --assignee me --state "In Progress"
+lincli issue ls -a me -s "In Progress"
 
 # Get specific issue
-linctl issue get LIN-123
-linctl issue show LIN-123
+lincli issue get LIN-123
+lincli issue show LIN-123
 
 # Create issue
-linctl issue create --title "Bug fix" --team TEAM_KEY
-linctl issue new -t "Bug fix" --team TEAM_KEY
+lincli issue create --title "Bug fix" --team TEAM_KEY
+lincli issue new -t "Bug fix" --team TEAM_KEY
 
 # Update issue
-linctl issue update LIN-123 --assignee user@example.com
-linctl issue edit LIN-123 -a user@example.com
+lincli issue update LIN-123 --assignee user@example.com
+lincli issue edit LIN-123 -a user@example.com
 
 # Archive issue
-linctl issue archive LIN-123
+lincli issue archive LIN-123
 ```
 
 ### Project Commands
 ```bash
 # List projects
-linctl project list --team TEAM_KEY
-linctl project ls -t TEAM_KEY
+lincli project list --team TEAM_KEY
+lincli project ls -t TEAM_KEY
 
 # Get project
-linctl project get PROJECT_ID
-linctl project show PROJECT_ID
+lincli project get PROJECT_ID
+lincli project show PROJECT_ID
 
 # Create project
-linctl project create --name "New Feature" --team TEAM_KEY
+lincli project create --name "New Feature" --team TEAM_KEY
 ```
 
 ### Team Commands
 ```bash
 # List teams
-linctl team list
-linctl team ls
+lincli team list
+lincli team ls
 
 # Get team info
-linctl team get TEAM_KEY
-linctl team show TEAM_KEY
+lincli team get TEAM_KEY
+lincli team show TEAM_KEY
 
 # List team members
-linctl team members TEAM_KEY
+lincli team members TEAM_KEY
 ```
 
 ### User Commands
 ```bash
 # Show current user
-linctl user me
-linctl whoami
+lincli user me
+lincli whoami
 
 # List users
-linctl user list
-linctl user ls
+lincli user list
+lincli user ls
 
 # Show user info
-linctl user get user@example.com
+lincli user get user@example.com
 ```
 
 ### Comment Commands
 ```bash
 # List comments
-linctl comment list LIN-123
-linctl comment ls LIN-123
+lincli comment list LIN-123
+lincli comment ls LIN-123
 
 # Add comment
-linctl comment create LIN-123 --body "Comment text"
-linctl comment add LIN-123 -b "Comment text"
+lincli comment create LIN-123 --body "Comment text"
+lincli comment add LIN-123 -b "Comment text"
 ```
 
 ### Auth Commands
 ```bash
 # Authenticate
-linctl auth
-linctl auth login
+lincli auth
+lincli auth login
 
 # Show current auth status
-linctl auth status
-linctl auth whoami
+lincli auth status
+lincli auth whoami
 
 # Logout
-linctl auth logout
+lincli auth logout
 ```
 
 ### Global Flags

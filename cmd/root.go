@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/fatih/color"
@@ -23,7 +24,7 @@ var version = "dev"
 // generateHeader creates a nice header box with proper Unicode box drawing
 func generateHeader() string {
 	lines := []string{
-		"🚀 linctl",
+		"🚀 lincli",
 		"Linear CLI - Built with ❤️",
 	}
 
@@ -66,7 +67,7 @@ func generateHeader() string {
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-    Use:     "linctl",
+    Use:     "lincli",
     Short:   "A comprehensive Linear CLI tool",
     Long:    color.New(color.FgCyan).Sprintf("%s\nA comprehensive CLI tool for Linear's API featuring:\n• Issue management (create, list, update, archive)\n• Project tracking and collaboration  \n• Team and user management\n• Comments and attachments\n• Webhook configuration\n• Table/plaintext/JSON output formats\n", generateHeader()),
     Version: version,
@@ -85,11 +86,33 @@ func GetRootCmd() *cobra.Command {
 	return rootCmd
 }
 
+// migrateOldConfig copies old linctl config to new lincli location
+func migrateOldConfig() {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return
+	}
+
+	oldConfig := filepath.Join(home, ".linctl.yaml")
+	newConfig := filepath.Join(home, ".lincli.yaml")
+
+	// Only migrate if old exists and new doesn't
+	if _, err := os.Stat(oldConfig); err == nil {
+		if _, err := os.Stat(newConfig); os.IsNotExist(err) {
+			data, err := os.ReadFile(oldConfig)
+			if err == nil {
+				_ = os.WriteFile(newConfig, data, 0600)
+			}
+		}
+	}
+}
+
 func init() {
+	migrateOldConfig()
 	cobra.OnInitialize(initConfig)
 
 	// Global flags
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.linctl.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.lincli.yaml)")
 	rootCmd.PersistentFlags().BoolVarP(&plaintext, "plaintext", "p", false, "plaintext output (non-interactive)")
 	rootCmd.PersistentFlags().BoolVarP(&jsonOut, "json", "j", false, "JSON output")
 
@@ -108,10 +131,10 @@ func initConfig() {
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		// Search config in home directory with name ".linctl" (without extension).
+		// Search config in home directory with name ".lincli" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".linctl")
+		viper.SetConfigName(".lincli")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match

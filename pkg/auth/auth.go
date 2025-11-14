@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/dorkitude/linctl/pkg/api"
+	"github.com/shanedolley/lincli/pkg/api"
 	"github.com/fatih/color"
 )
 
@@ -24,13 +24,35 @@ type AuthConfig struct {
 	APIKey string `json:"api_key,omitempty"`
 }
 
+// migrateOldAuthFile copies old linctl auth to new lincli location
+func migrateOldAuthFile() {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return
+	}
+
+	oldAuth := filepath.Join(home, ".linctl-auth.json")
+	newAuth := filepath.Join(home, ".lincli-auth.json")
+
+	// Only migrate if old exists and new doesn't
+	if _, err := os.Stat(oldAuth); err == nil {
+		if _, err := os.Stat(newAuth); os.IsNotExist(err) {
+			data, err := os.ReadFile(oldAuth)
+			if err == nil {
+				_ = os.WriteFile(newAuth, data, 0600)
+			}
+		}
+	}
+}
+
 // getConfigPath returns the path to the auth config file
 func getConfigPath() (string, error) {
+	migrateOldAuthFile()
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(homeDir, ".linctl-auth.json"), nil
+	return filepath.Join(homeDir, ".lincli-auth.json"), nil
 }
 
 // saveAuth saves authentication credentials

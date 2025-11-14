@@ -6,10 +6,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/dorkitude/linctl/pkg/api"
-	"github.com/dorkitude/linctl/pkg/auth"
-	"github.com/dorkitude/linctl/pkg/output"
-	"github.com/dorkitude/linctl/pkg/utils"
+	"github.com/shanedolley/lincli/pkg/api"
+	"github.com/shanedolley/lincli/pkg/auth"
+	"github.com/shanedolley/lincli/pkg/output"
+	"github.com/shanedolley/lincli/pkg/utils"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -40,11 +40,11 @@ var projectCmd = &cobra.Command{
 	Long: `Manage Linear projects including listing, viewing, and creating projects.
 
 Examples:
-  linctl project list                      # List active projects
-  linctl project list --include-completed  # List all projects including completed
-  linctl project list --newer-than 1_month_ago  # List projects from last month
-  linctl project get PROJECT-ID            # Get project details
-  linctl project create                    # Create a new project`,
+  lincli project list                      # List active projects
+  lincli project list --include-completed  # List all projects including completed
+  lincli project list --newer-than 1_month_ago  # List projects from last month
+  lincli project get PROJECT-ID            # Get project details
+  lincli project create                    # Create a new project`,
 }
 
 var projectListCmd = &cobra.Command{

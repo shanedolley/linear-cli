@@ -1,0 +1,78 @@
+Rename Verification - 2025-11-14
+=================================
+
+Binary Name: lincli ✓
+Module Path: github.com/shanedolley/lincli ✓
+All Go Files: Updated ✓
+Documentation: Updated ✓
+Smoke Tests: 39 passing ✓
+Config Migration: Working ✓
+GitHub Workflow: Updated ✓
+User-Agent Header: Updated ✓
+
+Verification Details
+--------------------
+
+1. Binary Build:
+   - Clean build successful
+   - Binary named 'lincli' (not 'linctl')
+   - Size: ~13MB
+   - Version output: "lincli version 42b254b"
+
+2. Test Suite:
+   - Full smoke test suite: 39/39 passing
+   - All commands verified: auth, user, team, project, issue, comment
+
+3. Config Migration:
+   - Old .linctl.yaml → .lincli.yaml: WORKING ✓
+   - Old .linctl-auth.json → .lincli-auth.json: WORKING ✓
+   - Migration is non-destructive (copies, not moves)
+   - Migration only happens if old exists and new doesn't
+
+4. Code References:
+   - Go module path: github.com/shanedolley/lincli
+   - No remaining "github.com/dorkitude/linctl" in Go files
+   - All import statements updated
+   - User-Agent header: "lincli/0.1.0"
+
+5. Documentation:
+   - README.md: Updated ✓
+   - CLAUDE.md: Updated ✓
+   - CONTRIBUTING.md: Updated ✓
+   - Design docs: Updated ✓
+
+6. Build System:
+   - Makefile: BINARY_NAME=lincli ✓
+   - .gitignore: Binary name updated ✓
+   - smoke_test.sh: All references updated ✓
+
+7. Homebrew:
+   - Formula renamed: linctl.rb → lincli.rb ✓
+   - Class name: Lincli ✓
+   - GitHub workflow: Updated for homebrew-lincli tap ✓
+
+Remaining "linctl" References (Intentional)
+-------------------------------------------
+
+The following files contain "linctl" references that are INTENTIONAL:
+
+1. Migration code in cmd/root.go:
+   - Comment: "copies old linctl config to new lincli location"
+   - Variable: oldConfig = ".linctl.yaml"
+
+2. Migration code in pkg/auth/auth.go:
+   - Comment: "copies old linctl auth to new lincli location"
+   - Variable: oldAuth = ".linctl-auth.json"
+
+3. Documentation files (historical/design context):
+   - docs/plans/2025-11-14-rename-to-lincli.md (this plan)
+   - docs/plans/2025-11-14-rename-linctl-to-lincli-design.md
+   - README.md (in migration notes)
+   - CONTRIBUTING.md (in migration notes)
+   - CLAUDE.md (in migration notes)
+
+4. .gitignore (backward compatibility):
+   - Still ignores old config file names for users upgrading
+
+All references to linctl have been successfully renamed to lincli.
+The rename is complete and verified.

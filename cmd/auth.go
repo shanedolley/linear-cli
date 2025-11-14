@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/dorkitude/linctl/pkg/auth"
-	"github.com/dorkitude/linctl/pkg/output"
+	"github.com/shanedolley/lincli/pkg/auth"
+	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -18,10 +18,10 @@ var authCmd = &cobra.Command{
 	Long: `Authenticate with Linear using Personal API Key.
 
 Examples:
-  linctl auth              # Interactive authentication
-  linctl auth login        # Same as above
-  linctl auth status       # Check authentication status
-  linctl auth logout       # Clear stored credentials`,
+  lincli auth              # Interactive authentication
+  lincli auth login        # Same as above
+  lincli auth status       # Check authentication status
+  lincli auth logout       # Clear stored credentials`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Default behavior is to run login
 		loginCmd.Run(cmd, args)

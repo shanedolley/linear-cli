@@ -2,15 +2,17 @@
 
 This file provides guidance when working with code in this repository.
 
+> **Note**: This is a personal fork of dorkitude/linctl, renamed to lincli. This fork is maintained by Shane Dolley for personal use and is not intended for upstream contribution or public distribution via Homebrew.
+
 ## Project Overview
 
-**linctl** is a comprehensive Go-based CLI tool for Linear's GraphQL API. The tool is designed to be both agent-friendly (via `--json` output) and human-friendly (via interactive table and plaintext formats).
+**lincli** is a comprehensive Go-based CLI tool for Linear's GraphQL API. The tool is designed to be both agent-friendly (via `--json` output) and human-friendly (via interactive table and plaintext formats).
 
 ## Common Commands
 
 ### Build & Development
 ```bash
-make build          # Build the linctl binary
+make build          # Build the lincli binary
 make deps           # Install/update dependencies (go mod download + tidy)
 make fmt            # Format code (go fmt ./...)
 make lint           # Run linter (requires golangci-lint)
@@ -23,12 +25,12 @@ make dev-install    # Create development symlink to /usr/local/bin
 go run main.go [command] [flags]
 
 # Run after building
-./linctl [command] [flags]
+./lincli [command] [flags]
 ```
 
 ### Testing
 - **Smoke tests**: `./smoke_test.sh` - Tests all read-only commands
-- **Manual testing**: Run `linctl auth` to authenticate, then test commands
+- **Manual testing**: Run `lincli auth` to authenticate, then test commands
 - Integration tests are read-only and safe with production API keys
 
 ## Architecture
@@ -36,7 +38,7 @@ go run main.go [command] [flags]
 ### Project Structure
 
 ```
-linctl/
+lincli/
 ├── main.go              # Entry point, embeds README.md
 ├── cmd/                 # Cobra command definitions
 │   ├── root.go          # Root command, global flags, config
@@ -79,7 +81,7 @@ All commands follow this pattern:
 - **Type definitions**: All in `pkg/api/queries.go`
 
 #### Authentication
-- **Storage**: `~/.linctl-auth.json` (0600 permissions)
+- **Storage**: `~/.lincli-auth.json` (0600 permissions)
 - **Format**: JSON with `api_key` field
 - **Flow**: Personal API Key only (no OAuth)
 - **Validation**: Tests API key by fetching viewer on login
@@ -135,8 +137,8 @@ func (c *Client) GetIssues(ctx context.Context, filter map[string]interface{}, l
 
 ### Configuration
 
-- **Config file**: `~/.linctl.yaml` (optional)
-- **Auth file**: `~/.linctl-auth.json` (required for authenticated commands)
+- **Config file**: `~/.lincli.yaml` (optional)
+- **Auth file**: `~/.lincli-auth.json` (required for authenticated commands)
 - **Viper**: Used for config management
 - **Environment**: `LINEAR_API_KEY` env var NOT used (only file-based auth)
 
@@ -180,15 +182,13 @@ All list commands support `--sort` flag:
 - Default value is `"dev"` for local development
 
 ### Release Process
-See `CONTRIBUTING.md` for full release checklist:
+This is a personal fork. For release process, simply:
 1. Create and push git tag (e.g., `v1.2.3`)
-2. GitHub Actions auto-creates Homebrew tap PR
-3. Requires `HOMEBREW_TAP_TOKEN` secret in repo settings
-4. Manual fallback documented in CONTRIBUTING.md
+2. Build from source using `make build && make install`
 
 ### Embedded README
 - `main.go` embeds `README.md` using `//go:embed`
-- Rendered by `linctl docs` command
+- Rendered by `lincli docs` command
 - Uses `glamour` for terminal markdown rendering
 - Ensures users always have access to docs offline
 

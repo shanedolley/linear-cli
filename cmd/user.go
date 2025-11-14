@@ -6,9 +6,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/dorkitude/linctl/pkg/api"
-	"github.com/dorkitude/linctl/pkg/auth"
-	"github.com/dorkitude/linctl/pkg/output"
+	"github.com/shanedolley/lincli/pkg/api"
+	"github.com/shanedolley/lincli/pkg/auth"
+	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -21,9 +21,9 @@ var userCmd = &cobra.Command{
 	Long: `Manage Linear users including listing users, viewing user details, and showing the current user.
 
 Examples:
-  linctl user list              # List all users
-  linctl user get john@example.com  # Get user details
-  linctl user me                # Show current user`,
+  lincli user list              # List all users
+  lincli user get john@example.com  # Get user details
+  lincli user me                # Show current user`,
 }
 
 var userListCmd = &cobra.Command{

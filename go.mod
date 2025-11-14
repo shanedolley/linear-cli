@@ -1,4 +1,4 @@
-module github.com/dorkitude/linctl
+module github.com/shanedolley/lincli
 
 go 1.23.0
 
