@@ -1004,12 +1004,8 @@ Examples:
 				os.Exit(1)
 			}
 
-			// Get available states for the team
-			states, err := client.GetTeamStates(context.Background(), issue.Team.Key)
-			if err != nil {
-				output.Error(fmt.Sprintf("Failed to get team states: %v", err), plaintext, jsonOut)
-				os.Exit(1)
-			}
+			// States are now embedded in issue.Team.States (no separate API call)
+			states := issue.Team.States
 
 			// Find the state by name (case-insensitive)
 			var stateID string

@@ -32,6 +32,7 @@ type Team struct {
 	CycleStartDay      int     `json:"cycleStartDay"`
 	CycleDuration      int     `json:"cycleDuration"`
 	UpcomingCycleCount int     `json:"upcomingCycleCount"`
+	States             []State `json:"states"` // Workflow states for this team
 }
 
 // Issue represents a Linear issue
