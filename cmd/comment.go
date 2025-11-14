@@ -22,8 +22,8 @@ var commentCmd = &cobra.Command{
 	Long: `Manage comments on Linear issues including listing and creating comments.
 
 Examples:
-  linctl comment list LIN-123        # List comments for an issue
-  linctl comment create LIN-123 --body "This is fixed"  # Add a comment`,
+  lincli comment list LIN-123        # List comments for an issue
+  lincli comment create LIN-123 --body "This is fixed"  # Add a comment`,
 }
 
 var commentListCmd = &cobra.Command{

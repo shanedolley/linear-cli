@@ -40,11 +40,11 @@ var projectCmd = &cobra.Command{
 	Long: `Manage Linear projects including listing, viewing, and creating projects.
 
 Examples:
-  linctl project list                      # List active projects
-  linctl project list --include-completed  # List all projects including completed
-  linctl project list --newer-than 1_month_ago  # List projects from last month
-  linctl project get PROJECT-ID            # Get project details
-  linctl project create                    # Create a new project`,
+  lincli project list                      # List active projects
+  lincli project list --include-completed  # List all projects including completed
+  lincli project list --newer-than 1_month_ago  # List projects from last month
+  lincli project get PROJECT-ID            # Get project details
+  lincli project create                    # Create a new project`,
 }
 
 var projectListCmd = &cobra.Command{

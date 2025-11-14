@@ -22,13 +22,13 @@ var issueCmd = &cobra.Command{
 	Long: `Create, list, update, and manage Linear issues.
 
 Examples:
-  linctl issue list --assignee me --state "In Progress"
-  linctl issue ls -a me -s "In Progress"
-  linctl issue list --include-completed  # Show all issues including completed
-  linctl issue list --newer-than 3_weeks_ago  # Show issues from last 3 weeks
-  linctl issue search "login bug" --team ENG
-  linctl issue get LIN-123
-  linctl issue create --title "Bug fix" --team ENG`,
+  lincli issue list --assignee me --state "In Progress"
+  lincli issue ls -a me -s "In Progress"
+  lincli issue list --include-completed  # Show all issues including completed
+  lincli issue list --newer-than 3_weeks_ago  # Show issues from last 3 weeks
+  lincli issue search "login bug" --team ENG
+  lincli issue get LIN-123
+  lincli issue create --title "Bug fix" --team ENG`,
 }
 
 var issueListCmd = &cobra.Command{
@@ -42,7 +42,7 @@ var issueListCmd = &cobra.Command{
 
 		authHeader, err := auth.GetAuthHeader()
 		if err != nil {
-			output.Error("Not authenticated. Run 'linctl auth' first.", plaintext, jsonOut)
+			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
 			os.Exit(1)
 		}
 
@@ -198,9 +198,9 @@ var issueSearchCmd = &cobra.Command{
 	Long: `Perform a full-text search across Linear issues.
 
 Examples:
-  linctl issue search "payment outage"
-  linctl issue search "auth token" --team ENG --include-completed
-  linctl issue search "customer:" --json`,
+  lincli issue search "payment outage"
+  lincli issue search "auth token" --team ENG --include-completed
+  lincli issue search "customer:" --json`,
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		plaintext := viper.GetBool("plaintext")
@@ -214,7 +214,7 @@ Examples:
 
 		authHeader, err := auth.GetAuthHeader()
 		if err != nil {
-			output.Error("Not authenticated. Run 'linctl auth' first.", plaintext, jsonOut)
+			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
 			os.Exit(1)
 		}
 
@@ -268,7 +268,7 @@ var issueGetCmd = &cobra.Command{
 
 		authHeader, err := auth.GetAuthHeader()
 		if err != nil {
-			output.Error("Not authenticated. Run 'linctl auth' first.", plaintext, jsonOut)
+			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
 			os.Exit(1)
 		}
 
@@ -509,7 +509,7 @@ var issueGetCmd = &cobra.Command{
 						}
 					}
 				}
-				fmt.Printf("\n> Use `linctl comment list %s` to see all comments\n", issue.Identifier)
+				fmt.Printf("\n> Use `lincli comment list %s` to see all comments\n", issue.Identifier)
 			}
 
 			// Show history
@@ -694,7 +694,7 @@ var issueGetCmd = &cobra.Command{
 					fmt.Printf("     %s\n", preview)
 				}
 			}
-			fmt.Printf("\n  %s Use 'linctl comment list %s' to see all comments\n",
+			fmt.Printf("\n  %s Use 'lincli comment list %s' to see all comments\n",
 				color.New(color.FgWhite, color.Faint).Sprint("→"),
 				issue.Identifier)
 		}
@@ -789,7 +789,7 @@ var issueAssignCmd = &cobra.Command{
 
 		authHeader, err := auth.GetAuthHeader()
 		if err != nil {
-			output.Error("Not authenticated. Run 'linctl auth' first.", plaintext, jsonOut)
+			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
 			os.Exit(1)
 		}
 
@@ -837,7 +837,7 @@ var issueCreateCmd = &cobra.Command{
 
 		authHeader, err := auth.GetAuthHeader()
 		if err != nil {
-			output.Error("Not authenticated. Run 'linctl auth' first.", plaintext, jsonOut)
+			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
 			os.Exit(1)
 		}
 
@@ -919,13 +919,13 @@ var issueUpdateCmd = &cobra.Command{
 	Long: `Update various fields of an issue.
 
 Examples:
-  linctl issue update LIN-123 --title "New title"
-  linctl issue update LIN-123 --description "Updated description"
-  linctl issue update LIN-123 --assignee john.doe@company.com
-  linctl issue update LIN-123 --state "In Progress"
-  linctl issue update LIN-123 --priority 1
-  linctl issue update LIN-123 --due-date "2024-12-31"
-  linctl issue update LIN-123 --title "New title" --assignee me --priority 2`,
+  lincli issue update LIN-123 --title "New title"
+  lincli issue update LIN-123 --description "Updated description"
+  lincli issue update LIN-123 --assignee john.doe@company.com
+  lincli issue update LIN-123 --state "In Progress"
+  lincli issue update LIN-123 --priority 1
+  lincli issue update LIN-123 --due-date "2024-12-31"
+  lincli issue update LIN-123 --title "New title" --assignee me --priority 2`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		plaintext := viper.GetBool("plaintext")
@@ -933,7 +933,7 @@ Examples:
 
 		authHeader, err := auth.GetAuthHeader()
 		if err != nil {
-			output.Error("Not authenticated. Run 'linctl auth' first.", plaintext, jsonOut)
+			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
 			os.Exit(1)
 		}
 
