@@ -412,7 +412,7 @@ type WorkflowState struct {
 	Name        string  `json:"name"`
 	Type        string  `json:"type"`
 	Color       string  `json:"color"`
-	Description string  `json:"description"`
+	Description *string `json:"description"`
 	Position    float64 `json:"position"`
 }
 
