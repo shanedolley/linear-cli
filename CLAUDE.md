@@ -180,9 +180,9 @@ This project uses [genqlient](https://github.com/Khan/genqlient) to generate typ
 
 ### Migration to genqlient
 
-**Status:** ✅ Phase 1 Complete - Direct Types (100%)
+**Status:** ✅ Phase 2 Complete - Write Operations (100%)
 
-The project has fully migrated to using genqlient-generated types directly, eliminating the adapter layer for read operations:
+The project has fully migrated to using genqlient-generated types directly for both read and write operations:
 
 **Phase 0: Code Generation (Completed)**
 - **Tool**: genqlient v0.8.1
@@ -191,32 +191,37 @@ The project has fully migrated to using genqlient-generated types directly, elim
 - **Code removed**: 1,604 lines of hand-written code (queries.go: 1,515 + legacy.go: 89)
 - **Net reduction**: 1,050 lines (31% reduction in pkg/api)
 
-**Phase 1: Direct Types (Completed)**
+**Phase 1: Direct Types - Read Operations (Completed)**
 - **Read commands migrated**: All 11 read operations (list, get, search) across all entities
 - **Filter building**: Migrated from `map[string]interface{}` to typed filters (IssueFilter, ProjectFilter)
 - **Response handling**: Direct use of generated types with fragment-based field access
 - **Code removed**: 61 lines (buildIssueFilter + deprecation comments added)
-- **Adapter functions**: 10 read operations marked deprecated, kept for Phase 2 write operations
+- **Adapter functions**: 10 read operations marked deprecated
 - **All smoke tests passing**: 39/39
 - **Type safety**: Full compile-time validation for all read operations
 
+**Phase 2: Write Operations (Completed)**
+- **Write commands migrated**: 4 write operations (issue assign, comment create, issue create, issue update)
+- **Input building**: Builder functions for complex commands (5+ fields), inline for simple
+- **Type safety**: Replace `map[string]interface{}` with typed input structs (IssueUpdateInput, IssueCreateInput, CommentCreateInput)
+- **State lookup optimization**: Eliminated extra GetTeamStates API call by using embedded workflow states (50% API call reduction for state updates)
+- **Adapter functions**: 3 write operations marked deprecated (CreateIssue, UpdateIssue, CreateComment)
+- **All manual tests passed**: 27 test cases across 4 commands
+- **Zero regressions**: All existing functionality preserved
+
 **Commands using direct types:**
-- Issues: `issue list`, `issue get`, `issue search`
-- Projects: `project list`, `project get`
-- Teams: `team list`, `team get`, `team members`
-- Users: `user list`, `user whoami`
-- Comments: `comment list`
+- Read operations: `issue list`, `issue get`, `issue search`, `project list`, `project get`, `team list`, `team get`, `team members`, `user list`, `user whoami`, `comment list`
+- Write operations: `issue assign`, `issue create`, `issue update`, `comment create`
 
 **Performance optimizations:**
 - Team workflow states are embedded in issue fetches, eliminating extra API calls during state validation
-- Single API call for issue updates with state changes (previously required 2 calls)
-- Eliminated adapter conversion overhead for all read operations
+- State updates now use embedded states (1 API call instead of 2 - 50% reduction)
+- Eliminated adapter conversion overhead for all read and write operations
 
-**Next phases:**
-- **Phase 2**: Migrate write operations (create, update, delete) to direct types
-- **Phase 3**: Remove adapter layer entirely (~600 lines)
+**Next phase:**
+- **Phase 3**: Remove adapter layer entirely (~1,700 lines including conversion functions)
 
-The migration achieves full type safety for read operations, eliminates maintenance burden, and catches API changes at compile time rather than runtime.
+The migration achieves full type safety for all operations, eliminates maintenance burden, catches API changes at compile time, and improves performance through optimized API usage.
 
 ### Configuration
 
@@ -286,8 +291,59 @@ For new read commands (list, get, search):
 - Add nil checks for nullable fields
 - Use helper functions for common patterns (stringEq, boolEq, etc.)
 
-### Using Adapters (For Write Operations Only)
-Write operations (create, update, delete) currently still use the adapter layer. This will change in Phase 2.
+### Using Direct genqlient Types for Write Operations (Recommended)
+For new write commands (create, update, delete):
+
+1. **Define GraphQL mutation** in appropriate `pkg/api/operations/<entity>.graphql` file:
+   ```graphql
+   mutation CreateMyData($input: MyDataCreateInput!) {
+       myDataCreate(input: $input) {
+           myData {
+               ...MyDataFields
+           }
+       }
+   }
+   ```
+
+2. **Generate code**:
+   ```bash
+   go generate ./pkg/api
+   ```
+
+3. **Create input builder** (for complex commands with 5+ fields):
+   ```go
+   func buildMyDataCreateInput(cmd *cobra.Command) api.MyDataCreateInput {
+       input := api.MyDataCreateInput{
+           RequiredField: value,  // Non-pointer required fields
+       }
+
+       // Use Changed() for optional fields to distinguish "not set" from "set to empty"
+       if cmd.Flags().Changed("optional-field") {
+           val, _ := cmd.Flags().GetString("optional-field")
+           input.OptionalField = &val
+       }
+
+       return input
+   }
+   ```
+
+4. **Implement command handler**:
+   ```go
+   - Parse flags
+   - Build typed input using builder function or inline (for simple cases)
+   - Call generated mutation: `resp, err := api.CreateMyData(ctx, client, &input)`
+   - Unwrap response: `data := resp.MyDataCreate.MyData`
+   - Render output using fragment fields
+   ```
+
+5. **Test manually** with comprehensive test cases
+
+**Key patterns for write operations:**
+- Use `cmd.Flags().Changed()` to detect which optional fields were actually set
+- Builder functions for 5+ fields, inline construction for 1-3 fields
+- All optional input fields are pointers
+- Pass inputs as pointers to mutation functions (`&input`)
+- Response unwrapping: `resp.MutationName.Entity`
 
 ### Updating Linear's GraphQL Schema
 When Linear's API changes, update the schema:
