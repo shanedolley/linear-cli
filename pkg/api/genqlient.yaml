@@ -1,0 +1,22 @@
+# genqlient configuration for Linear GraphQL API code generation
+schema: schema.graphql
+operations:
+  - operations/*.graphql
+generated: generated/generated.go
+package: api
+
+# Use the existing GraphQL client's Execute method
+# This tells genqlient to use our custom HTTP client wrapper
+use_struct_references: true
+
+# Optional settings for better type generation
+optional: pointer
+
+# Package-level configuration
+bindings:
+  # Use time.Time for DateTime scalars
+  DateTime:
+    type: time.Time
+  # Use UUID type if available, otherwise string
+  UUID:
+    type: string
