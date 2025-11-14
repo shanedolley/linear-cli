@@ -218,6 +218,7 @@ var teamMembersCmd = &cobra.Command{
 		client := api.NewClient(authHeader)
 
 		// Get team members
+		// GetTeamMembers now uses genqlient adapter (no code change needed)
 		members, err := client.GetTeamMembers(context.Background(), teamKey)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to get team members: %v", err), plaintext, jsonOut)
