@@ -1,10 +1,11 @@
-module github.com/dorkitude/linctl
+module github.com/shanedolley/lincli
 
 go 1.23.0
 
 toolchain go1.24.5
 
 require (
+	github.com/dorkitude/linctl v0.1.1
 	github.com/fatih/color v1.16.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/spf13/cobra v1.8.0
