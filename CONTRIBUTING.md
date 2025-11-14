@@ -36,7 +36,7 @@ Follow this checklist to cut a new release and update Homebrew:
 
 3) Homebrew Tap Bump (auto)
 - This repo has a GitHub Action that auto-opens a PR to the tap on release publish.
-- Required secret: `HOMEBREW_TAP_TOKEN` (fine‑grained PAT with contents:write on `dorkitude/homebrew-lincli`).
+- Required secret: `HOMEBREW_TAP_TOKEN` (fine‑grained PAT with contents:write on `shanedolley/homebrew-lincli`).
   - Add in GitHub: repo Settings → Secrets and variables → Actions → New repository secret.
 
 4) Homebrew Tap Bump (manual fallback)
@@ -47,7 +47,7 @@ TARBALL=https://github.com/dorkitude/lincli/archive/refs/tags/${TAG}.tar.gz
 curl -sL "$TARBALL" -o /tmp/lincli.tgz
 SHA=$(shasum -a 256 /tmp/lincli.tgz | awk '{print $1}')
 
-git clone https://github.com/dorkitude/homebrew-lincli.git
+git clone https://github.com/shanedolley/homebrew-lincli.git
 cd homebrew-lincli
 git checkout -b bump-lincli-${TAG#v}
 sed -i.bak -E "s|url \"[^\"]+\"|url \"$TARBALL\"|g" Formula/lincli.rb
