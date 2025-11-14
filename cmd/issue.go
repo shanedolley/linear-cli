@@ -307,39 +307,126 @@ Examples:
 
 		client := api.NewClient(authHeader)
 
-		filter := buildIssueFilter(cmd)
+		// Build typed filter from flags
+		filterTyped := buildIssueFilterTyped(cmd)
 
 		limit, _ := cmd.Flags().GetInt("limit")
 		if limit == 0 {
 			limit = 50
 		}
 
+		// Get sort option and convert to enum
 		sortBy, _ := cmd.Flags().GetString("sort")
-		orderBy := ""
+		var orderByEnum *api.PaginationOrderBy
 		if sortBy != "" {
 			switch sortBy {
 			case "created", "createdAt":
-				orderBy = "createdAt"
+				val := api.PaginationOrderByCreatedat
+				orderByEnum = &val
 			case "updated", "updatedAt":
-				orderBy = "updatedAt"
+				val := api.PaginationOrderByUpdatedat
+				orderByEnum = &val
 			case "linear":
-				orderBy = ""
+				// Use nil for Linear's default sort
+				orderByEnum = nil
 			default:
 				output.Error(fmt.Sprintf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy), plaintext, jsonOut)
 				os.Exit(1)
 			}
 		}
 
-		includeArchived, _ := cmd.Flags().GetBool("include-archived")
+		// Convert limit to pointer
+		var limitPtr *int
+		if limit > 0 {
+			limitPtr = &limit
+		}
 
-		issues, err := client.IssueSearch(context.Background(), query, filter, limit, "", orderBy, includeArchived)
+		includeArchived, _ := cmd.Flags().GetBool("include-archived")
+		includeArchivedPtr := &includeArchived
+
+		resp, err := api.SearchIssues(context.Background(), client, query, filterTyped, limitPtr, nil, orderByEnum, includeArchivedPtr)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to search issues: %v", err), plaintext, jsonOut)
 			os.Exit(1)
 		}
 
-		emptyMsg := fmt.Sprintf("No matches found for %q", query)
-		renderIssueCollection(issues, plaintext, jsonOut, emptyMsg, "matches", "# Search Results")
+		// Check if empty
+		if len(resp.SearchIssues.Nodes) == 0 {
+			output.Info(fmt.Sprintf("No matches found for %q", query), plaintext, jsonOut)
+			return
+		}
+
+		// JSON output
+		if jsonOut {
+			output.JSON(resp.SearchIssues.Nodes)
+			return
+		}
+
+		// Plaintext output
+		if plaintext {
+			fmt.Println("# Search Results")
+			for _, node := range resp.SearchIssues.Nodes {
+				fmt.Printf("## %s\n", node.Title)
+				fmt.Printf("- **ID**: %s\n", node.Identifier)
+				if node.State != nil {
+					fmt.Printf("- **State**: %s\n", node.State.Name)
+				}
+				if node.Assignee != nil {
+					fmt.Printf("- **Assignee**: %s\n", node.Assignee.Name)
+				} else {
+					fmt.Printf("- **Assignee**: Unassigned\n")
+				}
+				if node.Team != nil {
+					fmt.Printf("- **Team**: %s\n", node.Team.Key)
+				}
+				fmt.Printf("- **Created**: %s\n", node.CreatedAt.Format("2006-01-02"))
+				fmt.Printf("- **URL**: %s\n", node.Url)
+				if node.Description != nil && *node.Description != "" {
+					fmt.Printf("- **Description**: %s\n", *node.Description)
+				}
+				fmt.Println()
+			}
+			fmt.Printf("\nTotal: %d search results\n", len(resp.SearchIssues.Nodes))
+			return
+		}
+
+		// Table output
+		headers := []string{"Title", "State", "Assignee", "Team", "Created", "URL"}
+		rows := make([][]string, len(resp.SearchIssues.Nodes))
+
+		for i, node := range resp.SearchIssues.Nodes {
+			assignee := "Unassigned"
+			if node.Assignee != nil {
+				assignee = node.Assignee.Name
+			}
+
+			team := ""
+			if node.Team != nil {
+				team = node.Team.Key
+			}
+
+			state := ""
+			if node.State != nil {
+				state = node.State.Name
+			}
+
+			rows[i] = []string{
+				truncateString(node.Title, 50),
+				state,
+				assignee,
+				team,
+				node.CreatedAt.Format("2006-01-02"),
+				node.Url,
+			}
+		}
+
+		tableData := output.TableData{
+			Headers: headers,
+			Rows:    rows,
+		}
+
+		output.Table(tableData, false, false)
+		fmt.Printf("\nTotal: %d search results\n", len(resp.SearchIssues.Nodes))
 	},
 }
 
