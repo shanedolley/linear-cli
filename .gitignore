@@ -48,3 +48,6 @@ dist/
 .env.test
 coverage.out
 coverage.html
+
+# Generated code from genqlient
+pkg/api/generated/generated.go
