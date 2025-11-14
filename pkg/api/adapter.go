@@ -845,3 +845,367 @@ func ptrFloat64ToFloat64(f *float64) float64 {
 	}
 	return *f
 }
+
+func convertHealthToString(h *ProjectUpdateHealthType) string {
+	if h == nil {
+		return ""
+	}
+	return string(*h)
+}
+
+// ========== Project Adapters ==========
+
+// GetProjectsNew wraps the generated ListProjects function
+func (c *Client) GetProjectsNew(ctx context.Context, filter map[string]interface{}, first int, after string, orderBy string) (*Projects, error) {
+	// Convert map filter to typed ProjectFilter
+	projectFilter, err := convertToProjectFilter(filter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert filter: %w", err)
+	}
+
+	// Convert orderBy string to PaginationOrderBy
+	orderByEnum := convertOrderBy(orderBy)
+
+	// Convert parameters to pointers for genqlient
+	var firstPtr *int
+	if first > 0 {
+		firstPtr = &first
+	}
+
+	var afterPtr *string
+	if after != "" {
+		afterPtr = &after
+	}
+
+	// Call generated function
+	resp, err := ListProjects(ctx, c, projectFilter, firstPtr, afterPtr, orderByEnum)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert generated response to legacy Projects type
+	return convertToLegacyProjects(resp), nil
+}
+
+// GetProjectNew wraps the generated GetProject function
+func (c *Client) GetProjectNew(ctx context.Context, id string) (*Project, error) {
+	// Call generated function
+	resp, err := GetProject(ctx, c, id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert generated response to legacy Project type
+	return convertToLegacyProject(resp), nil
+}
+
+// convertToProjectFilter converts a map filter to a typed ProjectFilter
+func convertToProjectFilter(filter map[string]interface{}) (*ProjectFilter, error) {
+	if filter == nil {
+		return nil, nil
+	}
+
+	projectFilter := &ProjectFilter{}
+
+	// Handle common filter fields
+	if team, ok := filter["team"].(map[string]interface{}); ok {
+		teamFilter := convertToTeamFilter(team)
+		if teamFilter != nil {
+			projectFilter.AccessibleTeams = &TeamCollectionFilter{
+				Some: teamFilter,
+			}
+		}
+	}
+
+	if state, ok := filter["state"].(map[string]interface{}); ok {
+		projectFilter.State = convertToProjectStateFilter(state)
+	}
+
+	if createdAt, ok := filter["createdAt"].(map[string]interface{}); ok {
+		projectFilter.CreatedAt = convertToDateComparator(createdAt)
+	}
+
+	if updatedAt, ok := filter["updatedAt"].(map[string]interface{}); ok {
+		projectFilter.UpdatedAt = convertToDateComparator(updatedAt)
+	}
+
+	return projectFilter, nil
+}
+
+// convertToProjectStateFilter converts a project state filter map to typed filter
+func convertToProjectStateFilter(filter map[string]interface{}) *StringComparator {
+	if filter == nil {
+		return nil
+	}
+
+	// Project state filter is just a StringComparator in Linear's API
+	return convertToStringComparator(filter)
+}
+
+// convertToLegacyProjects converts a ListProjectsResponse to legacy Projects type
+func convertToLegacyProjects(resp *ListProjectsResponse) *Projects {
+	if resp == nil || resp.Projects == nil {
+		return &Projects{
+			Nodes:    []Project{},
+			PageInfo: PageInfo{},
+		}
+	}
+
+	projects := make([]Project, len(resp.Projects.Nodes))
+	for i, node := range resp.Projects.Nodes {
+		projects[i] = convertProjectListFieldsToLegacy(&node.ProjectListFields)
+	}
+
+	endCursor := ""
+	if resp.Projects.PageInfo.EndCursor != nil {
+		endCursor = *resp.Projects.PageInfo.EndCursor
+	}
+
+	return &Projects{
+		Nodes: projects,
+		PageInfo: PageInfo{
+			HasNextPage: resp.Projects.PageInfo.HasNextPage,
+			EndCursor:   endCursor,
+		},
+	}
+}
+
+// convertProjectListFieldsToLegacy converts ProjectListFields to legacy Project
+func convertProjectListFieldsToLegacy(fields *ProjectListFields) Project {
+	project := Project{
+		ID:          fields.Id,
+		Name:        fields.Name,
+		Description: fields.Description,
+		State:       fields.State,
+		Progress:    fields.Progress,
+		StartDate:   fields.StartDate,
+		TargetDate:  fields.TargetDate,
+		URL:         fields.Url,
+		CreatedAt:   fields.CreatedAt,
+		UpdatedAt:   fields.UpdatedAt,
+	}
+
+	if fields.Lead != nil {
+		project.Lead = &User{
+			ID:    fields.Lead.Id,
+			Name:  fields.Lead.Name,
+			Email: fields.Lead.Email,
+		}
+	}
+
+	if fields.Teams != nil && len(fields.Teams.Nodes) > 0 {
+		teams := make([]Team, len(fields.Teams.Nodes))
+		for i, team := range fields.Teams.Nodes {
+			teams[i] = Team{
+				ID:   team.Id,
+				Key:  team.Key,
+				Name: team.Name,
+			}
+		}
+		project.Teams = &Teams{Nodes: teams}
+	}
+
+	return project
+}
+
+// convertToLegacyProject converts a GetProjectResponse to legacy Project type
+func convertToLegacyProject(resp *GetProjectResponse) *Project {
+	if resp == nil || resp.Project == nil {
+		return nil
+	}
+
+	fields := &resp.Project.ProjectDetailFields
+	project := Project{
+		ID:                  fields.Id,
+		Name:                fields.Name,
+		Description:         fields.Description,
+		State:               fields.State,
+		Progress:            fields.Progress,
+		StartDate:           fields.StartDate,
+		TargetDate:          fields.TargetDate,
+		URL:                 fields.Url,
+		Icon:                fields.Icon,
+		Color:               fields.Color,
+		CreatedAt:           fields.CreatedAt,
+		UpdatedAt:           fields.UpdatedAt,
+		CompletedAt:         fields.CompletedAt,
+		CanceledAt:          fields.CanceledAt,
+		ArchivedAt:          fields.ArchivedAt,
+		SlugId:              fields.SlugId,
+		Content:             ptrToString(fields.Content),
+		Health:              convertHealthToString(fields.Health),
+		Scope:               int(fields.Scope),
+		SlackNewIssue:       fields.SlackNewIssue,
+		SlackIssueComments:  fields.SlackIssueComments,
+		SlackIssueStatuses:  fields.SlackIssueStatuses,
+	}
+
+	if fields.Lead != nil {
+		project.Lead = &User{
+			ID:          fields.Lead.Id,
+			Name:        fields.Lead.Name,
+			Email:       fields.Lead.Email,
+			AvatarURL:   ptrToString(fields.Lead.AvatarUrl),
+			DisplayName: fields.Lead.DisplayName,
+			Active:      fields.Lead.Active,
+		}
+	}
+
+	if fields.Creator != nil {
+		project.Creator = &User{
+			ID:        fields.Creator.Id,
+			Name:      fields.Creator.Name,
+			Email:     fields.Creator.Email,
+			AvatarURL: ptrToString(fields.Creator.AvatarUrl),
+			Active:    fields.Creator.Active,
+		}
+	}
+
+	if fields.ConvertedFromIssue != nil {
+		project.ConvertedFromIssue = &Issue{
+			ID:         fields.ConvertedFromIssue.Id,
+			Identifier: fields.ConvertedFromIssue.Identifier,
+			Title:      fields.ConvertedFromIssue.Title,
+		}
+	}
+
+	if fields.LastAppliedTemplate != nil {
+		project.LastAppliedTemplate = &Template{
+			ID:          fields.LastAppliedTemplate.Id,
+			Name:        fields.LastAppliedTemplate.Name,
+			Description: ptrToString(fields.LastAppliedTemplate.Description),
+		}
+	}
+
+	if fields.Teams != nil && len(fields.Teams.Nodes) > 0 {
+		teams := make([]Team, len(fields.Teams.Nodes))
+		for i, team := range fields.Teams.Nodes {
+			teams[i] = Team{
+				ID:            team.Id,
+				Key:           team.Key,
+				Name:          team.Name,
+				Description:   ptrToString(team.Description),
+				Icon:          team.Icon,
+				Color:         ptrToString(team.Color),
+				CyclesEnabled: team.CyclesEnabled,
+			}
+		}
+		project.Teams = &Teams{Nodes: teams}
+	}
+
+	if fields.Members != nil && len(fields.Members.Nodes) > 0 {
+		users := make([]User, len(fields.Members.Nodes))
+		for i, member := range fields.Members.Nodes {
+			users[i] = User{
+				ID:          member.Id,
+				Name:        member.Name,
+				Email:       member.Email,
+				AvatarURL:   ptrToString(member.AvatarUrl),
+				DisplayName: member.DisplayName,
+				Active:      member.Active,
+				Admin:       member.Admin,
+			}
+		}
+		project.Members = &Users{Nodes: users}
+	}
+
+	if fields.Issues != nil && len(fields.Issues.Nodes) > 0 {
+		issues := make([]Issue, len(fields.Issues.Nodes))
+		for i, issue := range fields.Issues.Nodes {
+			issues[i] = Issue{
+				ID:          issue.Id,
+				Identifier:  issue.Identifier,
+				Number:      int(issue.Number),
+				Title:       issue.Title,
+				Description: ptrToString(issue.Description),
+				Priority:    int(issue.Priority),
+				Estimate:    issue.Estimate,
+				CreatedAt:   issue.CreatedAt,
+				UpdatedAt:   issue.UpdatedAt,
+				CompletedAt: issue.CompletedAt,
+			}
+
+			if issue.State != nil {
+				issues[i].State = &State{
+					Name:  issue.State.Name,
+					Type:  issue.State.Type,
+					Color: issue.State.Color,
+				}
+			}
+
+			if issue.Assignee != nil {
+				issues[i].Assignee = &User{
+					Name:  issue.Assignee.Name,
+					Email: issue.Assignee.Email,
+				}
+			}
+
+			if issue.Labels != nil && len(issue.Labels.Nodes) > 0 {
+				labels := make([]Label, len(issue.Labels.Nodes))
+				for j, label := range issue.Labels.Nodes {
+					labels[j] = Label{
+						Name:  label.Name,
+						Color: label.Color,
+					}
+				}
+				issues[i].Labels = &Labels{Nodes: labels}
+			}
+		}
+		project.Issues = &Issues{Nodes: issues}
+	}
+
+	if fields.ProjectUpdates != nil && len(fields.ProjectUpdates.Nodes) > 0 {
+		updates := make([]ProjectUpdate, len(fields.ProjectUpdates.Nodes))
+		for i, update := range fields.ProjectUpdates.Nodes {
+			updates[i] = ProjectUpdate{
+				ID:        update.Id,
+				Body:      update.Body,
+				Health:    string(update.Health),
+				CreatedAt: update.CreatedAt,
+				UpdatedAt: update.UpdatedAt,
+				EditedAt:  update.EditedAt,
+			}
+
+			if update.User != nil {
+				updates[i].User = &User{
+					Name:      update.User.Name,
+					Email:     update.User.Email,
+					AvatarURL: ptrToString(update.User.AvatarUrl),
+				}
+			}
+		}
+		project.ProjectUpdates = &ProjectUpdates{Nodes: updates}
+	}
+
+	if fields.Documents != nil && len(fields.Documents.Nodes) > 0 {
+		docs := make([]Document, len(fields.Documents.Nodes))
+		for i, doc := range fields.Documents.Nodes {
+			docs[i] = Document{
+				ID:        doc.Id,
+				Title:     doc.Title,
+				Content:   ptrToString(doc.Content),
+				Icon:      doc.Icon,
+				Color:     ptrToString(doc.Color),
+				CreatedAt: doc.CreatedAt,
+				UpdatedAt: doc.UpdatedAt,
+			}
+
+			if doc.Creator != nil {
+				docs[i].Creator = &User{
+					Name:  doc.Creator.Name,
+					Email: doc.Creator.Email,
+				}
+			}
+
+			if doc.UpdatedBy != nil {
+				docs[i].UpdatedBy = &User{
+					Name:  doc.UpdatedBy.Name,
+					Email: doc.UpdatedBy.Email,
+				}
+			}
+		}
+		project.Documents = &Documents{Nodes: docs}
+	}
+
+	return &project
+}

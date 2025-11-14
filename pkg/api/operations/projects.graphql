@@ -1,0 +1,184 @@
+# GraphQL operations for Project entity
+# These operations will replace hand-written queries in pkg/api/queries.go
+
+# Fragment for basic project fields used in list views
+fragment ProjectListFields on Project {
+  id
+  name
+  description
+  state
+  progress
+  startDate
+  targetDate
+  url
+  createdAt
+  updatedAt
+  lead {
+    id
+    name
+    email
+  }
+  teams {
+    nodes {
+      id
+      key
+      name
+    }
+  }
+}
+
+# Fragment for detailed project fields used in single project view
+fragment ProjectDetailFields on Project {
+  id
+  slugId
+  name
+  description
+  content
+  state
+  progress
+  health
+  scope
+  startDate
+  targetDate
+  url
+  icon
+  color
+  createdAt
+  updatedAt
+  completedAt
+  canceledAt
+  archivedAt
+  slackNewIssue
+  slackIssueComments
+  slackIssueStatuses
+  lead {
+    id
+    name
+    email
+    avatarUrl
+    displayName
+    active
+  }
+  creator {
+    id
+    name
+    email
+    avatarUrl
+    active
+  }
+  convertedFromIssue {
+    id
+    identifier
+    title
+  }
+  lastAppliedTemplate {
+    id
+    name
+    description
+  }
+  teams {
+    nodes {
+      id
+      key
+      name
+      description
+      icon
+      color
+      cyclesEnabled
+    }
+  }
+  members {
+    nodes {
+      id
+      name
+      email
+      avatarUrl
+      displayName
+      active
+      admin
+    }
+  }
+  issues(first: 50, orderBy: updatedAt) {
+    nodes {
+      id
+      identifier
+      number
+      title
+      description
+      priority
+      estimate
+      createdAt
+      updatedAt
+      completedAt
+      state {
+        name
+        type
+        color
+      }
+      assignee {
+        name
+        email
+      }
+      labels {
+        nodes {
+          name
+          color
+        }
+      }
+    }
+  }
+  projectUpdates(first: 10) {
+    nodes {
+      id
+      body
+      health
+      createdAt
+      updatedAt
+      editedAt
+      user {
+        name
+        email
+        avatarUrl
+      }
+    }
+  }
+  documents(first: 20) {
+    nodes {
+      id
+      title
+      content
+      icon
+      color
+      createdAt
+      updatedAt
+      creator {
+        name
+        email
+      }
+      updatedBy {
+        name
+        email
+      }
+    }
+  }
+}
+
+# Query: Get paginated list of projects with optional filtering
+query ListProjects($filter: ProjectFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
+  projects(filter: $filter, first: $first, after: $after, orderBy: $orderBy) {
+    nodes {
+      ...ProjectListFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+# Query: Get a single project by ID with all details
+query GetProject($id: String!) {
+  project(id: $id) {
+    ...ProjectDetailFields
+  }
+}

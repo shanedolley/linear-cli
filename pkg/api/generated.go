@@ -1246,6 +1246,270 @@ type GetIssueResponse struct {
 // GetIssue returns GetIssueResponse.Issue, and is useful for accessing the field via an interface.
 func (v *GetIssueResponse) GetIssue() *GetIssueIssue { return v.Issue }
 
+// GetProjectProject includes the requested fields of the GraphQL type Project.
+// The GraphQL type's documentation follows.
+//
+// A project.
+type GetProjectProject struct {
+	ProjectDetailFields `json:"-"`
+}
+
+// GetId returns GetProjectProject.Id, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetId() string { return v.ProjectDetailFields.Id }
+
+// GetSlugId returns GetProjectProject.SlugId, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetSlugId() string { return v.ProjectDetailFields.SlugId }
+
+// GetName returns GetProjectProject.Name, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetName() string { return v.ProjectDetailFields.Name }
+
+// GetDescription returns GetProjectProject.Description, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetDescription() string { return v.ProjectDetailFields.Description }
+
+// GetContent returns GetProjectProject.Content, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetContent() *string { return v.ProjectDetailFields.Content }
+
+// GetState returns GetProjectProject.State, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetState() string { return v.ProjectDetailFields.State }
+
+// GetProgress returns GetProjectProject.Progress, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetProgress() float64 { return v.ProjectDetailFields.Progress }
+
+// GetHealth returns GetProjectProject.Health, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetHealth() *ProjectUpdateHealthType { return v.ProjectDetailFields.Health }
+
+// GetScope returns GetProjectProject.Scope, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetScope() float64 { return v.ProjectDetailFields.Scope }
+
+// GetStartDate returns GetProjectProject.StartDate, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetStartDate() *string { return v.ProjectDetailFields.StartDate }
+
+// GetTargetDate returns GetProjectProject.TargetDate, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetTargetDate() *string { return v.ProjectDetailFields.TargetDate }
+
+// GetUrl returns GetProjectProject.Url, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetUrl() string { return v.ProjectDetailFields.Url }
+
+// GetIcon returns GetProjectProject.Icon, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetIcon() *string { return v.ProjectDetailFields.Icon }
+
+// GetColor returns GetProjectProject.Color, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetColor() string { return v.ProjectDetailFields.Color }
+
+// GetCreatedAt returns GetProjectProject.CreatedAt, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetCreatedAt() time.Time { return v.ProjectDetailFields.CreatedAt }
+
+// GetUpdatedAt returns GetProjectProject.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetUpdatedAt() time.Time { return v.ProjectDetailFields.UpdatedAt }
+
+// GetCompletedAt returns GetProjectProject.CompletedAt, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetCompletedAt() *time.Time { return v.ProjectDetailFields.CompletedAt }
+
+// GetCanceledAt returns GetProjectProject.CanceledAt, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetCanceledAt() *time.Time { return v.ProjectDetailFields.CanceledAt }
+
+// GetArchivedAt returns GetProjectProject.ArchivedAt, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetArchivedAt() *time.Time { return v.ProjectDetailFields.ArchivedAt }
+
+// GetSlackNewIssue returns GetProjectProject.SlackNewIssue, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetSlackNewIssue() bool { return v.ProjectDetailFields.SlackNewIssue }
+
+// GetSlackIssueComments returns GetProjectProject.SlackIssueComments, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetSlackIssueComments() bool {
+	return v.ProjectDetailFields.SlackIssueComments
+}
+
+// GetSlackIssueStatuses returns GetProjectProject.SlackIssueStatuses, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetSlackIssueStatuses() bool {
+	return v.ProjectDetailFields.SlackIssueStatuses
+}
+
+// GetLead returns GetProjectProject.Lead, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetLead() *ProjectDetailFieldsLeadUser { return v.ProjectDetailFields.Lead }
+
+// GetCreator returns GetProjectProject.Creator, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetCreator() *ProjectDetailFieldsCreatorUser {
+	return v.ProjectDetailFields.Creator
+}
+
+// GetConvertedFromIssue returns GetProjectProject.ConvertedFromIssue, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetConvertedFromIssue() *ProjectDetailFieldsConvertedFromIssue {
+	return v.ProjectDetailFields.ConvertedFromIssue
+}
+
+// GetLastAppliedTemplate returns GetProjectProject.LastAppliedTemplate, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetLastAppliedTemplate() *ProjectDetailFieldsLastAppliedTemplate {
+	return v.ProjectDetailFields.LastAppliedTemplate
+}
+
+// GetTeams returns GetProjectProject.Teams, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetTeams() *ProjectDetailFieldsTeamsTeamConnection {
+	return v.ProjectDetailFields.Teams
+}
+
+// GetMembers returns GetProjectProject.Members, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetMembers() *ProjectDetailFieldsMembersUserConnection {
+	return v.ProjectDetailFields.Members
+}
+
+// GetIssues returns GetProjectProject.Issues, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetIssues() *ProjectDetailFieldsIssuesIssueConnection {
+	return v.ProjectDetailFields.Issues
+}
+
+// GetProjectUpdates returns GetProjectProject.ProjectUpdates, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetProjectUpdates() *ProjectDetailFieldsProjectUpdatesProjectUpdateConnection {
+	return v.ProjectDetailFields.ProjectUpdates
+}
+
+// GetDocuments returns GetProjectProject.Documents, and is useful for accessing the field via an interface.
+func (v *GetProjectProject) GetDocuments() *ProjectDetailFieldsDocumentsDocumentConnection {
+	return v.ProjectDetailFields.Documents
+}
+
+func (v *GetProjectProject) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*GetProjectProject
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.GetProjectProject = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.ProjectDetailFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalGetProjectProject struct {
+	Id string `json:"id"`
+
+	SlugId string `json:"slugId"`
+
+	Name string `json:"name"`
+
+	Description string `json:"description"`
+
+	Content *string `json:"content"`
+
+	State string `json:"state"`
+
+	Progress float64 `json:"progress"`
+
+	Health *ProjectUpdateHealthType `json:"health"`
+
+	Scope float64 `json:"scope"`
+
+	StartDate *string `json:"startDate"`
+
+	TargetDate *string `json:"targetDate"`
+
+	Url string `json:"url"`
+
+	Icon *string `json:"icon"`
+
+	Color string `json:"color"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	CompletedAt *time.Time `json:"completedAt"`
+
+	CanceledAt *time.Time `json:"canceledAt"`
+
+	ArchivedAt *time.Time `json:"archivedAt"`
+
+	SlackNewIssue bool `json:"slackNewIssue"`
+
+	SlackIssueComments bool `json:"slackIssueComments"`
+
+	SlackIssueStatuses bool `json:"slackIssueStatuses"`
+
+	Lead *ProjectDetailFieldsLeadUser `json:"lead"`
+
+	Creator *ProjectDetailFieldsCreatorUser `json:"creator"`
+
+	ConvertedFromIssue *ProjectDetailFieldsConvertedFromIssue `json:"convertedFromIssue"`
+
+	LastAppliedTemplate *ProjectDetailFieldsLastAppliedTemplate `json:"lastAppliedTemplate"`
+
+	Teams *ProjectDetailFieldsTeamsTeamConnection `json:"teams"`
+
+	Members *ProjectDetailFieldsMembersUserConnection `json:"members"`
+
+	Issues *ProjectDetailFieldsIssuesIssueConnection `json:"issues"`
+
+	ProjectUpdates *ProjectDetailFieldsProjectUpdatesProjectUpdateConnection `json:"projectUpdates"`
+
+	Documents *ProjectDetailFieldsDocumentsDocumentConnection `json:"documents"`
+}
+
+func (v *GetProjectProject) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *GetProjectProject) __premarshalJSON() (*__premarshalGetProjectProject, error) {
+	var retval __premarshalGetProjectProject
+
+	retval.Id = v.ProjectDetailFields.Id
+	retval.SlugId = v.ProjectDetailFields.SlugId
+	retval.Name = v.ProjectDetailFields.Name
+	retval.Description = v.ProjectDetailFields.Description
+	retval.Content = v.ProjectDetailFields.Content
+	retval.State = v.ProjectDetailFields.State
+	retval.Progress = v.ProjectDetailFields.Progress
+	retval.Health = v.ProjectDetailFields.Health
+	retval.Scope = v.ProjectDetailFields.Scope
+	retval.StartDate = v.ProjectDetailFields.StartDate
+	retval.TargetDate = v.ProjectDetailFields.TargetDate
+	retval.Url = v.ProjectDetailFields.Url
+	retval.Icon = v.ProjectDetailFields.Icon
+	retval.Color = v.ProjectDetailFields.Color
+	retval.CreatedAt = v.ProjectDetailFields.CreatedAt
+	retval.UpdatedAt = v.ProjectDetailFields.UpdatedAt
+	retval.CompletedAt = v.ProjectDetailFields.CompletedAt
+	retval.CanceledAt = v.ProjectDetailFields.CanceledAt
+	retval.ArchivedAt = v.ProjectDetailFields.ArchivedAt
+	retval.SlackNewIssue = v.ProjectDetailFields.SlackNewIssue
+	retval.SlackIssueComments = v.ProjectDetailFields.SlackIssueComments
+	retval.SlackIssueStatuses = v.ProjectDetailFields.SlackIssueStatuses
+	retval.Lead = v.ProjectDetailFields.Lead
+	retval.Creator = v.ProjectDetailFields.Creator
+	retval.ConvertedFromIssue = v.ProjectDetailFields.ConvertedFromIssue
+	retval.LastAppliedTemplate = v.ProjectDetailFields.LastAppliedTemplate
+	retval.Teams = v.ProjectDetailFields.Teams
+	retval.Members = v.ProjectDetailFields.Members
+	retval.Issues = v.ProjectDetailFields.Issues
+	retval.ProjectUpdates = v.ProjectDetailFields.ProjectUpdates
+	retval.Documents = v.ProjectDetailFields.Documents
+	return &retval, nil
+}
+
+// GetProjectResponse is returned by GetProject on success.
+type GetProjectResponse struct {
+	// One specific project.
+	Project *GetProjectProject `json:"project"`
+}
+
+// GetProject returns GetProjectResponse.Project, and is useful for accessing the field via an interface.
+func (v *GetProjectResponse) GetProject() *GetProjectProject { return v.Project }
+
 // Comparator for identifiers.
 type IDComparator struct {
 	// Equals constraint.
@@ -4678,6 +4942,192 @@ type ListIssuesResponse struct {
 // GetIssues returns ListIssuesResponse.Issues, and is useful for accessing the field via an interface.
 func (v *ListIssuesResponse) GetIssues() *ListIssuesIssuesIssueConnection { return v.Issues }
 
+// ListProjectsProjectsProjectConnection includes the requested fields of the GraphQL type ProjectConnection.
+type ListProjectsProjectsProjectConnection struct {
+	Nodes    []*ListProjectsProjectsProjectConnectionNodesProject `json:"nodes"`
+	PageInfo *ListProjectsProjectsProjectConnectionPageInfo       `json:"pageInfo"`
+}
+
+// GetNodes returns ListProjectsProjectsProjectConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ListProjectsProjectsProjectConnection) GetNodes() []*ListProjectsProjectsProjectConnectionNodesProject {
+	return v.Nodes
+}
+
+// GetPageInfo returns ListProjectsProjectsProjectConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *ListProjectsProjectsProjectConnection) GetPageInfo() *ListProjectsProjectsProjectConnectionPageInfo {
+	return v.PageInfo
+}
+
+// ListProjectsProjectsProjectConnectionNodesProject includes the requested fields of the GraphQL type Project.
+// The GraphQL type's documentation follows.
+//
+// A project.
+type ListProjectsProjectsProjectConnectionNodesProject struct {
+	ProjectListFields `json:"-"`
+}
+
+// GetId returns ListProjectsProjectsProjectConnectionNodesProject.Id, and is useful for accessing the field via an interface.
+func (v *ListProjectsProjectsProjectConnectionNodesProject) GetId() string {
+	return v.ProjectListFields.Id
+}
+
+// GetName returns ListProjectsProjectsProjectConnectionNodesProject.Name, and is useful for accessing the field via an interface.
+func (v *ListProjectsProjectsProjectConnectionNodesProject) GetName() string {
+	return v.ProjectListFields.Name
+}
+
+// GetDescription returns ListProjectsProjectsProjectConnectionNodesProject.Description, and is useful for accessing the field via an interface.
+func (v *ListProjectsProjectsProjectConnectionNodesProject) GetDescription() string {
+	return v.ProjectListFields.Description
+}
+
+// GetState returns ListProjectsProjectsProjectConnectionNodesProject.State, and is useful for accessing the field via an interface.
+func (v *ListProjectsProjectsProjectConnectionNodesProject) GetState() string {
+	return v.ProjectListFields.State
+}
+
+// GetProgress returns ListProjectsProjectsProjectConnectionNodesProject.Progress, and is useful for accessing the field via an interface.
+func (v *ListProjectsProjectsProjectConnectionNodesProject) GetProgress() float64 {
+	return v.ProjectListFields.Progress
+}
+
+// GetStartDate returns ListProjectsProjectsProjectConnectionNodesProject.StartDate, and is useful for accessing the field via an interface.
+func (v *ListProjectsProjectsProjectConnectionNodesProject) GetStartDate() *string {
+	return v.ProjectListFields.StartDate
+}
+
+// GetTargetDate returns ListProjectsProjectsProjectConnectionNodesProject.TargetDate, and is useful for accessing the field via an interface.
+func (v *ListProjectsProjectsProjectConnectionNodesProject) GetTargetDate() *string {
+	return v.ProjectListFields.TargetDate
+}
+
+// GetUrl returns ListProjectsProjectsProjectConnectionNodesProject.Url, and is useful for accessing the field via an interface.
+func (v *ListProjectsProjectsProjectConnectionNodesProject) GetUrl() string {
+	return v.ProjectListFields.Url
+}
+
+// GetCreatedAt returns ListProjectsProjectsProjectConnectionNodesProject.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ListProjectsProjectsProjectConnectionNodesProject) GetCreatedAt() time.Time {
+	return v.ProjectListFields.CreatedAt
+}
+
+// GetUpdatedAt returns ListProjectsProjectsProjectConnectionNodesProject.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ListProjectsProjectsProjectConnectionNodesProject) GetUpdatedAt() time.Time {
+	return v.ProjectListFields.UpdatedAt
+}
+
+// GetLead returns ListProjectsProjectsProjectConnectionNodesProject.Lead, and is useful for accessing the field via an interface.
+func (v *ListProjectsProjectsProjectConnectionNodesProject) GetLead() *ProjectListFieldsLeadUser {
+	return v.ProjectListFields.Lead
+}
+
+// GetTeams returns ListProjectsProjectsProjectConnectionNodesProject.Teams, and is useful for accessing the field via an interface.
+func (v *ListProjectsProjectsProjectConnectionNodesProject) GetTeams() *ProjectListFieldsTeamsTeamConnection {
+	return v.ProjectListFields.Teams
+}
+
+func (v *ListProjectsProjectsProjectConnectionNodesProject) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ListProjectsProjectsProjectConnectionNodesProject
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ListProjectsProjectsProjectConnectionNodesProject = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.ProjectListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalListProjectsProjectsProjectConnectionNodesProject struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Description string `json:"description"`
+
+	State string `json:"state"`
+
+	Progress float64 `json:"progress"`
+
+	StartDate *string `json:"startDate"`
+
+	TargetDate *string `json:"targetDate"`
+
+	Url string `json:"url"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	Lead *ProjectListFieldsLeadUser `json:"lead"`
+
+	Teams *ProjectListFieldsTeamsTeamConnection `json:"teams"`
+}
+
+func (v *ListProjectsProjectsProjectConnectionNodesProject) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ListProjectsProjectsProjectConnectionNodesProject) __premarshalJSON() (*__premarshalListProjectsProjectsProjectConnectionNodesProject, error) {
+	var retval __premarshalListProjectsProjectsProjectConnectionNodesProject
+
+	retval.Id = v.ProjectListFields.Id
+	retval.Name = v.ProjectListFields.Name
+	retval.Description = v.ProjectListFields.Description
+	retval.State = v.ProjectListFields.State
+	retval.Progress = v.ProjectListFields.Progress
+	retval.StartDate = v.ProjectListFields.StartDate
+	retval.TargetDate = v.ProjectListFields.TargetDate
+	retval.Url = v.ProjectListFields.Url
+	retval.CreatedAt = v.ProjectListFields.CreatedAt
+	retval.UpdatedAt = v.ProjectListFields.UpdatedAt
+	retval.Lead = v.ProjectListFields.Lead
+	retval.Teams = v.ProjectListFields.Teams
+	return &retval, nil
+}
+
+// ListProjectsProjectsProjectConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+type ListProjectsProjectsProjectConnectionPageInfo struct {
+	// Indicates if there are more results when paginating forward.
+	HasNextPage bool `json:"hasNextPage"`
+	// Cursor representing the last result in the paginated results.
+	EndCursor *string `json:"endCursor"`
+}
+
+// GetHasNextPage returns ListProjectsProjectsProjectConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *ListProjectsProjectsProjectConnectionPageInfo) GetHasNextPage() bool { return v.HasNextPage }
+
+// GetEndCursor returns ListProjectsProjectsProjectConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *ListProjectsProjectsProjectConnectionPageInfo) GetEndCursor() *string { return v.EndCursor }
+
+// ListProjectsResponse is returned by ListProjects on success.
+type ListProjectsResponse struct {
+	// All projects.
+	Projects *ListProjectsProjectsProjectConnection `json:"projects"`
+}
+
+// GetProjects returns ListProjectsResponse.Projects, and is useful for accessing the field via an interface.
+func (v *ListProjectsResponse) GetProjects() *ListProjectsProjectsProjectConnection {
+	return v.Projects
+}
+
 // Comment filtering options.
 type NullableCommentFilter struct {
 	// Compound filters, all of which need to be matched by the comment.
@@ -6470,6 +6920,799 @@ func (v *ProjectCollectionFilter) GetTargetDate() *NullableDateComparator { retu
 // GetUpdatedAt returns ProjectCollectionFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *ProjectCollectionFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
 
+// Fragment for detailed project fields used in single project view
+type ProjectDetailFields struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The project's unique URL slug.
+	SlugId string `json:"slugId"`
+	// The project's name.
+	Name string `json:"name"`
+	// The project's description.
+	Description string `json:"description"`
+	// The project's content in markdown format.
+	Content *string `json:"content"`
+	// [DEPRECATED] The type of the state.
+	State string `json:"state"`
+	// The overall progress of the project. This is the (completed estimate points +
+	// 0.25 * in progress estimate points) / total estimate points.
+	Progress float64 `json:"progress"`
+	// The health of the project.
+	Health *ProjectUpdateHealthType `json:"health"`
+	// The overall scope (total estimate points) of the project.
+	Scope float64 `json:"scope"`
+	// The estimated start date of the project.
+	StartDate *string `json:"startDate"`
+	// The estimated completion date of the project.
+	TargetDate *string `json:"targetDate"`
+	// Project URL.
+	Url string `json:"url"`
+	// The icon of the project.
+	Icon *string `json:"icon"`
+	// The project's color.
+	Color string `json:"color"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+	// been updated after creation.
+	UpdatedAt time.Time `json:"updatedAt"`
+	// The time at which the project was moved into completed state.
+	CompletedAt *time.Time `json:"completedAt"`
+	// The time at which the project was moved into canceled state.
+	CanceledAt *time.Time `json:"canceledAt"`
+	// The time at which the entity was archived. Null if the entity has not been archived.
+	ArchivedAt *time.Time `json:"archivedAt"`
+	// Whether to send new issue notifications to Slack.
+	SlackNewIssue bool `json:"slackNewIssue"`
+	// Whether to send new issue comment notifications to Slack.
+	SlackIssueComments bool `json:"slackIssueComments"`
+	// Whether to send new issue status updates to Slack.
+	SlackIssueStatuses bool `json:"slackIssueStatuses"`
+	// The project lead.
+	Lead *ProjectDetailFieldsLeadUser `json:"lead"`
+	// The user who created the project.
+	Creator *ProjectDetailFieldsCreatorUser `json:"creator"`
+	// The project was created based on this issue.
+	ConvertedFromIssue *ProjectDetailFieldsConvertedFromIssue `json:"convertedFromIssue"`
+	// The last template that was applied to this project.
+	LastAppliedTemplate *ProjectDetailFieldsLastAppliedTemplate `json:"lastAppliedTemplate"`
+	// Teams associated with this project.
+	Teams *ProjectDetailFieldsTeamsTeamConnection `json:"teams"`
+	// Users that are members of the project.
+	Members *ProjectDetailFieldsMembersUserConnection `json:"members"`
+	// Issues associated with the project.
+	Issues *ProjectDetailFieldsIssuesIssueConnection `json:"issues"`
+	// Project updates associated with the project.
+	ProjectUpdates *ProjectDetailFieldsProjectUpdatesProjectUpdateConnection `json:"projectUpdates"`
+	// Documents associated with the project.
+	Documents *ProjectDetailFieldsDocumentsDocumentConnection `json:"documents"`
+}
+
+// GetId returns ProjectDetailFields.Id, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetId() string { return v.Id }
+
+// GetSlugId returns ProjectDetailFields.SlugId, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetSlugId() string { return v.SlugId }
+
+// GetName returns ProjectDetailFields.Name, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetName() string { return v.Name }
+
+// GetDescription returns ProjectDetailFields.Description, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetDescription() string { return v.Description }
+
+// GetContent returns ProjectDetailFields.Content, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetContent() *string { return v.Content }
+
+// GetState returns ProjectDetailFields.State, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetState() string { return v.State }
+
+// GetProgress returns ProjectDetailFields.Progress, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetProgress() float64 { return v.Progress }
+
+// GetHealth returns ProjectDetailFields.Health, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetHealth() *ProjectUpdateHealthType { return v.Health }
+
+// GetScope returns ProjectDetailFields.Scope, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetScope() float64 { return v.Scope }
+
+// GetStartDate returns ProjectDetailFields.StartDate, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetStartDate() *string { return v.StartDate }
+
+// GetTargetDate returns ProjectDetailFields.TargetDate, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetTargetDate() *string { return v.TargetDate }
+
+// GetUrl returns ProjectDetailFields.Url, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetUrl() string { return v.Url }
+
+// GetIcon returns ProjectDetailFields.Icon, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetIcon() *string { return v.Icon }
+
+// GetColor returns ProjectDetailFields.Color, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetColor() string { return v.Color }
+
+// GetCreatedAt returns ProjectDetailFields.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetCreatedAt() time.Time { return v.CreatedAt }
+
+// GetUpdatedAt returns ProjectDetailFields.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetUpdatedAt() time.Time { return v.UpdatedAt }
+
+// GetCompletedAt returns ProjectDetailFields.CompletedAt, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetCompletedAt() *time.Time { return v.CompletedAt }
+
+// GetCanceledAt returns ProjectDetailFields.CanceledAt, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetCanceledAt() *time.Time { return v.CanceledAt }
+
+// GetArchivedAt returns ProjectDetailFields.ArchivedAt, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetArchivedAt() *time.Time { return v.ArchivedAt }
+
+// GetSlackNewIssue returns ProjectDetailFields.SlackNewIssue, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetSlackNewIssue() bool { return v.SlackNewIssue }
+
+// GetSlackIssueComments returns ProjectDetailFields.SlackIssueComments, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetSlackIssueComments() bool { return v.SlackIssueComments }
+
+// GetSlackIssueStatuses returns ProjectDetailFields.SlackIssueStatuses, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetSlackIssueStatuses() bool { return v.SlackIssueStatuses }
+
+// GetLead returns ProjectDetailFields.Lead, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetLead() *ProjectDetailFieldsLeadUser { return v.Lead }
+
+// GetCreator returns ProjectDetailFields.Creator, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetCreator() *ProjectDetailFieldsCreatorUser { return v.Creator }
+
+// GetConvertedFromIssue returns ProjectDetailFields.ConvertedFromIssue, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetConvertedFromIssue() *ProjectDetailFieldsConvertedFromIssue {
+	return v.ConvertedFromIssue
+}
+
+// GetLastAppliedTemplate returns ProjectDetailFields.LastAppliedTemplate, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetLastAppliedTemplate() *ProjectDetailFieldsLastAppliedTemplate {
+	return v.LastAppliedTemplate
+}
+
+// GetTeams returns ProjectDetailFields.Teams, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetTeams() *ProjectDetailFieldsTeamsTeamConnection { return v.Teams }
+
+// GetMembers returns ProjectDetailFields.Members, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetMembers() *ProjectDetailFieldsMembersUserConnection {
+	return v.Members
+}
+
+// GetIssues returns ProjectDetailFields.Issues, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetIssues() *ProjectDetailFieldsIssuesIssueConnection { return v.Issues }
+
+// GetProjectUpdates returns ProjectDetailFields.ProjectUpdates, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetProjectUpdates() *ProjectDetailFieldsProjectUpdatesProjectUpdateConnection {
+	return v.ProjectUpdates
+}
+
+// GetDocuments returns ProjectDetailFields.Documents, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFields) GetDocuments() *ProjectDetailFieldsDocumentsDocumentConnection {
+	return v.Documents
+}
+
+// ProjectDetailFieldsConvertedFromIssue includes the requested fields of the GraphQL type Issue.
+// The GraphQL type's documentation follows.
+//
+// An issue.
+type ProjectDetailFieldsConvertedFromIssue struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// Issue's human readable identifier (e.g. ENG-123).
+	Identifier string `json:"identifier"`
+	// The issue's title.
+	Title string `json:"title"`
+}
+
+// GetId returns ProjectDetailFieldsConvertedFromIssue.Id, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsConvertedFromIssue) GetId() string { return v.Id }
+
+// GetIdentifier returns ProjectDetailFieldsConvertedFromIssue.Identifier, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsConvertedFromIssue) GetIdentifier() string { return v.Identifier }
+
+// GetTitle returns ProjectDetailFieldsConvertedFromIssue.Title, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsConvertedFromIssue) GetTitle() string { return v.Title }
+
+// ProjectDetailFieldsCreatorUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that has access to the the resources of an organization.
+type ProjectDetailFieldsCreatorUser struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The user's full name.
+	Name string `json:"name"`
+	// The user's email address.
+	Email string `json:"email"`
+	// An URL to the user's avatar image.
+	AvatarUrl *string `json:"avatarUrl"`
+	// Whether the user account is active or disabled (suspended).
+	Active bool `json:"active"`
+}
+
+// GetId returns ProjectDetailFieldsCreatorUser.Id, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsCreatorUser) GetId() string { return v.Id }
+
+// GetName returns ProjectDetailFieldsCreatorUser.Name, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsCreatorUser) GetName() string { return v.Name }
+
+// GetEmail returns ProjectDetailFieldsCreatorUser.Email, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsCreatorUser) GetEmail() string { return v.Email }
+
+// GetAvatarUrl returns ProjectDetailFieldsCreatorUser.AvatarUrl, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsCreatorUser) GetAvatarUrl() *string { return v.AvatarUrl }
+
+// GetActive returns ProjectDetailFieldsCreatorUser.Active, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsCreatorUser) GetActive() bool { return v.Active }
+
+// ProjectDetailFieldsDocumentsDocumentConnection includes the requested fields of the GraphQL type DocumentConnection.
+type ProjectDetailFieldsDocumentsDocumentConnection struct {
+	Nodes []*ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument `json:"nodes"`
+}
+
+// GetNodes returns ProjectDetailFieldsDocumentsDocumentConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsDocumentsDocumentConnection) GetNodes() []*ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument {
+	return v.Nodes
+}
+
+// ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument includes the requested fields of the GraphQL type Document.
+// The GraphQL type's documentation follows.
+//
+// A document that can be attached to different entities.
+type ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The document title.
+	Title string `json:"title"`
+	// The documents content in markdown format.
+	Content *string `json:"content"`
+	// The icon of the document.
+	Icon *string `json:"icon"`
+	// The color of the icon.
+	Color *string `json:"color"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+	// been updated after creation.
+	UpdatedAt time.Time `json:"updatedAt"`
+	// The user who created the document.
+	Creator *ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentCreatorUser `json:"creator"`
+	// The user who last updated the document.
+	UpdatedBy *ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentUpdatedByUser `json:"updatedBy"`
+}
+
+// GetId returns ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument.Id, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument) GetId() string { return v.Id }
+
+// GetTitle returns ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument.Title, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument) GetTitle() string {
+	return v.Title
+}
+
+// GetContent returns ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument.Content, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument) GetContent() *string {
+	return v.Content
+}
+
+// GetIcon returns ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument.Icon, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument) GetIcon() *string {
+	return v.Icon
+}
+
+// GetColor returns ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument.Color, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument) GetColor() *string {
+	return v.Color
+}
+
+// GetCreatedAt returns ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument) GetCreatedAt() time.Time {
+	return v.CreatedAt
+}
+
+// GetUpdatedAt returns ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument) GetUpdatedAt() time.Time {
+	return v.UpdatedAt
+}
+
+// GetCreator returns ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument.Creator, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument) GetCreator() *ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentCreatorUser {
+	return v.Creator
+}
+
+// GetUpdatedBy returns ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument.UpdatedBy, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument) GetUpdatedBy() *ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentUpdatedByUser {
+	return v.UpdatedBy
+}
+
+// ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentCreatorUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that has access to the the resources of an organization.
+type ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentCreatorUser struct {
+	// The user's full name.
+	Name string `json:"name"`
+	// The user's email address.
+	Email string `json:"email"`
+}
+
+// GetName returns ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentCreatorUser.Name, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentCreatorUser) GetName() string {
+	return v.Name
+}
+
+// GetEmail returns ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentCreatorUser.Email, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentCreatorUser) GetEmail() string {
+	return v.Email
+}
+
+// ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentUpdatedByUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that has access to the the resources of an organization.
+type ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentUpdatedByUser struct {
+	// The user's full name.
+	Name string `json:"name"`
+	// The user's email address.
+	Email string `json:"email"`
+}
+
+// GetName returns ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentUpdatedByUser.Name, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentUpdatedByUser) GetName() string {
+	return v.Name
+}
+
+// GetEmail returns ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentUpdatedByUser.Email, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentUpdatedByUser) GetEmail() string {
+	return v.Email
+}
+
+// ProjectDetailFieldsIssuesIssueConnection includes the requested fields of the GraphQL type IssueConnection.
+type ProjectDetailFieldsIssuesIssueConnection struct {
+	Nodes []*ProjectDetailFieldsIssuesIssueConnectionNodesIssue `json:"nodes"`
+}
+
+// GetNodes returns ProjectDetailFieldsIssuesIssueConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsIssuesIssueConnection) GetNodes() []*ProjectDetailFieldsIssuesIssueConnectionNodesIssue {
+	return v.Nodes
+}
+
+// ProjectDetailFieldsIssuesIssueConnectionNodesIssue includes the requested fields of the GraphQL type Issue.
+// The GraphQL type's documentation follows.
+//
+// An issue.
+type ProjectDetailFieldsIssuesIssueConnectionNodesIssue struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// Issue's human readable identifier (e.g. ENG-123).
+	Identifier string `json:"identifier"`
+	// The issue's unique number.
+	Number float64 `json:"number"`
+	// The issue's title.
+	Title string `json:"title"`
+	// The issue's description in markdown format.
+	Description *string `json:"description"`
+	// The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+	Priority float64 `json:"priority"`
+	// The estimate of the complexity of the issue..
+	Estimate *float64 `json:"estimate"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+	// been updated after creation.
+	UpdatedAt time.Time `json:"updatedAt"`
+	// The time at which the issue was moved into completed state.
+	CompletedAt *time.Time `json:"completedAt"`
+	// The workflow state that the issue is associated with.
+	State *ProjectDetailFieldsIssuesIssueConnectionNodesIssueStateWorkflowState `json:"state"`
+	// The user to whom the issue is assigned to.
+	Assignee *ProjectDetailFieldsIssuesIssueConnectionNodesIssueAssigneeUser `json:"assignee"`
+	// Labels associated with this issue.
+	Labels *ProjectDetailFieldsIssuesIssueConnectionNodesIssueLabelsIssueLabelConnection `json:"labels"`
+}
+
+// GetId returns ProjectDetailFieldsIssuesIssueConnectionNodesIssue.Id, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssue) GetId() string { return v.Id }
+
+// GetIdentifier returns ProjectDetailFieldsIssuesIssueConnectionNodesIssue.Identifier, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssue) GetIdentifier() string {
+	return v.Identifier
+}
+
+// GetNumber returns ProjectDetailFieldsIssuesIssueConnectionNodesIssue.Number, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssue) GetNumber() float64 { return v.Number }
+
+// GetTitle returns ProjectDetailFieldsIssuesIssueConnectionNodesIssue.Title, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssue) GetTitle() string { return v.Title }
+
+// GetDescription returns ProjectDetailFieldsIssuesIssueConnectionNodesIssue.Description, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssue) GetDescription() *string {
+	return v.Description
+}
+
+// GetPriority returns ProjectDetailFieldsIssuesIssueConnectionNodesIssue.Priority, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssue) GetPriority() float64 { return v.Priority }
+
+// GetEstimate returns ProjectDetailFieldsIssuesIssueConnectionNodesIssue.Estimate, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssue) GetEstimate() *float64 {
+	return v.Estimate
+}
+
+// GetCreatedAt returns ProjectDetailFieldsIssuesIssueConnectionNodesIssue.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssue) GetCreatedAt() time.Time {
+	return v.CreatedAt
+}
+
+// GetUpdatedAt returns ProjectDetailFieldsIssuesIssueConnectionNodesIssue.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssue) GetUpdatedAt() time.Time {
+	return v.UpdatedAt
+}
+
+// GetCompletedAt returns ProjectDetailFieldsIssuesIssueConnectionNodesIssue.CompletedAt, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssue) GetCompletedAt() *time.Time {
+	return v.CompletedAt
+}
+
+// GetState returns ProjectDetailFieldsIssuesIssueConnectionNodesIssue.State, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssue) GetState() *ProjectDetailFieldsIssuesIssueConnectionNodesIssueStateWorkflowState {
+	return v.State
+}
+
+// GetAssignee returns ProjectDetailFieldsIssuesIssueConnectionNodesIssue.Assignee, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssue) GetAssignee() *ProjectDetailFieldsIssuesIssueConnectionNodesIssueAssigneeUser {
+	return v.Assignee
+}
+
+// GetLabels returns ProjectDetailFieldsIssuesIssueConnectionNodesIssue.Labels, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssue) GetLabels() *ProjectDetailFieldsIssuesIssueConnectionNodesIssueLabelsIssueLabelConnection {
+	return v.Labels
+}
+
+// ProjectDetailFieldsIssuesIssueConnectionNodesIssueAssigneeUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that has access to the the resources of an organization.
+type ProjectDetailFieldsIssuesIssueConnectionNodesIssueAssigneeUser struct {
+	// The user's full name.
+	Name string `json:"name"`
+	// The user's email address.
+	Email string `json:"email"`
+}
+
+// GetName returns ProjectDetailFieldsIssuesIssueConnectionNodesIssueAssigneeUser.Name, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssueAssigneeUser) GetName() string {
+	return v.Name
+}
+
+// GetEmail returns ProjectDetailFieldsIssuesIssueConnectionNodesIssueAssigneeUser.Email, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssueAssigneeUser) GetEmail() string {
+	return v.Email
+}
+
+// ProjectDetailFieldsIssuesIssueConnectionNodesIssueLabelsIssueLabelConnection includes the requested fields of the GraphQL type IssueLabelConnection.
+type ProjectDetailFieldsIssuesIssueConnectionNodesIssueLabelsIssueLabelConnection struct {
+	Nodes []*ProjectDetailFieldsIssuesIssueConnectionNodesIssueLabelsIssueLabelConnectionNodesIssueLabel `json:"nodes"`
+}
+
+// GetNodes returns ProjectDetailFieldsIssuesIssueConnectionNodesIssueLabelsIssueLabelConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssueLabelsIssueLabelConnection) GetNodes() []*ProjectDetailFieldsIssuesIssueConnectionNodesIssueLabelsIssueLabelConnectionNodesIssueLabel {
+	return v.Nodes
+}
+
+// ProjectDetailFieldsIssuesIssueConnectionNodesIssueLabelsIssueLabelConnectionNodesIssueLabel includes the requested fields of the GraphQL type IssueLabel.
+// The GraphQL type's documentation follows.
+//
+// Labels that can be associated with issues.
+type ProjectDetailFieldsIssuesIssueConnectionNodesIssueLabelsIssueLabelConnectionNodesIssueLabel struct {
+	// The label's name.
+	Name string `json:"name"`
+	// The label's color as a HEX string.
+	Color string `json:"color"`
+}
+
+// GetName returns ProjectDetailFieldsIssuesIssueConnectionNodesIssueLabelsIssueLabelConnectionNodesIssueLabel.Name, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssueLabelsIssueLabelConnectionNodesIssueLabel) GetName() string {
+	return v.Name
+}
+
+// GetColor returns ProjectDetailFieldsIssuesIssueConnectionNodesIssueLabelsIssueLabelConnectionNodesIssueLabel.Color, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssueLabelsIssueLabelConnectionNodesIssueLabel) GetColor() string {
+	return v.Color
+}
+
+// ProjectDetailFieldsIssuesIssueConnectionNodesIssueStateWorkflowState includes the requested fields of the GraphQL type WorkflowState.
+// The GraphQL type's documentation follows.
+//
+// A state in a team workflow.
+type ProjectDetailFieldsIssuesIssueConnectionNodesIssueStateWorkflowState struct {
+	// The state's name.
+	Name string `json:"name"`
+	// The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled".
+	Type string `json:"type"`
+	// The state's UI color as a HEX string.
+	Color string `json:"color"`
+}
+
+// GetName returns ProjectDetailFieldsIssuesIssueConnectionNodesIssueStateWorkflowState.Name, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssueStateWorkflowState) GetName() string {
+	return v.Name
+}
+
+// GetType returns ProjectDetailFieldsIssuesIssueConnectionNodesIssueStateWorkflowState.Type, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssueStateWorkflowState) GetType() string {
+	return v.Type
+}
+
+// GetColor returns ProjectDetailFieldsIssuesIssueConnectionNodesIssueStateWorkflowState.Color, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssueStateWorkflowState) GetColor() string {
+	return v.Color
+}
+
+// ProjectDetailFieldsLastAppliedTemplate includes the requested fields of the GraphQL type Template.
+// The GraphQL type's documentation follows.
+//
+// A template object used for creating entities faster.
+type ProjectDetailFieldsLastAppliedTemplate struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the template.
+	Name string `json:"name"`
+	// Template description.
+	Description *string `json:"description"`
+}
+
+// GetId returns ProjectDetailFieldsLastAppliedTemplate.Id, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsLastAppliedTemplate) GetId() string { return v.Id }
+
+// GetName returns ProjectDetailFieldsLastAppliedTemplate.Name, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsLastAppliedTemplate) GetName() string { return v.Name }
+
+// GetDescription returns ProjectDetailFieldsLastAppliedTemplate.Description, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsLastAppliedTemplate) GetDescription() *string { return v.Description }
+
+// ProjectDetailFieldsLeadUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that has access to the the resources of an organization.
+type ProjectDetailFieldsLeadUser struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The user's full name.
+	Name string `json:"name"`
+	// The user's email address.
+	Email string `json:"email"`
+	// An URL to the user's avatar image.
+	AvatarUrl *string `json:"avatarUrl"`
+	// The user's display (nick) name. Unique within each organization.
+	DisplayName string `json:"displayName"`
+	// Whether the user account is active or disabled (suspended).
+	Active bool `json:"active"`
+}
+
+// GetId returns ProjectDetailFieldsLeadUser.Id, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsLeadUser) GetId() string { return v.Id }
+
+// GetName returns ProjectDetailFieldsLeadUser.Name, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsLeadUser) GetName() string { return v.Name }
+
+// GetEmail returns ProjectDetailFieldsLeadUser.Email, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsLeadUser) GetEmail() string { return v.Email }
+
+// GetAvatarUrl returns ProjectDetailFieldsLeadUser.AvatarUrl, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsLeadUser) GetAvatarUrl() *string { return v.AvatarUrl }
+
+// GetDisplayName returns ProjectDetailFieldsLeadUser.DisplayName, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsLeadUser) GetDisplayName() string { return v.DisplayName }
+
+// GetActive returns ProjectDetailFieldsLeadUser.Active, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsLeadUser) GetActive() bool { return v.Active }
+
+// ProjectDetailFieldsMembersUserConnection includes the requested fields of the GraphQL type UserConnection.
+type ProjectDetailFieldsMembersUserConnection struct {
+	Nodes []*ProjectDetailFieldsMembersUserConnectionNodesUser `json:"nodes"`
+}
+
+// GetNodes returns ProjectDetailFieldsMembersUserConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsMembersUserConnection) GetNodes() []*ProjectDetailFieldsMembersUserConnectionNodesUser {
+	return v.Nodes
+}
+
+// ProjectDetailFieldsMembersUserConnectionNodesUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that has access to the the resources of an organization.
+type ProjectDetailFieldsMembersUserConnectionNodesUser struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The user's full name.
+	Name string `json:"name"`
+	// The user's email address.
+	Email string `json:"email"`
+	// An URL to the user's avatar image.
+	AvatarUrl *string `json:"avatarUrl"`
+	// The user's display (nick) name. Unique within each organization.
+	DisplayName string `json:"displayName"`
+	// Whether the user account is active or disabled (suspended).
+	Active bool `json:"active"`
+	// Whether the user is an organization administrator.
+	Admin bool `json:"admin"`
+}
+
+// GetId returns ProjectDetailFieldsMembersUserConnectionNodesUser.Id, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsMembersUserConnectionNodesUser) GetId() string { return v.Id }
+
+// GetName returns ProjectDetailFieldsMembersUserConnectionNodesUser.Name, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsMembersUserConnectionNodesUser) GetName() string { return v.Name }
+
+// GetEmail returns ProjectDetailFieldsMembersUserConnectionNodesUser.Email, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsMembersUserConnectionNodesUser) GetEmail() string { return v.Email }
+
+// GetAvatarUrl returns ProjectDetailFieldsMembersUserConnectionNodesUser.AvatarUrl, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsMembersUserConnectionNodesUser) GetAvatarUrl() *string {
+	return v.AvatarUrl
+}
+
+// GetDisplayName returns ProjectDetailFieldsMembersUserConnectionNodesUser.DisplayName, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsMembersUserConnectionNodesUser) GetDisplayName() string {
+	return v.DisplayName
+}
+
+// GetActive returns ProjectDetailFieldsMembersUserConnectionNodesUser.Active, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsMembersUserConnectionNodesUser) GetActive() bool { return v.Active }
+
+// GetAdmin returns ProjectDetailFieldsMembersUserConnectionNodesUser.Admin, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsMembersUserConnectionNodesUser) GetAdmin() bool { return v.Admin }
+
+// ProjectDetailFieldsProjectUpdatesProjectUpdateConnection includes the requested fields of the GraphQL type ProjectUpdateConnection.
+type ProjectDetailFieldsProjectUpdatesProjectUpdateConnection struct {
+	Nodes []*ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdate `json:"nodes"`
+}
+
+// GetNodes returns ProjectDetailFieldsProjectUpdatesProjectUpdateConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsProjectUpdatesProjectUpdateConnection) GetNodes() []*ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdate {
+	return v.Nodes
+}
+
+// ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdate includes the requested fields of the GraphQL type ProjectUpdate.
+// The GraphQL type's documentation follows.
+//
+// An update associated with a project.
+type ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdate struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The update content in markdown format.
+	Body string `json:"body"`
+	// The health of the project at the time of the update.
+	Health ProjectUpdateHealthType `json:"health"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+	// been updated after creation.
+	UpdatedAt time.Time `json:"updatedAt"`
+	// The time the update was edited.
+	EditedAt *time.Time `json:"editedAt"`
+	// The user who wrote the update.
+	User *ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdateUser `json:"user"`
+}
+
+// GetId returns ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdate.Id, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdate) GetId() string {
+	return v.Id
+}
+
+// GetBody returns ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdate.Body, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdate) GetBody() string {
+	return v.Body
+}
+
+// GetHealth returns ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdate.Health, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdate) GetHealth() ProjectUpdateHealthType {
+	return v.Health
+}
+
+// GetCreatedAt returns ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdate.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdate) GetCreatedAt() time.Time {
+	return v.CreatedAt
+}
+
+// GetUpdatedAt returns ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdate.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdate) GetUpdatedAt() time.Time {
+	return v.UpdatedAt
+}
+
+// GetEditedAt returns ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdate.EditedAt, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdate) GetEditedAt() *time.Time {
+	return v.EditedAt
+}
+
+// GetUser returns ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdate.User, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdate) GetUser() *ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdateUser {
+	return v.User
+}
+
+// ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdateUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that has access to the the resources of an organization.
+type ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdateUser struct {
+	// The user's full name.
+	Name string `json:"name"`
+	// The user's email address.
+	Email string `json:"email"`
+	// An URL to the user's avatar image.
+	AvatarUrl *string `json:"avatarUrl"`
+}
+
+// GetName returns ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdateUser.Name, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdateUser) GetName() string {
+	return v.Name
+}
+
+// GetEmail returns ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdateUser.Email, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdateUser) GetEmail() string {
+	return v.Email
+}
+
+// GetAvatarUrl returns ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdateUser.AvatarUrl, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdateUser) GetAvatarUrl() *string {
+	return v.AvatarUrl
+}
+
+// ProjectDetailFieldsTeamsTeamConnection includes the requested fields of the GraphQL type TeamConnection.
+type ProjectDetailFieldsTeamsTeamConnection struct {
+	Nodes []*ProjectDetailFieldsTeamsTeamConnectionNodesTeam `json:"nodes"`
+}
+
+// GetNodes returns ProjectDetailFieldsTeamsTeamConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsTeamsTeamConnection) GetNodes() []*ProjectDetailFieldsTeamsTeamConnectionNodesTeam {
+	return v.Nodes
+}
+
+// ProjectDetailFieldsTeamsTeamConnectionNodesTeam includes the requested fields of the GraphQL type Team.
+// The GraphQL type's documentation follows.
+//
+// An organizational unit that contains issues.
+type ProjectDetailFieldsTeamsTeamConnectionNodesTeam struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The team's unique key. The key is used in URLs.
+	Key string `json:"key"`
+	// The team's name.
+	Name string `json:"name"`
+	// The team's description.
+	Description *string `json:"description"`
+	// The icon of the team.
+	Icon *string `json:"icon"`
+	// The team's color.
+	Color *string `json:"color"`
+	// Whether the team uses cycles.
+	CyclesEnabled bool `json:"cyclesEnabled"`
+}
+
+// GetId returns ProjectDetailFieldsTeamsTeamConnectionNodesTeam.Id, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsTeamsTeamConnectionNodesTeam) GetId() string { return v.Id }
+
+// GetKey returns ProjectDetailFieldsTeamsTeamConnectionNodesTeam.Key, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsTeamsTeamConnectionNodesTeam) GetKey() string { return v.Key }
+
+// GetName returns ProjectDetailFieldsTeamsTeamConnectionNodesTeam.Name, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsTeamsTeamConnectionNodesTeam) GetName() string { return v.Name }
+
+// GetDescription returns ProjectDetailFieldsTeamsTeamConnectionNodesTeam.Description, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsTeamsTeamConnectionNodesTeam) GetDescription() *string {
+	return v.Description
+}
+
+// GetIcon returns ProjectDetailFieldsTeamsTeamConnectionNodesTeam.Icon, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsTeamsTeamConnectionNodesTeam) GetIcon() *string { return v.Icon }
+
+// GetColor returns ProjectDetailFieldsTeamsTeamConnectionNodesTeam.Color, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsTeamsTeamConnectionNodesTeam) GetColor() *string { return v.Color }
+
+// GetCyclesEnabled returns ProjectDetailFieldsTeamsTeamConnectionNodesTeam.CyclesEnabled, and is useful for accessing the field via an interface.
+func (v *ProjectDetailFieldsTeamsTeamConnectionNodesTeam) GetCyclesEnabled() bool {
+	return v.CyclesEnabled
+}
+
 // Project filtering options.
 type ProjectFilter struct {
 	// Filters that the project's team must satisfy.
@@ -6818,6 +8061,126 @@ func (v *ProjectLabelFilter) GetParent() *ProjectLabelFilter { return v.Parent }
 
 // GetUpdatedAt returns ProjectLabelFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *ProjectLabelFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
+// Fragment for basic project fields used in list views
+type ProjectListFields struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The project's name.
+	Name string `json:"name"`
+	// The project's description.
+	Description string `json:"description"`
+	// [DEPRECATED] The type of the state.
+	State string `json:"state"`
+	// The overall progress of the project. This is the (completed estimate points +
+	// 0.25 * in progress estimate points) / total estimate points.
+	Progress float64 `json:"progress"`
+	// The estimated start date of the project.
+	StartDate *string `json:"startDate"`
+	// The estimated completion date of the project.
+	TargetDate *string `json:"targetDate"`
+	// Project URL.
+	Url string `json:"url"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+	// been updated after creation.
+	UpdatedAt time.Time `json:"updatedAt"`
+	// The project lead.
+	Lead *ProjectListFieldsLeadUser `json:"lead"`
+	// Teams associated with this project.
+	Teams *ProjectListFieldsTeamsTeamConnection `json:"teams"`
+}
+
+// GetId returns ProjectListFields.Id, and is useful for accessing the field via an interface.
+func (v *ProjectListFields) GetId() string { return v.Id }
+
+// GetName returns ProjectListFields.Name, and is useful for accessing the field via an interface.
+func (v *ProjectListFields) GetName() string { return v.Name }
+
+// GetDescription returns ProjectListFields.Description, and is useful for accessing the field via an interface.
+func (v *ProjectListFields) GetDescription() string { return v.Description }
+
+// GetState returns ProjectListFields.State, and is useful for accessing the field via an interface.
+func (v *ProjectListFields) GetState() string { return v.State }
+
+// GetProgress returns ProjectListFields.Progress, and is useful for accessing the field via an interface.
+func (v *ProjectListFields) GetProgress() float64 { return v.Progress }
+
+// GetStartDate returns ProjectListFields.StartDate, and is useful for accessing the field via an interface.
+func (v *ProjectListFields) GetStartDate() *string { return v.StartDate }
+
+// GetTargetDate returns ProjectListFields.TargetDate, and is useful for accessing the field via an interface.
+func (v *ProjectListFields) GetTargetDate() *string { return v.TargetDate }
+
+// GetUrl returns ProjectListFields.Url, and is useful for accessing the field via an interface.
+func (v *ProjectListFields) GetUrl() string { return v.Url }
+
+// GetCreatedAt returns ProjectListFields.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ProjectListFields) GetCreatedAt() time.Time { return v.CreatedAt }
+
+// GetUpdatedAt returns ProjectListFields.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ProjectListFields) GetUpdatedAt() time.Time { return v.UpdatedAt }
+
+// GetLead returns ProjectListFields.Lead, and is useful for accessing the field via an interface.
+func (v *ProjectListFields) GetLead() *ProjectListFieldsLeadUser { return v.Lead }
+
+// GetTeams returns ProjectListFields.Teams, and is useful for accessing the field via an interface.
+func (v *ProjectListFields) GetTeams() *ProjectListFieldsTeamsTeamConnection { return v.Teams }
+
+// ProjectListFieldsLeadUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that has access to the the resources of an organization.
+type ProjectListFieldsLeadUser struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The user's full name.
+	Name string `json:"name"`
+	// The user's email address.
+	Email string `json:"email"`
+}
+
+// GetId returns ProjectListFieldsLeadUser.Id, and is useful for accessing the field via an interface.
+func (v *ProjectListFieldsLeadUser) GetId() string { return v.Id }
+
+// GetName returns ProjectListFieldsLeadUser.Name, and is useful for accessing the field via an interface.
+func (v *ProjectListFieldsLeadUser) GetName() string { return v.Name }
+
+// GetEmail returns ProjectListFieldsLeadUser.Email, and is useful for accessing the field via an interface.
+func (v *ProjectListFieldsLeadUser) GetEmail() string { return v.Email }
+
+// ProjectListFieldsTeamsTeamConnection includes the requested fields of the GraphQL type TeamConnection.
+type ProjectListFieldsTeamsTeamConnection struct {
+	Nodes []*ProjectListFieldsTeamsTeamConnectionNodesTeam `json:"nodes"`
+}
+
+// GetNodes returns ProjectListFieldsTeamsTeamConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ProjectListFieldsTeamsTeamConnection) GetNodes() []*ProjectListFieldsTeamsTeamConnectionNodesTeam {
+	return v.Nodes
+}
+
+// ProjectListFieldsTeamsTeamConnectionNodesTeam includes the requested fields of the GraphQL type Team.
+// The GraphQL type's documentation follows.
+//
+// An organizational unit that contains issues.
+type ProjectListFieldsTeamsTeamConnectionNodesTeam struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The team's unique key. The key is used in URLs.
+	Key string `json:"key"`
+	// The team's name.
+	Name string `json:"name"`
+}
+
+// GetId returns ProjectListFieldsTeamsTeamConnectionNodesTeam.Id, and is useful for accessing the field via an interface.
+func (v *ProjectListFieldsTeamsTeamConnectionNodesTeam) GetId() string { return v.Id }
+
+// GetKey returns ProjectListFieldsTeamsTeamConnectionNodesTeam.Key, and is useful for accessing the field via an interface.
+func (v *ProjectListFieldsTeamsTeamConnectionNodesTeam) GetKey() string { return v.Key }
+
+// GetName returns ProjectListFieldsTeamsTeamConnectionNodesTeam.Name, and is useful for accessing the field via an interface.
+func (v *ProjectListFieldsTeamsTeamConnectionNodesTeam) GetName() string { return v.Name }
 
 // Milestone collection filtering options.
 type ProjectMilestoneCollectionFilter struct {
@@ -8516,6 +9879,14 @@ type __GetIssueInput struct {
 // GetId returns __GetIssueInput.Id, and is useful for accessing the field via an interface.
 func (v *__GetIssueInput) GetId() string { return v.Id }
 
+// __GetProjectInput is used internally by genqlient
+type __GetProjectInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __GetProjectInput.Id, and is useful for accessing the field via an interface.
+func (v *__GetProjectInput) GetId() string { return v.Id }
+
 // __ListIssuesInput is used internally by genqlient
 type __ListIssuesInput struct {
 	Filter  *IssueFilter       `json:"filter,omitempty"`
@@ -8535,6 +9906,26 @@ func (v *__ListIssuesInput) GetAfter() *string { return v.After }
 
 // GetOrderBy returns __ListIssuesInput.OrderBy, and is useful for accessing the field via an interface.
 func (v *__ListIssuesInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy }
+
+// __ListProjectsInput is used internally by genqlient
+type __ListProjectsInput struct {
+	Filter  *ProjectFilter     `json:"filter,omitempty"`
+	First   *int               `json:"first"`
+	After   *string            `json:"after"`
+	OrderBy *PaginationOrderBy `json:"orderBy"`
+}
+
+// GetFilter returns __ListProjectsInput.Filter, and is useful for accessing the field via an interface.
+func (v *__ListProjectsInput) GetFilter() *ProjectFilter { return v.Filter }
+
+// GetFirst returns __ListProjectsInput.First, and is useful for accessing the field via an interface.
+func (v *__ListProjectsInput) GetFirst() *int { return v.First }
+
+// GetAfter returns __ListProjectsInput.After, and is useful for accessing the field via an interface.
+func (v *__ListProjectsInput) GetAfter() *string { return v.After }
+
+// GetOrderBy returns __ListProjectsInput.OrderBy, and is useful for accessing the field via an interface.
+func (v *__ListProjectsInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy }
 
 // __SearchIssuesInput is used internally by genqlient
 type __SearchIssuesInput struct {
@@ -8929,6 +10320,175 @@ func GetIssue(
 	return data_, err_
 }
 
+// The query executed by GetProject.
+const GetProject_Operation = `
+query GetProject ($id: String!) {
+	project(id: $id) {
+		... ProjectDetailFields
+	}
+}
+fragment ProjectDetailFields on Project {
+	id
+	slugId
+	name
+	description
+	content
+	state
+	progress
+	health
+	scope
+	startDate
+	targetDate
+	url
+	icon
+	color
+	createdAt
+	updatedAt
+	completedAt
+	canceledAt
+	archivedAt
+	slackNewIssue
+	slackIssueComments
+	slackIssueStatuses
+	lead {
+		id
+		name
+		email
+		avatarUrl
+		displayName
+		active
+	}
+	creator {
+		id
+		name
+		email
+		avatarUrl
+		active
+	}
+	convertedFromIssue {
+		id
+		identifier
+		title
+	}
+	lastAppliedTemplate {
+		id
+		name
+		description
+	}
+	teams {
+		nodes {
+			id
+			key
+			name
+			description
+			icon
+			color
+			cyclesEnabled
+		}
+	}
+	members {
+		nodes {
+			id
+			name
+			email
+			avatarUrl
+			displayName
+			active
+			admin
+		}
+	}
+	issues(first: 50, orderBy: updatedAt) {
+		nodes {
+			id
+			identifier
+			number
+			title
+			description
+			priority
+			estimate
+			createdAt
+			updatedAt
+			completedAt
+			state {
+				name
+				type
+				color
+			}
+			assignee {
+				name
+				email
+			}
+			labels {
+				nodes {
+					name
+					color
+				}
+			}
+		}
+	}
+	projectUpdates(first: 10) {
+		nodes {
+			id
+			body
+			health
+			createdAt
+			updatedAt
+			editedAt
+			user {
+				name
+				email
+				avatarUrl
+			}
+		}
+	}
+	documents(first: 20) {
+		nodes {
+			id
+			title
+			content
+			icon
+			color
+			createdAt
+			updatedAt
+			creator {
+				name
+				email
+			}
+			updatedBy {
+				name
+				email
+			}
+		}
+	}
+}
+`
+
+// Query: Get a single project by ID with all details
+func GetProject(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *GetProjectResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetProject",
+		Query:  GetProject_Operation,
+		Variables: &__GetProjectInput{
+			Id: id,
+		},
+	}
+
+	data_ = &GetProjectResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The query executed by ListIssues.
 const ListIssues_Operation = `
 query ListIssues ($filter: IssueFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
@@ -9000,6 +10560,77 @@ func ListIssues(
 	}
 
 	data_ = &ListIssuesResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by ListProjects.
+const ListProjects_Operation = `
+query ListProjects ($filter: ProjectFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
+	projects(filter: $filter, first: $first, after: $after, orderBy: $orderBy) {
+		nodes {
+			... ProjectListFields
+		}
+		pageInfo {
+			hasNextPage
+			endCursor
+		}
+	}
+}
+fragment ProjectListFields on Project {
+	id
+	name
+	description
+	state
+	progress
+	startDate
+	targetDate
+	url
+	createdAt
+	updatedAt
+	lead {
+		id
+		name
+		email
+	}
+	teams {
+		nodes {
+			id
+			key
+			name
+		}
+	}
+}
+`
+
+// Query: Get paginated list of projects with optional filtering
+func ListProjects(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter *ProjectFilter,
+	first *int,
+	after *string,
+	orderBy *PaginationOrderBy,
+) (data_ *ListProjectsResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ListProjects",
+		Query:  ListProjects_Operation,
+		Variables: &__ListProjectsInput{
+			Filter:  filter,
+			First:   first,
+			After:   after,
+			OrderBy: orderBy,
+		},
+	}
+
+	data_ = &ListProjectsResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(

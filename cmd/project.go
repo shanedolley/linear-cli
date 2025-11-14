@@ -122,7 +122,7 @@ var projectListCmd = &cobra.Command{
 		}
 
 		// Get projects
-		projects, err := client.GetProjects(context.Background(), filter, limit, "", orderBy)
+		projects, err := client.GetProjectsNew(context.Background(), filter, limit, "", orderBy)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to list projects: %v", err), plaintext, jsonOut)
 			os.Exit(1)
@@ -252,7 +252,7 @@ var projectGetCmd = &cobra.Command{
 		client := api.NewClient(authHeader)
 
 		// Get project details
-		project, err := client.GetProject(context.Background(), projectID)
+		project, err := client.GetProjectNew(context.Background(), projectID)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to get project: %v", err), plaintext, jsonOut)
 			os.Exit(1)
