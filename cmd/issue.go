@@ -890,58 +890,6 @@ var issueGetCmd = &cobra.Command{
 	},
 }
 
-func buildIssueFilter(cmd *cobra.Command) map[string]interface{} {
-	filter := make(map[string]interface{})
-
-	if assignee, _ := cmd.Flags().GetString("assignee"); assignee != "" {
-		if assignee == "me" {
-			// We'll need to get the current user's ID
-			// For now, we'll use a special marker
-			filter["assignee"] = map[string]interface{}{"isMe": map[string]interface{}{"eq": true}}
-		} else {
-			filter["assignee"] = map[string]interface{}{"email": map[string]interface{}{"eq": assignee}}
-		}
-	}
-
-	state, _ := cmd.Flags().GetString("state")
-	if state != "" {
-		filter["state"] = map[string]interface{}{"name": map[string]interface{}{"eq": state}}
-	} else {
-		// Only filter out completed issues if no specific state is requested
-		includeCompleted, _ := cmd.Flags().GetBool("include-completed")
-		if !includeCompleted {
-			// Filter out completed and canceled states
-			filter["state"] = map[string]interface{}{
-				"type": map[string]interface{}{
-					"nin": []string{"completed", "canceled"},
-				},
-			}
-		}
-	}
-
-	if team, _ := cmd.Flags().GetString("team"); team != "" {
-		filter["team"] = map[string]interface{}{"key": map[string]interface{}{"eq": team}}
-	}
-
-	if priority, _ := cmd.Flags().GetInt("priority"); priority != -1 {
-		filter["priority"] = map[string]interface{}{"eq": priority}
-	}
-
-	// Handle newer-than filter
-	newerThan, _ := cmd.Flags().GetString("newer-than")
-	createdAt, err := utils.ParseTimeExpression(newerThan)
-	if err != nil {
-		plaintext := viper.GetBool("plaintext")
-		jsonOut := viper.GetBool("json")
-		output.Error(fmt.Sprintf("Invalid newer-than value: %v", err), plaintext, jsonOut)
-		os.Exit(1)
-	}
-	if createdAt != "" {
-		filter["createdAt"] = map[string]interface{}{"gte": createdAt}
-	}
-
-	return filter
-}
 
 func priorityToString(priority int) string {
 	switch priority {

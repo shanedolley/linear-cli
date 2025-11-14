@@ -11,6 +11,8 @@ import (
 // type-safe genqlient types.
 
 // GetIssuesNew wraps the generated ListIssues function
+// Deprecated: Use api.ListIssues() directly with typed filters for type safety.
+// This adapter function is kept for backward compatibility with write operations only.
 func (c *Client) GetIssues(ctx context.Context, filter map[string]interface{}, first int, after string, orderBy string) (*Issues, error) {
 	// Convert map filter to typed IssueFilter
 	issueFilter, err := convertToIssueFilter(filter)
@@ -42,7 +44,8 @@ func (c *Client) GetIssues(ctx context.Context, filter map[string]interface{}, f
 	return convertToLegacyIssues(resp), nil
 }
 
-// GetIssueNew wraps the generated GetIssue function
+// Deprecated: Use api.GetIssue() directly for type safety.
+// This adapter function is kept for backward compatibility with write operations only.
 func (c *Client) GetIssue(ctx context.Context, id string) (*Issue, error) {
 	// Call generated function
 	resp, err := GetIssue(ctx, c, id)
@@ -872,7 +875,8 @@ func convertHealthToString(h *ProjectUpdateHealthType) string {
 
 // ========== Project Adapters ==========
 
-// GetProjectsNew wraps the generated ListProjects function
+// Deprecated: Use api.ListProjects() directly with typed filters for type safety.
+// This adapter function is kept for backward compatibility with write operations only.
 func (c *Client) GetProjects(ctx context.Context, filter map[string]interface{}, first int, after string, orderBy string) (*Projects, error) {
 	// Convert map filter to typed ProjectFilter
 	projectFilter, err := convertToProjectFilter(filter)
@@ -904,7 +908,8 @@ func (c *Client) GetProjects(ctx context.Context, filter map[string]interface{},
 	return convertToLegacyProjects(resp), nil
 }
 
-// GetProjectNew wraps the generated GetProject function
+// Deprecated: Use api.GetProject() directly for type safety.
+// This adapter function is kept for backward compatibility with write operations only.
 func (c *Client) GetProject(ctx context.Context, id string) (*Project, error) {
 	// Call generated function
 	resp, err := GetProject(ctx, c, id)
@@ -1229,7 +1234,8 @@ func convertToLegacyProject(resp *GetProjectResponse) *Project {
 
 // ========== Team Adapters ==========
 
-// GetTeamsNew wraps the generated ListTeams function
+// Deprecated: Use api.ListTeams() directly for type safety.
+// This adapter function is kept for backward compatibility with write operations only.
 func (c *Client) GetTeams(ctx context.Context, first int, after string, orderBy string) (*Teams, error) {
 	// Convert orderBy string to PaginationOrderBy
 	orderByEnum := convertOrderBy(orderBy)
@@ -1255,7 +1261,8 @@ func (c *Client) GetTeams(ctx context.Context, first int, after string, orderBy 
 	return convertToLegacyTeams(resp), nil
 }
 
-// GetTeamNew wraps the generated GetTeam function
+// Deprecated: Use api.GetTeam() directly for type safety.
+// This adapter function is kept for backward compatibility with write operations only.
 func (c *Client) GetTeam(ctx context.Context, key string) (*Team, error) {
 	// Call generated function
 	resp, err := GetTeam(ctx, c, key)
@@ -1353,7 +1360,8 @@ func convertToLegacyTeam(resp *GetTeamResponse) *Team {
 
 // ========== User Adapters ==========
 
-// GetUsersNew wraps the generated ListUsers function
+// Deprecated: Use api.ListUsers() directly for type safety.
+// This adapter function is kept for backward compatibility with write operations only.
 func (c *Client) GetUsers(ctx context.Context, first int, after string, orderBy string) (*Users, error) {
 	// Convert orderBy string to PaginationOrderBy
 	orderByEnum := convertOrderBy(orderBy)
@@ -1403,7 +1411,8 @@ func (c *Client) GetUser(ctx context.Context, email string) (*User, error) {
 	return convertToLegacyUser(&resp.Users.Nodes[0].UserDetailFields), nil
 }
 
-// GetViewerNew wraps the generated GetViewer function
+// Deprecated: Use api.GetViewer() directly for type safety.
+// This adapter function is kept for backward compatibility with write operations only.
 func (c *Client) GetViewer(ctx context.Context) (*User, error) {
 	// Call generated function
 	resp, err := GetViewer(ctx, c)
@@ -1479,7 +1488,8 @@ func convertToLegacyUser(fields *UserDetailFields) *User {
 // Comment Adapters
 // ==============================================================================
 
-// GetIssueCommentsNew wraps the generated ListComments function
+// Deprecated: Use api.ListComments() directly for type safety.
+// This adapter function is kept for backward compatibility with write operations only.
 func (c *Client) GetIssueComments(ctx context.Context, issueID string, first int, after string, orderBy string) (*Comments, error) {
 	// Convert orderBy string to PaginationOrderBy
 	orderByEnum := convertOrderBy(orderBy)
@@ -1619,7 +1629,8 @@ func convertToLegacyCommentFromUpdate(resp *UpdateCommentResponse) *Comment {
 	}
 }
 
-// GetTeamMembers wraps the generated GetTeamMembers function
+// Deprecated: Use api.GetTeamMembers() directly for type safety.
+// This adapter function is kept for backward compatibility with write operations only.
 func (c *Client) GetTeamMembers(ctx context.Context, teamKey string) (*Users, error) {
 	resp, err := GetTeamMembers(ctx, c, teamKey)
 	if err != nil {
