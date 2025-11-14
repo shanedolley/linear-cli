@@ -933,32 +933,35 @@ var issueAssignCmd = &cobra.Command{
 		client := api.NewClient(authHeader)
 
 		// Get current user
-		viewer, err := client.GetViewer(context.Background())
+		viewerResp, err := api.GetViewer(context.Background(), client)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to get current user: %v", err), plaintext, jsonOut)
 			os.Exit(1)
 		}
+		viewerID := viewerResp.Viewer.UserDetailFields.Id
 
 		// Update issue with assignee
-		input := map[string]interface{}{
-			"assigneeId": viewer.ID,
+		input := api.IssueUpdateInput{
+			AssigneeId: &viewerID,
 		}
 
-		issue, err := client.UpdateIssue(context.Background(), args[0], input)
+		updateResp, err := api.UpdateIssue(context.Background(), client, args[0], &input)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to assign issue: %v", err), plaintext, jsonOut)
 			os.Exit(1)
 		}
+		issue := updateResp.IssueUpdate.Issue
 
 		if jsonOut {
 			output.JSON(issue)
 		} else if plaintext {
-			fmt.Printf("Assigned %s to %s\n", issue.Identifier, viewer.Name)
+			fmt.Printf("Assigned issue %s to %s\n",
+				issue.IssueListFields.Identifier,
+				viewerResp.Viewer.UserDetailFields.Name)
 		} else {
-			fmt.Printf("%s Assigned %s to %s\n",
+			fmt.Printf("%s Assigned issue %s to you\n",
 				color.New(color.FgGreen).Sprint("✓"),
-				color.New(color.FgCyan, color.Bold).Sprint(issue.Identifier),
-				color.New(color.FgCyan).Sprint(viewer.Name))
+				color.New(color.FgCyan, color.Bold).Sprint(issue.IssueListFields.Identifier))
 		}
 	},
 }
