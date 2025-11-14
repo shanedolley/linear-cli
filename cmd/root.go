@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/fatih/color"
@@ -85,7 +86,29 @@ func GetRootCmd() *cobra.Command {
 	return rootCmd
 }
 
+// migrateOldConfig copies old linctl config to new lincli location
+func migrateOldConfig() {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return
+	}
+
+	oldConfig := filepath.Join(home, ".linctl.yaml")
+	newConfig := filepath.Join(home, ".lincli.yaml")
+
+	// Only migrate if old exists and new doesn't
+	if _, err := os.Stat(oldConfig); err == nil {
+		if _, err := os.Stat(newConfig); os.IsNotExist(err) {
+			data, err := os.ReadFile(oldConfig)
+			if err == nil {
+				_ = os.WriteFile(newConfig, data, 0600)
+			}
+		}
+	}
+}
+
 func init() {
+	migrateOldConfig()
 	cobra.OnInitialize(initConfig)
 
 	// Global flags
@@ -108,10 +131,10 @@ func initConfig() {
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		// Search config in home directory with name ".linctl" (without extension).
+		// Search config in home directory with name ".lincli" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".linctl")
+		viper.SetConfigName(".lincli")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
