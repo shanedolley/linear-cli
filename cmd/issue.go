@@ -273,131 +273,134 @@ var issueGetCmd = &cobra.Command{
 		}
 
 		client := api.NewClient(authHeader)
-		issue, err := client.GetIssue(context.Background(), args[0])
+		resp, err := api.GetIssue(context.Background(), client, args[0])
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to fetch issue: %v", err), plaintext, jsonOut)
 			os.Exit(1)
 		}
+		issue := resp.Issue
 
 		if jsonOut {
-			output.JSON(issue)
+			output.JSON(issue.IssueDetailFields)
 			return
 		}
 
 		if plaintext {
-			fmt.Printf("# %s - %s\n\n", issue.Identifier, issue.Title)
+			fmt.Printf("# %s - %s\n\n", issue.IssueDetailFields.Identifier, issue.IssueDetailFields.Title)
 
-			if issue.Description != "" {
-				fmt.Printf("## Description\n%s\n\n", issue.Description)
+			if issue.IssueDetailFields.Description != nil && *issue.IssueDetailFields.Description != "" {
+				fmt.Printf("## Description\n%s\n\n", *issue.IssueDetailFields.Description)
 			}
 
 			fmt.Printf("## Core Details\n")
-			fmt.Printf("- **ID**: %s\n", issue.Identifier)
-			fmt.Printf("- **Number**: %d\n", issue.Number)
-			if issue.State != nil {
-				fmt.Printf("- **State**: %s (%s)\n", issue.State.Name, issue.State.Type)
-				if issue.State.Description != nil && *issue.State.Description != "" {
-					fmt.Printf("  - Description: %s\n", *issue.State.Description)
+			fmt.Printf("- **ID**: %s\n", issue.IssueDetailFields.Identifier)
+			fmt.Printf("- **Number**: %.0f\n", issue.IssueDetailFields.Number)
+			if issue.IssueDetailFields.State != nil {
+				fmt.Printf("- **State**: %s (%s)\n", issue.IssueDetailFields.State.Name, issue.IssueDetailFields.State.Type)
+				if issue.IssueDetailFields.State.Description != nil && *issue.IssueDetailFields.State.Description != "" {
+					fmt.Printf("  - Description: %s\n", *issue.IssueDetailFields.State.Description)
 				}
 			}
-			if issue.Assignee != nil {
-				fmt.Printf("- **Assignee**: %s (%s)\n", issue.Assignee.Name, issue.Assignee.Email)
-				if issue.Assignee.DisplayName != "" && issue.Assignee.DisplayName != issue.Assignee.Name {
-					fmt.Printf("  - Display Name: %s\n", issue.Assignee.DisplayName)
+			if issue.IssueDetailFields.Assignee != nil {
+				fmt.Printf("- **Assignee**: %s (%s)\n", issue.IssueDetailFields.Assignee.Name, issue.IssueDetailFields.Assignee.Email)
+				if issue.IssueDetailFields.Assignee.DisplayName != "" && issue.IssueDetailFields.Assignee.DisplayName != issue.IssueDetailFields.Assignee.Name {
+					fmt.Printf("  - Display Name: %s\n", issue.IssueDetailFields.Assignee.DisplayName)
 				}
 			} else {
 				fmt.Printf("- **Assignee**: Unassigned\n")
 			}
-			if issue.Creator != nil {
-				fmt.Printf("- **Creator**: %s (%s)\n", issue.Creator.Name, issue.Creator.Email)
+			if issue.IssueDetailFields.Creator != nil {
+				fmt.Printf("- **Creator**: %s (%s)\n", issue.IssueDetailFields.Creator.Name, issue.IssueDetailFields.Creator.Email)
 			}
-			if issue.Team != nil {
-				fmt.Printf("- **Team**: %s (%s)\n", issue.Team.Name, issue.Team.Key)
-				if issue.Team.Description != "" {
-					fmt.Printf("  - Description: %s\n", issue.Team.Description)
+			if issue.IssueDetailFields.Team != nil {
+				fmt.Printf("- **Team**: %s (%s)\n", issue.IssueDetailFields.Team.Name, issue.IssueDetailFields.Team.Key)
+				if issue.IssueDetailFields.Team.Description != nil && *issue.IssueDetailFields.Team.Description != "" {
+					fmt.Printf("  - Description: %s\n", *issue.IssueDetailFields.Team.Description)
 				}
 			}
-			fmt.Printf("- **Priority**: %s (%d)\n", priorityToString(issue.Priority), issue.Priority)
-			if issue.PriorityLabel != "" {
-				fmt.Printf("- **Priority Label**: %s\n", issue.PriorityLabel)
+			fmt.Printf("- **Priority**: %s (%.0f)\n", priorityToString(int(issue.IssueDetailFields.Priority)), int(issue.IssueDetailFields.Priority))
+			if issue.IssueDetailFields.PriorityLabel != "" {
+				fmt.Printf("- **Priority Label**: %s\n", issue.IssueDetailFields.PriorityLabel)
 			}
-			if issue.Estimate != nil {
-				fmt.Printf("- **Estimate**: %.1f\n", *issue.Estimate)
+			if issue.IssueDetailFields.Estimate != nil {
+				fmt.Printf("- **Estimate**: %.1f\n", *issue.IssueDetailFields.Estimate)
 			}
 
 			fmt.Printf("\n## Status & Dates\n")
-			fmt.Printf("- **Created**: %s\n", issue.CreatedAt.Format("2006-01-02 15:04:05"))
-			fmt.Printf("- **Updated**: %s\n", issue.UpdatedAt.Format("2006-01-02 15:04:05"))
-			if issue.TriagedAt != nil {
-				fmt.Printf("- **Triaged**: %s\n", issue.TriagedAt.Format("2006-01-02 15:04:05"))
+			fmt.Printf("- **Created**: %s\n", issue.IssueDetailFields.CreatedAt.Format("2006-01-02 15:04:05"))
+			fmt.Printf("- **Updated**: %s\n", issue.IssueDetailFields.UpdatedAt.Format("2006-01-02 15:04:05"))
+			if issue.IssueDetailFields.TriagedAt != nil {
+				fmt.Printf("- **Triaged**: %s\n", issue.IssueDetailFields.TriagedAt.Format("2006-01-02 15:04:05"))
 			}
-			if issue.CompletedAt != nil {
-				fmt.Printf("- **Completed**: %s\n", issue.CompletedAt.Format("2006-01-02 15:04:05"))
+			if issue.IssueDetailFields.CompletedAt != nil {
+				fmt.Printf("- **Completed**: %s\n", issue.IssueDetailFields.CompletedAt.Format("2006-01-02 15:04:05"))
 			}
-			if issue.CanceledAt != nil {
-				fmt.Printf("- **Canceled**: %s\n", issue.CanceledAt.Format("2006-01-02 15:04:05"))
+			if issue.IssueDetailFields.CanceledAt != nil {
+				fmt.Printf("- **Canceled**: %s\n", issue.IssueDetailFields.CanceledAt.Format("2006-01-02 15:04:05"))
 			}
-			if issue.ArchivedAt != nil {
-				fmt.Printf("- **Archived**: %s\n", issue.ArchivedAt.Format("2006-01-02 15:04:05"))
+			if issue.IssueDetailFields.ArchivedAt != nil {
+				fmt.Printf("- **Archived**: %s\n", issue.IssueDetailFields.ArchivedAt.Format("2006-01-02 15:04:05"))
 			}
-			if issue.DueDate != nil && *issue.DueDate != "" {
-				fmt.Printf("- **Due Date**: %s\n", *issue.DueDate)
+			if issue.IssueDetailFields.DueDate != nil && *issue.IssueDetailFields.DueDate != "" {
+				fmt.Printf("- **Due Date**: %s\n", *issue.IssueDetailFields.DueDate)
 			}
-			if issue.SnoozedUntilAt != nil {
-				fmt.Printf("- **Snoozed Until**: %s\n", issue.SnoozedUntilAt.Format("2006-01-02 15:04:05"))
+			if issue.IssueDetailFields.SnoozedUntilAt != nil {
+				fmt.Printf("- **Snoozed Until**: %s\n", issue.IssueDetailFields.SnoozedUntilAt.Format("2006-01-02 15:04:05"))
 			}
 
 			fmt.Printf("\n## Technical Details\n")
-			fmt.Printf("- **Board Order**: %.2f\n", issue.BoardOrder)
-			fmt.Printf("- **Sub-Issue Sort Order**: %.2f\n", issue.SubIssueSortOrder)
-			if issue.BranchName != "" {
-				fmt.Printf("- **Git Branch**: %s\n", issue.BranchName)
+			fmt.Printf("- **Board Order**: %.2f\n", issue.IssueDetailFields.BoardOrder)
+			if issue.IssueDetailFields.SubIssueSortOrder != nil {
+				fmt.Printf("- **Sub-Issue Sort Order**: %.2f\n", *issue.IssueDetailFields.SubIssueSortOrder)
 			}
-			if issue.CustomerTicketCount > 0 {
-				fmt.Printf("- **Customer Ticket Count**: %d\n", issue.CustomerTicketCount)
+			if issue.IssueDetailFields.BranchName != "" {
+				fmt.Printf("- **Git Branch**: %s\n", issue.IssueDetailFields.BranchName)
 			}
-			if len(issue.PreviousIdentifiers) > 0 {
-				fmt.Printf("- **Previous Identifiers**: %s\n", strings.Join(issue.PreviousIdentifiers, ", "))
+			if issue.IssueDetailFields.CustomerTicketCount > 0 {
+				fmt.Printf("- **Customer Ticket Count**: %d\n", issue.IssueDetailFields.CustomerTicketCount)
 			}
-			if issue.IntegrationSourceType != nil && *issue.IntegrationSourceType != "" {
-				fmt.Printf("- **Integration Source**: %s\n", *issue.IntegrationSourceType)
+			if len(issue.IssueDetailFields.PreviousIdentifiers) > 0 {
+				fmt.Printf("- **Previous Identifiers**: %s\n", strings.Join(issue.IssueDetailFields.PreviousIdentifiers, ", "))
 			}
-			if issue.ExternalUserCreator != nil {
-				fmt.Printf("- **External Creator**: %s (%s)\n", issue.ExternalUserCreator.Name, issue.ExternalUserCreator.Email)
+			if issue.IssueDetailFields.IntegrationSourceType != nil {
+				fmt.Printf("- **Integration Source**: %s\n", *issue.IssueDetailFields.IntegrationSourceType)
 			}
-			fmt.Printf("- **URL**: %s\n", issue.URL)
+			if issue.IssueDetailFields.ExternalUserCreator != nil {
+				fmt.Printf("- **External Creator**: %s (%s)\n", issue.IssueDetailFields.ExternalUserCreator.Name, issue.IssueDetailFields.ExternalUserCreator.Email)
+			}
+			fmt.Printf("- **URL**: %s\n", issue.IssueDetailFields.Url)
 
 			// Project and Cycle Info
-			if issue.Project != nil {
+			if issue.IssueDetailFields.Project != nil {
 				fmt.Printf("\n## Project\n")
-				fmt.Printf("- **Name**: %s\n", issue.Project.Name)
-				fmt.Printf("- **State**: %s\n", issue.Project.State)
-				fmt.Printf("- **Progress**: %.0f%%\n", issue.Project.Progress*100)
-				if issue.Project.Health != "" {
-					fmt.Printf("- **Health**: %s\n", issue.Project.Health)
+				fmt.Printf("- **Name**: %s\n", issue.IssueDetailFields.Project.Name)
+				fmt.Printf("- **State**: %s\n", issue.IssueDetailFields.Project.State)
+				fmt.Printf("- **Progress**: %.0f%%\n", issue.IssueDetailFields.Project.Progress*100)
+				if issue.IssueDetailFields.Project.Health != nil {
+					fmt.Printf("- **Health**: %s\n", *issue.IssueDetailFields.Project.Health)
 				}
-				if issue.Project.Description != "" {
-					fmt.Printf("- **Description**: %s\n", issue.Project.Description)
+				if issue.IssueDetailFields.Project.Description != "" {
+					fmt.Printf("- **Description**: %s\n", issue.IssueDetailFields.Project.Description)
 				}
 			}
 
-			if issue.Cycle != nil {
+			if issue.IssueDetailFields.Cycle != nil {
 				fmt.Printf("\n## Cycle\n")
-				fmt.Printf("- **Name**: %s (#%d)\n", issue.Cycle.Name, issue.Cycle.Number)
-				if issue.Cycle.Description != nil && *issue.Cycle.Description != "" {
-					fmt.Printf("- **Description**: %s\n", *issue.Cycle.Description)
+				fmt.Printf("- **Name**: %s (#%.0f)\n", issue.IssueDetailFields.Cycle.Name, issue.IssueDetailFields.Cycle.Number)
+				if issue.IssueDetailFields.Cycle.Description != nil && *issue.IssueDetailFields.Cycle.Description != "" {
+					fmt.Printf("- **Description**: %s\n", *issue.IssueDetailFields.Cycle.Description)
 				}
-				fmt.Printf("- **Period**: %s to %s\n", issue.Cycle.StartsAt, issue.Cycle.EndsAt)
-				fmt.Printf("- **Progress**: %.0f%%\n", issue.Cycle.Progress*100)
-				if issue.Cycle.CompletedAt != nil {
-					fmt.Printf("- **Completed**: %s\n", issue.Cycle.CompletedAt.Format("2006-01-02"))
+				fmt.Printf("- **Period**: %s to %s\n", issue.IssueDetailFields.Cycle.StartsAt, issue.IssueDetailFields.Cycle.EndsAt)
+				fmt.Printf("- **Progress**: %.0f%%\n", issue.IssueDetailFields.Cycle.Progress*100)
+				if issue.IssueDetailFields.Cycle.CompletedAt != nil {
+					fmt.Printf("- **Completed**: %s\n", issue.IssueDetailFields.Cycle.CompletedAt.Format("2006-01-02"))
 				}
 			}
 
 			// Labels
-			if issue.Labels != nil && len(issue.Labels.Nodes) > 0 {
+			if issue.IssueDetailFields.Labels != nil && len(issue.IssueDetailFields.Labels.Nodes) > 0 {
 				fmt.Printf("\n## Labels\n")
-				for _, label := range issue.Labels.Nodes {
+				for _, label := range issue.IssueDetailFields.Labels.Nodes {
 					fmt.Printf("- %s", label.Name)
 					if label.Description != nil && *label.Description != "" {
 						fmt.Printf(" - %s", *label.Description)
@@ -407,17 +410,17 @@ var issueGetCmd = &cobra.Command{
 			}
 
 			// Subscribers
-			if issue.Subscribers != nil && len(issue.Subscribers.Nodes) > 0 {
+			if issue.IssueDetailFields.Subscribers != nil && len(issue.IssueDetailFields.Subscribers.Nodes) > 0 {
 				fmt.Printf("\n## Subscribers\n")
-				for _, subscriber := range issue.Subscribers.Nodes {
+				for _, subscriber := range issue.IssueDetailFields.Subscribers.Nodes {
 					fmt.Printf("- %s (%s)\n", subscriber.Name, subscriber.Email)
 				}
 			}
 
 			// Relations
-			if issue.Relations != nil && len(issue.Relations.Nodes) > 0 {
+			if issue.IssueDetailFields.Relations != nil && len(issue.IssueDetailFields.Relations.Nodes) > 0 {
 				fmt.Printf("\n## Related Issues\n")
-				for _, relation := range issue.Relations.Nodes {
+				for _, relation := range issue.IssueDetailFields.Relations.Nodes {
 					if relation.RelatedIssue != nil {
 						relationType := relation.Type
 						switch relationType {
@@ -440,10 +443,10 @@ var issueGetCmd = &cobra.Command{
 			}
 
 			// Reactions
-			if len(issue.Reactions) > 0 {
+			if len(issue.IssueDetailFields.Reactions) > 0 {
 				fmt.Printf("\n## Reactions\n")
 				reactionMap := make(map[string][]string)
-				for _, reaction := range issue.Reactions {
+				for _, reaction := range issue.IssueDetailFields.Reactions {
 					reactionMap[reaction.Emoji] = append(reactionMap[reaction.Emoji], reaction.User.Name)
 				}
 				for emoji, users := range reactionMap {
@@ -452,15 +455,15 @@ var issueGetCmd = &cobra.Command{
 			}
 
 			// Show parent issue if this is a sub-issue
-			if issue.Parent != nil {
+			if issue.IssueDetailFields.Parent != nil {
 				fmt.Printf("\n## Parent Issue\n")
-				fmt.Printf("- %s: %s\n", issue.Parent.Identifier, issue.Parent.Title)
+				fmt.Printf("- %s: %s\n", issue.IssueDetailFields.Parent.Identifier, issue.IssueDetailFields.Parent.Title)
 			}
 
 			// Show sub-issues if any
-			if issue.Children != nil && len(issue.Children.Nodes) > 0 {
+			if issue.IssueDetailFields.Children != nil && len(issue.IssueDetailFields.Children.Nodes) > 0 {
 				fmt.Printf("\n## Sub-issues\n")
-				for _, child := range issue.Children.Nodes {
+				for _, child := range issue.IssueDetailFields.Children.Nodes {
 					stateStr := ""
 					if child.State != nil {
 						switch child.State.Type {
@@ -487,35 +490,43 @@ var issueGetCmd = &cobra.Command{
 			}
 
 			// Show attachments if any
-			if issue.Attachments != nil && len(issue.Attachments.Nodes) > 0 {
+			if issue.IssueDetailFields.Attachments != nil && len(issue.IssueDetailFields.Attachments.Nodes) > 0 {
 				fmt.Printf("\n## Attachments\n")
-				for _, attachment := range issue.Attachments.Nodes {
-					fmt.Printf("- [%s](%s)\n", attachment.Title, attachment.URL)
+				for _, attachment := range issue.IssueDetailFields.Attachments.Nodes {
+					fmt.Printf("- [%s](%s)\n", attachment.Title, attachment.Url)
 				}
 			}
 
 			// Show recent comments if any
-			if issue.Comments != nil && len(issue.Comments.Nodes) > 0 {
+			if issue.IssueDetailFields.Comments != nil && len(issue.IssueDetailFields.Comments.Nodes) > 0 {
 				fmt.Printf("\n## Recent Comments\n")
-				for _, comment := range issue.Comments.Nodes {
-					fmt.Printf("\n### %s - %s\n", comment.User.Name, comment.CreatedAt.Format("2006-01-02 15:04"))
+				for _, comment := range issue.IssueDetailFields.Comments.Nodes {
+					userName := "Unknown"
+					if comment.User != nil {
+						userName = comment.User.Name
+					}
+					fmt.Printf("\n### %s - %s\n", userName, comment.CreatedAt.Format("2006-01-02 15:04"))
 					if comment.EditedAt != nil {
 						fmt.Printf("*(edited %s)*\n", comment.EditedAt.Format("2006-01-02 15:04"))
 					}
 					fmt.Printf("%s\n", comment.Body)
 					if comment.Children != nil && len(comment.Children.Nodes) > 0 {
 						for _, reply := range comment.Children.Nodes {
-							fmt.Printf("\n  **Reply from %s**: %s\n", reply.User.Name, reply.Body)
+							replyUserName := "Unknown"
+							if reply.User != nil {
+								replyUserName = reply.User.Name
+							}
+							fmt.Printf("\n  **Reply from %s**: %s\n", replyUserName, reply.Body)
 						}
 					}
 				}
-				fmt.Printf("\n> Use `lincli comment list %s` to see all comments\n", issue.Identifier)
+				fmt.Printf("\n> Use `lincli comment list %s` to see all comments\n", issue.IssueDetailFields.Identifier)
 			}
 
 			// Show history
-			if issue.History != nil && len(issue.History.Nodes) > 0 {
+			if issue.IssueDetailFields.History != nil && len(issue.IssueDetailFields.History.Nodes) > 0 {
 				fmt.Printf("\n## Recent History\n")
-				for _, entry := range issue.History.Nodes {
+				for _, entry := range issue.IssueDetailFields.History.Nodes {
 					fmt.Printf("\n- **%s** by %s", entry.CreatedAt.Format("2006-01-02 15:04"), entry.Actor.Name)
 					changes := []string{}
 
@@ -530,7 +541,7 @@ var issueGetCmd = &cobra.Command{
 						changes = append(changes, fmt.Sprintf("Assigned to %s", entry.ToAssignee.Name))
 					}
 					if entry.FromPriority != nil && entry.ToPriority != nil {
-						changes = append(changes, fmt.Sprintf("Priority: %s → %s", priorityToString(*entry.FromPriority), priorityToString(*entry.ToPriority)))
+						changes = append(changes, fmt.Sprintf("Priority: %s → %s", priorityToString(int(*entry.FromPriority)), priorityToString(int(*entry.ToPriority))))
 					}
 					if entry.FromTitle != nil && entry.ToTitle != nil {
 						changes = append(changes, fmt.Sprintf("Title: \"%s\" → \"%s\"", *entry.FromTitle, *entry.ToTitle))
@@ -560,88 +571,88 @@ var issueGetCmd = &cobra.Command{
 
 		// Rich display
 		fmt.Printf("%s %s\n",
-			color.New(color.FgCyan, color.Bold).Sprint(issue.Identifier),
-			color.New(color.FgWhite, color.Bold).Sprint(issue.Title))
+			color.New(color.FgCyan, color.Bold).Sprint(issue.IssueDetailFields.Identifier),
+			color.New(color.FgWhite, color.Bold).Sprint(issue.IssueDetailFields.Title))
 
-		if issue.Description != "" {
-			fmt.Printf("\n%s\n", issue.Description)
+		if issue.IssueDetailFields.Description != nil && *issue.IssueDetailFields.Description != "" {
+			fmt.Printf("\n%s\n", *issue.IssueDetailFields.Description)
 		}
 
 		fmt.Printf("\n%s\n", color.New(color.FgYellow).Sprint("Details:"))
 
-		if issue.State != nil {
-			stateStr := issue.State.Name
-			if issue.State.Type == "completed" && issue.CompletedAt != nil {
-				stateStr += fmt.Sprintf(" (%s)", issue.CompletedAt.Format("2006-01-02"))
+		if issue.IssueDetailFields.State != nil {
+			stateStr := issue.IssueDetailFields.State.Name
+			if issue.IssueDetailFields.State.Type == "completed" && issue.IssueDetailFields.CompletedAt != nil {
+				stateStr += fmt.Sprintf(" (%s)", issue.IssueDetailFields.CompletedAt.Format("2006-01-02"))
 			}
 			fmt.Printf("State: %s\n",
 				color.New(color.FgGreen).Sprint(stateStr))
 		}
 
-		if issue.Assignee != nil {
+		if issue.IssueDetailFields.Assignee != nil {
 			fmt.Printf("Assignee: %s\n",
-				color.New(color.FgCyan).Sprint(issue.Assignee.Name))
+				color.New(color.FgCyan).Sprint(issue.IssueDetailFields.Assignee.Name))
 		} else {
 			fmt.Printf("Assignee: %s\n",
 				color.New(color.FgRed).Sprint("Unassigned"))
 		}
 
-		if issue.Team != nil {
+		if issue.IssueDetailFields.Team != nil {
 			fmt.Printf("Team: %s\n",
-				color.New(color.FgMagenta).Sprint(issue.Team.Name))
+				color.New(color.FgMagenta).Sprint(issue.IssueDetailFields.Team.Name))
 		}
 
-		fmt.Printf("Priority: %s\n", priorityToString(issue.Priority))
+		fmt.Printf("Priority: %s\n", priorityToString(int(issue.IssueDetailFields.Priority)))
 
 		// Show project and cycle info
-		if issue.Project != nil {
+		if issue.IssueDetailFields.Project != nil {
 			fmt.Printf("Project: %s (%s)\n",
-				color.New(color.FgBlue).Sprint(issue.Project.Name),
-				color.New(color.FgWhite, color.Faint).Sprintf("%.0f%%", issue.Project.Progress*100))
+				color.New(color.FgBlue).Sprint(issue.IssueDetailFields.Project.Name),
+				color.New(color.FgWhite, color.Faint).Sprintf("%.0f%%", issue.IssueDetailFields.Project.Progress*100))
 		}
 
-		if issue.Cycle != nil {
+		if issue.IssueDetailFields.Cycle != nil {
 			fmt.Printf("Cycle: %s\n",
-				color.New(color.FgMagenta).Sprint(issue.Cycle.Name))
+				color.New(color.FgMagenta).Sprint(issue.IssueDetailFields.Cycle.Name))
 		}
 
-		fmt.Printf("Created: %s\n", issue.CreatedAt.Format("2006-01-02 15:04:05"))
-		fmt.Printf("Updated: %s\n", issue.UpdatedAt.Format("2006-01-02 15:04:05"))
+		fmt.Printf("Created: %s\n", issue.IssueDetailFields.CreatedAt.Format("2006-01-02 15:04:05"))
+		fmt.Printf("Updated: %s\n", issue.IssueDetailFields.UpdatedAt.Format("2006-01-02 15:04:05"))
 
-		if issue.DueDate != nil && *issue.DueDate != "" {
+		if issue.IssueDetailFields.DueDate != nil && *issue.IssueDetailFields.DueDate != "" {
 			fmt.Printf("Due Date: %s\n",
-				color.New(color.FgYellow).Sprint(*issue.DueDate))
+				color.New(color.FgYellow).Sprint(*issue.IssueDetailFields.DueDate))
 		}
 
-		if issue.SnoozedUntilAt != nil {
+		if issue.IssueDetailFields.SnoozedUntilAt != nil {
 			fmt.Printf("Snoozed Until: %s\n",
-				color.New(color.FgYellow).Sprint(issue.SnoozedUntilAt.Format("2006-01-02 15:04:05")))
+				color.New(color.FgYellow).Sprint(issue.IssueDetailFields.SnoozedUntilAt.Format("2006-01-02 15:04:05")))
 		}
 
 		// Show git branch if available
-		if issue.BranchName != "" {
+		if issue.IssueDetailFields.BranchName != "" {
 			fmt.Printf("Git Branch: %s\n",
-				color.New(color.FgGreen).Sprint(issue.BranchName))
+				color.New(color.FgGreen).Sprint(issue.IssueDetailFields.BranchName))
 		}
 
 		// Show URL
-		if issue.URL != "" {
+		if issue.IssueDetailFields.Url != "" {
 			fmt.Printf("URL: %s\n",
-				color.New(color.FgBlue, color.Underline).Sprint(issue.URL))
+				color.New(color.FgBlue, color.Underline).Sprint(issue.IssueDetailFields.Url))
 		}
 
 		// Show parent issue if this is a sub-issue
-		if issue.Parent != nil {
+		if issue.IssueDetailFields.Parent != nil {
 			fmt.Printf("\n%s\n", color.New(color.FgYellow).Sprint("Parent Issue:"))
 			fmt.Printf("  %s %s\n",
-				color.New(color.FgCyan).Sprint(issue.Parent.Identifier),
-				issue.Parent.Title)
+				color.New(color.FgCyan).Sprint(issue.IssueDetailFields.Parent.Identifier),
+				issue.IssueDetailFields.Parent.Title)
 		}
 
 		// Show sub-issues if any
-		if issue.Children != nil && len(issue.Children.Nodes) > 0 {
+		if issue.IssueDetailFields.Children != nil && len(issue.IssueDetailFields.Children.Nodes) > 0 {
 			fmt.Printf("\n%s\n", color.New(color.FgYellow).Sprint("Sub-issues:"))
-			for _, child := range issue.Children.Nodes {
+			for _, child := range issue.IssueDetailFields.Children.Nodes {
 				stateIcon := "○"
 				if child.State != nil {
 					switch child.State.Type {
@@ -668,21 +679,25 @@ var issueGetCmd = &cobra.Command{
 		}
 
 		// Show attachments if any
-		if issue.Attachments != nil && len(issue.Attachments.Nodes) > 0 {
+		if issue.IssueDetailFields.Attachments != nil && len(issue.IssueDetailFields.Attachments.Nodes) > 0 {
 			fmt.Printf("\n%s\n", color.New(color.FgYellow).Sprint("Attachments:"))
-			for _, attachment := range issue.Attachments.Nodes {
+			for _, attachment := range issue.IssueDetailFields.Attachments.Nodes {
 				fmt.Printf("  📎 %s - %s\n",
 					attachment.Title,
-					color.New(color.FgBlue, color.Underline).Sprint(attachment.URL))
+					color.New(color.FgBlue, color.Underline).Sprint(attachment.Url))
 			}
 		}
 
 		// Show recent comments if any
-		if issue.Comments != nil && len(issue.Comments.Nodes) > 0 {
+		if issue.IssueDetailFields.Comments != nil && len(issue.IssueDetailFields.Comments.Nodes) > 0 {
 			fmt.Printf("\n%s\n", color.New(color.FgYellow).Sprint("Recent Comments:"))
-			for _, comment := range issue.Comments.Nodes {
+			for _, comment := range issue.IssueDetailFields.Comments.Nodes {
+				userName := "Unknown"
+				if comment.User != nil {
+					userName = comment.User.Name
+				}
 				fmt.Printf("  💬 %s - %s\n",
-					color.New(color.FgCyan).Sprint(comment.User.Name),
+					color.New(color.FgCyan).Sprint(userName),
 					color.New(color.FgWhite, color.Faint).Sprint(comment.CreatedAt.Format("2006-01-02 15:04")))
 				// Show first line of comment
 				lines := strings.Split(comment.Body, "\n")
@@ -696,7 +711,7 @@ var issueGetCmd = &cobra.Command{
 			}
 			fmt.Printf("\n  %s Use 'lincli comment list %s' to see all comments\n",
 				color.New(color.FgWhite, color.Faint).Sprint("→"),
-				issue.Identifier)
+				issue.IssueDetailFields.Identifier)
 		}
 	},
 }
