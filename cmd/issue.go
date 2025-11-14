@@ -915,6 +915,26 @@ func truncateString(s string, maxLen int) string {
 	return s[:maxLen-3] + "..."
 }
 
+func buildIssueCreateInput(cmd *cobra.Command, teamID string) api.IssueCreateInput {
+	input := api.IssueCreateInput{
+		TeamId: teamID, // Required field (no pointer)
+	}
+
+	if title, _ := cmd.Flags().GetString("title"); title != "" {
+		input.Title = &title
+	}
+
+	if description, _ := cmd.Flags().GetString("description"); description != "" {
+		input.Description = &description
+	}
+
+	if priority, _ := cmd.Flags().GetInt("priority"); priority >= 0 && priority <= 4 {
+		input.Priority = &priority
+	}
+
+	return input
+}
+
 var issueAssignCmd = &cobra.Command{
 	Use:   "assign [issue-id]",
 	Short: "Assign issue to yourself",
@@ -985,9 +1005,7 @@ var issueCreateCmd = &cobra.Command{
 
 		// Get flags
 		title, _ := cmd.Flags().GetString("title")
-		description, _ := cmd.Flags().GetString("description")
 		teamKey, _ := cmd.Flags().GetString("team")
-		priority, _ := cmd.Flags().GetInt("priority")
 		assignToMe, _ := cmd.Flags().GetBool("assign-me")
 
 		if title == "" {
@@ -1001,53 +1019,47 @@ var issueCreateCmd = &cobra.Command{
 		}
 
 		// Get team ID from key
-		team, err := client.GetTeam(context.Background(), teamKey)
+		teamResp, err := api.GetTeam(context.Background(), client, teamKey)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to find team '%s': %v", teamKey, err), plaintext, jsonOut)
 			os.Exit(1)
 		}
+		team := teamResp.Team
 
 		// Build input
-		input := map[string]interface{}{
-			"title":  title,
-			"teamId": team.ID,
-		}
-
-		if description != "" {
-			input["description"] = description
-		}
-
-		if priority >= 0 && priority <= 4 {
-			input["priority"] = priority
-		}
+		input := buildIssueCreateInput(cmd, team.TeamDetailFields.Id)
 
 		if assignToMe {
-			viewer, err := client.GetViewer(context.Background())
+			viewerResp, err := api.GetViewer(context.Background(), client)
 			if err != nil {
 				output.Error(fmt.Sprintf("Failed to get current user: %v", err), plaintext, jsonOut)
 				os.Exit(1)
 			}
-			input["assigneeId"] = viewer.ID
+			viewerID := viewerResp.Viewer.UserDetailFields.Id
+			input.AssigneeId = &viewerID
 		}
 
 		// Create issue
-		issue, err := client.CreateIssue(context.Background(), input)
+		createResp, err := api.CreateIssue(context.Background(), client, &input)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to create issue: %v", err), plaintext, jsonOut)
 			os.Exit(1)
 		}
+		issue := createResp.IssueCreate.Issue
 
 		if jsonOut {
 			output.JSON(issue)
 		} else if plaintext {
-			fmt.Printf("Created issue %s: %s\n", issue.Identifier, issue.Title)
+			fmt.Printf("Created issue %s: %s\n",
+				issue.IssueListFields.Identifier,
+				issue.IssueListFields.Title)
 		} else {
 			fmt.Printf("%s Created issue %s: %s\n",
 				color.New(color.FgGreen).Sprint("✓"),
-				color.New(color.FgCyan, color.Bold).Sprint(issue.Identifier),
-				issue.Title)
-			if issue.Assignee != nil {
-				fmt.Printf("  Assigned to: %s\n", color.New(color.FgCyan).Sprint(issue.Assignee.Name))
+				color.New(color.FgCyan, color.Bold).Sprint(issue.IssueListFields.Identifier),
+				issue.IssueListFields.Title)
+			if issue.IssueListFields.Assignee != nil {
+				fmt.Printf("  Assigned to: %s\n", color.New(color.FgCyan).Sprint(issue.IssueListFields.Assignee.Name))
 			}
 		}
 	},
