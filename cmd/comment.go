@@ -68,48 +68,79 @@ var commentListCmd = &cobra.Command{
 			}
 		}
 
-		// Get comments
-		comments, err := client.GetIssueComments(context.Background(), issueID, limit, "", orderBy)
+		// Convert limit to pointer
+		var limitPtr *int
+		if limit > 0 {
+			limitPtr = &limit
+		}
+
+		// Convert orderBy string to PaginationOrderBy enum
+		var orderByEnum *api.PaginationOrderBy
+		if orderBy != "" {
+			if orderBy == "createdAt" {
+				val := api.PaginationOrderByCreatedat
+				orderByEnum = &val
+			} else if orderBy == "updatedAt" {
+				val := api.PaginationOrderByUpdatedat
+				orderByEnum = &val
+			}
+		}
+
+		// Get comments using generated function
+		resp, err := api.ListComments(context.Background(), client, issueID, limitPtr, nil, orderByEnum)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to list comments: %v", err), plaintext, jsonOut)
 			os.Exit(1)
 		}
 
+		// Check if no comments
+		if resp.Issue == nil || resp.Issue.Comments == nil || len(resp.Issue.Comments.Nodes) == 0 {
+			if jsonOut {
+				output.JSON([]*api.ListCommentsIssueCommentsCommentConnectionNodesComment{})
+			} else {
+				output.Info(fmt.Sprintf("No comments on issue %s", issueID), plaintext, jsonOut)
+			}
+			return
+		}
+
+		comments := resp.Issue.Comments.Nodes
+
 		// Handle output
 		if jsonOut {
-			output.JSON(comments.Nodes)
+			output.JSON(comments)
 		} else if plaintext {
-			for i, comment := range comments.Nodes {
+			for i, comment := range comments {
 				if i > 0 {
 					fmt.Println("---")
 				}
-				fmt.Printf("Author: %s\n", comment.User.Name)
+				author := "Unknown"
+				if comment.User != nil {
+					author = comment.User.Name
+				}
+				fmt.Printf("Author: %s\n", author)
 				fmt.Printf("Date: %s\n", comment.CreatedAt.Format("2006-01-02 15:04:05"))
 				fmt.Printf("Comment:\n%s\n", comment.Body)
 			}
 		} else {
 			// Rich display
-			if len(comments.Nodes) == 0 {
-				fmt.Printf("\n%s No comments on issue %s\n",
-					color.New(color.FgYellow).Sprint("ℹ️"),
-					color.New(color.FgCyan).Sprint(issueID))
-				return
-			}
-
 			fmt.Printf("\n%s Comments on %s (%d)\n\n",
 				color.New(color.FgCyan, color.Bold).Sprint("💬"),
 				color.New(color.FgCyan).Sprint(issueID),
-				len(comments.Nodes))
+				len(comments))
 
-			for i, comment := range comments.Nodes {
+			for i, comment := range comments {
 				if i > 0 {
 					fmt.Println(strings.Repeat("─", 50))
 				}
 
 				// Header with author and time
+				author := "Unknown"
+				if comment.User != nil {
+					author = comment.User.Name
+				}
 				timeAgo := formatTimeAgo(comment.CreatedAt)
 				fmt.Printf("%s %s %s\n",
-					color.New(color.FgCyan, color.Bold).Sprint(comment.User.Name),
+					color.New(color.FgCyan, color.Bold).Sprint(author),
 					color.New(color.FgWhite, color.Faint).Sprint("•"),
 					color.New(color.FgWhite, color.Faint).Sprint(timeAgo))
 

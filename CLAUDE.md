@@ -89,8 +89,10 @@ All commands follow this pattern:
 - **Core methods**:
   - `MakeRequest()`: Required by genqlient for generated code
   - `Execute()`: Legacy method for backward compatibility (deprecated)
-- **Usage**: genqlient-generated functions use this client automatically
-- **Adapter layer**: `pkg/api/adapter.go` wraps generated code for backward compatibility
+- **Usage**: Read commands call genqlient-generated functions directly (e.g., `api.ListIssues()`)
+- **Adapter layer**: `pkg/api/adapter.go` provides deprecated adapters for backward compatibility with write operations
+  - Read operation adapters (GetIssues, GetTeams, etc.) are deprecated - use generated functions directly
+  - Write operation adapters (CreateIssue, UpdateIssue, etc.) still in use until Phase 2 migration
 - **Code generation**: Operations defined in `pkg/api/operations/*.graphql` are compiled to type-safe Go code via genqlient
 
 #### Authentication
@@ -178,23 +180,43 @@ This project uses [genqlient](https://github.com/Khan/genqlient) to generate typ
 
 ### Migration to genqlient
 
-**Status:** ✅ Complete (100%)
+**Status:** ✅ Phase 1 Complete - Direct Types (100%)
 
-The project has fully migrated from hand-written GraphQL queries to genqlient code generation:
+The project has fully migrated to using genqlient-generated types directly, eliminating the adapter layer for read operations:
 
+**Phase 0: Code Generation (Completed)**
 - **Tool**: genqlient v0.8.1
 - **Entities migrated**: Issues, Projects, Teams, Users, Comments (5 total)
 - **Helper methods migrated**: GetTeamMembers (to genqlient), GetTeamStates (eliminated via optimization)
 - **Code removed**: 1,604 lines of hand-written code (queries.go: 1,515 + legacy.go: 89)
 - **Net reduction**: 1,050 lines (31% reduction in pkg/api)
+
+**Phase 1: Direct Types (Completed)**
+- **Read commands migrated**: All 11 read operations (list, get, search) across all entities
+- **Filter building**: Migrated from `map[string]interface{}` to typed filters (IssueFilter, ProjectFilter)
+- **Response handling**: Direct use of generated types with fragment-based field access
+- **Code removed**: 61 lines (buildIssueFilter + deprecation comments added)
+- **Adapter functions**: 10 read operations marked deprecated, kept for Phase 2 write operations
 - **All smoke tests passing**: 39/39
-- **Backward compatibility**: Maintained via adapter layer
+- **Type safety**: Full compile-time validation for all read operations
+
+**Commands using direct types:**
+- Issues: `issue list`, `issue get`, `issue search`
+- Projects: `project list`, `project get`
+- Teams: `team list`, `team get`, `team members`
+- Users: `user list`, `user whoami`
+- Comments: `comment list`
 
 **Performance optimizations:**
 - Team workflow states are embedded in issue fetches, eliminating extra API calls during state validation
 - Single API call for issue updates with state changes (previously required 2 calls)
+- Eliminated adapter conversion overhead for all read operations
 
-The migration improves type safety, reduces maintenance burden, and catches API changes at compile time rather than runtime.
+**Next phases:**
+- **Phase 2**: Migrate write operations (create, update, delete) to direct types
+- **Phase 3**: Remove adapter layer entirely (~600 lines)
+
+The migration achieves full type safety for read operations, eliminates maintenance burden, and catches API changes at compile time rather than runtime.
 
 ### Configuration
 
@@ -205,18 +227,19 @@ The migration improves type safety, reduces maintenance burden, and catches API 
 
 ## Adding New Commands
 
-### Using genqlient (Recommended)
-For new commands that require new GraphQL operations:
+### Using Direct genqlient Types (Recommended for Read Operations)
+For new read commands (list, get, search):
 
 1. **Define GraphQL operation** in appropriate `pkg/api/operations/<entity>.graphql` file:
    ```graphql
-   query GetMyNewData($filter: Filter, $first: Int) {
-       myNewData(filter: $filter, first: $first) {
+   query ListMyData($filter: MyDataFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
+       myData(filter: $filter, first: $first, after: $after, orderBy: $orderBy) {
            nodes {
                id
                name
                # ... fields you need
            }
+           pageInfo { hasNextPage endCursor }
        }
    }
    ```
@@ -225,33 +248,46 @@ For new commands that require new GraphQL operations:
    ```bash
    go generate ./pkg/api
    ```
-   This creates type-safe functions in `pkg/api/generated.go`
+   This creates type-safe functions in `pkg/api/generated.go` (e.g., `ListMyData()`)
 
-3. **Add adapter function** (if needed for backward compatibility) in `pkg/api/adapter.go`:
+3. **Create typed filter builder** in command file (if filters needed):
    ```go
-   func (c *Client) GetMyNewData(ctx context.Context, filter map[string]interface{}, limit int) (*MyNewDataResult, error) {
-       response, err := GetMyNewData(ctx, c, filter, limit)
-       if err != nil {
-           return nil, err
+   func buildMyDataFilterTyped(cmd *cobra.Command) api.MyDataFilter {
+       filter := api.MyDataFilter{}
+       if name, _ := cmd.Flags().GetString("name"); name != "" {
+           filter.Name = stringEq(name)  // Use helper functions
        }
-       return convertMyNewDataResponse(response), nil
+       return filter
    }
    ```
 
-4. **Create command definition** in appropriate `cmd/*.go` file
-
-5. **Implement command handler**:
+4. **Implement command handler** in appropriate `cmd/*.go` file:
+   ```go
    - Parse flags
    - Get auth header via `auth.GetAuthHeader()`
    - Create client: `client := api.NewClient(authHeader)`
-   - Call API method (adapter or generated function)
-   - Render output using `output` package
+   - Build typed filter: `filter := buildMyDataFilterTyped(cmd)`
+   - Convert pagination params to pointers
+   - Call generated function: `resp, err := api.ListMyData(ctx, client, filter, &limit, nil, orderByEnum)`
+   - Access response: `resp.MyData.Nodes`
+   - Render output using fragment fields (e.g., `node.MyDataListFields.Name`)
+   ```
 
-6. **Register command** in `init()` function
+5. **Register command** in `init()` function
 
-7. **Update README.md** with command documentation
+6. **Update README.md** with command documentation
 
-8. **Add to smoke_test.sh** if read-only
+7. **Add to smoke_test.sh** if read-only
+
+**Key patterns:**
+- Use typed filter structs (`api.MyDataFilter`) instead of `map[string]interface{}`
+- Call generated functions directly (`api.ListMyData()`) - no adapters
+- Access fields through fragments (`node.MyDataListFields`)
+- Add nil checks for nullable fields
+- Use helper functions for common patterns (stringEq, boolEq, etc.)
+
+### Using Adapters (For Write Operations Only)
+Write operations (create, update, delete) currently still use the adapter layer. This will change in Phase 2.
 
 ### Updating Linear's GraphQL Schema
 When Linear's API changes, update the schema:

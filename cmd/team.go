@@ -50,24 +50,32 @@ var teamListCmd = &cobra.Command{
 
 		// Get sort option
 		sortBy, _ := cmd.Flags().GetString("sort")
-		orderBy := ""
+		var orderByEnum *api.PaginationOrderBy
 		if sortBy != "" {
 			switch sortBy {
 			case "created", "createdAt":
-				orderBy = "createdAt"
+				val := api.PaginationOrderByCreatedat
+				orderByEnum = &val
 			case "updated", "updatedAt":
-				orderBy = "updatedAt"
+				val := api.PaginationOrderByUpdatedat
+				orderByEnum = &val
 			case "linear":
-				// Use empty string for Linear's default sort
-				orderBy = ""
+				// Use nil for Linear's default sort
+				orderByEnum = nil
 			default:
 				output.Error(fmt.Sprintf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy), plaintext, jsonOut)
 				os.Exit(1)
 			}
 		}
 
+		// Convert limit to pointer
+		var limitPtr *int
+		if limit > 0 {
+			limitPtr = &limit
+		}
+
 		// Get teams
-		teams, err := client.GetTeams(context.Background(), limit, "", orderBy)
+		resp, err := api.ListTeams(context.Background(), client, limitPtr, nil, orderByEnum)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to list teams: %v", err), plaintext, jsonOut)
 			os.Exit(1)
@@ -75,20 +83,24 @@ var teamListCmd = &cobra.Command{
 
 		// Handle output
 		if jsonOut {
-			output.JSON(teams.Nodes)
+			output.JSON(resp.Teams.Nodes)
 		} else if plaintext {
 			fmt.Println("Key\tName\tDescription\tPrivate\tIssues")
-			for _, team := range teams.Nodes {
-				description := team.Description
+			for _, node := range resp.Teams.Nodes {
+				f := node.TeamListFields
+				description := ""
+				if f.Description != nil {
+					description = *f.Description
+				}
 				if len(description) > 50 {
 					description = description[:47] + "..."
 				}
 				fmt.Printf("%s\t%s\t%s\t%v\t%d\n",
-					team.Key,
-					team.Name,
+					f.Key,
+					f.Name,
 					description,
-					team.Private,
-					team.IssueCount,
+					f.Private,
+					f.IssueCount,
 				)
 			}
 		} else {
@@ -96,25 +108,29 @@ var teamListCmd = &cobra.Command{
 			headers := []string{"Key", "Name", "Description", "Private", "Issues"}
 			rows := [][]string{}
 
-			for _, team := range teams.Nodes {
-				description := team.Description
+			for _, node := range resp.Teams.Nodes {
+				f := node.TeamListFields
+				description := ""
+				if f.Description != nil {
+					description = *f.Description
+				}
 				if len(description) > 40 {
 					description = description[:37] + "..."
 				}
 
 				privateStr := ""
-				if team.Private {
+				if f.Private {
 					privateStr = color.New(color.FgYellow).Sprint("🔒 Yes")
 				} else {
 					privateStr = color.New(color.FgGreen).Sprint("No")
 				}
 
 				rows = append(rows, []string{
-					color.New(color.FgCyan, color.Bold).Sprint(team.Key),
-					team.Name,
+					color.New(color.FgCyan, color.Bold).Sprint(f.Key),
+					f.Name,
 					description,
 					privateStr,
-					fmt.Sprintf("%d", team.IssueCount),
+					fmt.Sprintf("%d", f.IssueCount),
 				})
 			}
 
@@ -126,7 +142,7 @@ var teamListCmd = &cobra.Command{
 			if !plaintext && !jsonOut {
 				fmt.Printf("\n%s %d teams\n",
 					color.New(color.FgGreen).Sprint("✓"),
-					len(teams.Nodes))
+					len(resp.Teams.Nodes))
 			}
 		}
 	},
@@ -154,11 +170,12 @@ var teamGetCmd = &cobra.Command{
 		client := api.NewClient(authHeader)
 
 		// Get team details
-		team, err := client.GetTeam(context.Background(), teamKey)
+		resp, err := api.GetTeam(context.Background(), client, teamKey)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to get team: %v", err), plaintext, jsonOut)
 			os.Exit(1)
 		}
+		team := resp.Team.TeamDetailFields
 
 		// Handle output
 		if jsonOut {
@@ -166,8 +183,8 @@ var teamGetCmd = &cobra.Command{
 		} else if plaintext {
 			fmt.Printf("Key: %s\n", team.Key)
 			fmt.Printf("Name: %s\n", team.Name)
-			if team.Description != "" {
-				fmt.Printf("Description: %s\n", team.Description)
+			if team.Description != nil && *team.Description != "" {
+				fmt.Printf("Description: %s\n", *team.Description)
 			}
 			fmt.Printf("Private: %v\n", team.Private)
 			fmt.Printf("Issue Count: %d\n", team.IssueCount)
@@ -180,10 +197,10 @@ var teamGetCmd = &cobra.Command{
 				color.New(color.FgCyan).Sprint(team.Key))
 			fmt.Println(strings.Repeat("─", 50))
 
-			if team.Description != "" {
+			if team.Description != nil && *team.Description != "" {
 				fmt.Printf("\n%s\n%s\n",
 					color.New(color.Bold).Sprint("Description:"),
-					team.Description)
+					*team.Description)
 			}
 
 			privateStr := color.New(color.FgGreen).Sprint("No")
@@ -218,19 +235,19 @@ var teamMembersCmd = &cobra.Command{
 		client := api.NewClient(authHeader)
 
 		// Get team members
-		// GetTeamMembers now uses genqlient adapter (no code change needed)
-		members, err := client.GetTeamMembers(context.Background(), teamKey)
+		resp, err := api.GetTeamMembers(context.Background(), client, teamKey)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to get team members: %v", err), plaintext, jsonOut)
 			os.Exit(1)
 		}
+		members := resp.Team.Members.Nodes
 
 		// Handle output
 		if jsonOut {
-			output.JSON(members.Nodes)
+			output.JSON(members)
 		} else if plaintext {
 			fmt.Println("Name\tEmail\tRole\tActive")
-			for _, member := range members.Nodes {
+			for _, member := range members {
 				role := "Member"
 				if member.Admin {
 					role = "Admin"
@@ -247,7 +264,7 @@ var teamMembersCmd = &cobra.Command{
 			headers := []string{"Name", "Email", "Role", "Status"}
 			rows := [][]string{}
 
-			for _, member := range members.Nodes {
+			for _, member := range members {
 				role := "Member"
 				roleColor := color.New(color.FgWhite)
 				if member.Admin {
@@ -280,7 +297,7 @@ var teamMembersCmd = &cobra.Command{
 			if !plaintext && !jsonOut {
 				fmt.Printf("\n%s %d members in team %s\n",
 					color.New(color.FgGreen).Sprint("✓"),
-					len(members.Nodes),
+					len(members),
 					color.New(color.FgCyan).Sprint(teamKey))
 			}
 		}

@@ -51,35 +51,43 @@ var userListCmd = &cobra.Command{
 
 		// Get sort option
 		sortBy, _ := cmd.Flags().GetString("sort")
-		orderBy := ""
+		var orderByEnum *api.PaginationOrderBy
 		if sortBy != "" {
 			switch sortBy {
 			case "created", "createdAt":
-				orderBy = "createdAt"
+				val := api.PaginationOrderByCreatedat
+				orderByEnum = &val
 			case "updated", "updatedAt":
-				orderBy = "updatedAt"
+				val := api.PaginationOrderByUpdatedat
+				orderByEnum = &val
 			case "linear":
-				// Use empty string for Linear's default sort
-				orderBy = ""
+				// Use nil for Linear's default sort
+				orderByEnum = nil
 			default:
 				output.Error(fmt.Sprintf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy), plaintext, jsonOut)
 				os.Exit(1)
 			}
 		}
 
+		// Convert limit to pointer
+		var limitPtr *int
+		if limit > 0 {
+			limitPtr = &limit
+		}
+
 		// Get users
-		users, err := client.GetUsers(context.Background(), limit, "", orderBy)
+		resp, err := api.ListUsers(context.Background(), client, limitPtr, nil, orderByEnum)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to list users: %v", err), plaintext, jsonOut)
 			os.Exit(1)
 		}
 
 		// Filter active users if requested
-		filteredUsers := users.Nodes
+		filteredUsers := resp.Users.Nodes
 		if activeOnly {
-			var activeUsers []api.User
-			for _, user := range users.Nodes {
-				if user.Active {
+			activeUsers := resp.Users.Nodes[:0] // reuse slice with zero length
+			for _, user := range resp.Users.Nodes {
+				if user.UserListFields.Active {
 					activeUsers = append(activeUsers, user)
 				}
 			}
@@ -88,19 +96,25 @@ var userListCmd = &cobra.Command{
 
 		// Handle output
 		if jsonOut {
-			output.JSON(filteredUsers)
+			// Extract just the fields for JSON output
+			var jsonUsers []api.UserListFields
+			for _, user := range filteredUsers {
+				jsonUsers = append(jsonUsers, user.UserListFields)
+			}
+			output.JSON(jsonUsers)
 		} else if plaintext {
 			fmt.Println("Name\tEmail\tRole\tActive")
 			for _, user := range filteredUsers {
+				f := user.UserListFields
 				role := "Member"
-				if user.Admin {
+				if f.Admin {
 					role = "Admin"
 				}
 				fmt.Printf("%s\t%s\t%s\t%v\n",
-					user.Name,
-					user.Email,
+					f.Name,
+					f.Email,
 					role,
-					user.Active,
+					f.Active,
 				)
 			}
 		} else {
@@ -109,25 +123,26 @@ var userListCmd = &cobra.Command{
 			rows := [][]string{}
 
 			for _, user := range filteredUsers {
+				f := user.UserListFields
 				role := "Member"
 				roleColor := color.New(color.FgWhite)
-				if user.Admin {
+				if f.Admin {
 					role = "Admin"
 					roleColor = color.New(color.FgYellow)
 				}
-				if user.IsMe {
+				if f.IsMe {
 					role = role + " (You)"
 					roleColor = color.New(color.FgCyan, color.Bold)
 				}
 
 				status := color.New(color.FgGreen).Sprint("✓ Active")
-				if !user.Active {
+				if !f.Active {
 					status = color.New(color.FgRed).Sprint("✗ Inactive")
 				}
 
 				rows = append(rows, []string{
-					user.Name,
-					color.New(color.FgCyan).Sprint(user.Email),
+					f.Name,
+					color.New(color.FgCyan).Sprint(f.Email),
 					roleColor.Sprint(role),
 					status,
 				})
@@ -245,23 +260,24 @@ var userMeCmd = &cobra.Command{
 		client := api.NewClient(authHeader)
 
 		// Get current user
-		user, err := client.GetViewer(context.Background())
+		resp, err := api.GetViewer(context.Background(), client)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to get current user: %v", err), plaintext, jsonOut)
 			os.Exit(1)
 		}
+		user := resp.Viewer.UserDetailFields
 
 		// Handle output
 		if jsonOut {
 			output.JSON(user)
 		} else if plaintext {
-			fmt.Printf("ID: %s\n", user.ID)
+			fmt.Printf("ID: %s\n", user.Id)
 			fmt.Printf("Name: %s\n", user.Name)
 			fmt.Printf("Email: %s\n", user.Email)
 			fmt.Printf("Admin: %v\n", user.Admin)
 			fmt.Printf("Active: %v\n", user.Active)
-			if user.AvatarURL != "" {
-				fmt.Printf("Avatar: %s\n", user.AvatarURL)
+			if user.AvatarUrl != nil && *user.AvatarUrl != "" {
+				fmt.Printf("Avatar: %s\n", *user.AvatarUrl)
 			}
 		} else {
 			// Formatted output
@@ -273,7 +289,7 @@ var userMeCmd = &cobra.Command{
 
 			fmt.Printf("\n%s %s\n", color.New(color.Bold).Sprint("Email:"),
 				color.New(color.FgCyan).Sprint(user.Email))
-			fmt.Printf("%s %s\n", color.New(color.Bold).Sprint("ID:"), user.ID)
+			fmt.Printf("%s %s\n", color.New(color.Bold).Sprint("ID:"), user.Id)
 
 			role := "Member"
 			roleColor := color.New(color.FgWhite)
@@ -289,9 +305,9 @@ var userMeCmd = &cobra.Command{
 			}
 			fmt.Printf("%s %s\n", color.New(color.Bold).Sprint("Status:"), status)
 
-			if user.AvatarURL != "" {
+			if user.AvatarUrl != nil && *user.AvatarUrl != "" {
 				fmt.Printf("\n%s\n%s\n", color.New(color.Bold).Sprint("Avatar:"),
-					color.New(color.FgBlue).Sprint(user.AvatarURL))
+					color.New(color.FgBlue).Sprint(*user.AvatarUrl))
 			}
 			fmt.Println()
 		}
