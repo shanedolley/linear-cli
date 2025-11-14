@@ -1,4 +1,4 @@
-# linctl Makefile
+# lincli Makefile
 
 .PHONY: build clean test install lint fmt deps help
 

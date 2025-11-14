@@ -31,8 +31,8 @@ jobs:
 
       - name: Compute tarball sha256
         run: |
-          curl -sL "$TARBALL" -o linctl.tgz
-          SHASUM=$(sha256sum linctl.tgz | awk '{print $1}')
+          curl -sL "$TARBALL" -o lincli.tgz
+          SHASUM=$(sha256sum lincli.tgz | awk '{print $1}')
           echo "SHA256=$SHASUM" >> $GITHUB_ENV
 
       - name: Clone tap repo and push branch
@@ -42,26 +42,26 @@ jobs:
           set -e
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
-          git clone https://github.com/dorkitude/homebrew-linctl.git
-          cd homebrew-linctl
-          BRANCH="bump-linctl-${TAG#v}"
+          git clone https://github.com/shanedolley/homebrew-lincli.git
+          cd homebrew-lincli
+          BRANCH="bump-lincli-${TAG#v}"
           git checkout -b "$BRANCH"
           # Update Formula
-          sed -i.bak -E "s|url \"[^\"]+\"|url \"https://github.com/${{ github.repository }}/archive/refs/tags/${TAG}.tar.gz\"|g" Formula/linctl.rb
-          sed -i.bak -E "s|sha256 \"[0-9a-f]+\"|sha256 \"${SHA256}\"|g" Formula/linctl.rb
-          rm -f Formula/linctl.rb.bak
-          git add Formula/linctl.rb
-          git commit -m "linctl: bump to ${TAG}"
-          git push "https://${GH_TOKEN}@github.com/dorkitude/homebrew-linctl.git" HEAD:"$BRANCH"
+          sed -i.bak -E "s|url \"[^\"]+\"|url \"https://github.com/${{ github.repository }}/archive/refs/tags/${TAG}.tar.gz\"|g" Formula/lincli.rb
+          sed -i.bak -E "s|sha256 \"[0-9a-f]+\"|sha256 \"${SHA256}\"|g" Formula/lincli.rb
+          rm -f Formula/lincli.rb.bak
+          git add Formula/lincli.rb
+          git commit -m "lincli: bump to ${TAG}"
+          git push "https://${GH_TOKEN}@github.com/shanedolley/homebrew-lincli.git" HEAD:"$BRANCH"
 
       - name: Open PR on tap repo
         env:
           GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
         run: |
-          cd homebrew-linctl
-          BRANCH="bump-linctl-${TAG#v}"
+          cd homebrew-lincli
+          BRANCH="bump-lincli-${TAG#v}"
           gh pr create \
-            --title "linctl: bump to ${TAG}" \
+            --title "lincli: bump to ${TAG}" \
             --body "Update formula to ${TAG}." \
             --base master \
             --head "$BRANCH"
