@@ -24,7 +24,7 @@ var version = "dev"
 // generateHeader creates a nice header box with proper Unicode box drawing
 func generateHeader() string {
 	lines := []string{
-		"🚀 linctl",
+		"🚀 lincli",
 		"Linear CLI - Built with ❤️",
 	}
 
@@ -67,7 +67,7 @@ func generateHeader() string {
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-    Use:     "linctl",
+    Use:     "lincli",
     Short:   "A comprehensive Linear CLI tool",
     Long:    color.New(color.FgCyan).Sprintf("%s\nA comprehensive CLI tool for Linear's API featuring:\n• Issue management (create, list, update, archive)\n• Project tracking and collaboration  \n• Team and user management\n• Comments and attachments\n• Webhook configuration\n• Table/plaintext/JSON output formats\n", generateHeader()),
     Version: version,
@@ -112,7 +112,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	// Global flags
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.linctl.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.lincli.yaml)")
 	rootCmd.PersistentFlags().BoolVarP(&plaintext, "plaintext", "p", false, "plaintext output (non-interactive)")
 	rootCmd.PersistentFlags().BoolVarP(&jsonOut, "json", "j", false, "JSON output")
 
