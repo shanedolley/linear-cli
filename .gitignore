@@ -50,4 +50,5 @@ coverage.out
 coverage.html
 
 # Generated code from genqlient
-pkg/api/generated/generated.go
+# Note: Keeping generated.go in git during migration for easier review.
+# Will be excluded from git after migration is stable and tested.
