@@ -10,6 +10,8 @@ import (
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/Khan/genqlient/graphql"
 )
 
 const (
@@ -128,4 +130,69 @@ type RateLimit struct {
 	Limit     int       `json:"limit"`
 	Remaining int       `json:"remaining"`
 	Reset     time.Time `json:"reset"`
+}
+
+// MakeRequest implements the graphql.Client interface required by genqlient
+func (c *Client) MakeRequest(ctx context.Context, req *graphql.Request, resp *graphql.Response) error {
+	// Convert Variables from interface{} to map[string]interface{}
+	var variables map[string]interface{}
+	if req.Variables != nil {
+		if v, ok := req.Variables.(map[string]interface{}); ok {
+			variables = v
+		}
+	}
+
+	// Build the GraphQL request body
+	reqBody := GraphQLRequest{
+		Query:     req.Query,
+		Variables: variables,
+	}
+
+	jsonBody, err := json.Marshal(reqBody)
+	if err != nil {
+		return fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", c.baseURL, bytes.NewBuffer(jsonBody))
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", c.authHeader)
+	httpReq.Header.Set("User-Agent", "lincli/0.1.0")
+
+	httpResp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return fmt.Errorf("request failed: %w", err)
+	}
+	defer func() { _ = httpResp.Body.Close() }()
+
+	body, err := io.ReadAll(httpResp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response: %w", err)
+	}
+
+	if httpResp.StatusCode != http.StatusOK {
+		return fmt.Errorf("API request failed with status %d: %s", httpResp.StatusCode, string(body))
+	}
+
+	// Parse into a GraphQL response structure
+	var gqlResp GraphQLResponse
+	if err := json.Unmarshal(body, &gqlResp); err != nil {
+		return fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	if len(gqlResp.Errors) > 0 {
+		return fmt.Errorf("GraphQL errors: %v", gqlResp.Errors)
+	}
+
+	// Unmarshal the data into the response Data field
+	if resp.Data != nil {
+		if err := json.Unmarshal(gqlResp.Data, resp.Data); err != nil {
+			return fmt.Errorf("failed to unmarshal data: %w", err)
+		}
+	}
+
+	return nil
 }

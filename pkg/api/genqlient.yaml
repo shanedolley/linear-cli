@@ -2,7 +2,7 @@
 schema: schema.graphql
 operations:
   - operations/*.graphql
-generated: generated/generated.go
+generated: generated.go
 package: api
 
 # Use the existing GraphQL client's Execute method
@@ -17,6 +17,23 @@ bindings:
   # Use time.Time for DateTime scalars
   DateTime:
     type: time.Time
+  # DateTimeOrDuration can be either DateTime or Duration, use string
+  DateTimeOrDuration:
+    type: string
+  # Duration scalar - use string representation
+  Duration:
+    type: string
+  # JSON scalars - use interface{} for flexibility
+  JSON:
+    type: interface{}
+  JSONObject:
+    type: map[string]interface{}
+  # TimelessDate - use string in YYYY-MM-DD format
+  TimelessDate:
+    type: string
+  # TimelessDateOrDuration - use string
+  TimelessDateOrDuration:
+    type: string
   # Use UUID type if available, otherwise string
   UUID:
     type: string
