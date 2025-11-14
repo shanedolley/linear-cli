@@ -132,18 +132,52 @@ type RateLimit struct {
 	Reset     time.Time `json:"reset"`
 }
 
-// MakeRequest implements the graphql.Client interface required by genqlient
-func (c *Client) MakeRequest(ctx context.Context, req *graphql.Request, resp *graphql.Response) error {
-	// Convert Variables from interface{} to map[string]interface{}
-	var variables map[string]interface{}
-	if req.Variables != nil {
-		if v, ok := req.Variables.(map[string]interface{}); ok {
-			variables = v
+// stripNulls recursively removes null values from a map
+func stripNulls(m map[string]interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+	for k, v := range m {
+		if v == nil {
+			continue
+		}
+		if innerMap, ok := v.(map[string]interface{}); ok {
+			stripped := stripNulls(innerMap)
+			if len(stripped) > 0 {
+				result[k] = stripped
+			}
+		} else if innerSlice, ok := v.([]interface{}); ok {
+			// Keep slices even if they contain nulls (they might be intentional)
+			result[k] = innerSlice
+		} else {
+			result[k] = v
 		}
 	}
+	return result
+}
 
+// MakeRequest implements the graphql.Client interface required by genqlient
+func (c *Client) MakeRequest(ctx context.Context, req *graphql.Request, resp *graphql.Response) error {
 	// Build the GraphQL request body
-	reqBody := GraphQLRequest{
+	// We need to strip null values from variables because Linear's API doesn't like them
+	type graphQLRequest struct {
+		Query     string                 `json:"query"`
+		Variables map[string]interface{} `json:"variables,omitempty"`
+	}
+
+	// Convert variables to map and strip nulls
+	var variables map[string]interface{}
+	if req.Variables != nil {
+		varBytes, err := json.Marshal(req.Variables)
+		if err != nil {
+			return fmt.Errorf("failed to marshal variables: %w", err)
+		}
+		if err := json.Unmarshal(varBytes, &variables); err != nil {
+			return fmt.Errorf("failed to unmarshal variables: %w", err)
+		}
+		// Strip null values recursively
+		variables = stripNulls(variables)
+	}
+
+	reqBody := graphQLRequest{
 		Query:     req.Query,
 		Variables: variables,
 	}
@@ -152,6 +186,9 @@ func (c *Client) MakeRequest(ctx context.Context, req *graphql.Request, resp *gr
 	if err != nil {
 		return fmt.Errorf("failed to marshal request: %w", err)
 	}
+
+	// DEBUG: Print the request body for debugging
+	// fmt.Fprintf(os.Stderr, "DEBUG: GraphQL Request: %s\n", string(jsonBody))
 
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", c.baseURL, bytes.NewBuffer(jsonBody))
 	if err != nil {

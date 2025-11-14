@@ -74,7 +74,7 @@ var issueListCmd = &cobra.Command{
 			}
 		}
 
-		issues, err := client.GetIssues(context.Background(), filter, limit, "", orderBy)
+		issues, err := client.GetIssuesNew(context.Background(), filter, limit, "", orderBy)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to fetch issues: %v", err), plaintext, jsonOut)
 			os.Exit(1)
@@ -245,7 +245,7 @@ Examples:
 
 		includeArchived, _ := cmd.Flags().GetBool("include-archived")
 
-		issues, err := client.IssueSearch(context.Background(), query, filter, limit, "", orderBy, includeArchived)
+		issues, err := client.IssueSearchNew(context.Background(), query, filter, limit, "", orderBy, includeArchived)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to search issues: %v", err), plaintext, jsonOut)
 			os.Exit(1)
@@ -273,7 +273,7 @@ var issueGetCmd = &cobra.Command{
 		}
 
 		client := api.NewClient(authHeader)
-		issue, err := client.GetIssue(context.Background(), args[0])
+		issue, err := client.GetIssueNew(context.Background(), args[0])
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to fetch issue: %v", err), plaintext, jsonOut)
 			os.Exit(1)
@@ -807,7 +807,7 @@ var issueAssignCmd = &cobra.Command{
 			"assigneeId": viewer.ID,
 		}
 
-		issue, err := client.UpdateIssue(context.Background(), args[0], input)
+		issue, err := client.UpdateIssueNew(context.Background(), args[0], input)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to assign issue: %v", err), plaintext, jsonOut)
 			os.Exit(1)
@@ -891,7 +891,7 @@ var issueCreateCmd = &cobra.Command{
 		}
 
 		// Create issue
-		issue, err := client.CreateIssue(context.Background(), input)
+		issue, err := client.CreateIssueNew(context.Background(), input)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to create issue: %v", err), plaintext, jsonOut)
 			os.Exit(1)
@@ -998,7 +998,7 @@ Examples:
 			stateName, _ := cmd.Flags().GetString("state")
 
 			// First, get the issue to know which team it belongs to
-			issue, err := client.GetIssue(context.Background(), args[0])
+			issue, err := client.GetIssueNew(context.Background(), args[0])
 			if err != nil {
 				output.Error(fmt.Sprintf("Failed to get issue: %v", err), plaintext, jsonOut)
 				os.Exit(1)
@@ -1056,7 +1056,7 @@ Examples:
 		}
 
 		// Update the issue
-		issue, err := client.UpdateIssue(context.Background(), args[0], input)
+		issue, err := client.UpdateIssueNew(context.Background(), args[0], input)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to update issue: %v", err), plaintext, jsonOut)
 			os.Exit(1)

@@ -181,6 +181,10 @@ func convertToNullableUserFilter(filter map[string]interface{}) *NullableUserFil
 		userFilter.Email = convertToStringComparator(email)
 	}
 
+	if isMe, ok := filter["isMe"].(map[string]interface{}); ok {
+		userFilter.IsMe = convertToBooleanComparator(isMe)
+	}
+
 	return userFilter
 }
 
@@ -210,17 +214,31 @@ func convertToWorkflowStateFilter(filter map[string]interface{}) *WorkflowStateF
 	}
 
 	stateFilter := &WorkflowStateFilter{}
+	hasValue := false
 
 	if id, ok := filter["id"].(map[string]interface{}); ok {
 		stateFilter.Id = convertToIDComparator(id)
+		if stateFilter.Id != nil {
+			hasValue = true
+		}
 	}
 
 	if name, ok := filter["name"].(map[string]interface{}); ok {
 		stateFilter.Name = convertToStringComparator(name)
+		if stateFilter.Name != nil {
+			hasValue = true
+		}
 	}
 
 	if typeVal, ok := filter["type"].(map[string]interface{}); ok {
 		stateFilter.Type = convertToStringComparator(typeVal)
+		if stateFilter.Type != nil {
+			hasValue = true
+		}
+	}
+
+	if !hasValue {
+		return nil
 	}
 
 	return stateFilter
@@ -255,6 +273,25 @@ func convertToIDComparator(comp map[string]interface{}) *IDComparator {
 	return comparator
 }
 
+// convertToBooleanComparator converts a boolean comparator map to typed comparator
+func convertToBooleanComparator(comp map[string]interface{}) *BooleanComparator {
+	if comp == nil {
+		return nil
+	}
+
+	comparator := &BooleanComparator{}
+
+	if eq, ok := comp["eq"].(bool); ok {
+		comparator.Eq = &eq
+	}
+
+	if neq, ok := comp["neq"].(bool); ok {
+		comparator.Neq = &neq
+	}
+
+	return comparator
+}
+
 // convertToStringComparator converts a string comparator map to typed comparator
 func convertToStringComparator(comp map[string]interface{}) *StringComparator {
 	if comp == nil {
@@ -262,21 +299,41 @@ func convertToStringComparator(comp map[string]interface{}) *StringComparator {
 	}
 
 	comparator := &StringComparator{}
+	hasValue := false
 
 	if eq, ok := comp["eq"].(string); ok {
 		comparator.Eq = &eq
+		hasValue = true
 	}
 
 	if neq, ok := comp["neq"].(string); ok {
 		comparator.Neq = &neq
+		hasValue = true
 	}
 
 	if contains, ok := comp["contains"].(string); ok {
 		comparator.Contains = &contains
+		hasValue = true
 	}
 
 	if containsIgnoreCase, ok := comp["containsIgnoreCase"].(string); ok {
 		comparator.ContainsIgnoreCase = &containsIgnoreCase
+		hasValue = true
+	}
+
+	if nin, ok := comp["nin"].([]interface{}); ok {
+		stringSlice := make([]string, len(nin))
+		for i, v := range nin {
+			if s, ok := v.(string); ok {
+				stringSlice[i] = s
+			}
+		}
+		comparator.Nin = stringSlice
+		hasValue = true
+	}
+
+	if !hasValue {
+		return nil
 	}
 
 	return comparator
@@ -324,30 +381,41 @@ func convertToDateComparator(comp map[string]interface{}) *DateComparator {
 	}
 
 	comparator := &DateComparator{}
+	hasValue := false
 
 	// TimelessDate is configured as string in genqlient.yaml
 	if eq, ok := comp["eq"].(string); ok {
 		comparator.Eq = &eq
+		hasValue = true
 	}
 
 	if neq, ok := comp["neq"].(string); ok {
 		comparator.Neq = &neq
+		hasValue = true
 	}
 
 	if gt, ok := comp["gt"].(string); ok {
 		comparator.Gt = &gt
+		hasValue = true
 	}
 
 	if gte, ok := comp["gte"].(string); ok {
 		comparator.Gte = &gte
+		hasValue = true
 	}
 
 	if lt, ok := comp["lt"].(string); ok {
 		comparator.Lt = &lt
+		hasValue = true
 	}
 
 	if lte, ok := comp["lte"].(string); ok {
 		comparator.Lte = &lte
+		hasValue = true
+	}
+
+	if !hasValue {
+		return nil
 	}
 
 	return comparator
