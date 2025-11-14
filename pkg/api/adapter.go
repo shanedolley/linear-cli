@@ -1601,3 +1601,40 @@ func convertToLegacyCommentFromUpdate(resp *UpdateCommentResponse) *Comment {
 		},
 	}
 }
+
+// GetTeamMembers wraps the generated GetTeamMembers function
+func (c *Client) GetTeamMembers(ctx context.Context, teamKey string) (*Users, error) {
+	resp, err := GetTeamMembers(ctx, c, teamKey)
+	if err != nil {
+		return nil, err
+	}
+	return convertTeamMembersToLegacyUsers(resp), nil
+}
+
+// convertTeamMembersToLegacyUsers converts GetTeamMembers response to legacy Users type
+func convertTeamMembersToLegacyUsers(resp *GetTeamMembersResponse) *Users {
+	users := &Users{
+		Nodes: make([]User, len(resp.Team.Members.Nodes)),
+	}
+
+	for i, member := range resp.Team.Members.Nodes {
+		users.Nodes[i] = User{
+			ID:        member.Id,
+			Name:      member.Name,
+			Email:     member.Email,
+			AvatarURL: ptrToString(member.AvatarUrl),
+			IsMe:      member.IsMe,
+			Active:    member.Active,
+			Admin:     member.Admin,
+		}
+	}
+
+	if resp.Team.Members.PageInfo != nil {
+		users.PageInfo.HasNextPage = resp.Team.Members.PageInfo.HasNextPage
+		if resp.Team.Members.PageInfo.EndCursor != nil {
+			users.PageInfo.EndCursor = *resp.Team.Members.PageInfo.EndCursor
+		}
+	}
+
+	return users
+}
