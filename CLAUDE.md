@@ -1,0 +1,233 @@
+# CLAUDE.md
+
+This file provides guidance when working with code in this repository.
+
+> **Note**: This is a personal fork of dorkitude/linctl, renamed to lincli. This fork is maintained by Shane Dolley for personal use and is not intended for upstream contribution or public distribution via Homebrew.
+
+## Project Overview
+
+**lincli** is a comprehensive Go-based CLI tool for Linear's GraphQL API. The tool is designed to be both agent-friendly (via `--json` output) and human-friendly (via interactive table and plaintext formats).
+
+## Common Commands
+
+### Build & Development
+```bash
+make build          # Build the lincli binary
+make deps           # Install/update dependencies (go mod download + tidy)
+make fmt            # Format code (go fmt ./...)
+make lint           # Run linter (requires golangci-lint)
+make test           # Run smoke tests via smoke_test.sh
+make test-verbose   # Run smoke tests with verbose output
+make install        # Build and install to /usr/local/bin (requires sudo)
+make dev-install    # Create development symlink to /usr/local/bin
+
+# Run without building
+go run main.go [command] [flags]
+
+# Run after building
+./lincli [command] [flags]
+```
+
+### Testing
+- **Smoke tests**: `./smoke_test.sh` - Tests all read-only commands
+- **Manual testing**: Run `lincli auth` to authenticate, then test commands
+- Integration tests are read-only and safe with production API keys
+
+## Architecture
+
+### Project Structure
+
+```
+lincli/
+├── main.go              # Entry point, embeds README.md
+├── cmd/                 # Cobra command definitions
+│   ├── root.go          # Root command, global flags, config
+│   ├── auth.go          # Authentication commands
+│   ├── issue.go         # Issue management (list, get, create, update, search)
+│   ├── project.go       # Project commands
+│   ├── team.go          # Team commands
+│   ├── user.go          # User commands
+│   ├── comment.go       # Comment commands
+│   └── docs.go          # Embedded README rendering
+├── pkg/
+│   ├── api/
+│   │   ├── client.go    # GraphQL client with Execute() method
+│   │   └── queries.go   # GraphQL queries, type definitions
+│   ├── auth/
+│   │   └── auth.go      # Auth config management (~/.linctl-auth.json)
+│   ├── output/
+│   │   └── output.go    # Output formatting (table, plaintext, JSON)
+│   └── utils/
+│       └── time.go      # Time expression parser (e.g., "3_weeks_ago")
+└── Formula/             # Homebrew formula
+```
+
+### Key Design Patterns
+
+#### Command Structure
+All commands follow this pattern:
+1. Parse flags using Cobra
+2. Get auth header via `auth.GetAuthHeader()`
+3. Create API client: `client := api.NewClient(authHeader)`
+4. Build filter/query parameters from flags
+5. Call API method with `context.Background()`
+6. Render output using `output` package functions
+
+#### API Client
+- **Location**: `pkg/api/client.go`
+- **Pattern**: GraphQL client with single `Execute()` method
+- **Usage**: Pass GraphQL query string, variables map, and result pointer
+- **Error handling**: Returns error for HTTP failures or GraphQL errors
+- **Type definitions**: All in `pkg/api/queries.go`
+
+#### Authentication
+- **Storage**: `~/.lincli-auth.json` (0600 permissions)
+- **Format**: JSON with `api_key` field
+- **Flow**: Personal API Key only (no OAuth)
+- **Validation**: Tests API key by fetching viewer on login
+
+#### Output Formatting
+Three output modes controlled by global flags:
+- **Table** (default): Interactive, colored tablewriter output
+- **Plaintext** (`--plaintext`, `-p`): Markdown-style for non-interactive use
+- **JSON** (`--json`, `-j`): Machine-readable, for agents and scripts
+
+The `output` package provides:
+- `output.JSON()` - Marshal and print JSON
+- `output.Error()` - Format errors per output mode
+- `output.Success()` - Format success messages
+- `output.Info()` - Format info messages
+- `output.Table()` - Render table output
+
+#### Time Filtering
+The `utils.ParseTimeExpression()` function converts human-readable time expressions:
+- Relative: `3_weeks_ago`, `6_months_ago`, `1_year_ago`
+- Special: `all_time` (no filter)
+- ISO dates: `2025-07-01` or `2025-07-01T15:30:00Z`
+- Default: `6_months_ago` (when no flag provided)
+
+**Important**: List commands default to 6-month filter for performance. Use `--newer-than all_time` to see all items.
+
+### GraphQL Query Patterns
+
+Commands use hand-written GraphQL queries in `pkg/api/queries.go`. Common patterns:
+
+```go
+// Query with pagination and filtering
+func (c *Client) GetIssues(ctx context.Context, filter map[string]interface{}, limit int, cursor string, orderBy string) (*Issues, error) {
+    query := `query($filter: IssueFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
+        issues(filter: $filter, first: $first, after: $after, orderBy: $orderBy) {
+            nodes { /* fields */ }
+            pageInfo { hasNextPage endCursor }
+        }
+    }`
+
+    variables := map[string]interface{}{
+        "filter": filter,
+        "first": limit,
+        "after": cursor,
+        "orderBy": orderBy,
+    }
+
+    var result struct{ Issues Issues `json:"issues"` }
+    err := c.Execute(ctx, query, variables, &result)
+    return &result.Issues, err
+}
+```
+
+### Configuration
+
+- **Config file**: `~/.lincli.yaml` (optional)
+- **Auth file**: `~/.lincli-auth.json` (required for authenticated commands)
+- **Viper**: Used for config management
+- **Environment**: `LINEAR_API_KEY` env var NOT used (only file-based auth)
+
+## Adding New Commands
+
+1. **Create command definition** in appropriate `cmd/*.go` file
+2. **Define GraphQL types** in `pkg/api/queries.go` if needed
+3. **Add API method** in `pkg/api/queries.go` for API calls
+4. **Implement command handler**:
+   - Parse flags
+   - Get auth header
+   - Create client
+   - Call API method
+   - Render output using `output` package
+5. **Register command** in `init()` function
+6. **Update README.md** with command documentation
+7. **Add to smoke_test.sh** if read-only
+
+## Important Notes
+
+### Issue Filtering
+- **Default behavior**: List commands filter to last 6 months (`--newer-than 6_months_ago`)
+- **Rationale**: Performance for large workspaces
+- **Override**: Use `--newer-than all_time` to see all items
+- **Completed items**: Excluded by default, use `--include-completed` flag
+
+### Search vs List
+- `issue list`: Uses filters, supports `--assignee`, `--state`, `--team`, `--priority`
+- `issue search`: Uses Linear's full-text index, searches title/description/comments
+- Both support `--newer-than` and `--include-completed` flags
+
+### Sorting Options
+All list commands support `--sort` flag:
+- `linear` (default): Linear's manual sort order
+- `created`: Sort by creation date (newest first)
+- `updated`: Sort by update date (most recently updated first)
+
+### Version Management
+- Version is injected at build time via `-ldflags`
+- Set in `Makefile` using git tags or commit hash
+- Default value is `"dev"` for local development
+
+### Release Process
+This is a personal fork. For release process, simply:
+1. Create and push git tag (e.g., `v1.2.3`)
+2. Build from source using `make build && make install`
+
+### Embedded README
+- `main.go` embeds `README.md` using `//go:embed`
+- Rendered by `lincli docs` command
+- Uses `glamour` for terminal markdown rendering
+- Ensures users always have access to docs offline
+
+## Linear API Specifics
+
+### Authentication
+- Personal API Keys only (from https://linear.app/settings/api)
+- Rate limit: 5,000 requests/hour
+- API endpoint: `https://api.linear.app/graphql`
+
+### Common Entities
+- **Issue**: `identifier` (e.g., "LIN-123"), includes state, assignee, team, priority
+- **Team**: `key` (e.g., "ENG"), not display name
+- **Project**: Uses UUID, not human-readable identifier
+- **User**: Identified by email for lookups, has `isMe` field for current user
+- **State**: Workflow states (e.g., "Todo", "In Progress", "Done")
+- **Priority**: 0=None, 1=Urgent, 2=High, 3=Normal, 4=Low
+
+### Parent-Child Relationships
+Issues support hierarchy:
+- `parent`: Parent issue reference
+- `children`: Array of sub-issues
+- Displayed recursively in `issue get` command
+
+## Testing Philosophy
+
+- **Smoke tests**: Fast, read-only, safe with production credentials
+- **No destructive tests**: All integration tests are read-only
+- **Test API key**: Use `.env.test` for integration tests (optional)
+- **Manual verification**: Critical operations (create, update) tested manually
+
+## AI Agent Considerations
+
+This tool is designed for both human and AI agent use:
+
+- **Always use `--json` flag** for programmatic access
+- **Respect rate limits**: Linear allows 5,000 req/hour
+- **Use time filters**: Always specify `--newer-than` to avoid large data loads
+- **Issue identifiers**: Use format "TEAM-NUMBER" (e.g., "ENG-123")
+- **Team keys**: Use uppercase team key (e.g., "ENG"), not display name
+- **Email for users**: Use email addresses for user lookups
+- **Error handling**: JSON output includes `{"error": "message"}` format
