@@ -136,9 +136,9 @@ func loginWithAPIKey(plaintext, jsonOut bool) error {
 		return fmt.Errorf("API key cannot be empty")
 	}
 
-	// Test the API key
+	// Test the API key using generated function
 	client := api.NewClient(apiKey)
-	user, err := client.GetViewer(context.Background())
+	viewerResp, err := api.GetViewer(context.Background(), client)
 	if err != nil {
 		return fmt.Errorf("invalid API key: %v", err)
 	}
@@ -153,10 +153,11 @@ func loginWithAPIKey(plaintext, jsonOut bool) error {
 	}
 
 	if !plaintext && !jsonOut {
+		viewer := viewerResp.Viewer.UserDetailFields
 		fmt.Printf("\n%s Authenticated as %s (%s)\n",
 			color.New(color.FgGreen).Sprint("✅"),
-			color.New(color.FgCyan).Sprint(user.Name),
-			color.New(color.FgCyan).Sprint(user.Email))
+			color.New(color.FgCyan).Sprint(viewer.Name),
+			color.New(color.FgCyan).Sprint(viewer.Email))
 	}
 
 	return nil
@@ -170,17 +171,23 @@ func GetCurrentUser() (*User, error) {
 	}
 
 	client := api.NewClient(authHeader)
-	apiUser, err := client.GetViewer(context.Background())
+	viewerResp, err := api.GetViewer(context.Background(), client)
 	if err != nil {
 		return nil, err
 	}
 
-	// Convert api.User to auth.User
+	// Convert generated type to auth.User
+	viewer := viewerResp.Viewer.UserDetailFields
+	avatarURL := ""
+	if viewer.AvatarUrl != nil {
+		avatarURL = *viewer.AvatarUrl
+	}
+
 	return &User{
-		ID:        apiUser.ID,
-		Name:      apiUser.Name,
-		Email:     apiUser.Email,
-		AvatarURL: apiUser.AvatarURL,
+		ID:        viewer.Id,
+		Name:      viewer.Name,
+		Email:     viewer.Email,
+		AvatarURL: avatarURL,
 	}, nil
 }
 
