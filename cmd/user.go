@@ -183,24 +183,35 @@ var userGetCmd = &cobra.Command{
 		// Create API client
 		client := api.NewClient(authHeader)
 
-		// Get user details
-		user, err := client.GetUser(context.Background(), email)
+		// Get user details using generated function
+		filter := &api.UserFilter{
+			Email: &api.StringComparator{Eq: &email},
+		}
+
+		userResp, err := api.GetUserByEmail(context.Background(), client, filter)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to get user: %v", err), plaintext, jsonOut)
 			os.Exit(1)
 		}
 
+		if len(userResp.Users.Nodes) == 0 {
+			output.Error(fmt.Sprintf("User not found with email: %s", email), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		user := &userResp.Users.Nodes[0].UserDetailFields
+
 		// Handle output
 		if jsonOut {
 			output.JSON(user)
 		} else if plaintext {
-			fmt.Printf("ID: %s\n", user.ID)
+			fmt.Printf("ID: %s\n", user.Id)
 			fmt.Printf("Name: %s\n", user.Name)
 			fmt.Printf("Email: %s\n", user.Email)
 			fmt.Printf("Admin: %v\n", user.Admin)
 			fmt.Printf("Active: %v\n", user.Active)
-			if user.AvatarURL != "" {
-				fmt.Printf("Avatar: %s\n", user.AvatarURL)
+			if user.AvatarUrl != nil && *user.AvatarUrl != "" {
+				fmt.Printf("Avatar: %s\n", *user.AvatarUrl)
 			}
 		} else {
 			// Formatted output
@@ -212,7 +223,7 @@ var userGetCmd = &cobra.Command{
 
 			fmt.Printf("\n%s %s\n", color.New(color.Bold).Sprint("Email:"),
 				color.New(color.FgCyan).Sprint(user.Email))
-			fmt.Printf("%s %s\n", color.New(color.Bold).Sprint("ID:"), user.ID)
+			fmt.Printf("%s %s\n", color.New(color.Bold).Sprint("ID:"), user.Id)
 
 			role := "Member"
 			roleColor := color.New(color.FgWhite)
@@ -232,9 +243,9 @@ var userGetCmd = &cobra.Command{
 			}
 			fmt.Printf("%s %s\n", color.New(color.Bold).Sprint("Status:"), status)
 
-			if user.AvatarURL != "" {
+			if user.AvatarUrl != nil && *user.AvatarUrl != "" {
 				fmt.Printf("\n%s\n%s\n", color.New(color.Bold).Sprint("Avatar:"),
-					color.New(color.FgBlue).Sprint(user.AvatarURL))
+					color.New(color.FgBlue).Sprint(*user.AvatarUrl))
 			}
 			fmt.Println()
 		}
