@@ -91,7 +91,9 @@ func (c *Client) IssueSearch(ctx context.Context, term string, filter map[string
 	return convertToLegacyIssuesFromSearch(resp), nil
 }
 
-// CreateIssueNew wraps the generated CreateIssue function
+// Deprecated: Use api.CreateIssue() directly with typed IssueCreateInput for type safety.
+// All write commands have been migrated to use generated types directly.
+// This adapter function will be removed in Phase 3 cleanup.
 func (c *Client) CreateIssue(ctx context.Context, input map[string]interface{}) (*Issue, error) {
 	// Convert map input to typed IssueCreateInput
 	createInput, err := convertToIssueCreateInput(input)
@@ -109,7 +111,9 @@ func (c *Client) CreateIssue(ctx context.Context, input map[string]interface{}) 
 	return convertToLegacyIssueFromCreate(resp), nil
 }
 
-// UpdateIssueNew wraps the generated UpdateIssue function
+// Deprecated: Use api.UpdateIssue() directly with typed IssueUpdateInput for type safety.
+// All write commands have been migrated to use generated types directly.
+// This adapter function will be removed in Phase 3 cleanup.
 func (c *Client) UpdateIssue(ctx context.Context, id string, input map[string]interface{}) (*Issue, error) {
 	// Convert map input to typed IssueUpdateInput
 	updateInput, err := convertToIssueUpdateInput(input)
@@ -1515,7 +1519,9 @@ func (c *Client) GetIssueComments(ctx context.Context, issueID string, first int
 	return convertToLegacyComments(resp), nil
 }
 
-// CreateCommentNew wraps the generated CreateComment function
+// Deprecated: Use api.CreateComment() directly with typed CommentCreateInput for type safety.
+// All write commands have been migrated to use generated types directly.
+// This adapter function will be removed in Phase 3 cleanup.
 func (c *Client) CreateComment(ctx context.Context, issueID string, body string) (*Comment, error) {
 	// Create input
 	input := &CommentCreateInput{

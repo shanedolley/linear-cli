@@ -915,6 +915,48 @@ func truncateString(s string, maxLen int) string {
 	return s[:maxLen-3] + "..."
 }
 
+func buildIssueCreateInput(cmd *cobra.Command, teamID string) api.IssueCreateInput {
+	input := api.IssueCreateInput{
+		TeamId: teamID, // Required field (no pointer)
+	}
+
+	if title, _ := cmd.Flags().GetString("title"); title != "" {
+		input.Title = &title
+	}
+
+	if description, _ := cmd.Flags().GetString("description"); description != "" {
+		input.Description = &description
+	}
+
+	if priority, _ := cmd.Flags().GetInt("priority"); priority >= 0 && priority <= 4 {
+		input.Priority = &priority
+	}
+
+	return input
+}
+
+func buildIssueUpdateInput(cmd *cobra.Command) api.IssueUpdateInput {
+	input := api.IssueUpdateInput{}
+
+	if cmd.Flags().Changed("title") {
+		title, _ := cmd.Flags().GetString("title")
+		input.Title = &title
+	}
+
+	if cmd.Flags().Changed("description") {
+		description, _ := cmd.Flags().GetString("description")
+		input.Description = &description
+	}
+
+	// Priority is *int in IssueUpdateInput (not *float64 like IssueCreateInput)
+	if cmd.Flags().Changed("priority") {
+		priority, _ := cmd.Flags().GetInt("priority")
+		input.Priority = &priority
+	}
+
+	return input
+}
+
 var issueAssignCmd = &cobra.Command{
 	Use:   "assign [issue-id]",
 	Short: "Assign issue to yourself",
@@ -933,32 +975,35 @@ var issueAssignCmd = &cobra.Command{
 		client := api.NewClient(authHeader)
 
 		// Get current user
-		viewer, err := client.GetViewer(context.Background())
+		viewerResp, err := api.GetViewer(context.Background(), client)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to get current user: %v", err), plaintext, jsonOut)
 			os.Exit(1)
 		}
+		viewerID := viewerResp.Viewer.UserDetailFields.Id
 
 		// Update issue with assignee
-		input := map[string]interface{}{
-			"assigneeId": viewer.ID,
+		input := api.IssueUpdateInput{
+			AssigneeId: &viewerID,
 		}
 
-		issue, err := client.UpdateIssue(context.Background(), args[0], input)
+		updateResp, err := api.UpdateIssue(context.Background(), client, args[0], &input)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to assign issue: %v", err), plaintext, jsonOut)
 			os.Exit(1)
 		}
+		issue := updateResp.IssueUpdate.Issue
 
 		if jsonOut {
 			output.JSON(issue)
 		} else if plaintext {
-			fmt.Printf("Assigned %s to %s\n", issue.Identifier, viewer.Name)
+			fmt.Printf("Assigned issue %s to %s\n",
+				issue.IssueListFields.Identifier,
+				viewerResp.Viewer.UserDetailFields.Name)
 		} else {
-			fmt.Printf("%s Assigned %s to %s\n",
+			fmt.Printf("%s Assigned issue %s to you\n",
 				color.New(color.FgGreen).Sprint("✓"),
-				color.New(color.FgCyan, color.Bold).Sprint(issue.Identifier),
-				color.New(color.FgCyan).Sprint(viewer.Name))
+				color.New(color.FgCyan, color.Bold).Sprint(issue.IssueListFields.Identifier))
 		}
 	},
 }
@@ -982,9 +1027,7 @@ var issueCreateCmd = &cobra.Command{
 
 		// Get flags
 		title, _ := cmd.Flags().GetString("title")
-		description, _ := cmd.Flags().GetString("description")
 		teamKey, _ := cmd.Flags().GetString("team")
-		priority, _ := cmd.Flags().GetInt("priority")
 		assignToMe, _ := cmd.Flags().GetBool("assign-me")
 
 		if title == "" {
@@ -998,53 +1041,47 @@ var issueCreateCmd = &cobra.Command{
 		}
 
 		// Get team ID from key
-		team, err := client.GetTeam(context.Background(), teamKey)
+		teamResp, err := api.GetTeam(context.Background(), client, teamKey)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to find team '%s': %v", teamKey, err), plaintext, jsonOut)
 			os.Exit(1)
 		}
+		team := teamResp.Team
 
 		// Build input
-		input := map[string]interface{}{
-			"title":  title,
-			"teamId": team.ID,
-		}
-
-		if description != "" {
-			input["description"] = description
-		}
-
-		if priority >= 0 && priority <= 4 {
-			input["priority"] = priority
-		}
+		input := buildIssueCreateInput(cmd, team.TeamDetailFields.Id)
 
 		if assignToMe {
-			viewer, err := client.GetViewer(context.Background())
+			viewerResp, err := api.GetViewer(context.Background(), client)
 			if err != nil {
 				output.Error(fmt.Sprintf("Failed to get current user: %v", err), plaintext, jsonOut)
 				os.Exit(1)
 			}
-			input["assigneeId"] = viewer.ID
+			viewerID := viewerResp.Viewer.UserDetailFields.Id
+			input.AssigneeId = &viewerID
 		}
 
 		// Create issue
-		issue, err := client.CreateIssue(context.Background(), input)
+		createResp, err := api.CreateIssue(context.Background(), client, &input)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to create issue: %v", err), plaintext, jsonOut)
 			os.Exit(1)
 		}
+		issue := createResp.IssueCreate.Issue
 
 		if jsonOut {
 			output.JSON(issue)
 		} else if plaintext {
-			fmt.Printf("Created issue %s: %s\n", issue.Identifier, issue.Title)
+			fmt.Printf("Created issue %s: %s\n",
+				issue.IssueListFields.Identifier,
+				issue.IssueListFields.Title)
 		} else {
 			fmt.Printf("%s Created issue %s: %s\n",
 				color.New(color.FgGreen).Sprint("✓"),
-				color.New(color.FgCyan, color.Bold).Sprint(issue.Identifier),
-				issue.Title)
-			if issue.Assignee != nil {
-				fmt.Printf("  Assigned to: %s\n", color.New(color.FgCyan).Sprint(issue.Assignee.Name))
+				color.New(color.FgCyan, color.Bold).Sprint(issue.IssueListFields.Identifier),
+				issue.IssueListFields.Title)
+			if issue.IssueListFields.Assignee != nil {
+				fmt.Printf("  Assigned to: %s\n", color.New(color.FgCyan).Sprint(issue.IssueListFields.Assignee.Name))
 			}
 		}
 	},
@@ -1076,20 +1113,8 @@ Examples:
 
 		client := api.NewClient(authHeader)
 
-		// Build update input
-		input := make(map[string]interface{})
-
-		// Handle title update
-		if cmd.Flags().Changed("title") {
-			title, _ := cmd.Flags().GetString("title")
-			input["title"] = title
-		}
-
-		// Handle description update
-		if cmd.Flags().Changed("description") {
-			description, _ := cmd.Flags().GetString("description")
-			input["description"] = description
-		}
+		// Build update input using builder function
+		input := buildIssueUpdateInput(cmd)
 
 		// Handle assignee update
 		if cmd.Flags().Changed("assignee") {
@@ -1097,16 +1122,19 @@ Examples:
 			switch assignee {
 			case "me":
 				// Get current user
-				viewer, err := client.GetViewer(context.Background())
+				viewerResp, err := api.GetViewer(context.Background(), client)
 				if err != nil {
 					output.Error(fmt.Sprintf("Failed to get current user: %v", err), plaintext, jsonOut)
 					os.Exit(1)
 				}
-				input["assigneeId"] = viewer.ID
+				viewerID := viewerResp.Viewer.UserDetailFields.Id
+				input.AssigneeId = &viewerID
 			case "unassigned", "":
-				input["assigneeId"] = nil
+				// Set to nil to unassign
+				var nilID *string
+				input.AssigneeId = nilID
 			default:
-				// Look up user by email
+				// Look up user by email - still uses adapter (not migrated in Phase 2)
 				users, err := client.GetUsers(context.Background(), 100, "", "")
 				if err != nil {
 					output.Error(fmt.Sprintf("Failed to get users: %v", err), plaintext, jsonOut)
@@ -1126,29 +1154,30 @@ Examples:
 					os.Exit(1)
 				}
 
-				input["assigneeId"] = foundUser.ID
+				input.AssigneeId = &foundUser.ID
 			}
 		}
 
-		// Handle state update
+		// Handle state update - uses embedded workflow states from GetIssue
 		if cmd.Flags().Changed("state") {
 			stateName, _ := cmd.Flags().GetString("state")
 
-			// First, get the issue to know which team it belongs to
-			issue, err := client.GetIssue(context.Background(), args[0])
+			// Get the issue to access embedded team workflow states (no extra API call)
+			issueResp, err := api.GetIssue(context.Background(), client, args[0])
 			if err != nil {
 				output.Error(fmt.Sprintf("Failed to get issue: %v", err), plaintext, jsonOut)
 				os.Exit(1)
 			}
+			issue := issueResp.Issue
 
-			// States are now embedded in issue.Team.States (no separate API call)
-			states := issue.Team.States
+			// States are embedded in issue response (issue.Team.States.Nodes)
+			states := issue.IssueDetailFields.Team.States.Nodes
 
 			// Find the state by name (case-insensitive)
 			var stateID string
 			for _, state := range states {
 				if strings.EqualFold(state.Name, stateName) {
-					stateID = state.ID
+					stateID = state.Id
 					break
 				}
 			}
@@ -1159,48 +1188,52 @@ Examples:
 				for _, state := range states {
 					stateNames = append(stateNames, state.Name)
 				}
-				output.Error(fmt.Sprintf("State '%s' not found. Available states: %s", stateName, strings.Join(stateNames, ", ")), plaintext, jsonOut)
+				teamKey := issue.IssueDetailFields.Team.Key
+				output.Error(fmt.Sprintf("State '%s' not found in team '%s'. Available states: %s", stateName, teamKey, strings.Join(stateNames, ", ")), plaintext, jsonOut)
 				os.Exit(1)
 			}
 
-			input["stateId"] = stateID
-		}
-
-		// Handle priority update
-		if cmd.Flags().Changed("priority") {
-			priority, _ := cmd.Flags().GetInt("priority")
-			input["priority"] = priority
+			input.StateId = &stateID
 		}
 
 		// Handle due date update
 		if cmd.Flags().Changed("due-date") {
 			dueDate, _ := cmd.Flags().GetString("due-date")
 			if dueDate == "" {
-				input["dueDate"] = nil
+				var nilDate *string
+				input.DueDate = nilDate
 			} else {
-				input["dueDate"] = dueDate
+				input.DueDate = &dueDate
 			}
 		}
 
-		// Check if any updates were specified
-		if len(input) == 0 {
+		// Check if any updates were specified (check all pointer fields)
+		hasUpdates := input.Title != nil ||
+			input.Description != nil ||
+			input.Priority != nil ||
+			input.AssigneeId != nil ||
+			input.StateId != nil ||
+			input.DueDate != nil
+
+		if !hasUpdates {
 			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
 			os.Exit(1)
 		}
 
-		// Update the issue
-		issue, err := client.UpdateIssue(context.Background(), args[0], input)
+		// Update the issue using generated function
+		updateResp, err := api.UpdateIssue(context.Background(), client, args[0], &input)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to update issue: %v", err), plaintext, jsonOut)
 			os.Exit(1)
 		}
+		updatedIssue := updateResp.IssueUpdate.Issue
 
 		if jsonOut {
-			output.JSON(issue)
+			output.JSON(updatedIssue)
 		} else if plaintext {
-			fmt.Printf("Updated issue %s\n", issue.Identifier)
+			fmt.Printf("Updated issue %s\n", updatedIssue.IssueListFields.Identifier)
 		} else {
-			output.Success(fmt.Sprintf("Updated issue %s", issue.Identifier), plaintext, jsonOut)
+			output.Success(fmt.Sprintf("Updated issue %s", updatedIssue.IssueListFields.Identifier), plaintext, jsonOut)
 		}
 	},
 }

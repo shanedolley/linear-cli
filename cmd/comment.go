@@ -179,25 +179,32 @@ var commentCreateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		// Create comment input
+		input := &api.CommentCreateInput{
+			Body:    &body,
+			IssueId: &issueID,
+		}
+
 		// Create comment
-		comment, err := client.CreateComment(context.Background(), issueID, body)
+		createResp, err := api.CreateComment(context.Background(), client, input)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to create comment: %v", err), plaintext, jsonOut)
 			os.Exit(1)
 		}
+		comment := createResp.CommentCreate.Comment
 
 		// Handle output
 		if jsonOut {
 			output.JSON(comment)
 		} else if plaintext {
 			fmt.Printf("Created comment on %s\n", issueID)
-			fmt.Printf("Author: %s\n", comment.User.Name)
-			fmt.Printf("Date: %s\n", comment.CreatedAt.Format("2006-01-02 15:04:05"))
+			fmt.Printf("Author: %s\n", comment.CommentFields.User.Name)
+			fmt.Printf("Date: %s\n", comment.CommentFields.CreatedAt.Format("2006-01-02 15:04:05"))
 		} else {
 			fmt.Printf("%s Added comment to %s\n",
 				color.New(color.FgGreen).Sprint("✓"),
 				color.New(color.FgCyan, color.Bold).Sprint(issueID))
-			fmt.Printf("\n%s\n", comment.Body)
+			fmt.Printf("\n%s\n", comment.CommentFields.Body)
 		}
 	},
 }
