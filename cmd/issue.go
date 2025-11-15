@@ -1134,27 +1134,27 @@ Examples:
 				var nilID *string
 				input.AssigneeId = nilID
 			default:
-				// Look up user by email - still uses adapter (not migrated in Phase 2)
-				users, err := client.GetUsers(context.Background(), 100, "", "")
+				// Look up user by email or name using generated function
+				filter := &api.UserFilter{
+					Or: []*api.UserFilter{
+						{Email: &api.StringComparator{Eq: &assignee}},
+						{Name: &api.StringComparator{Eq: &assignee}},
+					},
+				}
+
+				userResp, err := api.GetUserByEmail(context.Background(), client, filter)
 				if err != nil {
-					output.Error(fmt.Sprintf("Failed to get users: %v", err), plaintext, jsonOut)
+					output.Error(fmt.Sprintf("Failed to find user: %v", err), plaintext, jsonOut)
 					os.Exit(1)
 				}
 
-				var foundUser *api.User
-				for _, user := range users.Nodes {
-					if user.Email == assignee || user.Name == assignee {
-						foundUser = &user
-						break
-					}
-				}
-
-				if foundUser == nil {
+				if len(userResp.Users.Nodes) == 0 {
 					output.Error(fmt.Sprintf("User not found: %s", assignee), plaintext, jsonOut)
 					os.Exit(1)
 				}
 
-				input.AssigneeId = &foundUser.ID
+				userID := userResp.Users.Nodes[0].UserDetailFields.Id
+				input.AssigneeId = &userID
 			}
 		}
 
