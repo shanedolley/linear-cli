@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/shanedolley/lincli/pkg/api"
@@ -152,4 +153,120 @@ func init() {
 	attachmentCmd.AddCommand(attachmentListCmd)
 	attachmentListCmd.Flags().IntP("limit", "l", 50, "Maximum number of attachments to return")
 	attachmentListCmd.Flags().StringP("sort", "o", "", "Sort order: linear (default), created, updated")
+}
+
+var attachmentCreateCmd = &cobra.Command{
+	Use:   "create <issue-id>",
+	Short: "Create a URL attachment on an issue",
+	Long:  `Create an attachment linking to an external URL (e.g., GitHub PR, documentation).`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		issueID := args[0]
+
+		// Get output flags
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		// Get flags
+		url, _ := cmd.Flags().GetString("url")
+		title, _ := cmd.Flags().GetString("title")
+		subtitle, _ := cmd.Flags().GetString("subtitle")
+		iconURL, _ := cmd.Flags().GetString("icon-url")
+		metadataStr, _ := cmd.Flags().GetString("metadata")
+
+		// Validate required flags
+		if url == "" {
+			output.Error("--url is required", plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if title == "" {
+			output.Error("--title is required", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		// Parse metadata
+		var metadata *map[string]interface{}
+		if metadataStr != "" {
+			var err error
+			metadataMap, err := parseMetadata(metadataStr)
+			if err != nil {
+				output.Error(fmt.Sprintf("Invalid metadata: %v", err), plaintext, jsonOut)
+				os.Exit(1)
+			}
+			metadata = &metadataMap
+		}
+
+		// Build input
+		input := api.AttachmentCreateInput{
+			IssueId: issueID,
+			Title:   title,
+			Url:     url,
+		}
+		if subtitle != "" {
+			input.Subtitle = &subtitle
+		}
+		if iconURL != "" {
+			input.IconUrl = &iconURL
+		}
+		if metadata != nil {
+			input.Metadata = metadata
+		}
+
+		// Get auth and create client
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+
+		// Call API
+		resp, err := api.AttachmentCreate(ctx, client, &input)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to create attachment: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if !resp.AttachmentCreate.Success {
+			output.Error("Failed to create attachment", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		// Render output
+		if jsonOut {
+			output.JSON(resp.AttachmentCreate.Attachment)
+			return
+		}
+
+		fmt.Printf("✓ Created attachment: %s\n", resp.AttachmentCreate.Attachment.Title)
+		fmt.Printf("  ID: %s\n", resp.AttachmentCreate.Attachment.Id)
+		fmt.Printf("  URL: %s\n", resp.AttachmentCreate.Attachment.Url)
+	},
+}
+
+// parseMetadata parses comma-separated key=value pairs
+func parseMetadata(s string) (map[string]interface{}, error) {
+	metadata := make(map[string]interface{})
+	pairs := strings.Split(s, ",")
+	for _, pair := range pairs {
+		kv := strings.SplitN(pair, "=", 2)
+		if len(kv) != 2 {
+			return nil, fmt.Errorf("metadata must be key=value pairs separated by commas")
+		}
+		metadata[strings.TrimSpace(kv[0])] = strings.TrimSpace(kv[1])
+	}
+	return metadata, nil
+}
+
+func init() {
+	attachmentCmd.AddCommand(attachmentCreateCmd)
+	attachmentCreateCmd.Flags().String("url", "", "URL to attach (required)")
+	attachmentCreateCmd.Flags().String("title", "", "Attachment title (required)")
+	attachmentCreateCmd.Flags().String("subtitle", "", "Attachment subtitle")
+	attachmentCreateCmd.Flags().String("icon-url", "", "Custom icon URL")
+	attachmentCreateCmd.Flags().String("metadata", "", "Metadata as key=value pairs (comma-separated)")
+	attachmentCreateCmd.MarkFlagRequired("url")
+	attachmentCreateCmd.MarkFlagRequired("title")
 }
