@@ -389,8 +389,7 @@ func uploadFileToLinear(ctx context.Context, client graphql.Client, file fileAtt
 		input.IconUrl = &file.iconURL
 	}
 	if file.metadata != nil {
-		metadataPtr := file.metadata
-		input.Metadata = &metadataPtr
+		input.Metadata = &file.metadata
 	}
 
 	attachResp, err := api.AttachmentCreate(ctx, client, &input)
@@ -417,61 +416,75 @@ func uploadFileWithProgress(filePath, uploadURL string, headers []*api.FileUploa
 			time.Sleep(backoff[attempt-1])
 		}
 
-		// Open file
-		file, err := os.Open(filePath)
-		if err != nil {
-			return fmt.Errorf("failed to open file: %w", err)
-		}
-		defer file.Close()
+		// Wrap each retry attempt in anonymous function so defer runs per iteration
+		err := func() error {
+			// Open file
+			file, err := os.Open(filePath)
+			if err != nil {
+				return fmt.Errorf("failed to open file: %w", err)
+			}
+			defer file.Close()
 
-		// Create progress bar
-		bar := progressbar.DefaultBytes(
-			fileSize,
-			fmt.Sprintf("Uploading %s (%s)...", filepath.Base(filePath), formatSize(fileSize)),
-		)
+			// Create progress bar
+			bar := progressbar.DefaultBytes(
+				fileSize,
+				fmt.Sprintf("Uploading %s (%s)...", filepath.Base(filePath), formatSize(fileSize)),
+			)
 
-		// Wrap file reader with progress tracking
-		reader := progressbar.NewReader(file, bar)
+			// Wrap file reader with progress tracking
+			reader := progressbar.NewReader(file, bar)
 
-		// Build request
-		req, err := http.NewRequest("PUT", uploadURL, &reader)
-		if err != nil {
-			return fmt.Errorf("failed to create request: %w", err)
-		}
+			// Build request
+			req, err := http.NewRequest("PUT", uploadURL, &reader)
+			if err != nil {
+				return fmt.Errorf("failed to create request: %w", err)
+			}
 
-		// Add headers from Linear
-		for _, h := range headers {
-			req.Header.Set(h.Key, h.Value)
-		}
-		// Add required headers
-		req.Header.Set("Content-Type", "application/octet-stream")
-		req.Header.Set("Cache-Control", "public, max-age=31536000")
+			// Add headers from Linear
+			for _, h := range headers {
+				req.Header.Set(h.Key, h.Value)
+			}
+			// Add required headers
+			req.Header.Set("Content-Type", "application/octet-stream")
+			req.Header.Set("Cache-Control", "public, max-age=31536000")
 
-		// Execute upload
-		client := &http.Client{Timeout: 5 * time.Minute}
-		resp, err := client.Do(req)
-		if err != nil {
-			lastErr = fmt.Errorf("upload failed: %w", err)
-			file.Close()
-			continue
-		}
-		defer resp.Body.Close()
+			// Execute upload
+			client := &http.Client{Timeout: 5 * time.Minute}
+			resp, err := client.Do(req)
+			if err != nil {
+				return fmt.Errorf("upload failed: %w", err)
+			}
+			defer resp.Body.Close()
 
-		// Check status
-		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
-			file.Close()
+			// Read response body to allow connection reuse
+			_, _ = io.Copy(io.Discard, resp.Body)
+
+			// Check status
+			if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+				return nil
+			}
+
+			// 4xx errors should not be retried
+			if resp.StatusCode >= 400 && resp.StatusCode < 500 {
+				return fmt.Errorf("upload failed with status %d (non-retryable)", resp.StatusCode)
+			}
+
+			// 5xx errors can be retried
+			return fmt.Errorf("upload failed with status %d", resp.StatusCode)
+		}()
+
+		// Success case
+		if err == nil {
 			return nil
 		}
 
-		// 4xx errors should not be retried
-		if resp.StatusCode >= 400 && resp.StatusCode < 500 {
-			file.Close()
-			return fmt.Errorf("upload failed with status %d", resp.StatusCode)
-		}
+		// Save error for potential retry
+		lastErr = err
 
-		// 5xx errors can be retried
-		lastErr = fmt.Errorf("upload failed with status %d", resp.StatusCode)
-		file.Close()
+		// Check if error is non-retryable (4xx status)
+		if strings.Contains(err.Error(), "non-retryable") {
+			return lastErr
+		}
 	}
 
 	return fmt.Errorf("upload failed after %d retries: %w", maxRetries, lastErr)
