@@ -9,8 +9,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/Khan/genqlient/graphql"
 	"github.com/olekukonko/tablewriter"
+	"github.com/schollz/progressbar/v3"
 	"github.com/shanedolley/lincli/pkg/api"
 	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
@@ -358,4 +361,118 @@ func formatSize(bytes int64) string {
 		exp++
 	}
 	return fmt.Sprintf("%.1f %cB", float64(bytes)/float64(div), "KMGTPE"[exp])
+}
+
+// uploadFileToLinear uploads a file through Linear's file upload flow
+func uploadFileToLinear(ctx context.Context, client graphql.Client, file fileAttachment, issueID string) error {
+	// Step 1: Get pre-signed URL
+	uploadResp, err := api.FileUpload(ctx, client, file.contentType, filepath.Base(file.path), int(file.size))
+	if err != nil {
+		return fmt.Errorf("failed to get upload URL: %w", err)
+	}
+
+	// Step 2: Upload file with progress tracking
+	if err := uploadFileWithProgress(file.path, uploadResp.FileUpload.UploadFile.UploadUrl, uploadResp.FileUpload.UploadFile.Headers, file.size); err != nil {
+		return err
+	}
+
+	// Step 3: Create attachment using asset URL
+	input := api.AttachmentCreateInput{
+		IssueId: issueID,
+		Title:   file.title,
+		Url:     uploadResp.FileUpload.UploadFile.AssetUrl,
+	}
+	if file.subtitle != "" {
+		input.Subtitle = &file.subtitle
+	}
+	if file.iconURL != "" {
+		input.IconUrl = &file.iconURL
+	}
+	if file.metadata != nil {
+		metadataPtr := file.metadata
+		input.Metadata = &metadataPtr
+	}
+
+	attachResp, err := api.AttachmentCreate(ctx, client, &input)
+	if err != nil {
+		return fmt.Errorf("failed to create attachment: %w", err)
+	}
+
+	if !attachResp.AttachmentCreate.Success {
+		return fmt.Errorf("attachment creation failed")
+	}
+
+	return nil
+}
+
+// uploadFileWithProgress uploads file to URL with progress bar and retry logic
+func uploadFileWithProgress(filePath, uploadURL string, headers []*api.FileUploadFileUploadUploadPayloadUploadFileHeadersUploadFileHeader, fileSize int64) error {
+	const maxRetries = 3
+	backoff := []time.Duration{1 * time.Second, 2 * time.Second, 4 * time.Second}
+
+	var lastErr error
+	for attempt := 0; attempt <= maxRetries; attempt++ {
+		if attempt > 0 {
+			fmt.Printf("✗ Network error, retrying... (attempt %d/%d)\n", attempt, maxRetries)
+			time.Sleep(backoff[attempt-1])
+		}
+
+		// Open file
+		file, err := os.Open(filePath)
+		if err != nil {
+			return fmt.Errorf("failed to open file: %w", err)
+		}
+		defer file.Close()
+
+		// Create progress bar
+		bar := progressbar.DefaultBytes(
+			fileSize,
+			fmt.Sprintf("Uploading %s (%s)...", filepath.Base(filePath), formatSize(fileSize)),
+		)
+
+		// Wrap file reader with progress tracking
+		reader := progressbar.NewReader(file, bar)
+
+		// Build request
+		req, err := http.NewRequest("PUT", uploadURL, &reader)
+		if err != nil {
+			return fmt.Errorf("failed to create request: %w", err)
+		}
+
+		// Add headers from Linear
+		for _, h := range headers {
+			req.Header.Set(h.Key, h.Value)
+		}
+		// Add required headers
+		req.Header.Set("Content-Type", "application/octet-stream")
+		req.Header.Set("Cache-Control", "public, max-age=31536000")
+
+		// Execute upload
+		client := &http.Client{Timeout: 5 * time.Minute}
+		resp, err := client.Do(req)
+		if err != nil {
+			lastErr = fmt.Errorf("upload failed: %w", err)
+			file.Close()
+			continue
+		}
+		defer resp.Body.Close()
+
+		// Check status
+		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+			file.Close()
+			return nil
+		}
+
+		// 4xx errors should not be retried
+		if resp.StatusCode >= 400 && resp.StatusCode < 500 {
+			file.Close()
+			return fmt.Errorf("upload failed with status %d", resp.StatusCode)
+		}
+
+		// 5xx errors can be retried
+		lastErr = fmt.Errorf("upload failed with status %d", resp.StatusCode)
+		file.Close()
+	}
+
+	return fmt.Errorf("upload failed after %d retries: %w", maxRetries, lastErr)
 }
