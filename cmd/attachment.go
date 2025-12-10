@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/shanedolley/lincli/pkg/api"
@@ -301,7 +300,10 @@ func validateFile(path string) (int64, error) {
 		if os.IsNotExist(err) {
 			return 0, fmt.Errorf("file not found")
 		}
-		return 0, fmt.Errorf("permission denied")
+		if os.IsPermission(err) {
+			return 0, fmt.Errorf("permission denied")
+		}
+		return 0, fmt.Errorf("cannot access file: %w", err)
 	}
 
 	// Check not a directory
