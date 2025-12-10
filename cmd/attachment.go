@@ -489,3 +489,169 @@ func uploadFileWithProgress(filePath, uploadURL string, headers []*api.FileUploa
 
 	return fmt.Errorf("upload failed after %d retries: %w", maxRetries, lastErr)
 }
+
+var attachmentUploadCmd = &cobra.Command{
+	Use:   "upload <issue-id>",
+	Short: "Upload files as attachments to an issue",
+	Long: `Upload one or more files to Linear's storage and attach them to an issue.
+
+Each --file flag starts a new attachment. Required flags for each:
+  --file: Path to file
+  --title: Attachment title
+
+Optional per-file flags:
+  --subtitle: Attachment subtitle
+  --icon-url: Custom icon URL
+  --metadata: key=value pairs (comma-separated)
+
+Example:
+  lincli attachment upload LIN-123 \
+    --file report.pdf --title "Q4 Report" --subtitle "Draft" \
+    --file screenshot.png --title "Bug Screenshot"`,
+	Args: cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		issueID := args[0]
+
+		// Get output flags
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		// Parse file attachments from flags
+		files, err := parseFileFlags(cmd)
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if len(files) == 0 {
+			output.Error("At least one --file and --title pair is required", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		// Validate all files first
+		fmt.Println("Validating files...")
+		var validationErrors []validationError
+		for i := range files {
+			size, err := validateFile(files[i].path)
+			if err != nil {
+				validationErrors = append(validationErrors, validationError{
+					filename: filepath.Base(files[i].path),
+					error:    err.Error(),
+				})
+				continue
+			}
+			files[i].size = size
+
+			// Detect content type
+			contentType, err := detectContentType(files[i].path)
+			if err != nil {
+				validationErrors = append(validationErrors, validationError{
+					filename: filepath.Base(files[i].path),
+					error:    fmt.Sprintf("failed to detect content type: %v", err),
+				})
+				continue
+			}
+			files[i].contentType = contentType
+
+			fmt.Printf("✓ %s (%s) - OK\n", filepath.Base(files[i].path), formatSize(size))
+		}
+
+		// Stop if validation failed
+		if len(validationErrors) > 0 {
+			fmt.Println("\nError: Validation failed:")
+			for _, ve := range validationErrors {
+				fmt.Printf("  - %s: %s\n", ve.filename, ve.error)
+			}
+			os.Exit(1)
+		}
+
+		// Get auth and create client
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+
+		// Upload files
+		fmt.Println()
+		var succeeded, failed int
+		var failures []string
+
+		for _, file := range files {
+			err := uploadFileToLinear(ctx, client, file, issueID)
+			if err != nil {
+				fmt.Printf("✗ Failed to attach %s: %v\n", filepath.Base(file.path), err)
+				failed++
+				failures = append(failures, fmt.Sprintf("%s: %v", filepath.Base(file.path), err))
+			} else {
+				fmt.Printf("✓ Attached %s to %s\n", filepath.Base(file.path), issueID)
+				succeeded++
+			}
+			fmt.Println()
+		}
+
+		// Summary
+		fmt.Printf("Summary: %d succeeded, %d failed\n", succeeded, failed)
+		if len(failures) > 0 {
+			fmt.Println("Failed uploads:")
+			for _, f := range failures {
+				fmt.Printf("  - %s\n", f)
+			}
+			os.Exit(1)
+		}
+	},
+}
+
+// parseFileFlags parses --file, --title, --subtitle, etc. into fileAttachment structs
+func parseFileFlags(cmd *cobra.Command) ([]fileAttachment, error) {
+	// Get all flag values
+	files, _ := cmd.Flags().GetStringArray("file")
+	titles, _ := cmd.Flags().GetStringArray("title")
+	subtitles, _ := cmd.Flags().GetStringArray("subtitle")
+	iconURLs, _ := cmd.Flags().GetStringArray("icon-url")
+	metadatas, _ := cmd.Flags().GetStringArray("metadata")
+
+	// Validate counts
+	if len(files) != len(titles) {
+		return nil, fmt.Errorf("each --file must have a corresponding --title")
+	}
+
+	// Build attachments
+	var attachments []fileAttachment
+	for i := range files {
+		att := fileAttachment{
+			path:  files[i],
+			title: titles[i],
+		}
+
+		if i < len(subtitles) && subtitles[i] != "" {
+			att.subtitle = subtitles[i]
+		}
+		if i < len(iconURLs) && iconURLs[i] != "" {
+			att.iconURL = iconURLs[i]
+		}
+		if i < len(metadatas) && metadatas[i] != "" {
+			metadata, err := parseMetadata(metadatas[i])
+			if err != nil {
+				return nil, fmt.Errorf("invalid metadata for file %s: %w", files[i], err)
+			}
+			att.metadata = metadata
+		}
+
+		attachments = append(attachments, att)
+	}
+
+	return attachments, nil
+}
+
+func init() {
+	attachmentCmd.AddCommand(attachmentUploadCmd)
+	attachmentUploadCmd.Flags().StringArray("file", []string{}, "Path to file to upload (required)")
+	attachmentUploadCmd.Flags().StringArray("title", []string{}, "Attachment title (required for each file)")
+	attachmentUploadCmd.Flags().StringArray("subtitle", []string{}, "Attachment subtitle")
+	attachmentUploadCmd.Flags().StringArray("icon-url", []string{}, "Custom icon URL")
+	attachmentUploadCmd.Flags().StringArray("metadata", []string{}, "Metadata as key=value pairs")
+}
