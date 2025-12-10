@@ -142,6 +142,14 @@ if [ -n "$issue_id" ]; then
     echo -e "\n${YELLOW}Testing comment commands...${NC}"
     run_test "comment list" "go run main.go comment list $issue_id"
     run_test "comment list (plaintext)" "go run main.go comment list $issue_id -p"
+
+    # Test attachment list for this issue
+    echo -e "\n${YELLOW}Testing attachment commands...${NC}"
+    run_test "attachment list" "go run main.go attachment list $issue_id"
+    run_test "attachment list (json)" "go run main.go attachment list $issue_id -j"
+    run_test "attachment list (plaintext)" "go run main.go attachment list $issue_id -p"
+    run_test "attachment list (limit)" "go run main.go attachment list $issue_id --limit 10"
+    run_test "attachment list (sort)" "go run main.go attachment list $issue_id --sort created"
 fi
 
 # Test help commands
