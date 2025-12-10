@@ -807,3 +807,51 @@ func init() {
 	attachmentUpdateCmd.Flags().String("metadata", "", "New metadata as key=value pairs")
 	attachmentUpdateCmd.MarkFlagRequired("title")
 }
+
+var attachmentDeleteCmd = &cobra.Command{
+	Use:   "delete <attachment-id>",
+	Short: "Delete an attachment",
+	Long:  `Delete an attachment from an issue. This action cannot be undone.`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		attachmentID := args[0]
+
+		// Get output flags
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		// Get auth and create client
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+
+		// Call API
+		resp, err := api.AttachmentDelete(ctx, client, attachmentID)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to delete attachment: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if !resp.AttachmentDelete.Success {
+			output.Error("Failed to delete attachment", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		// Render output
+		if jsonOut {
+			output.JSON(map[string]bool{"success": true})
+			return
+		}
+
+		fmt.Printf("✓ Deleted attachment %s\n", attachmentID)
+	},
+}
+
+func init() {
+	attachmentCmd.AddCommand(attachmentDeleteCmd)
+}
