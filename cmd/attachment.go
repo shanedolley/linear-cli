@@ -3,8 +3,13 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"io"
+	"mime"
+	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/shanedolley/lincli/pkg/api"
@@ -269,4 +274,86 @@ func init() {
 	attachmentCreateCmd.Flags().String("metadata", "", "Metadata as key=value pairs (comma-separated)")
 	attachmentCreateCmd.MarkFlagRequired("url")
 	attachmentCreateCmd.MarkFlagRequired("title")
+}
+
+// fileAttachment represents a file to be uploaded
+type fileAttachment struct {
+	path        string
+	title       string
+	subtitle    string
+	iconURL     string
+	metadata    map[string]interface{}
+	size        int64
+	contentType string
+}
+
+// validationError represents a file validation error
+type validationError struct {
+	filename string
+	error    string
+}
+
+// validateFile checks if a file is valid for upload
+func validateFile(path string) (int64, error) {
+	// Check file exists
+	info, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return 0, fmt.Errorf("file not found")
+		}
+		return 0, fmt.Errorf("permission denied")
+	}
+
+	// Check not a directory
+	if info.IsDir() {
+		return 0, fmt.Errorf("is a directory, not a file")
+	}
+
+	// Check size
+	size := info.Size()
+	const maxSize = 50 * 1024 * 1024 // 50MB
+	if size > maxSize {
+		return 0, fmt.Errorf("file size %.1f MB exceeds limit of 50 MB", float64(size)/(1024*1024))
+	}
+
+	return size, nil
+}
+
+// detectContentType detects MIME type of a file
+func detectContentType(path string) (string, error) {
+	// Try extension-based detection first
+	ext := strings.ToLower(filepath.Ext(path))
+	if contentType := mime.TypeByExtension(ext); contentType != "" {
+		return contentType, nil
+	}
+
+	// Fallback to content-based detection
+	file, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	// Read first 512 bytes for detection
+	buffer := make([]byte, 512)
+	n, err := file.Read(buffer)
+	if err != nil && err != io.EOF {
+		return "", err
+	}
+
+	return http.DetectContentType(buffer[:n]), nil
+}
+
+// formatSize formats bytes as human-readable size
+func formatSize(bytes int64) string {
+	const unit = 1024
+	if bytes < unit {
+		return fmt.Sprintf("%d B", bytes)
+	}
+	div, exp := int64(unit), 0
+	for n := bytes / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f %cB", float64(bytes)/float64(div), "KMGTPE"[exp])
 }
