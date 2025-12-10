@@ -295,6 +295,14 @@ type validationError struct {
 	error    string
 }
 
+// uploadResult represents the result of a file upload
+type uploadResult struct {
+	Filename string `json:"filename"`
+	Title    string `json:"title"`
+	Success  bool   `json:"success"`
+	Error    string `json:"error,omitempty"`
+}
+
 // validateFile checks if a file is valid for upload
 func validateFile(path string) (int64, error) {
 	// Check file exists
@@ -364,7 +372,7 @@ func formatSize(bytes int64) string {
 }
 
 // uploadFileToLinear uploads a file through Linear's file upload flow
-func uploadFileToLinear(ctx context.Context, client graphql.Client, file fileAttachment, issueID string) error {
+func uploadFileToLinear(ctx context.Context, client graphql.Client, file fileAttachment, issueID string, quiet bool) error {
 	// Step 1: Get pre-signed URL
 	uploadResp, err := api.FileUpload(ctx, client, file.contentType, filepath.Base(file.path), int(file.size))
 	if err != nil {
@@ -372,7 +380,7 @@ func uploadFileToLinear(ctx context.Context, client graphql.Client, file fileAtt
 	}
 
 	// Step 2: Upload file with progress tracking
-	if err := uploadFileWithProgress(file.path, uploadResp.FileUpload.UploadFile.UploadUrl, uploadResp.FileUpload.UploadFile.Headers, file.size); err != nil {
+	if err := uploadFileWithProgress(file.path, uploadResp.FileUpload.UploadFile.UploadUrl, uploadResp.FileUpload.UploadFile.Headers, file.size, quiet); err != nil {
 		return err
 	}
 
@@ -405,13 +413,13 @@ func uploadFileToLinear(ctx context.Context, client graphql.Client, file fileAtt
 }
 
 // uploadFileWithProgress uploads file to URL with progress bar and retry logic
-func uploadFileWithProgress(filePath, uploadURL string, headers []*api.FileUploadFileUploadUploadPayloadUploadFileHeadersUploadFileHeader, fileSize int64) error {
+func uploadFileWithProgress(filePath, uploadURL string, headers []*api.FileUploadFileUploadUploadPayloadUploadFileHeadersUploadFileHeader, fileSize int64, quiet bool) error {
 	const maxRetries = 3
 	backoff := []time.Duration{1 * time.Second, 2 * time.Second, 4 * time.Second}
 
 	var lastErr error
 	for attempt := 0; attempt <= maxRetries; attempt++ {
-		if attempt > 0 {
+		if attempt > 0 && !quiet {
 			fmt.Printf("✗ Network error, retrying... (attempt %d/%d)\n", attempt, maxRetries)
 			time.Sleep(backoff[attempt-1])
 		}
@@ -425,17 +433,20 @@ func uploadFileWithProgress(filePath, uploadURL string, headers []*api.FileUploa
 			}
 			defer file.Close()
 
-			// Create progress bar
-			bar := progressbar.DefaultBytes(
-				fileSize,
-				fmt.Sprintf("Uploading %s (%s)...", filepath.Base(filePath), formatSize(fileSize)),
-			)
-
-			// Wrap file reader with progress tracking
-			reader := progressbar.NewReader(file, bar)
-
-			// Build request
-			req, err := http.NewRequest("PUT", uploadURL, &reader)
+			// Build request with appropriate reader
+			var req *http.Request
+			if quiet {
+				// In quiet mode, use the file directly without progress bar
+				req, err = http.NewRequest("PUT", uploadURL, file)
+			} else {
+				// Create progress bar and wrap file reader with progress tracking
+				bar := progressbar.DefaultBytes(
+					fileSize,
+					fmt.Sprintf("Uploading %s (%s)...", filepath.Base(filePath), formatSize(fileSize)),
+				)
+				reader := progressbar.NewReader(file, bar)
+				req, err = http.NewRequest("PUT", uploadURL, &reader)
+			}
 			if err != nil {
 				return fmt.Errorf("failed to create request: %w", err)
 			}
@@ -529,7 +540,9 @@ Example:
 		}
 
 		// Validate all files first
-		fmt.Println("Validating files...")
+		if !jsonOut {
+			fmt.Println("Validating files...")
+		}
 		var validationErrors []validationError
 		for i := range files {
 			size, err := validateFile(files[i].path)
@@ -553,14 +566,31 @@ Example:
 			}
 			files[i].contentType = contentType
 
-			fmt.Printf("✓ %s (%s) - OK\n", filepath.Base(files[i].path), formatSize(size))
+			if !jsonOut {
+				fmt.Printf("✓ %s (%s) - OK\n", filepath.Base(files[i].path), formatSize(size))
+			}
 		}
 
 		// Stop if validation failed
 		if len(validationErrors) > 0 {
-			fmt.Println("\nError: Validation failed:")
-			for _, ve := range validationErrors {
-				fmt.Printf("  - %s: %s\n", ve.filename, ve.error)
+			if jsonOut {
+				// In JSON mode, output validation errors as JSON
+				errorList := make([]map[string]string, len(validationErrors))
+				for i, ve := range validationErrors {
+					errorList[i] = map[string]string{
+						"filename": ve.filename,
+						"error":    ve.error,
+					}
+				}
+				output.JSON(map[string]interface{}{
+					"error":             "Validation failed",
+					"validation_errors": errorList,
+				})
+			} else {
+				fmt.Println("\nError: Validation failed:")
+				for _, ve := range validationErrors {
+					fmt.Printf("  - %s: %s\n", ve.filename, ve.error)
+				}
 			}
 			os.Exit(1)
 		}
@@ -575,32 +605,60 @@ Example:
 		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
-		// Upload files
-		fmt.Println()
-		var succeeded, failed int
-		var failures []string
-
-		for _, file := range files {
-			err := uploadFileToLinear(ctx, client, file, issueID)
-			if err != nil {
-				fmt.Printf("✗ Failed to attach %s: %v\n", filepath.Base(file.path), err)
-				failed++
-				failures = append(failures, fmt.Sprintf("%s: %v", filepath.Base(file.path), err))
-			} else {
-				fmt.Printf("✓ Attached %s to %s\n", filepath.Base(file.path), issueID)
-				succeeded++
-			}
+		// Upload files and collect results
+		if !jsonOut {
 			fmt.Println()
 		}
+		var results []uploadResult
+		var succeeded, failed int
 
-		// Summary
-		fmt.Printf("Summary: %d succeeded, %d failed\n", succeeded, failed)
-		if len(failures) > 0 {
-			fmt.Println("Failed uploads:")
-			for _, f := range failures {
-				fmt.Printf("  - %s\n", f)
+		for _, file := range files {
+			err := uploadFileToLinear(ctx, client, file, issueID, jsonOut)
+			result := uploadResult{
+				Filename: filepath.Base(file.path),
+				Title:    file.title,
+				Success:  err == nil,
 			}
-			os.Exit(1)
+			if err != nil {
+				result.Error = err.Error()
+				failed++
+				if !jsonOut {
+					fmt.Printf("✗ Failed to attach %s: %v\n", filepath.Base(file.path), err)
+				}
+			} else {
+				succeeded++
+				if !jsonOut {
+					fmt.Printf("✓ Attached %s to %s\n", filepath.Base(file.path), issueID)
+				}
+			}
+			results = append(results, result)
+			if !jsonOut {
+				fmt.Println()
+			}
+		}
+
+		// Output results
+		if jsonOut {
+			output.JSON(map[string]interface{}{
+				"succeeded": succeeded,
+				"failed":    failed,
+				"results":   results,
+			})
+			if failed > 0 {
+				os.Exit(1)
+			}
+		} else {
+			// Summary
+			fmt.Printf("Summary: %d succeeded, %d failed\n", succeeded, failed)
+			if failed > 0 {
+				fmt.Println("Failed uploads:")
+				for _, r := range results {
+					if !r.Success {
+						fmt.Printf("  - %s: %s\n", r.Filename, r.Error)
+					}
+				}
+				os.Exit(1)
+			}
 		}
 	},
 }
@@ -622,6 +680,11 @@ func parseFileFlags(cmd *cobra.Command) ([]fileAttachment, error) {
 	// Build attachments
 	var attachments []fileAttachment
 	for i := range files {
+		// Validate title is not empty
+		if titles[i] == "" {
+			return nil, fmt.Errorf("title for file %s cannot be empty", files[i])
+		}
+
 		att := fileAttachment{
 			path:  files[i],
 			title: titles[i],
