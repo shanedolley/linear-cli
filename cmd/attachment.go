@@ -718,3 +718,92 @@ func init() {
 	attachmentUploadCmd.Flags().StringArray("icon-url", []string{}, "Custom icon URL")
 	attachmentUploadCmd.Flags().StringArray("metadata", []string{}, "Metadata as key=value pairs")
 }
+
+var attachmentUpdateCmd = &cobra.Command{
+	Use:   "update <attachment-id>",
+	Short: "Update an attachment's metadata",
+	Long: `Update an attachment's title, subtitle, icon, or metadata.
+
+Note: Linear's API does not support changing an attachment's URL after creation.
+To change a file or URL, delete the old attachment and create a new one.`,
+	Args: cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		attachmentID := args[0]
+
+		// Get output flags
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		// Get flags
+		title, _ := cmd.Flags().GetString("title")
+		subtitle, _ := cmd.Flags().GetString("subtitle")
+		iconURL, _ := cmd.Flags().GetString("icon-url")
+		metadataStr, _ := cmd.Flags().GetString("metadata")
+
+		// Check if at least one field other than title is being changed
+		// (title alone is valid, but we require at least one field to change)
+		if !cmd.Flags().Changed("title") && !cmd.Flags().Changed("subtitle") &&
+			!cmd.Flags().Changed("icon-url") && !cmd.Flags().Changed("metadata") {
+			output.Error("No fields to update (specify --title, --subtitle, --icon-url, or --metadata)", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		// Get auth and create client
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+
+		// Build update input
+		input := api.AttachmentUpdateInput{
+			Title: title, // Required field
+		}
+		if cmd.Flags().Changed("subtitle") {
+			input.Subtitle = &subtitle
+		}
+		if cmd.Flags().Changed("icon-url") {
+			input.IconUrl = &iconURL
+		}
+		if cmd.Flags().Changed("metadata") {
+			metadata, err := parseMetadata(metadataStr)
+			if err != nil {
+				output.Error(fmt.Sprintf("Invalid metadata: %v", err), plaintext, jsonOut)
+				os.Exit(1)
+			}
+			input.Metadata = &metadata
+		}
+
+		// Call API
+		resp, err := api.AttachmentUpdate(ctx, client, attachmentID, &input)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to update attachment: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if !resp.AttachmentUpdate.Success {
+			output.Error("Failed to update attachment", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		// Render output
+		if jsonOut {
+			output.JSON(resp.AttachmentUpdate.Attachment)
+			return
+		}
+
+		fmt.Printf("✓ Updated attachment: %s\n", resp.AttachmentUpdate.Attachment.Title)
+	},
+}
+
+func init() {
+	attachmentCmd.AddCommand(attachmentUpdateCmd)
+	attachmentUpdateCmd.Flags().String("title", "", "Attachment title (required)")
+	attachmentUpdateCmd.Flags().String("subtitle", "", "New subtitle")
+	attachmentUpdateCmd.Flags().String("icon-url", "", "New icon URL")
+	attachmentUpdateCmd.Flags().String("metadata", "", "New metadata as key=value pairs")
+	attachmentUpdateCmd.MarkFlagRequired("title")
+}
