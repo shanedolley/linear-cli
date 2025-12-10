@@ -79,6 +79,151 @@ func (v *AttachmentCollectionFilter) GetUpdatedAt() *DateComparator { return v.U
 // GetUrl returns AttachmentCollectionFilter.Url, and is useful for accessing the field via an interface.
 func (v *AttachmentCollectionFilter) GetUrl() *StringComparator { return v.Url }
 
+// AttachmentCreateAttachmentCreateAttachmentPayload includes the requested fields of the GraphQL type AttachmentPayload.
+type AttachmentCreateAttachmentCreateAttachmentPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The issue attachment that was created.
+	Attachment *AttachmentCreateAttachmentCreateAttachmentPayloadAttachment `json:"attachment"`
+}
+
+// GetSuccess returns AttachmentCreateAttachmentCreateAttachmentPayload.Success, and is useful for accessing the field via an interface.
+func (v *AttachmentCreateAttachmentCreateAttachmentPayload) GetSuccess() bool { return v.Success }
+
+// GetAttachment returns AttachmentCreateAttachmentCreateAttachmentPayload.Attachment, and is useful for accessing the field via an interface.
+func (v *AttachmentCreateAttachmentCreateAttachmentPayload) GetAttachment() *AttachmentCreateAttachmentCreateAttachmentPayloadAttachment {
+	return v.Attachment
+}
+
+// AttachmentCreateAttachmentCreateAttachmentPayloadAttachment includes the requested fields of the GraphQL type Attachment.
+// The GraphQL type's documentation follows.
+//
+// Issue attachment (e.g. support ticket, pull request).
+type AttachmentCreateAttachmentCreateAttachmentPayloadAttachment struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// Content for the title line in the Linear attachment widget.
+	Title string `json:"title"`
+	// Location of the attachment which is also used as an identifier.
+	Url string `json:"url"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+}
+
+// GetId returns AttachmentCreateAttachmentCreateAttachmentPayloadAttachment.Id, and is useful for accessing the field via an interface.
+func (v *AttachmentCreateAttachmentCreateAttachmentPayloadAttachment) GetId() string { return v.Id }
+
+// GetTitle returns AttachmentCreateAttachmentCreateAttachmentPayloadAttachment.Title, and is useful for accessing the field via an interface.
+func (v *AttachmentCreateAttachmentCreateAttachmentPayloadAttachment) GetTitle() string {
+	return v.Title
+}
+
+// GetUrl returns AttachmentCreateAttachmentCreateAttachmentPayloadAttachment.Url, and is useful for accessing the field via an interface.
+func (v *AttachmentCreateAttachmentCreateAttachmentPayloadAttachment) GetUrl() string { return v.Url }
+
+// GetCreatedAt returns AttachmentCreateAttachmentCreateAttachmentPayloadAttachment.CreatedAt, and is useful for accessing the field via an interface.
+func (v *AttachmentCreateAttachmentCreateAttachmentPayloadAttachment) GetCreatedAt() time.Time {
+	return v.CreatedAt
+}
+
+type AttachmentCreateInput struct {
+	// Create a linked comment with markdown body.
+	CommentBody *string `json:"commentBody"`
+	// [Internal] Create a linked comment with Prosemirror body. Please use `commentBody` instead.
+	CommentBodyData *map[string]interface{} `json:"commentBodyData"`
+	// Create attachment as a user with the provided name. This option is only
+	// available to OAuth applications creating attachments in `actor=application` mode.
+	CreateAsUser *string `json:"createAsUser"`
+	// Indicates if attachments for the same source application should be grouped in the Linear UI.
+	GroupBySource *bool `json:"groupBySource"`
+	// An icon url to display with the attachment. Should be of jpg or png format.
+	// Maximum of 1MB in size. Dimensions should be 20x20px for optimal display quality.
+	IconUrl *string `json:"iconUrl"`
+	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
+	Id *string `json:"id"`
+	// The issue to associate the attachment with.
+	IssueId string `json:"issueId"`
+	// Attachment metadata object with string and number values.
+	Metadata *map[string]interface{} `json:"metadata"`
+	// The attachment subtitle.
+	Subtitle *string `json:"subtitle"`
+	// The attachment title.
+	Title string `json:"title"`
+	// Attachment location which is also used as an unique identifier for the
+	// attachment. If another attachment is created with the same `url` value,
+	// existing record is updated instead.
+	Url string `json:"url"`
+}
+
+// GetCommentBody returns AttachmentCreateInput.CommentBody, and is useful for accessing the field via an interface.
+func (v *AttachmentCreateInput) GetCommentBody() *string { return v.CommentBody }
+
+// GetCommentBodyData returns AttachmentCreateInput.CommentBodyData, and is useful for accessing the field via an interface.
+func (v *AttachmentCreateInput) GetCommentBodyData() *map[string]interface{} {
+	return v.CommentBodyData
+}
+
+// GetCreateAsUser returns AttachmentCreateInput.CreateAsUser, and is useful for accessing the field via an interface.
+func (v *AttachmentCreateInput) GetCreateAsUser() *string { return v.CreateAsUser }
+
+// GetGroupBySource returns AttachmentCreateInput.GroupBySource, and is useful for accessing the field via an interface.
+func (v *AttachmentCreateInput) GetGroupBySource() *bool { return v.GroupBySource }
+
+// GetIconUrl returns AttachmentCreateInput.IconUrl, and is useful for accessing the field via an interface.
+func (v *AttachmentCreateInput) GetIconUrl() *string { return v.IconUrl }
+
+// GetId returns AttachmentCreateInput.Id, and is useful for accessing the field via an interface.
+func (v *AttachmentCreateInput) GetId() *string { return v.Id }
+
+// GetIssueId returns AttachmentCreateInput.IssueId, and is useful for accessing the field via an interface.
+func (v *AttachmentCreateInput) GetIssueId() string { return v.IssueId }
+
+// GetMetadata returns AttachmentCreateInput.Metadata, and is useful for accessing the field via an interface.
+func (v *AttachmentCreateInput) GetMetadata() *map[string]interface{} { return v.Metadata }
+
+// GetSubtitle returns AttachmentCreateInput.Subtitle, and is useful for accessing the field via an interface.
+func (v *AttachmentCreateInput) GetSubtitle() *string { return v.Subtitle }
+
+// GetTitle returns AttachmentCreateInput.Title, and is useful for accessing the field via an interface.
+func (v *AttachmentCreateInput) GetTitle() string { return v.Title }
+
+// GetUrl returns AttachmentCreateInput.Url, and is useful for accessing the field via an interface.
+func (v *AttachmentCreateInput) GetUrl() string { return v.Url }
+
+// AttachmentCreateResponse is returned by AttachmentCreate on success.
+type AttachmentCreateResponse struct {
+	// Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
+	AttachmentCreate *AttachmentCreateAttachmentCreateAttachmentPayload `json:"attachmentCreate"`
+}
+
+// GetAttachmentCreate returns AttachmentCreateResponse.AttachmentCreate, and is useful for accessing the field via an interface.
+func (v *AttachmentCreateResponse) GetAttachmentCreate() *AttachmentCreateAttachmentCreateAttachmentPayload {
+	return v.AttachmentCreate
+}
+
+// AttachmentDeleteAttachmentDeleteDeletePayload includes the requested fields of the GraphQL type DeletePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity deletion mutations.
+type AttachmentDeleteAttachmentDeleteDeletePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+}
+
+// GetSuccess returns AttachmentDeleteAttachmentDeleteDeletePayload.Success, and is useful for accessing the field via an interface.
+func (v *AttachmentDeleteAttachmentDeleteDeletePayload) GetSuccess() bool { return v.Success }
+
+// AttachmentDeleteResponse is returned by AttachmentDelete on success.
+type AttachmentDeleteResponse struct {
+	// Deletes an issue attachment.
+	AttachmentDelete *AttachmentDeleteAttachmentDeleteDeletePayload `json:"attachmentDelete"`
+}
+
+// GetAttachmentDelete returns AttachmentDeleteResponse.AttachmentDelete, and is useful for accessing the field via an interface.
+func (v *AttachmentDeleteResponse) GetAttachmentDelete() *AttachmentDeleteAttachmentDeleteDeletePayload {
+	return v.AttachmentDelete
+}
+
 // Attachment filtering options.
 type AttachmentFilter struct {
 	// Compound filters, all of which need to be matched by the attachment.
@@ -132,6 +277,88 @@ func (v *AttachmentFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
 
 // GetUrl returns AttachmentFilter.Url, and is useful for accessing the field via an interface.
 func (v *AttachmentFilter) GetUrl() *StringComparator { return v.Url }
+
+// AttachmentUpdateAttachmentUpdateAttachmentPayload includes the requested fields of the GraphQL type AttachmentPayload.
+type AttachmentUpdateAttachmentUpdateAttachmentPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The issue attachment that was created.
+	Attachment *AttachmentUpdateAttachmentUpdateAttachmentPayloadAttachment `json:"attachment"`
+}
+
+// GetSuccess returns AttachmentUpdateAttachmentUpdateAttachmentPayload.Success, and is useful for accessing the field via an interface.
+func (v *AttachmentUpdateAttachmentUpdateAttachmentPayload) GetSuccess() bool { return v.Success }
+
+// GetAttachment returns AttachmentUpdateAttachmentUpdateAttachmentPayload.Attachment, and is useful for accessing the field via an interface.
+func (v *AttachmentUpdateAttachmentUpdateAttachmentPayload) GetAttachment() *AttachmentUpdateAttachmentUpdateAttachmentPayloadAttachment {
+	return v.Attachment
+}
+
+// AttachmentUpdateAttachmentUpdateAttachmentPayloadAttachment includes the requested fields of the GraphQL type Attachment.
+// The GraphQL type's documentation follows.
+//
+// Issue attachment (e.g. support ticket, pull request).
+type AttachmentUpdateAttachmentUpdateAttachmentPayloadAttachment struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// Content for the title line in the Linear attachment widget.
+	Title string `json:"title"`
+	// Content for the subtitle line in the Linear attachment widget.
+	Subtitle *string `json:"subtitle"`
+	// Location of the attachment which is also used as an identifier.
+	Url string `json:"url"`
+}
+
+// GetId returns AttachmentUpdateAttachmentUpdateAttachmentPayloadAttachment.Id, and is useful for accessing the field via an interface.
+func (v *AttachmentUpdateAttachmentUpdateAttachmentPayloadAttachment) GetId() string { return v.Id }
+
+// GetTitle returns AttachmentUpdateAttachmentUpdateAttachmentPayloadAttachment.Title, and is useful for accessing the field via an interface.
+func (v *AttachmentUpdateAttachmentUpdateAttachmentPayloadAttachment) GetTitle() string {
+	return v.Title
+}
+
+// GetSubtitle returns AttachmentUpdateAttachmentUpdateAttachmentPayloadAttachment.Subtitle, and is useful for accessing the field via an interface.
+func (v *AttachmentUpdateAttachmentUpdateAttachmentPayloadAttachment) GetSubtitle() *string {
+	return v.Subtitle
+}
+
+// GetUrl returns AttachmentUpdateAttachmentUpdateAttachmentPayloadAttachment.Url, and is useful for accessing the field via an interface.
+func (v *AttachmentUpdateAttachmentUpdateAttachmentPayloadAttachment) GetUrl() string { return v.Url }
+
+type AttachmentUpdateInput struct {
+	// An icon url to display with the attachment. Should be of jpg or png format.
+	// Maximum of 1MB in size. Dimensions should be 20x20px for optimal display quality.
+	IconUrl *string `json:"iconUrl"`
+	// Attachment metadata object with string and number values.
+	Metadata *map[string]interface{} `json:"metadata"`
+	// The attachment subtitle.
+	Subtitle *string `json:"subtitle"`
+	// The attachment title.
+	Title string `json:"title"`
+}
+
+// GetIconUrl returns AttachmentUpdateInput.IconUrl, and is useful for accessing the field via an interface.
+func (v *AttachmentUpdateInput) GetIconUrl() *string { return v.IconUrl }
+
+// GetMetadata returns AttachmentUpdateInput.Metadata, and is useful for accessing the field via an interface.
+func (v *AttachmentUpdateInput) GetMetadata() *map[string]interface{} { return v.Metadata }
+
+// GetSubtitle returns AttachmentUpdateInput.Subtitle, and is useful for accessing the field via an interface.
+func (v *AttachmentUpdateInput) GetSubtitle() *string { return v.Subtitle }
+
+// GetTitle returns AttachmentUpdateInput.Title, and is useful for accessing the field via an interface.
+func (v *AttachmentUpdateInput) GetTitle() string { return v.Title }
+
+// AttachmentUpdateResponse is returned by AttachmentUpdate on success.
+type AttachmentUpdateResponse struct {
+	// Updates an existing issue attachment.
+	AttachmentUpdate *AttachmentUpdateAttachmentUpdateAttachmentPayload `json:"attachmentUpdate"`
+}
+
+// GetAttachmentUpdate returns AttachmentUpdateResponse.AttachmentUpdate, and is useful for accessing the field via an interface.
+func (v *AttachmentUpdateResponse) GetAttachmentUpdate() *AttachmentUpdateAttachmentUpdateAttachmentPayload {
+	return v.AttachmentUpdate
+}
 
 // Comparator for booleans.
 type BooleanComparator struct {
@@ -1314,6 +1541,72 @@ func (v *EstimateComparator) GetNull() *bool { return v.Null }
 
 // GetOr returns EstimateComparator.Or, and is useful for accessing the field via an interface.
 func (v *EstimateComparator) GetOr() []*NullableNumberComparator { return v.Or }
+
+// FileUploadFileUploadUploadPayload includes the requested fields of the GraphQL type UploadPayload.
+type FileUploadFileUploadUploadPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// Object describing the file to be uploaded.
+	UploadFile *FileUploadFileUploadUploadPayloadUploadFile `json:"uploadFile"`
+}
+
+// GetSuccess returns FileUploadFileUploadUploadPayload.Success, and is useful for accessing the field via an interface.
+func (v *FileUploadFileUploadUploadPayload) GetSuccess() bool { return v.Success }
+
+// GetUploadFile returns FileUploadFileUploadUploadPayload.UploadFile, and is useful for accessing the field via an interface.
+func (v *FileUploadFileUploadUploadPayload) GetUploadFile() *FileUploadFileUploadUploadPayloadUploadFile {
+	return v.UploadFile
+}
+
+// FileUploadFileUploadUploadPayloadUploadFile includes the requested fields of the GraphQL type UploadFile.
+// The GraphQL type's documentation follows.
+//
+// Object representing Google Cloud upload policy, plus additional data.
+type FileUploadFileUploadUploadPayloadUploadFile struct {
+	// The signed URL the for the uploaded file. (assigned automatically).
+	UploadUrl string `json:"uploadUrl"`
+	// The asset URL for the uploaded file. (assigned automatically).
+	AssetUrl string                                                                `json:"assetUrl"`
+	Headers  []*FileUploadFileUploadUploadPayloadUploadFileHeadersUploadFileHeader `json:"headers"`
+}
+
+// GetUploadUrl returns FileUploadFileUploadUploadPayloadUploadFile.UploadUrl, and is useful for accessing the field via an interface.
+func (v *FileUploadFileUploadUploadPayloadUploadFile) GetUploadUrl() string { return v.UploadUrl }
+
+// GetAssetUrl returns FileUploadFileUploadUploadPayloadUploadFile.AssetUrl, and is useful for accessing the field via an interface.
+func (v *FileUploadFileUploadUploadPayloadUploadFile) GetAssetUrl() string { return v.AssetUrl }
+
+// GetHeaders returns FileUploadFileUploadUploadPayloadUploadFile.Headers, and is useful for accessing the field via an interface.
+func (v *FileUploadFileUploadUploadPayloadUploadFile) GetHeaders() []*FileUploadFileUploadUploadPayloadUploadFileHeadersUploadFileHeader {
+	return v.Headers
+}
+
+// FileUploadFileUploadUploadPayloadUploadFileHeadersUploadFileHeader includes the requested fields of the GraphQL type UploadFileHeader.
+type FileUploadFileUploadUploadPayloadUploadFileHeadersUploadFileHeader struct {
+	// Upload file header key.
+	Key string `json:"key"`
+	// Upload file header value.
+	Value string `json:"value"`
+}
+
+// GetKey returns FileUploadFileUploadUploadPayloadUploadFileHeadersUploadFileHeader.Key, and is useful for accessing the field via an interface.
+func (v *FileUploadFileUploadUploadPayloadUploadFileHeadersUploadFileHeader) GetKey() string {
+	return v.Key
+}
+
+// GetValue returns FileUploadFileUploadUploadPayloadUploadFileHeadersUploadFileHeader.Value, and is useful for accessing the field via an interface.
+func (v *FileUploadFileUploadUploadPayloadUploadFileHeadersUploadFileHeader) GetValue() string {
+	return v.Value
+}
+
+// FileUploadResponse is returned by FileUpload on success.
+type FileUploadResponse struct {
+	// XHR request payload to upload an images, video and other attachments directly to Linear's cloud storage.
+	FileUpload *FileUploadFileUploadUploadPayload `json:"fileUpload"`
+}
+
+// GetFileUpload returns FileUploadResponse.FileUpload, and is useful for accessing the field via an interface.
+func (v *FileUploadResponse) GetFileUpload() *FileUploadFileUploadUploadPayload { return v.FileUpload }
 
 // GetIssueIssue includes the requested fields of the GraphQL type Issue.
 // The GraphQL type's documentation follows.
@@ -5751,6 +6044,153 @@ func (v *IssueUpdateInput) GetTitle() *string { return v.Title }
 
 // GetTrashed returns IssueUpdateInput.Trashed, and is useful for accessing the field via an interface.
 func (v *IssueUpdateInput) GetTrashed() *bool { return v.Trashed }
+
+// ListAttachmentsIssue includes the requested fields of the GraphQL type Issue.
+// The GraphQL type's documentation follows.
+//
+// An issue.
+type ListAttachmentsIssue struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// Attachments associated with the issue.
+	Attachments *ListAttachmentsIssueAttachmentsAttachmentConnection `json:"attachments"`
+}
+
+// GetId returns ListAttachmentsIssue.Id, and is useful for accessing the field via an interface.
+func (v *ListAttachmentsIssue) GetId() string { return v.Id }
+
+// GetAttachments returns ListAttachmentsIssue.Attachments, and is useful for accessing the field via an interface.
+func (v *ListAttachmentsIssue) GetAttachments() *ListAttachmentsIssueAttachmentsAttachmentConnection {
+	return v.Attachments
+}
+
+// ListAttachmentsIssueAttachmentsAttachmentConnection includes the requested fields of the GraphQL type AttachmentConnection.
+type ListAttachmentsIssueAttachmentsAttachmentConnection struct {
+	Nodes    []*ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment `json:"nodes"`
+	PageInfo *ListAttachmentsIssueAttachmentsAttachmentConnectionPageInfo          `json:"pageInfo"`
+}
+
+// GetNodes returns ListAttachmentsIssueAttachmentsAttachmentConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ListAttachmentsIssueAttachmentsAttachmentConnection) GetNodes() []*ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment {
+	return v.Nodes
+}
+
+// GetPageInfo returns ListAttachmentsIssueAttachmentsAttachmentConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *ListAttachmentsIssueAttachmentsAttachmentConnection) GetPageInfo() *ListAttachmentsIssueAttachmentsAttachmentConnectionPageInfo {
+	return v.PageInfo
+}
+
+// ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment includes the requested fields of the GraphQL type Attachment.
+// The GraphQL type's documentation follows.
+//
+// Issue attachment (e.g. support ticket, pull request).
+type ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// Content for the title line in the Linear attachment widget.
+	Title string `json:"title"`
+	// Content for the subtitle line in the Linear attachment widget.
+	Subtitle *string `json:"subtitle"`
+	// Location of the attachment which is also used as an identifier.
+	Url string `json:"url"`
+	// Custom metadata related to the attachment.
+	Metadata map[string]interface{} `json:"metadata"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+	// been updated after creation.
+	UpdatedAt time.Time `json:"updatedAt"`
+	// The creator of the attachment.
+	Creator *ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachmentCreatorUser `json:"creator"`
+}
+
+// GetId returns ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment.Id, and is useful for accessing the field via an interface.
+func (v *ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment) GetId() string {
+	return v.Id
+}
+
+// GetTitle returns ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment.Title, and is useful for accessing the field via an interface.
+func (v *ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment) GetTitle() string {
+	return v.Title
+}
+
+// GetSubtitle returns ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment.Subtitle, and is useful for accessing the field via an interface.
+func (v *ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment) GetSubtitle() *string {
+	return v.Subtitle
+}
+
+// GetUrl returns ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment.Url, and is useful for accessing the field via an interface.
+func (v *ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment) GetUrl() string {
+	return v.Url
+}
+
+// GetMetadata returns ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment.Metadata, and is useful for accessing the field via an interface.
+func (v *ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment) GetMetadata() map[string]interface{} {
+	return v.Metadata
+}
+
+// GetCreatedAt returns ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment) GetCreatedAt() time.Time {
+	return v.CreatedAt
+}
+
+// GetUpdatedAt returns ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment) GetUpdatedAt() time.Time {
+	return v.UpdatedAt
+}
+
+// GetCreator returns ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment.Creator, and is useful for accessing the field via an interface.
+func (v *ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment) GetCreator() *ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachmentCreatorUser {
+	return v.Creator
+}
+
+// ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachmentCreatorUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that has access to the the resources of an organization.
+type ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachmentCreatorUser struct {
+	// The user's email address.
+	Email string `json:"email"`
+	// The user's full name.
+	Name string `json:"name"`
+}
+
+// GetEmail returns ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachmentCreatorUser.Email, and is useful for accessing the field via an interface.
+func (v *ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachmentCreatorUser) GetEmail() string {
+	return v.Email
+}
+
+// GetName returns ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachmentCreatorUser.Name, and is useful for accessing the field via an interface.
+func (v *ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachmentCreatorUser) GetName() string {
+	return v.Name
+}
+
+// ListAttachmentsIssueAttachmentsAttachmentConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+type ListAttachmentsIssueAttachmentsAttachmentConnectionPageInfo struct {
+	// Indicates if there are more results when paginating forward.
+	HasNextPage bool `json:"hasNextPage"`
+	// Cursor representing the last result in the paginated results.
+	EndCursor *string `json:"endCursor"`
+}
+
+// GetHasNextPage returns ListAttachmentsIssueAttachmentsAttachmentConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *ListAttachmentsIssueAttachmentsAttachmentConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// GetEndCursor returns ListAttachmentsIssueAttachmentsAttachmentConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *ListAttachmentsIssueAttachmentsAttachmentConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// ListAttachmentsResponse is returned by ListAttachments on success.
+type ListAttachmentsResponse struct {
+	// One specific issue.
+	Issue *ListAttachmentsIssue `json:"issue"`
+}
+
+// GetIssue returns ListAttachmentsResponse.Issue, and is useful for accessing the field via an interface.
+func (v *ListAttachmentsResponse) GetIssue() *ListAttachmentsIssue { return v.Issue }
 
 // ListCommentsIssue includes the requested fields of the GraphQL type Issue.
 // The GraphQL type's documentation follows.
@@ -11568,6 +12008,34 @@ func (v *WorkflowStateFilter) GetType() *StringComparator { return v.Type }
 // GetUpdatedAt returns WorkflowStateFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *WorkflowStateFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
 
+// __AttachmentCreateInput is used internally by genqlient
+type __AttachmentCreateInput struct {
+	Input *AttachmentCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __AttachmentCreateInput.Input, and is useful for accessing the field via an interface.
+func (v *__AttachmentCreateInput) GetInput() *AttachmentCreateInput { return v.Input }
+
+// __AttachmentDeleteInput is used internally by genqlient
+type __AttachmentDeleteInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __AttachmentDeleteInput.Id, and is useful for accessing the field via an interface.
+func (v *__AttachmentDeleteInput) GetId() string { return v.Id }
+
+// __AttachmentUpdateInput is used internally by genqlient
+type __AttachmentUpdateInput struct {
+	Id    string                 `json:"id"`
+	Input *AttachmentUpdateInput `json:"input,omitempty"`
+}
+
+// GetId returns __AttachmentUpdateInput.Id, and is useful for accessing the field via an interface.
+func (v *__AttachmentUpdateInput) GetId() string { return v.Id }
+
+// GetInput returns __AttachmentUpdateInput.Input, and is useful for accessing the field via an interface.
+func (v *__AttachmentUpdateInput) GetInput() *AttachmentUpdateInput { return v.Input }
+
 // __CreateCommentInput is used internally by genqlient
 type __CreateCommentInput struct {
 	Input *CommentCreateInput `json:"input,omitempty"`
@@ -11583,6 +12051,22 @@ type __CreateIssueInput struct {
 
 // GetInput returns __CreateIssueInput.Input, and is useful for accessing the field via an interface.
 func (v *__CreateIssueInput) GetInput() *IssueCreateInput { return v.Input }
+
+// __FileUploadInput is used internally by genqlient
+type __FileUploadInput struct {
+	ContentType string `json:"contentType"`
+	Filename    string `json:"filename"`
+	Size        int    `json:"size"`
+}
+
+// GetContentType returns __FileUploadInput.ContentType, and is useful for accessing the field via an interface.
+func (v *__FileUploadInput) GetContentType() string { return v.ContentType }
+
+// GetFilename returns __FileUploadInput.Filename, and is useful for accessing the field via an interface.
+func (v *__FileUploadInput) GetFilename() string { return v.Filename }
+
+// GetSize returns __FileUploadInput.Size, and is useful for accessing the field via an interface.
+func (v *__FileUploadInput) GetSize() int { return v.Size }
 
 // __GetIssueInput is used internally by genqlient
 type __GetIssueInput struct {
@@ -11631,6 +12115,26 @@ type __GetUserByEmailInput struct {
 
 // GetFilter returns __GetUserByEmailInput.Filter, and is useful for accessing the field via an interface.
 func (v *__GetUserByEmailInput) GetFilter() *UserFilter { return v.Filter }
+
+// __ListAttachmentsInput is used internally by genqlient
+type __ListAttachmentsInput struct {
+	IssueId string             `json:"issueId"`
+	First   *int               `json:"first"`
+	After   *string            `json:"after"`
+	OrderBy *PaginationOrderBy `json:"orderBy"`
+}
+
+// GetIssueId returns __ListAttachmentsInput.IssueId, and is useful for accessing the field via an interface.
+func (v *__ListAttachmentsInput) GetIssueId() string { return v.IssueId }
+
+// GetFirst returns __ListAttachmentsInput.First, and is useful for accessing the field via an interface.
+func (v *__ListAttachmentsInput) GetFirst() *int { return v.First }
+
+// GetAfter returns __ListAttachmentsInput.After, and is useful for accessing the field via an interface.
+func (v *__ListAttachmentsInput) GetAfter() *string { return v.After }
+
+// GetOrderBy returns __ListAttachmentsInput.OrderBy, and is useful for accessing the field via an interface.
+func (v *__ListAttachmentsInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy }
 
 // __ListCommentsInput is used internally by genqlient
 type __ListCommentsInput struct {
@@ -11776,6 +12280,125 @@ func (v *__UpdateIssueInput) GetId() string { return v.Id }
 // GetInput returns __UpdateIssueInput.Input, and is useful for accessing the field via an interface.
 func (v *__UpdateIssueInput) GetInput() *IssueUpdateInput { return v.Input }
 
+// The mutation executed by AttachmentCreate.
+const AttachmentCreate_Operation = `
+mutation AttachmentCreate ($input: AttachmentCreateInput!) {
+	attachmentCreate(input: $input) {
+		success
+		attachment {
+			id
+			title
+			url
+			createdAt
+		}
+	}
+}
+`
+
+// Step 2 of file upload & URL attachments: Create attachment
+func AttachmentCreate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *AttachmentCreateInput,
+) (data_ *AttachmentCreateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "AttachmentCreate",
+		Query:  AttachmentCreate_Operation,
+		Variables: &__AttachmentCreateInput{
+			Input: input,
+		},
+	}
+
+	data_ = &AttachmentCreateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by AttachmentDelete.
+const AttachmentDelete_Operation = `
+mutation AttachmentDelete ($id: String!) {
+	attachmentDelete(id: $id) {
+		success
+	}
+}
+`
+
+// Delete attachment
+func AttachmentDelete(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *AttachmentDeleteResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "AttachmentDelete",
+		Query:  AttachmentDelete_Operation,
+		Variables: &__AttachmentDeleteInput{
+			Id: id,
+		},
+	}
+
+	data_ = &AttachmentDeleteResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by AttachmentUpdate.
+const AttachmentUpdate_Operation = `
+mutation AttachmentUpdate ($id: String!, $input: AttachmentUpdateInput!) {
+	attachmentUpdate(id: $id, input: $input) {
+		success
+		attachment {
+			id
+			title
+			subtitle
+			url
+		}
+	}
+}
+`
+
+// Update attachment metadata
+func AttachmentUpdate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	input *AttachmentUpdateInput,
+) (data_ *AttachmentUpdateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "AttachmentUpdate",
+		Query:  AttachmentUpdate_Operation,
+		Variables: &__AttachmentUpdateInput{
+			Id:    id,
+			Input: input,
+		},
+	}
+
+	data_ = &AttachmentUpdateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The mutation executed by CreateComment.
 const CreateComment_Operation = `
 mutation CreateComment ($input: CommentCreateInput!) {
@@ -11899,6 +12522,53 @@ func CreateIssue(
 	}
 
 	data_ = &CreateIssueResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by FileUpload.
+const FileUpload_Operation = `
+mutation FileUpload ($contentType: String!, $filename: String!, $size: Int!) {
+	fileUpload(contentType: $contentType, filename: $filename, size: $size) {
+		success
+		uploadFile {
+			uploadUrl
+			assetUrl
+			headers {
+				key
+				value
+			}
+		}
+	}
+}
+`
+
+// Step 1 of file upload: Get pre-signed URL
+func FileUpload(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	contentType string,
+	filename string,
+	size int,
+) (data_ *FileUploadResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "FileUpload",
+		Query:  FileUpload_Operation,
+		Variables: &__FileUploadInput{
+			ContentType: contentType,
+			Filename:    filename,
+			Size:        size,
+		},
+	}
+
+	data_ = &FileUploadResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -12592,6 +13262,66 @@ func GetViewer(
 	}
 
 	data_ = &GetViewerResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by ListAttachments.
+const ListAttachments_Operation = `
+query ListAttachments ($issueId: String!, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
+	issue(id: $issueId) {
+		id
+		attachments(first: $first, after: $after, orderBy: $orderBy) {
+			nodes {
+				id
+				title
+				subtitle
+				url
+				metadata
+				createdAt
+				updatedAt
+				creator {
+					email
+					name
+				}
+			}
+			pageInfo {
+				hasNextPage
+				endCursor
+			}
+		}
+	}
+}
+`
+
+// List attachments on an issue
+func ListAttachments(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	issueId string,
+	first *int,
+	after *string,
+	orderBy *PaginationOrderBy,
+) (data_ *ListAttachmentsResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ListAttachments",
+		Query:  ListAttachments_Operation,
+		Variables: &__ListAttachmentsInput{
+			IssueId: issueId,
+			First:   first,
+			After:   after,
+			OrderBy: orderBy,
+		},
+	}
+
+	data_ = &ListAttachmentsResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(

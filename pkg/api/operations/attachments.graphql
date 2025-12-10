@@ -1,0 +1,73 @@
+# Step 1 of file upload: Get pre-signed URL
+mutation FileUpload($contentType: String!, $filename: String!, $size: Int!) {
+  fileUpload(contentType: $contentType, filename: $filename, size: $size) {
+    success
+    uploadFile {
+      uploadUrl
+      assetUrl
+      headers {
+        key
+        value
+      }
+    }
+  }
+}
+
+# Step 2 of file upload & URL attachments: Create attachment
+mutation AttachmentCreate($input: AttachmentCreateInput!) {
+  attachmentCreate(input: $input) {
+    success
+    attachment {
+      id
+      title
+      url
+      createdAt
+    }
+  }
+}
+
+# List attachments on an issue
+query ListAttachments($issueId: String!, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
+  issue(id: $issueId) {
+    id
+    attachments(first: $first, after: $after, orderBy: $orderBy) {
+      nodes {
+        id
+        title
+        subtitle
+        url
+        metadata
+        createdAt
+        updatedAt
+        creator {
+          email
+          name
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+}
+
+# Update attachment metadata
+mutation AttachmentUpdate($id: String!, $input: AttachmentUpdateInput!) {
+  attachmentUpdate(id: $id, input: $input) {
+    success
+    attachment {
+      id
+      title
+      subtitle
+      url
+    }
+  }
+}
+
+# Delete attachment
+mutation AttachmentDelete($id: String!) {
+  attachmentDelete(id: $id) {
+    success
+  }
+}
