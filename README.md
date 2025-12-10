@@ -23,7 +23,11 @@ A comprehensive command-line interface for Linear's API, built with agents in mi
   - Timeline tracking (created, updated, completed dates)
 - 👤 **User Management**: List all users, view user details, and current user info
 - 💬 **Comments**: List and create comments on issues with time-aware formatting
-- 📎 **Attachments**: View file uploads and attachments on issues
+- 📎 **Attachment Management**: Upload files, create URL attachments, full CRUD operations
+  - File uploads to Linear's storage with progress tracking
+  - URL attachments for external resources (GitHub PRs, docs, etc.)
+  - 50MB file size limit with retry logic
+  - List, update, and delete attachments
 - 🔗 **Webhooks**: Configure and manage webhooks
 - 🎨 **Multiple Output Formats**: Table, plaintext, and JSON output
 - ⚡ **Performance**: Fast and lightweight CLI tool
@@ -194,6 +198,28 @@ lincli comment list LIN-123
 lincli comment create LIN-123 --body "Fixed the authentication bug"
 ```
 
+### 7. Attachment Management
+```bash
+# List attachments on an issue
+lincli attachment list LIN-123
+
+# Create URL attachment
+lincli attachment create LIN-123 \
+  --url "https://github.com/org/repo/pull/456" \
+  --title "Fix PR"
+
+# Upload files
+lincli attachment upload LIN-123 \
+  --file report.pdf --title "Q4 Report" \
+  --file screenshot.png --title "Error Screenshot"
+
+# Update attachment
+lincli attachment update <attachment-id> --title "Updated Title"
+
+# Delete attachment
+lincli attachment delete <attachment-id>
+```
+
 ## 📖 Command Reference
 
 ### Global Flags
@@ -352,6 +378,68 @@ lincli comment new <issue-id> -b "Comment text"    # Alias
 lincli comment create LIN-123 --body "I've started working on this"
 lincli comment add LIN-123 -b "Fixed in commit abc123"
 lincli comment create LIN-456 --body "@john please review this PR"
+```
+
+### Attachment Commands
+```bash
+# List attachments
+lincli attachment list <issue-id> [flags]
+lincli attachment ls <issue-id> [flags]     # Alias
+# Flags:
+  -l, --limit int          Maximum results (default 50)
+  -o, --sort string        Sort order: created (default), updated
+
+# Examples:
+lincli attachment list LIN-123              # List all attachments
+lincli attachment list LIN-123 --json       # JSON output
+
+# Create URL attachment
+lincli attachment create <issue-id> [flags]
+# Flags:
+  --url string             URL to attach (required)
+  --title string           Attachment title (required)
+  --subtitle string        Attachment subtitle
+  --icon-url string        Custom icon URL
+  --metadata string        Metadata as key=value pairs (comma-separated)
+
+# Examples:
+lincli attachment create LIN-123 --url "https://github.com/org/repo/pull/456" --title "Fix PR"
+lincli attachment create LIN-123 --url "https://docs.example.com" --title "Documentation" --subtitle "User Guide"
+
+# Upload files
+lincli attachment upload <issue-id> [flags]
+# Flags:
+  --file string[]          Path to file (required, repeatable)
+  --title string[]         Attachment title for each file (required)
+  --subtitle string[]      Attachment subtitle
+  --icon-url string[]      Custom icon URL
+  --metadata string[]      Metadata as key=value pairs
+
+# Examples:
+lincli attachment upload LIN-123 --file report.pdf --title "Q4 Report"
+lincli attachment upload LIN-123 \
+  --file report.pdf --title "Q4 Report" --subtitle "Draft" \
+  --file screenshot.png --title "Bug Screenshot"
+
+# Update attachment
+lincli attachment update <attachment-id> [flags]
+# Flags:
+  --title string           New title
+  --subtitle string        New subtitle
+  --icon-url string        New icon URL
+  --metadata string        New metadata
+  --url string             New URL (URL attachments only)
+  --file string            Re-upload file (file attachments only)
+
+# Examples:
+lincli attachment update abc123 --title "Updated Title"
+lincli attachment update abc123 --file new-report.pdf  # Re-upload file
+
+# Delete attachment
+lincli attachment delete <attachment-id>
+
+# Examples:
+lincli attachment delete abc123
 ```
 
 ## 🎨 Output Formats
