@@ -47,6 +47,9 @@ var attachmentListCmd = &cobra.Command{
 		var orderByEnum *api.PaginationOrderBy
 		if sortFlag != "" {
 			switch sortFlag {
+			case "linear":
+				// Use Linear's default sort order (nil orderBy)
+				orderByEnum = nil
 			case "created", "createdAt":
 				val := api.PaginationOrderByCreatedat
 				orderByEnum = &val
@@ -54,7 +57,7 @@ var attachmentListCmd = &cobra.Command{
 				val := api.PaginationOrderByUpdatedat
 				orderByEnum = &val
 			default:
-				output.Error(fmt.Sprintf("Invalid sort option: %s. Valid options are: created, updated", sortFlag), plaintext, jsonOut)
+				output.Error(fmt.Sprintf("Invalid sort option: %s. Valid options are: linear, created, updated", sortFlag), plaintext, jsonOut)
 				os.Exit(1)
 			}
 		}
@@ -148,5 +151,5 @@ var attachmentListCmd = &cobra.Command{
 func init() {
 	attachmentCmd.AddCommand(attachmentListCmd)
 	attachmentListCmd.Flags().IntP("limit", "l", 50, "Maximum number of attachments to return")
-	attachmentListCmd.Flags().StringP("sort", "o", "created", "Sort order: created, updated")
+	attachmentListCmd.Flags().StringP("sort", "o", "", "Sort order: linear (default), created, updated")
 }
