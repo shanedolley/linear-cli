@@ -48,6 +48,7 @@ lincli/
 │   ├── team.go          # Team commands
 │   ├── user.go          # User commands
 │   ├── comment.go       # Comment commands
+│   ├── attachment.go    # Attachment management (list, create, upload, update, delete)
 │   └── docs.go          # Embedded README rendering
 ├── pkg/
 │   ├── api/
@@ -60,7 +61,8 @@ lincli/
 │   │       ├── projects.graphql
 │   │       ├── teams.graphql
 │   │       ├── users.graphql
-│   │       └── comments.graphql
+│   │       ├── comments.graphql
+│   │       └── attachments.graphql
 │   ├── auth/
 │   │   └── auth.go      # Auth config management (~/.lincli-auth.json)
 │   ├── output/
@@ -351,6 +353,16 @@ For new write commands (create, update, delete):
 - Pass inputs as pointers to mutation functions (`&input`)
 - Response unwrapping: `resp.MutationName.Entity`
 
+### Advanced Patterns: Multi-Step Operations
+
+For operations requiring file uploads or multi-step API flows, see the **Attachment Commands Pattern** section below for comprehensive guidance on:
+- File upload flow (validation → upload → attachment creation)
+- Progress tracking with retry logic
+- Multiple file support with coordinated flag parsing
+- Best-effort error handling strategies
+
+The attachment commands (`cmd/attachment.go`) serve as a reference implementation for complex operations.
+
 ### Updating Linear's GraphQL Schema
 When Linear's API changes, update the schema:
 
@@ -369,6 +381,241 @@ go generate ./pkg/api
 
 # Fix any compilation errors from breaking changes
 ```
+
+## Attachment Commands Pattern
+
+The attachment commands (`cmd/attachment.go`) demonstrate several advanced patterns for multi-step operations and file handling:
+
+### Multi-Subcommand Structure
+Attachment management uses a parent command with five subcommands:
+- `attachment list` - Read operation with pagination
+- `attachment create` - URL attachment creation (simple write)
+- `attachment upload` - File upload to Linear storage (complex multi-step)
+- `attachment update` - Update metadata or re-upload files
+- `attachment delete` - Delete operation
+
+**Key pattern**: All subcommands are registered under `attachmentCmd` in their respective `init()` functions.
+
+### File Upload Flow
+
+File uploads require a three-step process (Linear's API requirement):
+
+1. **Validation Phase** (local, before any API calls)
+   ```go
+   - Check file exists and is readable
+   - Validate size (50MB limit)
+   - Detect content type (extension-based, fallback to content sniffing)
+   - Collect all validation errors before failing
+   ```
+
+2. **Upload Phase** (GraphQL → HTTP → GraphQL)
+   ```go
+   // Step 1: Get pre-signed URL from Linear
+   uploadResp, err := api.FileUpload(ctx, client, contentType, filename, size)
+
+   // Step 2: HTTP PUT to pre-signed URL with progress tracking
+   err = uploadFileWithProgress(path, uploadResp.FileUpload.UploadUrl, uploadResp.FileUpload.Headers, size, quiet)
+
+   // Step 3: Create attachment record using asset URL
+   input := api.AttachmentCreateInput{
+       IssueId: issueID,
+       Title:   title,
+       Url:     uploadResp.FileUpload.AssetUrl,  // Use returned asset URL
+   }
+   attachResp, err := api.AttachmentCreate(ctx, client, &input)
+   ```
+
+3. **Retry Logic** (automatic, transparent to user)
+   - Up to 3 retry attempts with exponential backoff (1s, 2s, 4s)
+   - Only network errors and 5xx status codes trigger retries
+   - 4xx status codes fail immediately (non-retryable)
+   - Progress bar recreated on each retry attempt
+
+### Multiple File Support
+
+The `upload` command supports multiple files with individual metadata:
+
+```bash
+lincli attachment upload LIN-123 \
+  --file report.pdf --title "Q4 Report" --subtitle "Draft" \
+  --file screenshot.png --title "Bug Screenshot"
+```
+
+**Implementation pattern**:
+- Use `StringArray` flags for repeatable values
+- Parse flags into `[]fileAttachment` structs
+- Validate all files before uploading any
+- Continue with remaining files if one fails (best-effort)
+- Report summary at end: "N succeeded, M failed"
+
+### Flag Parsing for Related Values
+
+Multiple files require coordinated flag parsing:
+
+```go
+func parseFileFlags(cmd *cobra.Command) ([]fileAttachment, error) {
+    files, _ := cmd.Flags().GetStringArray("file")
+    titles, _ := cmd.Flags().GetStringArray("title")
+    subtitles, _ := cmd.Flags().GetStringArray("subtitle")
+
+    // Validate counts match
+    if len(files) != len(titles) {
+        return nil, fmt.Errorf("each --file must have a corresponding --title")
+    }
+
+    // Build attachment structs with optional fields
+    for i := range files {
+        att := fileAttachment{path: files[i], title: titles[i]}
+        if i < len(subtitles) && subtitles[i] != "" {
+            att.subtitle = subtitles[i]
+        }
+        attachments = append(attachments, att)
+    }
+}
+```
+
+### File Validation Helpers
+
+Reusable validation functions for file operations:
+
+- `validateFile(path string) (int64, error)` - Check exists, readable, size <50MB
+- `detectContentType(path string) (string, error)` - MIME type detection
+- `formatSize(bytes int64) string` - Human-readable sizes (KB, MB, GB)
+
+### Progress Tracking
+
+File uploads show real-time progress using `progressbar/v3`:
+
+```go
+bar := progressbar.DefaultBytes(
+    fileSize,
+    fmt.Sprintf("Uploading %s (%s)...", filename, formatSize(fileSize)),
+)
+reader := progressbar.NewReader(file, bar)
+req, err := http.NewRequest("PUT", uploadURL, &reader)
+```
+
+**JSON mode consideration**: Progress bars are suppressed when `--json` flag is set (quiet mode).
+
+### Error Handling Strategy
+
+Attachment commands use **best-effort** error handling:
+
+1. **Validate everything first** - Collect all validation errors before failing
+2. **Fail fast on validation** - Don't attempt uploads if any file is invalid
+3. **Continue on upload failure** - Process remaining files if one fails
+4. **Report comprehensive results** - Show which succeeded and which failed
+5. **Exit code reflects outcome** - Exit 1 if any failures occurred
+
+Example output:
+```
+Validating files...
+✓ report.pdf (2.3 MB) - OK
+✓ screenshot.png (145.7 KB) - OK
+
+Uploading report.pdf (2.3 MB)...
+✓ Attached report.pdf to LIN-123
+
+Uploading screenshot.png (145.7 KB)...
+✗ Network error, retrying... (attempt 1/3)
+✓ Attached screenshot.png to LIN-123
+
+Summary: 2 succeeded, 0 failed
+```
+
+### Common Attachment Operations
+
+**List attachments** (simple read):
+```bash
+lincli attachment list LIN-123
+lincli attachment list LIN-123 --json  # Machine-readable
+lincli attachment list LIN-123 --sort updated --limit 20
+```
+
+**Create URL attachment** (external resource):
+```bash
+lincli attachment create LIN-123 \
+  --url "https://github.com/org/repo/pull/456" \
+  --title "Fix PR" \
+  --subtitle "Merged" \
+  --metadata "status=merged,author=user"
+```
+
+**Upload files** (to Linear storage):
+```bash
+# Single file
+lincli attachment upload LIN-123 --file report.pdf --title "Q4 Report"
+
+# Multiple files with metadata
+lincli attachment upload LIN-123 \
+  --file report.pdf --title "Q4 Report" --subtitle "Draft" \
+  --file screenshot.png --title "Error Screenshot" \
+  --file logs.txt --title "Debug Logs"
+```
+
+**Update attachment** (metadata or re-upload):
+```bash
+# Update metadata only
+lincli attachment update <attachment-id> --title "Updated Title" --subtitle "Final"
+
+# Re-upload file (file attachments only)
+lincli attachment update <attachment-id> --file new-report.pdf
+
+# Change URL (URL attachments only)
+lincli attachment update <attachment-id> --url "https://new-url.com"
+```
+
+**Delete attachment**:
+```bash
+lincli attachment delete <attachment-id>
+```
+
+### Adding New Commands with File Upload
+
+When adding commands that need file uploads:
+
+1. **Add GraphQL operations** to `pkg/api/operations/attachments.graphql`:
+   - `FileUpload` mutation (already exists for attachments)
+   - Your entity-specific mutation that accepts asset URLs
+
+2. **Generate code**: `go generate ./pkg/api`
+
+3. **Implement validation helpers** (if not reusing attachment helpers):
+   - File size limits
+   - Content type detection
+   - Path resolution and existence checks
+
+4. **Implement upload helper** with retry logic:
+   - Call `FileUpload` mutation
+   - HTTP PUT with progress bar
+   - Call your mutation with asset URL
+   - Handle retries transparently
+
+5. **Add command with proper error handling**:
+   - Validate before uploading
+   - Show progress for user operations
+   - Support quiet mode for scripting
+   - Provide clear error messages
+
+6. **Test with various file types and sizes**:
+   - Small files (<1MB)
+   - Large files (close to limit)
+   - Different content types
+   - Network interruption scenarios
+
+### Notes for AI Agents
+
+When working with attachment commands programmatically:
+
+- **Always use `--json` flag** for machine-readable output
+- **Validate files locally first** before calling upload commands
+- **Check returned JSON for `error` field** to detect failures
+- **Parse validation_errors array** for detailed failure information
+- **Respect 50MB file size limit** - check before attempting upload
+- **Use absolute paths** for file arguments to avoid path resolution issues
+- **Handle partial failures** - some files may succeed while others fail
+- **Retry on network errors** - upload command has built-in retry logic
+- **Don't retry 4xx errors** - these indicate invalid requests (e.g., file too large)
 
 ## Important Notes
 
