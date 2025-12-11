@@ -380,7 +380,7 @@ func uploadFileToLinear(ctx context.Context, client graphql.Client, file fileAtt
 	}
 
 	// Step 2: Upload file with progress tracking
-	if err := uploadFileWithProgress(file.path, uploadResp.FileUpload.UploadFile.UploadUrl, uploadResp.FileUpload.UploadFile.Headers, file.size, quiet); err != nil {
+	if err := uploadFileWithProgress(file.path, uploadResp.FileUpload.UploadFile.UploadUrl, uploadResp.FileUpload.UploadFile.Headers, file.contentType, file.size, quiet); err != nil {
 		return err
 	}
 
@@ -413,7 +413,7 @@ func uploadFileToLinear(ctx context.Context, client graphql.Client, file fileAtt
 }
 
 // uploadFileWithProgress uploads file to URL with progress bar and retry logic
-func uploadFileWithProgress(filePath, uploadURL string, headers []*api.FileUploadFileUploadUploadPayloadUploadFileHeadersUploadFileHeader, fileSize int64, quiet bool) error {
+func uploadFileWithProgress(filePath, uploadURL string, headers []*api.FileUploadFileUploadUploadPayloadUploadFileHeadersUploadFileHeader, contentType string, fileSize int64, quiet bool) error {
 	const maxRetries = 3
 	backoff := []time.Duration{1 * time.Second, 2 * time.Second, 4 * time.Second}
 
@@ -451,13 +451,16 @@ func uploadFileWithProgress(filePath, uploadURL string, headers []*api.FileUploa
 				return fmt.Errorf("failed to create request: %w", err)
 			}
 
-			// Add headers from Linear
+			// Set Content-Length (required for pre-signed URL uploads)
+			req.ContentLength = fileSize
+
+			// Set Content-Type to match what we told Linear in FileUpload mutation
+			req.Header.Set("Content-Type", contentType)
+
+			// Add headers from Linear (Content-Disposition, content-length-range, etc)
 			for _, h := range headers {
 				req.Header.Set(h.Key, h.Value)
 			}
-			// Add required headers
-			req.Header.Set("Content-Type", "application/octet-stream")
-			req.Header.Set("Cache-Control", "public, max-age=31536000")
 
 			// Execute upload
 			client := &http.Client{Timeout: 5 * time.Minute}
