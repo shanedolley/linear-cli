@@ -378,3 +378,31 @@ mutation UpdateIssue($id: String!, $input: IssueUpdateInput!) {
     }
   }
 }
+
+# Mutation: Create a relation between two issues
+mutation CreateIssueRelation($input: IssueRelationCreateInput!) {
+  issueRelationCreate(input: $input) {
+    issueRelation {
+      id
+      type
+      issue {
+        id
+        identifier
+        title
+      }
+      relatedIssue {
+        id
+        identifier
+        title
+      }
+    }
+    success
+  }
+}
+
+# Mutation: Delete an issue relation
+mutation DeleteIssueRelation($id: String!) {
+  issueRelationDelete(id: $id) {
+    success
+  }
+}

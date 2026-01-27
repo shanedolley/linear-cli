@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/shanedolley/lincli/pkg/api"
 	"github.com/fatih/color"
+	"github.com/shanedolley/lincli/pkg/api"
 )
 
 type User struct {

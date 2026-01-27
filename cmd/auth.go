@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

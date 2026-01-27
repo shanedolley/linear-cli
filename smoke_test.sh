@@ -152,6 +152,36 @@ if [ -n "$issue_id" ]; then
     run_test "attachment list (sort)" "go run main.go attachment list $issue_id --sort created"
 fi
 
+# Test issue link command (help/error handling only - no actual linking)
+echo -e "\n${YELLOW}Testing issue link command...${NC}"
+run_test "issue link help" "go run main.go issue link --help" "blocks"
+run_test "issue link help" "go run main.go issue link --help" "parent-of"
+
+# Test error handling for link command
+set +e
+output=$(go run main.go issue link SAME-123 SAME-123 --type blocks 2>&1)
+if echo "$output" | grep -q "Cannot link an issue to itself"; then
+    echo -e "issue link (self-referential check): ${GREEN}PASS${NC}"
+    TESTS_RUN=$((TESTS_RUN + 1))
+    TESTS_PASSED=$((TESTS_PASSED + 1))
+else
+    echo -e "issue link (self-referential check): ${RED}FAIL${NC}"
+    TESTS_RUN=$((TESTS_RUN + 1))
+    TESTS_FAILED=$((TESTS_FAILED + 1))
+fi
+
+output=$(go run main.go issue link A-1 B-2 --type invalid-type 2>&1)
+if echo "$output" | grep -q "Invalid type"; then
+    echo -e "issue link (invalid type check): ${GREEN}PASS${NC}"
+    TESTS_RUN=$((TESTS_RUN + 1))
+    TESTS_PASSED=$((TESTS_PASSED + 1))
+else
+    echo -e "issue link (invalid type check): ${RED}FAIL${NC}"
+    TESTS_RUN=$((TESTS_RUN + 1))
+    TESTS_FAILED=$((TESTS_FAILED + 1))
+fi
+set -e
+
 # Test help commands
 echo -e "\n${YELLOW}Testing help commands...${NC}"
 run_test "help" "go run main.go --help" "Usage:"

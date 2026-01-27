@@ -1100,6 +1100,126 @@ func (v *CreateIssueIssueCreateIssuePayloadIssue) __premarshalJSON() (*__premars
 	return &retval, nil
 }
 
+// CreateIssueRelationIssueRelationCreateIssueRelationPayload includes the requested fields of the GraphQL type IssueRelationPayload.
+type CreateIssueRelationIssueRelationCreateIssueRelationPayload struct {
+	// The issue relation that was created or updated.
+	IssueRelation *CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelation `json:"issueRelation"`
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+}
+
+// GetIssueRelation returns CreateIssueRelationIssueRelationCreateIssueRelationPayload.IssueRelation, and is useful for accessing the field via an interface.
+func (v *CreateIssueRelationIssueRelationCreateIssueRelationPayload) GetIssueRelation() *CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelation {
+	return v.IssueRelation
+}
+
+// GetSuccess returns CreateIssueRelationIssueRelationCreateIssueRelationPayload.Success, and is useful for accessing the field via an interface.
+func (v *CreateIssueRelationIssueRelationCreateIssueRelationPayload) GetSuccess() bool {
+	return v.Success
+}
+
+// CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelation includes the requested fields of the GraphQL type IssueRelation.
+// The GraphQL type's documentation follows.
+//
+// A relation between two issues.
+type CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelation struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The relationship of the issue with the related issue.
+	Type string `json:"type"`
+	// The issue whose relationship is being described.
+	Issue *CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationIssue `json:"issue"`
+	// The related issue.
+	RelatedIssue *CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationRelatedIssue `json:"relatedIssue"`
+}
+
+// GetId returns CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelation.Id, and is useful for accessing the field via an interface.
+func (v *CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelation) GetId() string {
+	return v.Id
+}
+
+// GetType returns CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelation.Type, and is useful for accessing the field via an interface.
+func (v *CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelation) GetType() string {
+	return v.Type
+}
+
+// GetIssue returns CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelation.Issue, and is useful for accessing the field via an interface.
+func (v *CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelation) GetIssue() *CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationIssue {
+	return v.Issue
+}
+
+// GetRelatedIssue returns CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelation.RelatedIssue, and is useful for accessing the field via an interface.
+func (v *CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelation) GetRelatedIssue() *CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationRelatedIssue {
+	return v.RelatedIssue
+}
+
+// CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationIssue includes the requested fields of the GraphQL type Issue.
+// The GraphQL type's documentation follows.
+//
+// An issue.
+type CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationIssue struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// Issue's human readable identifier (e.g. ENG-123).
+	Identifier string `json:"identifier"`
+	// The issue's title.
+	Title string `json:"title"`
+}
+
+// GetId returns CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationIssue.Id, and is useful for accessing the field via an interface.
+func (v *CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationIssue) GetId() string {
+	return v.Id
+}
+
+// GetIdentifier returns CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationIssue.Identifier, and is useful for accessing the field via an interface.
+func (v *CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationIssue) GetIdentifier() string {
+	return v.Identifier
+}
+
+// GetTitle returns CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationIssue.Title, and is useful for accessing the field via an interface.
+func (v *CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationIssue) GetTitle() string {
+	return v.Title
+}
+
+// CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationRelatedIssue includes the requested fields of the GraphQL type Issue.
+// The GraphQL type's documentation follows.
+//
+// An issue.
+type CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationRelatedIssue struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// Issue's human readable identifier (e.g. ENG-123).
+	Identifier string `json:"identifier"`
+	// The issue's title.
+	Title string `json:"title"`
+}
+
+// GetId returns CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationRelatedIssue.Id, and is useful for accessing the field via an interface.
+func (v *CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationRelatedIssue) GetId() string {
+	return v.Id
+}
+
+// GetIdentifier returns CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationRelatedIssue.Identifier, and is useful for accessing the field via an interface.
+func (v *CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationRelatedIssue) GetIdentifier() string {
+	return v.Identifier
+}
+
+// GetTitle returns CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationRelatedIssue.Title, and is useful for accessing the field via an interface.
+func (v *CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationRelatedIssue) GetTitle() string {
+	return v.Title
+}
+
+// CreateIssueRelationResponse is returned by CreateIssueRelation on success.
+type CreateIssueRelationResponse struct {
+	// Creates a new issue relation.
+	IssueRelationCreate *CreateIssueRelationIssueRelationCreateIssueRelationPayload `json:"issueRelationCreate"`
+}
+
+// GetIssueRelationCreate returns CreateIssueRelationResponse.IssueRelationCreate, and is useful for accessing the field via an interface.
+func (v *CreateIssueRelationResponse) GetIssueRelationCreate() *CreateIssueRelationIssueRelationCreateIssueRelationPayload {
+	return v.IssueRelationCreate
+}
+
 // CreateIssueResponse is returned by CreateIssue on success.
 type CreateIssueResponse struct {
 	// Creates a new issue.
@@ -1423,6 +1543,29 @@ func (v *DateComparator) GetNeq() *string { return v.Neq }
 
 // GetNin returns DateComparator.Nin, and is useful for accessing the field via an interface.
 func (v *DateComparator) GetNin() []string { return v.Nin }
+
+// DeleteIssueRelationIssueRelationDeleteDeletePayload includes the requested fields of the GraphQL type DeletePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity deletion mutations.
+type DeleteIssueRelationIssueRelationDeleteDeletePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+}
+
+// GetSuccess returns DeleteIssueRelationIssueRelationDeleteDeletePayload.Success, and is useful for accessing the field via an interface.
+func (v *DeleteIssueRelationIssueRelationDeleteDeletePayload) GetSuccess() bool { return v.Success }
+
+// DeleteIssueRelationResponse is returned by DeleteIssueRelation on success.
+type DeleteIssueRelationResponse struct {
+	// Deletes an issue relation.
+	IssueRelationDelete *DeleteIssueRelationIssueRelationDeleteDeletePayload `json:"issueRelationDelete"`
+}
+
+// GetIssueRelationDelete returns DeleteIssueRelationResponse.IssueRelationDelete, and is useful for accessing the field via an interface.
+func (v *DeleteIssueRelationResponse) GetIssueRelationDelete() *DeleteIssueRelationIssueRelationDeleteDeletePayload {
+	return v.IssueRelationDelete
+}
 
 // Document filtering options.
 type DocumentFilter struct {
@@ -5753,6 +5896,46 @@ func (v *IssueListFieldsTeam) GetKey() string { return v.Key }
 
 // GetName returns IssueListFieldsTeam.Name, and is useful for accessing the field via an interface.
 func (v *IssueListFieldsTeam) GetName() string { return v.Name }
+
+type IssueRelationCreateInput struct {
+	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
+	Id *string `json:"id"`
+	// The identifier of the issue that is related to another issue.
+	IssueId string `json:"issueId"`
+	// The identifier of the related issue.
+	RelatedIssueId string `json:"relatedIssueId"`
+	// The type of relation of the issue to the related issue.
+	Type IssueRelationType `json:"type"`
+}
+
+// GetId returns IssueRelationCreateInput.Id, and is useful for accessing the field via an interface.
+func (v *IssueRelationCreateInput) GetId() *string { return v.Id }
+
+// GetIssueId returns IssueRelationCreateInput.IssueId, and is useful for accessing the field via an interface.
+func (v *IssueRelationCreateInput) GetIssueId() string { return v.IssueId }
+
+// GetRelatedIssueId returns IssueRelationCreateInput.RelatedIssueId, and is useful for accessing the field via an interface.
+func (v *IssueRelationCreateInput) GetRelatedIssueId() string { return v.RelatedIssueId }
+
+// GetType returns IssueRelationCreateInput.Type, and is useful for accessing the field via an interface.
+func (v *IssueRelationCreateInput) GetType() IssueRelationType { return v.Type }
+
+// The type of the issue relation.
+type IssueRelationType string
+
+const (
+	IssueRelationTypeBlocks    IssueRelationType = "blocks"
+	IssueRelationTypeDuplicate IssueRelationType = "duplicate"
+	IssueRelationTypeRelated   IssueRelationType = "related"
+	IssueRelationTypeSimilar   IssueRelationType = "similar"
+)
+
+var AllIssueRelationType = []IssueRelationType{
+	IssueRelationTypeBlocks,
+	IssueRelationTypeDuplicate,
+	IssueRelationTypeRelated,
+	IssueRelationTypeSimilar,
+}
 
 // IssueSuggestion collection filtering options.
 type IssueSuggestionCollectionFilter struct {
@@ -12052,6 +12235,22 @@ type __CreateIssueInput struct {
 // GetInput returns __CreateIssueInput.Input, and is useful for accessing the field via an interface.
 func (v *__CreateIssueInput) GetInput() *IssueCreateInput { return v.Input }
 
+// __CreateIssueRelationInput is used internally by genqlient
+type __CreateIssueRelationInput struct {
+	Input *IssueRelationCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __CreateIssueRelationInput.Input, and is useful for accessing the field via an interface.
+func (v *__CreateIssueRelationInput) GetInput() *IssueRelationCreateInput { return v.Input }
+
+// __DeleteIssueRelationInput is used internally by genqlient
+type __DeleteIssueRelationInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __DeleteIssueRelationInput.Id, and is useful for accessing the field via an interface.
+func (v *__DeleteIssueRelationInput) GetId() string { return v.Id }
+
 // __FileUploadInput is used internally by genqlient
 type __FileUploadInput struct {
 	ContentType string `json:"contentType"`
@@ -12522,6 +12721,90 @@ func CreateIssue(
 	}
 
 	data_ = &CreateIssueResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by CreateIssueRelation.
+const CreateIssueRelation_Operation = `
+mutation CreateIssueRelation ($input: IssueRelationCreateInput!) {
+	issueRelationCreate(input: $input) {
+		issueRelation {
+			id
+			type
+			issue {
+				id
+				identifier
+				title
+			}
+			relatedIssue {
+				id
+				identifier
+				title
+			}
+		}
+		success
+	}
+}
+`
+
+// Mutation: Create a relation between two issues
+func CreateIssueRelation(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *IssueRelationCreateInput,
+) (data_ *CreateIssueRelationResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "CreateIssueRelation",
+		Query:  CreateIssueRelation_Operation,
+		Variables: &__CreateIssueRelationInput{
+			Input: input,
+		},
+	}
+
+	data_ = &CreateIssueRelationResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by DeleteIssueRelation.
+const DeleteIssueRelation_Operation = `
+mutation DeleteIssueRelation ($id: String!) {
+	issueRelationDelete(id: $id) {
+		success
+	}
+}
+`
+
+// Mutation: Delete an issue relation
+func DeleteIssueRelation(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *DeleteIssueRelationResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "DeleteIssueRelation",
+		Query:  DeleteIssueRelation_Operation,
+		Variables: &__DeleteIssueRelationInput{
+			Id: id,
+		},
+	}
+
+	data_ = &DeleteIssueRelationResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(

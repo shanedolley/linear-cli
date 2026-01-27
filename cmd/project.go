@@ -6,11 +6,11 @@ import (
 	"os"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
 	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/shanedolley/lincli/pkg/utils"
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

@@ -6,11 +6,11 @@ import (
 	"os"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
 	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/shanedolley/lincli/pkg/utils"
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -783,7 +783,6 @@ var issueGetCmd = &cobra.Command{
 	},
 }
 
-
 func priorityToString(priority int) string {
 	switch priority {
 	case 0:
@@ -1131,6 +1130,326 @@ Examples:
 	},
 }
 
+var issueLinkCmd = &cobra.Command{
+	Use:   "link [source-issue] [target-issue]",
+	Short: "Link two issues together",
+	Long: `Create a relationship between two issues.
+
+Supported relation types:
+  blocks      - Source issue blocks target (target cannot proceed until source is done)
+  blocked-by  - Source issue is blocked by target (source cannot proceed until target is done)
+  related     - Issues are related to each other
+  duplicate   - Source issue is a duplicate of target
+  parent-of   - Source issue becomes the parent of target (target becomes sub-issue)
+  sub-issue-of - Source issue becomes a sub-issue of target (target becomes parent)
+
+Examples:
+  lincli issue link TEAM-123 TEAM-456 --type blocks
+  lincli issue link TEAM-123 TEAM-456 --type blocked-by
+  lincli issue link TEAM-123 TEAM-456 --type related
+  lincli issue link TEAM-123 TEAM-456 --type duplicate
+  lincli issue link TEAM-123 TEAM-456 --type parent-of
+  lincli issue link TEAM-123 TEAM-456 --type sub-issue-of
+  lincli issue link TEAM-123 TEAM-456 --type blocks --remove`,
+	Args: cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		sourceIssue := args[0]
+		targetIssue := args[1]
+
+		// Validate not self-referential
+		if strings.EqualFold(sourceIssue, targetIssue) {
+			output.Error("Cannot link an issue to itself", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		linkType, _ := cmd.Flags().GetString("type")
+		remove, _ := cmd.Flags().GetBool("remove")
+
+		// Validate type
+		validTypes := []string{"blocks", "blocked-by", "related", "duplicate", "parent-of", "sub-issue-of"}
+		isValidType := false
+		for _, t := range validTypes {
+			if linkType == t {
+				isValidType = true
+				break
+			}
+		}
+		if !isValidType {
+			output.Error(fmt.Sprintf("Invalid type '%s'. Valid types: %s", linkType, strings.Join(validTypes, ", ")), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+
+		// Handle parent/child types differently - they use IssueUpdateInput.parentId
+		if linkType == "parent-of" || linkType == "sub-issue-of" {
+			handleParentChildLink(ctx, client, sourceIssue, targetIssue, linkType, remove, plaintext, jsonOut)
+			return
+		}
+
+		// Handle relation types (blocks, blocked-by, related, duplicate)
+		handleRelationLink(ctx, client, sourceIssue, targetIssue, linkType, remove, plaintext, jsonOut)
+	},
+}
+
+func handleParentChildLink(ctx context.Context, client *api.Client, sourceIssue, targetIssue, linkType string, remove bool, plaintext, jsonOut bool) {
+	// For parent-of: target's parentId = source's id
+	// For sub-issue-of: source's parentId = target's id
+
+	if remove {
+		// To remove a parent relationship, set parentId to nil
+		var issueToUpdate string
+		if linkType == "parent-of" {
+			issueToUpdate = targetIssue
+		} else {
+			issueToUpdate = sourceIssue
+		}
+
+		// Set parentId to nil (empty string in Linear API unsets it)
+		var nilParent *string = nil
+		input := api.IssueUpdateInput{
+			ParentId: nilParent,
+		}
+
+		_, err := api.UpdateIssue(ctx, client, issueToUpdate, &input)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to remove parent relationship: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if jsonOut {
+			output.JSON(map[string]interface{}{
+				"success": true,
+				"action":  "removed",
+				"type":    linkType,
+				"source":  sourceIssue,
+				"target":  targetIssue,
+			})
+		} else if plaintext {
+			fmt.Printf("Removed %s relationship between %s and %s\n", linkType, sourceIssue, targetIssue)
+		} else {
+			output.Success(fmt.Sprintf("Removed %s relationship between %s and %s", linkType, sourceIssue, targetIssue), plaintext, jsonOut)
+		}
+		return
+	}
+
+	// Get the issue IDs
+	var parentIssue, childIssue string
+	if linkType == "parent-of" {
+		parentIssue = sourceIssue
+		childIssue = targetIssue
+	} else {
+		parentIssue = targetIssue
+		childIssue = sourceIssue
+	}
+
+	// Get parent issue to get its ID
+	parentResp, err := api.GetIssue(ctx, client, parentIssue)
+	if err != nil {
+		output.Error(fmt.Sprintf("Failed to get parent issue: %v", err), plaintext, jsonOut)
+		os.Exit(1)
+	}
+	parentID := parentResp.Issue.IssueDetailFields.Id
+
+	// Update child issue with parentId
+	input := api.IssueUpdateInput{
+		ParentId: &parentID,
+	}
+
+	updateResp, err := api.UpdateIssue(ctx, client, childIssue, &input)
+	if err != nil {
+		output.Error(fmt.Sprintf("Failed to create parent relationship: %v", err), plaintext, jsonOut)
+		os.Exit(1)
+	}
+
+	if jsonOut {
+		output.JSON(map[string]interface{}{
+			"success": true,
+			"type":    linkType,
+			"parent":  parentIssue,
+			"child":   childIssue,
+			"childId": updateResp.IssueUpdate.Issue.IssueListFields.Id,
+		})
+	} else if plaintext {
+		fmt.Printf("Linked %s %s %s\n", sourceIssue, linkType, targetIssue)
+	} else {
+		fmt.Printf("%s Linked %s %s %s\n",
+			color.New(color.FgGreen).Sprint("✓"),
+			color.New(color.FgCyan).Sprint(sourceIssue),
+			linkType,
+			color.New(color.FgCyan).Sprint(targetIssue))
+	}
+}
+
+func handleRelationLink(ctx context.Context, client *api.Client, sourceIssue, targetIssue, linkType string, remove bool, plaintext, jsonOut bool) {
+	// Get issue IDs first
+	sourceResp, err := api.GetIssue(ctx, client, sourceIssue)
+	if err != nil {
+		output.Error(fmt.Sprintf("Failed to get source issue: %v", err), plaintext, jsonOut)
+		os.Exit(1)
+	}
+	sourceID := sourceResp.Issue.IssueDetailFields.Id
+
+	targetResp, err := api.GetIssue(ctx, client, targetIssue)
+	if err != nil {
+		output.Error(fmt.Sprintf("Failed to get target issue: %v", err), plaintext, jsonOut)
+		os.Exit(1)
+	}
+	targetID := targetResp.Issue.IssueDetailFields.Id
+
+	if remove {
+		// Find and delete the relation
+		// Need to find the relation ID from the source issue's relations
+		relations := sourceResp.Issue.IssueDetailFields.Relations
+		if relations == nil || len(relations.Nodes) == 0 {
+			output.Error(fmt.Sprintf("No relations found on issue %s", sourceIssue), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		// Map CLI type to API type for matching
+		var apiType string
+		switch linkType {
+		case "blocks":
+			apiType = "blocks"
+		case "blocked-by":
+			// For blocked-by, the relation is stored as "blocks" on the OTHER issue
+			// We need to check the target issue's relations instead
+			targetRelations := targetResp.Issue.IssueDetailFields.Relations
+			if targetRelations != nil {
+				for _, rel := range targetRelations.Nodes {
+					if rel.RelatedIssue != nil && rel.RelatedIssue.Id == sourceID && rel.Type == "blocks" {
+						_, err := api.DeleteIssueRelation(ctx, client, rel.Id)
+						if err != nil {
+							output.Error(fmt.Sprintf("Failed to delete relation: %v", err), plaintext, jsonOut)
+							os.Exit(1)
+						}
+						if jsonOut {
+							output.JSON(map[string]interface{}{
+								"success": true,
+								"action":  "removed",
+								"type":    linkType,
+								"source":  sourceIssue,
+								"target":  targetIssue,
+							})
+						} else if plaintext {
+							fmt.Printf("Removed %s relationship between %s and %s\n", linkType, sourceIssue, targetIssue)
+						} else {
+							output.Success(fmt.Sprintf("Removed %s relationship between %s and %s", linkType, sourceIssue, targetIssue), plaintext, jsonOut)
+						}
+						return
+					}
+				}
+			}
+			output.Error(fmt.Sprintf("No %s relation found between %s and %s", linkType, sourceIssue, targetIssue), plaintext, jsonOut)
+			os.Exit(1)
+		case "related":
+			apiType = "related"
+		case "duplicate":
+			apiType = "duplicate"
+		}
+
+		// Find matching relation
+		var relationID string
+		for _, rel := range relations.Nodes {
+			if rel.RelatedIssue != nil && rel.RelatedIssue.Id == targetID && rel.Type == apiType {
+				relationID = rel.Id
+				break
+			}
+		}
+
+		if relationID == "" {
+			output.Error(fmt.Sprintf("No %s relation found between %s and %s", linkType, sourceIssue, targetIssue), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		_, err = api.DeleteIssueRelation(ctx, client, relationID)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to delete relation: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if jsonOut {
+			output.JSON(map[string]interface{}{
+				"success": true,
+				"action":  "removed",
+				"type":    linkType,
+				"source":  sourceIssue,
+				"target":  targetIssue,
+			})
+		} else if plaintext {
+			fmt.Printf("Removed %s relationship between %s and %s\n", linkType, sourceIssue, targetIssue)
+		} else {
+			output.Success(fmt.Sprintf("Removed %s relationship between %s and %s", linkType, sourceIssue, targetIssue), plaintext, jsonOut)
+		}
+		return
+	}
+
+	// Create the relation
+	// For blocked-by, swap source and target to create "target blocks source"
+	var issueID, relatedIssueID string
+	var relationType api.IssueRelationType
+
+	switch linkType {
+	case "blocks":
+		issueID = sourceID
+		relatedIssueID = targetID
+		relationType = api.IssueRelationTypeBlocks
+	case "blocked-by":
+		// Swap: target blocks source
+		issueID = targetID
+		relatedIssueID = sourceID
+		relationType = api.IssueRelationTypeBlocks
+	case "related":
+		issueID = sourceID
+		relatedIssueID = targetID
+		relationType = api.IssueRelationTypeRelated
+	case "duplicate":
+		issueID = sourceID
+		relatedIssueID = targetID
+		relationType = api.IssueRelationTypeDuplicate
+	}
+
+	input := api.IssueRelationCreateInput{
+		IssueId:        issueID,
+		RelatedIssueId: relatedIssueID,
+		Type:           relationType,
+	}
+
+	resp, err := api.CreateIssueRelation(ctx, client, &input)
+	if err != nil {
+		output.Error(fmt.Sprintf("Failed to create relation: %v", err), plaintext, jsonOut)
+		os.Exit(1)
+	}
+
+	if jsonOut {
+		output.JSON(map[string]interface{}{
+			"success":      resp.IssueRelationCreate.Success,
+			"type":         linkType,
+			"relationId":   resp.IssueRelationCreate.IssueRelation.Id,
+			"issue":        sourceIssue,
+			"relatedIssue": targetIssue,
+		})
+	} else if plaintext {
+		fmt.Printf("Linked %s %s %s\n", sourceIssue, linkType, targetIssue)
+	} else {
+		fmt.Printf("%s Linked %s %s %s\n",
+			color.New(color.FgGreen).Sprint("✓"),
+			color.New(color.FgCyan).Sprint(sourceIssue),
+			linkType,
+			color.New(color.FgCyan).Sprint(targetIssue))
+	}
+}
+
 func init() {
 	rootCmd.AddCommand(issueCmd)
 	issueCmd.AddCommand(issueListCmd)
@@ -1139,6 +1458,7 @@ func init() {
 	issueCmd.AddCommand(issueAssignCmd)
 	issueCmd.AddCommand(issueCreateCmd)
 	issueCmd.AddCommand(issueUpdateCmd)
+	issueCmd.AddCommand(issueLinkCmd)
 
 	// Issue list flags
 	issueListCmd.Flags().StringP("assignee", "a", "", "Filter by assignee (email or 'me')")
@@ -1177,6 +1497,11 @@ func init() {
 	issueUpdateCmd.Flags().StringP("state", "s", "", "State name (e.g., 'Todo', 'In Progress', 'Done')")
 	issueUpdateCmd.Flags().Int("priority", -1, "Priority (0=None, 1=Urgent, 2=High, 3=Normal, 4=Low)")
 	issueUpdateCmd.Flags().String("due-date", "", "Due date (YYYY-MM-DD format, or empty to remove)")
+
+	// Issue link flags
+	issueLinkCmd.Flags().StringP("type", "t", "", "Relation type: blocks, blocked-by, related, duplicate, parent-of, sub-issue-of (required)")
+	issueLinkCmd.Flags().Bool("remove", false, "Remove the relationship instead of creating it")
+	_ = issueLinkCmd.MarkFlagRequired("type")
 }
 
 // Filter helper functions for type-safe filter building
