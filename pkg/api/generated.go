@@ -1794,6 +1794,183 @@ func (v *CreateIssueResponse) GetIssueCreate() *CreateIssueIssueCreateIssuePaylo
 	return v.IssueCreate
 }
 
+// CreateProjectProjectCreateProjectPayload includes the requested fields of the GraphQL type ProjectPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a project mutation.
+type CreateProjectProjectCreateProjectPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The project that was created or updated.
+	Project *CreateProjectProjectCreateProjectPayloadProject `json:"project"`
+}
+
+// GetSuccess returns CreateProjectProjectCreateProjectPayload.Success, and is useful for accessing the field via an interface.
+func (v *CreateProjectProjectCreateProjectPayload) GetSuccess() bool { return v.Success }
+
+// GetProject returns CreateProjectProjectCreateProjectPayload.Project, and is useful for accessing the field via an interface.
+func (v *CreateProjectProjectCreateProjectPayload) GetProject() *CreateProjectProjectCreateProjectPayloadProject {
+	return v.Project
+}
+
+// CreateProjectProjectCreateProjectPayloadProject includes the requested fields of the GraphQL type Project.
+// The GraphQL type's documentation follows.
+//
+// A project is a collection of issues working toward a shared goal. Projects have
+// start and target dates, milestones, status tracking, and progress metrics. They
+// can span multiple teams and be grouped under initiatives.
+type CreateProjectProjectCreateProjectPayloadProject struct {
+	ProjectListFields `json:"-"`
+}
+
+// GetId returns CreateProjectProjectCreateProjectPayloadProject.Id, and is useful for accessing the field via an interface.
+func (v *CreateProjectProjectCreateProjectPayloadProject) GetId() string {
+	return v.ProjectListFields.Id
+}
+
+// GetName returns CreateProjectProjectCreateProjectPayloadProject.Name, and is useful for accessing the field via an interface.
+func (v *CreateProjectProjectCreateProjectPayloadProject) GetName() string {
+	return v.ProjectListFields.Name
+}
+
+// GetDescription returns CreateProjectProjectCreateProjectPayloadProject.Description, and is useful for accessing the field via an interface.
+func (v *CreateProjectProjectCreateProjectPayloadProject) GetDescription() string {
+	return v.ProjectListFields.Description
+}
+
+// GetState returns CreateProjectProjectCreateProjectPayloadProject.State, and is useful for accessing the field via an interface.
+func (v *CreateProjectProjectCreateProjectPayloadProject) GetState() string {
+	return v.ProjectListFields.State
+}
+
+// GetProgress returns CreateProjectProjectCreateProjectPayloadProject.Progress, and is useful for accessing the field via an interface.
+func (v *CreateProjectProjectCreateProjectPayloadProject) GetProgress() float64 {
+	return v.ProjectListFields.Progress
+}
+
+// GetStartDate returns CreateProjectProjectCreateProjectPayloadProject.StartDate, and is useful for accessing the field via an interface.
+func (v *CreateProjectProjectCreateProjectPayloadProject) GetStartDate() *string {
+	return v.ProjectListFields.StartDate
+}
+
+// GetTargetDate returns CreateProjectProjectCreateProjectPayloadProject.TargetDate, and is useful for accessing the field via an interface.
+func (v *CreateProjectProjectCreateProjectPayloadProject) GetTargetDate() *string {
+	return v.ProjectListFields.TargetDate
+}
+
+// GetUrl returns CreateProjectProjectCreateProjectPayloadProject.Url, and is useful for accessing the field via an interface.
+func (v *CreateProjectProjectCreateProjectPayloadProject) GetUrl() string {
+	return v.ProjectListFields.Url
+}
+
+// GetCreatedAt returns CreateProjectProjectCreateProjectPayloadProject.CreatedAt, and is useful for accessing the field via an interface.
+func (v *CreateProjectProjectCreateProjectPayloadProject) GetCreatedAt() time.Time {
+	return v.ProjectListFields.CreatedAt
+}
+
+// GetUpdatedAt returns CreateProjectProjectCreateProjectPayloadProject.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *CreateProjectProjectCreateProjectPayloadProject) GetUpdatedAt() time.Time {
+	return v.ProjectListFields.UpdatedAt
+}
+
+// GetLead returns CreateProjectProjectCreateProjectPayloadProject.Lead, and is useful for accessing the field via an interface.
+func (v *CreateProjectProjectCreateProjectPayloadProject) GetLead() *ProjectListFieldsLeadUser {
+	return v.ProjectListFields.Lead
+}
+
+// GetTeams returns CreateProjectProjectCreateProjectPayloadProject.Teams, and is useful for accessing the field via an interface.
+func (v *CreateProjectProjectCreateProjectPayloadProject) GetTeams() *ProjectListFieldsTeamsTeamConnection {
+	return v.ProjectListFields.Teams
+}
+
+func (v *CreateProjectProjectCreateProjectPayloadProject) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CreateProjectProjectCreateProjectPayloadProject
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CreateProjectProjectCreateProjectPayloadProject = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.ProjectListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCreateProjectProjectCreateProjectPayloadProject struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Description string `json:"description"`
+
+	State string `json:"state"`
+
+	Progress float64 `json:"progress"`
+
+	StartDate *string `json:"startDate"`
+
+	TargetDate *string `json:"targetDate"`
+
+	Url string `json:"url"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	Lead *ProjectListFieldsLeadUser `json:"lead"`
+
+	Teams *ProjectListFieldsTeamsTeamConnection `json:"teams"`
+}
+
+func (v *CreateProjectProjectCreateProjectPayloadProject) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CreateProjectProjectCreateProjectPayloadProject) __premarshalJSON() (*__premarshalCreateProjectProjectCreateProjectPayloadProject, error) {
+	var retval __premarshalCreateProjectProjectCreateProjectPayloadProject
+
+	retval.Id = v.ProjectListFields.Id
+	retval.Name = v.ProjectListFields.Name
+	retval.Description = v.ProjectListFields.Description
+	retval.State = v.ProjectListFields.State
+	retval.Progress = v.ProjectListFields.Progress
+	retval.StartDate = v.ProjectListFields.StartDate
+	retval.TargetDate = v.ProjectListFields.TargetDate
+	retval.Url = v.ProjectListFields.Url
+	retval.CreatedAt = v.ProjectListFields.CreatedAt
+	retval.UpdatedAt = v.ProjectListFields.UpdatedAt
+	retval.Lead = v.ProjectListFields.Lead
+	retval.Teams = v.ProjectListFields.Teams
+	return &retval, nil
+}
+
+// CreateProjectResponse is returned by CreateProject on success.
+type CreateProjectResponse struct {
+	// Creates a new project.
+	ProjectCreate *CreateProjectProjectCreateProjectPayload `json:"projectCreate"`
+}
+
+// GetProjectCreate returns CreateProjectResponse.ProjectCreate, and is useful for accessing the field via an interface.
+func (v *CreateProjectResponse) GetProjectCreate() *CreateProjectProjectCreateProjectPayload {
+	return v.ProjectCreate
+}
+
 // Customer needs filtering options.
 type CustomerNeedCollectionFilter struct {
 	// Compound filters, all of which need to be matched by the customer needs.
@@ -3362,6 +3539,165 @@ type GetProjectInitiativeLinksResponse struct {
 // GetProject returns GetProjectInitiativeLinksResponse.Project, and is useful for accessing the field via an interface.
 func (v *GetProjectInitiativeLinksResponse) GetProject() *GetProjectInitiativeLinksProject {
 	return v.Project
+}
+
+// GetProjectMilestoneProjectMilestone includes the requested fields of the GraphQL type ProjectMilestone.
+// The GraphQL type's documentation follows.
+//
+// A milestone within a project. Milestones break a project into phases or target
+// checkpoints, each with its own target date and set of issues. Issues can be
+// assigned to a milestone to track progress toward that checkpoint.
+type GetProjectMilestoneProjectMilestone struct {
+	ProjectMilestoneFields `json:"-"`
+	// The project that this milestone belongs to.
+	Project *GetProjectMilestoneProjectMilestoneProject `json:"project"`
+}
+
+// GetProject returns GetProjectMilestoneProjectMilestone.Project, and is useful for accessing the field via an interface.
+func (v *GetProjectMilestoneProjectMilestone) GetProject() *GetProjectMilestoneProjectMilestoneProject {
+	return v.Project
+}
+
+// GetId returns GetProjectMilestoneProjectMilestone.Id, and is useful for accessing the field via an interface.
+func (v *GetProjectMilestoneProjectMilestone) GetId() string { return v.ProjectMilestoneFields.Id }
+
+// GetName returns GetProjectMilestoneProjectMilestone.Name, and is useful for accessing the field via an interface.
+func (v *GetProjectMilestoneProjectMilestone) GetName() string { return v.ProjectMilestoneFields.Name }
+
+// GetDescription returns GetProjectMilestoneProjectMilestone.Description, and is useful for accessing the field via an interface.
+func (v *GetProjectMilestoneProjectMilestone) GetDescription() *string {
+	return v.ProjectMilestoneFields.Description
+}
+
+// GetTargetDate returns GetProjectMilestoneProjectMilestone.TargetDate, and is useful for accessing the field via an interface.
+func (v *GetProjectMilestoneProjectMilestone) GetTargetDate() *string {
+	return v.ProjectMilestoneFields.TargetDate
+}
+
+// GetStatus returns GetProjectMilestoneProjectMilestone.Status, and is useful for accessing the field via an interface.
+func (v *GetProjectMilestoneProjectMilestone) GetStatus() ProjectMilestoneStatus {
+	return v.ProjectMilestoneFields.Status
+}
+
+// GetSortOrder returns GetProjectMilestoneProjectMilestone.SortOrder, and is useful for accessing the field via an interface.
+func (v *GetProjectMilestoneProjectMilestone) GetSortOrder() float64 {
+	return v.ProjectMilestoneFields.SortOrder
+}
+
+// GetProgress returns GetProjectMilestoneProjectMilestone.Progress, and is useful for accessing the field via an interface.
+func (v *GetProjectMilestoneProjectMilestone) GetProgress() float64 {
+	return v.ProjectMilestoneFields.Progress
+}
+
+// GetCreatedAt returns GetProjectMilestoneProjectMilestone.CreatedAt, and is useful for accessing the field via an interface.
+func (v *GetProjectMilestoneProjectMilestone) GetCreatedAt() time.Time {
+	return v.ProjectMilestoneFields.CreatedAt
+}
+
+// GetUpdatedAt returns GetProjectMilestoneProjectMilestone.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *GetProjectMilestoneProjectMilestone) GetUpdatedAt() time.Time {
+	return v.ProjectMilestoneFields.UpdatedAt
+}
+
+func (v *GetProjectMilestoneProjectMilestone) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*GetProjectMilestoneProjectMilestone
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.GetProjectMilestoneProjectMilestone = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.ProjectMilestoneFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalGetProjectMilestoneProjectMilestone struct {
+	Project *GetProjectMilestoneProjectMilestoneProject `json:"project"`
+
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Description *string `json:"description"`
+
+	TargetDate *string `json:"targetDate"`
+
+	Status ProjectMilestoneStatus `json:"status"`
+
+	SortOrder float64 `json:"sortOrder"`
+
+	Progress float64 `json:"progress"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+func (v *GetProjectMilestoneProjectMilestone) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *GetProjectMilestoneProjectMilestone) __premarshalJSON() (*__premarshalGetProjectMilestoneProjectMilestone, error) {
+	var retval __premarshalGetProjectMilestoneProjectMilestone
+
+	retval.Project = v.Project
+	retval.Id = v.ProjectMilestoneFields.Id
+	retval.Name = v.ProjectMilestoneFields.Name
+	retval.Description = v.ProjectMilestoneFields.Description
+	retval.TargetDate = v.ProjectMilestoneFields.TargetDate
+	retval.Status = v.ProjectMilestoneFields.Status
+	retval.SortOrder = v.ProjectMilestoneFields.SortOrder
+	retval.Progress = v.ProjectMilestoneFields.Progress
+	retval.CreatedAt = v.ProjectMilestoneFields.CreatedAt
+	retval.UpdatedAt = v.ProjectMilestoneFields.UpdatedAt
+	return &retval, nil
+}
+
+// GetProjectMilestoneProjectMilestoneProject includes the requested fields of the GraphQL type Project.
+// The GraphQL type's documentation follows.
+//
+// A project is a collection of issues working toward a shared goal. Projects have
+// start and target dates, milestones, status tracking, and progress metrics. They
+// can span multiple teams and be grouped under initiatives.
+type GetProjectMilestoneProjectMilestoneProject struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the project.
+	Name string `json:"name"`
+}
+
+// GetId returns GetProjectMilestoneProjectMilestoneProject.Id, and is useful for accessing the field via an interface.
+func (v *GetProjectMilestoneProjectMilestoneProject) GetId() string { return v.Id }
+
+// GetName returns GetProjectMilestoneProjectMilestoneProject.Name, and is useful for accessing the field via an interface.
+func (v *GetProjectMilestoneProjectMilestoneProject) GetName() string { return v.Name }
+
+// GetProjectMilestoneResponse is returned by GetProjectMilestone on success.
+type GetProjectMilestoneResponse struct {
+	// Returns a single project milestone by its identifier.
+	ProjectMilestone *GetProjectMilestoneProjectMilestone `json:"projectMilestone"`
+}
+
+// GetProjectMilestone returns GetProjectMilestoneResponse.ProjectMilestone, and is useful for accessing the field via an interface.
+func (v *GetProjectMilestoneResponse) GetProjectMilestone() *GetProjectMilestoneProjectMilestone {
+	return v.ProjectMilestone
 }
 
 // GetProjectProject includes the requested fields of the GraphQL type Project.
@@ -11441,6 +11777,301 @@ type ListIssuesResponse struct {
 // GetIssues returns ListIssuesResponse.Issues, and is useful for accessing the field via an interface.
 func (v *ListIssuesResponse) GetIssues() *ListIssuesIssuesIssueConnection { return v.Issues }
 
+// ListProjectMilestonesProject includes the requested fields of the GraphQL type Project.
+// The GraphQL type's documentation follows.
+//
+// A project is a collection of issues working toward a shared goal. Projects have
+// start and target dates, milestones, status tracking, and progress metrics. They
+// can span multiple teams and be grouped under initiatives.
+type ListProjectMilestonesProject struct {
+	// Milestones associated with the project.
+	ProjectMilestones *ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnection `json:"projectMilestones"`
+}
+
+// GetProjectMilestones returns ListProjectMilestonesProject.ProjectMilestones, and is useful for accessing the field via an interface.
+func (v *ListProjectMilestonesProject) GetProjectMilestones() *ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnection {
+	return v.ProjectMilestones
+}
+
+// ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnection includes the requested fields of the GraphQL type ProjectMilestoneConnection.
+type ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnection struct {
+	Nodes    []*ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone `json:"nodes"`
+	PageInfo *ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionPageInfo                `json:"pageInfo"`
+}
+
+// GetNodes returns ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnection) GetNodes() []*ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone {
+	return v.Nodes
+}
+
+// GetPageInfo returns ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnection) GetPageInfo() *ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionPageInfo {
+	return v.PageInfo
+}
+
+// ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone includes the requested fields of the GraphQL type ProjectMilestone.
+// The GraphQL type's documentation follows.
+//
+// A milestone within a project. Milestones break a project into phases or target
+// checkpoints, each with its own target date and set of issues. Issues can be
+// assigned to a milestone to track progress toward that checkpoint.
+type ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone struct {
+	ProjectMilestoneFields `json:"-"`
+}
+
+// GetId returns ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone.Id, and is useful for accessing the field via an interface.
+func (v *ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone) GetId() string {
+	return v.ProjectMilestoneFields.Id
+}
+
+// GetName returns ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone.Name, and is useful for accessing the field via an interface.
+func (v *ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone) GetName() string {
+	return v.ProjectMilestoneFields.Name
+}
+
+// GetDescription returns ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone.Description, and is useful for accessing the field via an interface.
+func (v *ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone) GetDescription() *string {
+	return v.ProjectMilestoneFields.Description
+}
+
+// GetTargetDate returns ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone.TargetDate, and is useful for accessing the field via an interface.
+func (v *ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone) GetTargetDate() *string {
+	return v.ProjectMilestoneFields.TargetDate
+}
+
+// GetStatus returns ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone.Status, and is useful for accessing the field via an interface.
+func (v *ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone) GetStatus() ProjectMilestoneStatus {
+	return v.ProjectMilestoneFields.Status
+}
+
+// GetSortOrder returns ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone.SortOrder, and is useful for accessing the field via an interface.
+func (v *ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone) GetSortOrder() float64 {
+	return v.ProjectMilestoneFields.SortOrder
+}
+
+// GetProgress returns ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone.Progress, and is useful for accessing the field via an interface.
+func (v *ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone) GetProgress() float64 {
+	return v.ProjectMilestoneFields.Progress
+}
+
+// GetCreatedAt returns ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone) GetCreatedAt() time.Time {
+	return v.ProjectMilestoneFields.CreatedAt
+}
+
+// GetUpdatedAt returns ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone) GetUpdatedAt() time.Time {
+	return v.ProjectMilestoneFields.UpdatedAt
+}
+
+func (v *ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.ProjectMilestoneFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Description *string `json:"description"`
+
+	TargetDate *string `json:"targetDate"`
+
+	Status ProjectMilestoneStatus `json:"status"`
+
+	SortOrder float64 `json:"sortOrder"`
+
+	Progress float64 `json:"progress"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+func (v *ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone) __premarshalJSON() (*__premarshalListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone, error) {
+	var retval __premarshalListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionNodesProjectMilestone
+
+	retval.Id = v.ProjectMilestoneFields.Id
+	retval.Name = v.ProjectMilestoneFields.Name
+	retval.Description = v.ProjectMilestoneFields.Description
+	retval.TargetDate = v.ProjectMilestoneFields.TargetDate
+	retval.Status = v.ProjectMilestoneFields.Status
+	retval.SortOrder = v.ProjectMilestoneFields.SortOrder
+	retval.Progress = v.ProjectMilestoneFields.Progress
+	retval.CreatedAt = v.ProjectMilestoneFields.CreatedAt
+	retval.UpdatedAt = v.ProjectMilestoneFields.UpdatedAt
+	return &retval, nil
+}
+
+// ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+type ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionPageInfo struct {
+	// Indicates if there are more results when paginating forward.
+	HasNextPage bool `json:"hasNextPage"`
+	// Cursor representing the last result in the paginated results.
+	EndCursor *string `json:"endCursor"`
+}
+
+// GetHasNextPage returns ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// GetEndCursor returns ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *ListProjectMilestonesProjectProjectMilestonesProjectMilestoneConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// ListProjectMilestonesResponse is returned by ListProjectMilestones on success.
+type ListProjectMilestonesResponse struct {
+	// Returns a single project by its identifier or URL slug.
+	Project *ListProjectMilestonesProject `json:"project"`
+}
+
+// GetProject returns ListProjectMilestonesResponse.Project, and is useful for accessing the field via an interface.
+func (v *ListProjectMilestonesResponse) GetProject() *ListProjectMilestonesProject { return v.Project }
+
+// ListProjectStatusesProjectStatusesProjectStatusConnection includes the requested fields of the GraphQL type ProjectStatusConnection.
+type ListProjectStatusesProjectStatusesProjectStatusConnection struct {
+	Nodes []*ListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus `json:"nodes"`
+}
+
+// GetNodes returns ListProjectStatusesProjectStatusesProjectStatusConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ListProjectStatusesProjectStatusesProjectStatusConnection) GetNodes() []*ListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus {
+	return v.Nodes
+}
+
+// ListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus includes the requested fields of the GraphQL type ProjectStatus.
+// The GraphQL type's documentation follows.
+//
+// A custom project status within a workspace. Statuses are grouped by type
+// (backlog, planned, started, paused, completed, canceled) and define the
+// lifecycle stages a project can move through. Each workspace can customize the
+// names and colors of its project statuses.
+type ListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus struct {
+	ProjectStatusFields `json:"-"`
+}
+
+// GetId returns ListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus.Id, and is useful for accessing the field via an interface.
+func (v *ListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus) GetId() string {
+	return v.ProjectStatusFields.Id
+}
+
+// GetName returns ListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus.Name, and is useful for accessing the field via an interface.
+func (v *ListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus) GetName() string {
+	return v.ProjectStatusFields.Name
+}
+
+// GetType returns ListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus.Type, and is useful for accessing the field via an interface.
+func (v *ListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus) GetType() ProjectStatusType {
+	return v.ProjectStatusFields.Type
+}
+
+// GetColor returns ListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus.Color, and is useful for accessing the field via an interface.
+func (v *ListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus) GetColor() string {
+	return v.ProjectStatusFields.Color
+}
+
+// GetPosition returns ListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus.Position, and is useful for accessing the field via an interface.
+func (v *ListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus) GetPosition() float64 {
+	return v.ProjectStatusFields.Position
+}
+
+func (v *ListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.ProjectStatusFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Type ProjectStatusType `json:"type"`
+
+	Color string `json:"color"`
+
+	Position float64 `json:"position"`
+}
+
+func (v *ListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus) __premarshalJSON() (*__premarshalListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus, error) {
+	var retval __premarshalListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus
+
+	retval.Id = v.ProjectStatusFields.Id
+	retval.Name = v.ProjectStatusFields.Name
+	retval.Type = v.ProjectStatusFields.Type
+	retval.Color = v.ProjectStatusFields.Color
+	retval.Position = v.ProjectStatusFields.Position
+	return &retval, nil
+}
+
+// ListProjectStatusesResponse is returned by ListProjectStatuses on success.
+type ListProjectStatusesResponse struct {
+	// Returns all project statuses in the workspace.
+	ProjectStatuses *ListProjectStatusesProjectStatusesProjectStatusConnection `json:"projectStatuses"`
+}
+
+// GetProjectStatuses returns ListProjectStatusesResponse.ProjectStatuses, and is useful for accessing the field via an interface.
+func (v *ListProjectStatusesResponse) GetProjectStatuses() *ListProjectStatusesProjectStatusesProjectStatusConnection {
+	return v.ProjectStatuses
+}
+
 // ListProjectsProjectsProjectConnection includes the requested fields of the GraphQL type ProjectConnection.
 type ListProjectsProjectsProjectConnection struct {
 	Nodes    []*ListProjectsProjectsProjectConnectionNodesProject `json:"nodes"`
@@ -13938,6 +14569,177 @@ func (v *ProjectCollectionFilter) GetTargetDate() *NullableDateComparator { retu
 // GetUpdatedAt returns ProjectCollectionFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *ProjectCollectionFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
 
+// Input for creating a new project. A name and at least one team are required. All
+// other fields are optional and will use defaults if not specified.
+type ProjectCreateInput struct {
+	// The color of the project.
+	Color *string `json:"color"`
+	// The project content as markdown.
+	Content *string `json:"content"`
+	// The ID of the issue that was converted into this project.
+	ConvertedFromIssueId *string `json:"convertedFromIssueId"`
+	// The description for the project.
+	Description *string `json:"description"`
+	// The icon of the project.
+	Icon *string `json:"icon"`
+	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
+	Id *string `json:"id"`
+	// The identifiers of the project labels associated with this project.
+	LabelIds []string `json:"labelIds"`
+	// The ID of the last template applied to the project.
+	LastAppliedTemplateId *string `json:"lastAppliedTemplateId"`
+	// The identifier of the project lead.
+	LeadId *string `json:"leadId"`
+	// The identifiers of the members of this project.
+	MemberIds []string `json:"memberIds"`
+	// The name of the project.
+	Name string `json:"name"`
+	// The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
+	Priority *int `json:"priority"`
+	// The sort order for the project within shared views, when ordered by priority.
+	PrioritySortOrder *float64 `json:"prioritySortOrder"`
+	// The sort order for the project within shared views.
+	SortOrder *float64 `json:"sortOrder"`
+	// The planned start date of the project.
+	StartDate *string `json:"startDate"`
+	// The resolution of the project's start date.
+	StartDateResolution *DateResolutionType `json:"startDateResolution"`
+	// The ID of the project status.
+	StatusId *string `json:"statusId"`
+	// The planned target date of the project.
+	TargetDate *string `json:"targetDate"`
+	// The resolution of the project's estimated completion date.
+	TargetDateResolution *DateResolutionType `json:"targetDateResolution"`
+	// The identifiers of the teams this project is associated with.
+	TeamIds []string `json:"teamIds"`
+	// The ID of a project template to apply when creating the project. Overrides useDefaultTemplate if both are provided.
+	TemplateId *string `json:"templateId"`
+	// When set to true, the default project template of the first team provided will
+	// be applied. If templateId is provided, this will be ignored.
+	UseDefaultTemplate *bool `json:"useDefaultTemplate"`
+}
+
+// GetColor returns ProjectCreateInput.Color, and is useful for accessing the field via an interface.
+func (v *ProjectCreateInput) GetColor() *string { return v.Color }
+
+// GetContent returns ProjectCreateInput.Content, and is useful for accessing the field via an interface.
+func (v *ProjectCreateInput) GetContent() *string { return v.Content }
+
+// GetConvertedFromIssueId returns ProjectCreateInput.ConvertedFromIssueId, and is useful for accessing the field via an interface.
+func (v *ProjectCreateInput) GetConvertedFromIssueId() *string { return v.ConvertedFromIssueId }
+
+// GetDescription returns ProjectCreateInput.Description, and is useful for accessing the field via an interface.
+func (v *ProjectCreateInput) GetDescription() *string { return v.Description }
+
+// GetIcon returns ProjectCreateInput.Icon, and is useful for accessing the field via an interface.
+func (v *ProjectCreateInput) GetIcon() *string { return v.Icon }
+
+// GetId returns ProjectCreateInput.Id, and is useful for accessing the field via an interface.
+func (v *ProjectCreateInput) GetId() *string { return v.Id }
+
+// GetLabelIds returns ProjectCreateInput.LabelIds, and is useful for accessing the field via an interface.
+func (v *ProjectCreateInput) GetLabelIds() []string { return v.LabelIds }
+
+// GetLastAppliedTemplateId returns ProjectCreateInput.LastAppliedTemplateId, and is useful for accessing the field via an interface.
+func (v *ProjectCreateInput) GetLastAppliedTemplateId() *string { return v.LastAppliedTemplateId }
+
+// GetLeadId returns ProjectCreateInput.LeadId, and is useful for accessing the field via an interface.
+func (v *ProjectCreateInput) GetLeadId() *string { return v.LeadId }
+
+// GetMemberIds returns ProjectCreateInput.MemberIds, and is useful for accessing the field via an interface.
+func (v *ProjectCreateInput) GetMemberIds() []string { return v.MemberIds }
+
+// GetName returns ProjectCreateInput.Name, and is useful for accessing the field via an interface.
+func (v *ProjectCreateInput) GetName() string { return v.Name }
+
+// GetPriority returns ProjectCreateInput.Priority, and is useful for accessing the field via an interface.
+func (v *ProjectCreateInput) GetPriority() *int { return v.Priority }
+
+// GetPrioritySortOrder returns ProjectCreateInput.PrioritySortOrder, and is useful for accessing the field via an interface.
+func (v *ProjectCreateInput) GetPrioritySortOrder() *float64 { return v.PrioritySortOrder }
+
+// GetSortOrder returns ProjectCreateInput.SortOrder, and is useful for accessing the field via an interface.
+func (v *ProjectCreateInput) GetSortOrder() *float64 { return v.SortOrder }
+
+// GetStartDate returns ProjectCreateInput.StartDate, and is useful for accessing the field via an interface.
+func (v *ProjectCreateInput) GetStartDate() *string { return v.StartDate }
+
+// GetStartDateResolution returns ProjectCreateInput.StartDateResolution, and is useful for accessing the field via an interface.
+func (v *ProjectCreateInput) GetStartDateResolution() *DateResolutionType {
+	return v.StartDateResolution
+}
+
+// GetStatusId returns ProjectCreateInput.StatusId, and is useful for accessing the field via an interface.
+func (v *ProjectCreateInput) GetStatusId() *string { return v.StatusId }
+
+// GetTargetDate returns ProjectCreateInput.TargetDate, and is useful for accessing the field via an interface.
+func (v *ProjectCreateInput) GetTargetDate() *string { return v.TargetDate }
+
+// GetTargetDateResolution returns ProjectCreateInput.TargetDateResolution, and is useful for accessing the field via an interface.
+func (v *ProjectCreateInput) GetTargetDateResolution() *DateResolutionType {
+	return v.TargetDateResolution
+}
+
+// GetTeamIds returns ProjectCreateInput.TeamIds, and is useful for accessing the field via an interface.
+func (v *ProjectCreateInput) GetTeamIds() []string { return v.TeamIds }
+
+// GetTemplateId returns ProjectCreateInput.TemplateId, and is useful for accessing the field via an interface.
+func (v *ProjectCreateInput) GetTemplateId() *string { return v.TemplateId }
+
+// GetUseDefaultTemplate returns ProjectCreateInput.UseDefaultTemplate, and is useful for accessing the field via an interface.
+func (v *ProjectCreateInput) GetUseDefaultTemplate() *bool { return v.UseDefaultTemplate }
+
+// ProjectDeleteProjectDeleteProjectArchivePayload includes the requested fields of the GraphQL type ProjectArchivePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity archive mutations.
+type ProjectDeleteProjectDeleteProjectArchivePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The archived/unarchived entity. Null if entity was deleted.
+	Entity *ProjectDeleteProjectDeleteProjectArchivePayloadEntityProject `json:"entity"`
+}
+
+// GetSuccess returns ProjectDeleteProjectDeleteProjectArchivePayload.Success, and is useful for accessing the field via an interface.
+func (v *ProjectDeleteProjectDeleteProjectArchivePayload) GetSuccess() bool { return v.Success }
+
+// GetEntity returns ProjectDeleteProjectDeleteProjectArchivePayload.Entity, and is useful for accessing the field via an interface.
+func (v *ProjectDeleteProjectDeleteProjectArchivePayload) GetEntity() *ProjectDeleteProjectDeleteProjectArchivePayloadEntityProject {
+	return v.Entity
+}
+
+// ProjectDeleteProjectDeleteProjectArchivePayloadEntityProject includes the requested fields of the GraphQL type Project.
+// The GraphQL type's documentation follows.
+//
+// A project is a collection of issues working toward a shared goal. Projects have
+// start and target dates, milestones, status tracking, and progress metrics. They
+// can span multiple teams and be grouped under initiatives.
+type ProjectDeleteProjectDeleteProjectArchivePayloadEntityProject struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the project.
+	Name string `json:"name"`
+}
+
+// GetId returns ProjectDeleteProjectDeleteProjectArchivePayloadEntityProject.Id, and is useful for accessing the field via an interface.
+func (v *ProjectDeleteProjectDeleteProjectArchivePayloadEntityProject) GetId() string { return v.Id }
+
+// GetName returns ProjectDeleteProjectDeleteProjectArchivePayloadEntityProject.Name, and is useful for accessing the field via an interface.
+func (v *ProjectDeleteProjectDeleteProjectArchivePayloadEntityProject) GetName() string {
+	return v.Name
+}
+
+// ProjectDeleteResponse is returned by ProjectDelete on success.
+type ProjectDeleteResponse struct {
+	// Deletes (trashes) a project. The project can be restored later with projectUnarchive.
+	ProjectDelete *ProjectDeleteProjectDeleteProjectArchivePayload `json:"projectDelete"`
+}
+
+// GetProjectDelete returns ProjectDeleteResponse.ProjectDelete, and is useful for accessing the field via an interface.
+func (v *ProjectDeleteResponse) GetProjectDelete() *ProjectDeleteProjectDeleteProjectArchivePayload {
+	return v.ProjectDelete
+}
+
 // Fragment for detailed project fields used in single project view
 type ProjectDetailFields struct {
 	// The unique identifier of the entity.
@@ -15330,6 +16132,289 @@ func (v *ProjectMilestoneCollectionFilter) GetTargetDate() *NullableDateComparat
 // GetUpdatedAt returns ProjectMilestoneCollectionFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *ProjectMilestoneCollectionFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
 
+// Input for creating a new project milestone.
+type ProjectMilestoneCreateInput struct {
+	// The description of the project milestone in markdown format.
+	Description *string `json:"description"`
+	// [Internal] The description of the project milestone as a Prosemirror document.
+	DescriptionData *map[string]interface{} `json:"descriptionData"`
+	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
+	Id *string `json:"id"`
+	// The name of the project milestone.
+	Name string `json:"name"`
+	// Related project for the project milestone.
+	ProjectId string `json:"projectId"`
+	// The sort order for the project milestone within a project.
+	SortOrder *float64 `json:"sortOrder"`
+	// The planned target date of the project milestone.
+	TargetDate *string `json:"targetDate"`
+}
+
+// GetDescription returns ProjectMilestoneCreateInput.Description, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneCreateInput) GetDescription() *string { return v.Description }
+
+// GetDescriptionData returns ProjectMilestoneCreateInput.DescriptionData, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneCreateInput) GetDescriptionData() *map[string]interface{} {
+	return v.DescriptionData
+}
+
+// GetId returns ProjectMilestoneCreateInput.Id, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneCreateInput) GetId() *string { return v.Id }
+
+// GetName returns ProjectMilestoneCreateInput.Name, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneCreateInput) GetName() string { return v.Name }
+
+// GetProjectId returns ProjectMilestoneCreateInput.ProjectId, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneCreateInput) GetProjectId() string { return v.ProjectId }
+
+// GetSortOrder returns ProjectMilestoneCreateInput.SortOrder, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneCreateInput) GetSortOrder() *float64 { return v.SortOrder }
+
+// GetTargetDate returns ProjectMilestoneCreateInput.TargetDate, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneCreateInput) GetTargetDate() *string { return v.TargetDate }
+
+// ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayload includes the requested fields of the GraphQL type ProjectMilestonePayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a project milestone mutation.
+type ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The project milestone that was created or updated.
+	ProjectMilestone *ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone `json:"projectMilestone"`
+}
+
+// GetSuccess returns ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayload.Success, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetProjectMilestone returns ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayload.ProjectMilestone, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayload) GetProjectMilestone() *ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone {
+	return v.ProjectMilestone
+}
+
+// ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone includes the requested fields of the GraphQL type ProjectMilestone.
+// The GraphQL type's documentation follows.
+//
+// A milestone within a project. Milestones break a project into phases or target
+// checkpoints, each with its own target date and set of issues. Issues can be
+// assigned to a milestone to track progress toward that checkpoint.
+type ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone struct {
+	ProjectMilestoneFields `json:"-"`
+}
+
+// GetId returns ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone.Id, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone) GetId() string {
+	return v.ProjectMilestoneFields.Id
+}
+
+// GetName returns ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone.Name, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone) GetName() string {
+	return v.ProjectMilestoneFields.Name
+}
+
+// GetDescription returns ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone.Description, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone) GetDescription() *string {
+	return v.ProjectMilestoneFields.Description
+}
+
+// GetTargetDate returns ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone.TargetDate, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone) GetTargetDate() *string {
+	return v.ProjectMilestoneFields.TargetDate
+}
+
+// GetStatus returns ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone.Status, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone) GetStatus() ProjectMilestoneStatus {
+	return v.ProjectMilestoneFields.Status
+}
+
+// GetSortOrder returns ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone.SortOrder, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone) GetSortOrder() float64 {
+	return v.ProjectMilestoneFields.SortOrder
+}
+
+// GetProgress returns ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone.Progress, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone) GetProgress() float64 {
+	return v.ProjectMilestoneFields.Progress
+}
+
+// GetCreatedAt returns ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone) GetCreatedAt() time.Time {
+	return v.ProjectMilestoneFields.CreatedAt
+}
+
+// GetUpdatedAt returns ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone) GetUpdatedAt() time.Time {
+	return v.ProjectMilestoneFields.UpdatedAt
+}
+
+func (v *ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.ProjectMilestoneFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Description *string `json:"description"`
+
+	TargetDate *string `json:"targetDate"`
+
+	Status ProjectMilestoneStatus `json:"status"`
+
+	SortOrder float64 `json:"sortOrder"`
+
+	Progress float64 `json:"progress"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+func (v *ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone) __premarshalJSON() (*__premarshalProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone, error) {
+	var retval __premarshalProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayloadProjectMilestone
+
+	retval.Id = v.ProjectMilestoneFields.Id
+	retval.Name = v.ProjectMilestoneFields.Name
+	retval.Description = v.ProjectMilestoneFields.Description
+	retval.TargetDate = v.ProjectMilestoneFields.TargetDate
+	retval.Status = v.ProjectMilestoneFields.Status
+	retval.SortOrder = v.ProjectMilestoneFields.SortOrder
+	retval.Progress = v.ProjectMilestoneFields.Progress
+	retval.CreatedAt = v.ProjectMilestoneFields.CreatedAt
+	retval.UpdatedAt = v.ProjectMilestoneFields.UpdatedAt
+	return &retval, nil
+}
+
+// ProjectMilestoneCreateResponse is returned by ProjectMilestoneCreate on success.
+type ProjectMilestoneCreateResponse struct {
+	// Creates a new project milestone.
+	ProjectMilestoneCreate *ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayload `json:"projectMilestoneCreate"`
+}
+
+// GetProjectMilestoneCreate returns ProjectMilestoneCreateResponse.ProjectMilestoneCreate, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneCreateResponse) GetProjectMilestoneCreate() *ProjectMilestoneCreateProjectMilestoneCreateProjectMilestonePayload {
+	return v.ProjectMilestoneCreate
+}
+
+// ProjectMilestoneDeleteProjectMilestoneDeleteDeletePayload includes the requested fields of the GraphQL type DeletePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity deletion mutations.
+type ProjectMilestoneDeleteProjectMilestoneDeleteDeletePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The identifier of the deleted entity.
+	EntityId string `json:"entityId"`
+}
+
+// GetSuccess returns ProjectMilestoneDeleteProjectMilestoneDeleteDeletePayload.Success, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneDeleteProjectMilestoneDeleteDeletePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetEntityId returns ProjectMilestoneDeleteProjectMilestoneDeleteDeletePayload.EntityId, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneDeleteProjectMilestoneDeleteDeletePayload) GetEntityId() string {
+	return v.EntityId
+}
+
+// ProjectMilestoneDeleteResponse is returned by ProjectMilestoneDelete on success.
+type ProjectMilestoneDeleteResponse struct {
+	// Deletes a project milestone.
+	ProjectMilestoneDelete *ProjectMilestoneDeleteProjectMilestoneDeleteDeletePayload `json:"projectMilestoneDelete"`
+}
+
+// GetProjectMilestoneDelete returns ProjectMilestoneDeleteResponse.ProjectMilestoneDelete, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneDeleteResponse) GetProjectMilestoneDelete() *ProjectMilestoneDeleteProjectMilestoneDeleteDeletePayload {
+	return v.ProjectMilestoneDelete
+}
+
+// ProjectMilestoneFields includes the GraphQL fields of ProjectMilestone requested by the fragment ProjectMilestoneFields.
+// The GraphQL type's documentation follows.
+//
+// A milestone within a project. Milestones break a project into phases or target
+// checkpoints, each with its own target date and set of issues. Issues can be
+// assigned to a milestone to track progress toward that checkpoint.
+type ProjectMilestoneFields struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the project milestone.
+	Name string `json:"name"`
+	// The project milestone's description in markdown format.
+	Description *string `json:"description"`
+	// The planned completion date of the milestone. Null if no target date is set.
+	TargetDate *string `json:"targetDate"`
+	// The status of the project milestone.
+	Status ProjectMilestoneStatus `json:"status"`
+	// The order of the milestone in relation to other milestones within a project.
+	SortOrder float64 `json:"sortOrder"`
+	// The progress % of the project milestone.
+	Progress float64 `json:"progress"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+	// been updated after creation.
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// GetId returns ProjectMilestoneFields.Id, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneFields) GetId() string { return v.Id }
+
+// GetName returns ProjectMilestoneFields.Name, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneFields) GetName() string { return v.Name }
+
+// GetDescription returns ProjectMilestoneFields.Description, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneFields) GetDescription() *string { return v.Description }
+
+// GetTargetDate returns ProjectMilestoneFields.TargetDate, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneFields) GetTargetDate() *string { return v.TargetDate }
+
+// GetStatus returns ProjectMilestoneFields.Status, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneFields) GetStatus() ProjectMilestoneStatus { return v.Status }
+
+// GetSortOrder returns ProjectMilestoneFields.SortOrder, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneFields) GetSortOrder() float64 { return v.SortOrder }
+
+// GetProgress returns ProjectMilestoneFields.Progress, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneFields) GetProgress() float64 { return v.Progress }
+
+// GetCreatedAt returns ProjectMilestoneFields.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneFields) GetCreatedAt() time.Time { return v.CreatedAt }
+
+// GetUpdatedAt returns ProjectMilestoneFields.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneFields) GetUpdatedAt() time.Time { return v.UpdatedAt }
+
 // Project milestone filtering options.
 type ProjectMilestoneFilter struct {
 	// Compound filters, all of which need to be matched by the project milestone.
@@ -15373,6 +16458,507 @@ func (v *ProjectMilestoneFilter) GetTargetDate() *NullableDateComparator { retur
 
 // GetUpdatedAt returns ProjectMilestoneFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *ProjectMilestoneFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
+// [Internal] Input for moving a project milestone to another project.
+type ProjectMilestoneMoveInput struct {
+	// Whether to add each milestone issue's team to the project. This is needed when
+	// there is a mismatch between a project's teams and the milestone's issues'
+	// teams. Either this or newIssueTeamId is required in that situation to resolve constraints.
+	AddIssueTeamToProject *bool `json:"addIssueTeamToProject"`
+	// The team id to move the attached issues to. This is needed when there is a
+	// mismatch between a project's teams and the milestone's issues' teams. Either
+	// this or addIssueTeamToProject is required in that situation to resolve constraints.
+	NewIssueTeamId *string `json:"newIssueTeamId"`
+	// The identifier of the project to move the milestone to.
+	ProjectId string `json:"projectId"`
+	// A list of issue id to team ids, used for undoing a previous milestone move
+	// where the specified issues were moved from the specified teams.
+	UndoIssueTeamIds []*ProjectMilestoneMoveIssueToTeamInput `json:"undoIssueTeamIds,omitempty"`
+	// A mapping of project id to a previous set of team ids, used for undoing a
+	// previous milestone move where the specified teams were added to the project.
+	UndoProjectTeamIds *ProjectMilestoneMoveProjectTeamsInput `json:"undoProjectTeamIds,omitempty"`
+}
+
+// GetAddIssueTeamToProject returns ProjectMilestoneMoveInput.AddIssueTeamToProject, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveInput) GetAddIssueTeamToProject() *bool { return v.AddIssueTeamToProject }
+
+// GetNewIssueTeamId returns ProjectMilestoneMoveInput.NewIssueTeamId, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveInput) GetNewIssueTeamId() *string { return v.NewIssueTeamId }
+
+// GetProjectId returns ProjectMilestoneMoveInput.ProjectId, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveInput) GetProjectId() string { return v.ProjectId }
+
+// GetUndoIssueTeamIds returns ProjectMilestoneMoveInput.UndoIssueTeamIds, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveInput) GetUndoIssueTeamIds() []*ProjectMilestoneMoveIssueToTeamInput {
+	return v.UndoIssueTeamIds
+}
+
+// GetUndoProjectTeamIds returns ProjectMilestoneMoveInput.UndoProjectTeamIds, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveInput) GetUndoProjectTeamIds() *ProjectMilestoneMoveProjectTeamsInput {
+	return v.UndoProjectTeamIds
+}
+
+// [Internal] Used for ProjectMilestoneMoveInput to describe a mapping between an issue and its team.
+type ProjectMilestoneMoveIssueToTeamInput struct {
+	// The issue id in this relationship, you can use * as wildcard if all issues are being moved to the same team
+	IssueId string `json:"issueId"`
+	// The team id in this relationship
+	TeamId string `json:"teamId"`
+}
+
+// GetIssueId returns ProjectMilestoneMoveIssueToTeamInput.IssueId, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveIssueToTeamInput) GetIssueId() string { return v.IssueId }
+
+// GetTeamId returns ProjectMilestoneMoveIssueToTeamInput.TeamId, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveIssueToTeamInput) GetTeamId() string { return v.TeamId }
+
+// ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayload includes the requested fields of the GraphQL type ProjectMilestoneMovePayload.
+// The GraphQL type's documentation follows.
+//
+// [Internal] The result of a project milestone move mutation.
+type ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The project milestone that was created or updated.
+	ProjectMilestone *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone `json:"projectMilestone"`
+}
+
+// GetSuccess returns ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayload.Success, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetProjectMilestone returns ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayload.ProjectMilestone, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayload) GetProjectMilestone() *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone {
+	return v.ProjectMilestone
+}
+
+// ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone includes the requested fields of the GraphQL type ProjectMilestone.
+// The GraphQL type's documentation follows.
+//
+// A milestone within a project. Milestones break a project into phases or target
+// checkpoints, each with its own target date and set of issues. Issues can be
+// assigned to a milestone to track progress toward that checkpoint.
+type ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone struct {
+	ProjectMilestoneFields `json:"-"`
+	// The project that this milestone belongs to.
+	Project *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestoneProject `json:"project"`
+}
+
+// GetProject returns ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone.Project, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone) GetProject() *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestoneProject {
+	return v.Project
+}
+
+// GetId returns ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone.Id, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone) GetId() string {
+	return v.ProjectMilestoneFields.Id
+}
+
+// GetName returns ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone.Name, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone) GetName() string {
+	return v.ProjectMilestoneFields.Name
+}
+
+// GetDescription returns ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone.Description, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone) GetDescription() *string {
+	return v.ProjectMilestoneFields.Description
+}
+
+// GetTargetDate returns ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone.TargetDate, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone) GetTargetDate() *string {
+	return v.ProjectMilestoneFields.TargetDate
+}
+
+// GetStatus returns ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone.Status, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone) GetStatus() ProjectMilestoneStatus {
+	return v.ProjectMilestoneFields.Status
+}
+
+// GetSortOrder returns ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone.SortOrder, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone) GetSortOrder() float64 {
+	return v.ProjectMilestoneFields.SortOrder
+}
+
+// GetProgress returns ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone.Progress, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone) GetProgress() float64 {
+	return v.ProjectMilestoneFields.Progress
+}
+
+// GetCreatedAt returns ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone) GetCreatedAt() time.Time {
+	return v.ProjectMilestoneFields.CreatedAt
+}
+
+// GetUpdatedAt returns ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone) GetUpdatedAt() time.Time {
+	return v.ProjectMilestoneFields.UpdatedAt
+}
+
+func (v *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.ProjectMilestoneFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone struct {
+	Project *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestoneProject `json:"project"`
+
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Description *string `json:"description"`
+
+	TargetDate *string `json:"targetDate"`
+
+	Status ProjectMilestoneStatus `json:"status"`
+
+	SortOrder float64 `json:"sortOrder"`
+
+	Progress float64 `json:"progress"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+func (v *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone) __premarshalJSON() (*__premarshalProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone, error) {
+	var retval __premarshalProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestone
+
+	retval.Project = v.Project
+	retval.Id = v.ProjectMilestoneFields.Id
+	retval.Name = v.ProjectMilestoneFields.Name
+	retval.Description = v.ProjectMilestoneFields.Description
+	retval.TargetDate = v.ProjectMilestoneFields.TargetDate
+	retval.Status = v.ProjectMilestoneFields.Status
+	retval.SortOrder = v.ProjectMilestoneFields.SortOrder
+	retval.Progress = v.ProjectMilestoneFields.Progress
+	retval.CreatedAt = v.ProjectMilestoneFields.CreatedAt
+	retval.UpdatedAt = v.ProjectMilestoneFields.UpdatedAt
+	return &retval, nil
+}
+
+// ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestoneProject includes the requested fields of the GraphQL type Project.
+// The GraphQL type's documentation follows.
+//
+// A project is a collection of issues working toward a shared goal. Projects have
+// start and target dates, milestones, status tracking, and progress metrics. They
+// can span multiple teams and be grouped under initiatives.
+type ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestoneProject struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the project.
+	Name string `json:"name"`
+}
+
+// GetId returns ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestoneProject.Id, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestoneProject) GetId() string {
+	return v.Id
+}
+
+// GetName returns ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestoneProject.Name, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayloadProjectMilestoneProject) GetName() string {
+	return v.Name
+}
+
+// [Internal] Used for ProjectMilestoneMoveInput to describe a snapshot of a project and its team ids
+type ProjectMilestoneMoveProjectTeamsInput struct {
+	// The project id
+	ProjectId string `json:"projectId"`
+	// The team ids for the project
+	TeamIds []string `json:"teamIds"`
+}
+
+// GetProjectId returns ProjectMilestoneMoveProjectTeamsInput.ProjectId, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveProjectTeamsInput) GetProjectId() string { return v.ProjectId }
+
+// GetTeamIds returns ProjectMilestoneMoveProjectTeamsInput.TeamIds, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveProjectTeamsInput) GetTeamIds() []string { return v.TeamIds }
+
+// ProjectMilestoneMoveResponse is returned by ProjectMilestoneMove on success.
+type ProjectMilestoneMoveResponse struct {
+	// [Internal] Moves a project milestone to another project, can be called to undo a prior move.
+	ProjectMilestoneMove *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayload `json:"projectMilestoneMove"`
+}
+
+// GetProjectMilestoneMove returns ProjectMilestoneMoveResponse.ProjectMilestoneMove, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneMoveResponse) GetProjectMilestoneMove() *ProjectMilestoneMoveProjectMilestoneMoveProjectMilestoneMovePayload {
+	return v.ProjectMilestoneMove
+}
+
+// The status of a project milestone.
+type ProjectMilestoneStatus string
+
+const (
+	ProjectMilestoneStatusUnstarted ProjectMilestoneStatus = "unstarted"
+	ProjectMilestoneStatusNext      ProjectMilestoneStatus = "next"
+	ProjectMilestoneStatusOverdue   ProjectMilestoneStatus = "overdue"
+	ProjectMilestoneStatusDone      ProjectMilestoneStatus = "done"
+)
+
+var AllProjectMilestoneStatus = []ProjectMilestoneStatus{
+	ProjectMilestoneStatusUnstarted,
+	ProjectMilestoneStatusNext,
+	ProjectMilestoneStatusOverdue,
+	ProjectMilestoneStatusDone,
+}
+
+// Input for updating an existing project milestone.
+type ProjectMilestoneUpdateInput struct {
+	// The description of the project milestone in markdown format.
+	Description *string `json:"description"`
+	// [Internal] The description of the project milestone as a Prosemirror document.
+	DescriptionData *map[string]interface{} `json:"descriptionData"`
+	// The name of the project milestone.
+	Name *string `json:"name"`
+	// Related project for the project milestone.
+	ProjectId *string `json:"projectId"`
+	// The sort order for the project milestone within a project.
+	SortOrder *float64 `json:"sortOrder"`
+	// The planned target date of the project milestone.
+	TargetDate *string `json:"targetDate"`
+}
+
+// GetDescription returns ProjectMilestoneUpdateInput.Description, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneUpdateInput) GetDescription() *string { return v.Description }
+
+// GetDescriptionData returns ProjectMilestoneUpdateInput.DescriptionData, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneUpdateInput) GetDescriptionData() *map[string]interface{} {
+	return v.DescriptionData
+}
+
+// GetName returns ProjectMilestoneUpdateInput.Name, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneUpdateInput) GetName() *string { return v.Name }
+
+// GetProjectId returns ProjectMilestoneUpdateInput.ProjectId, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneUpdateInput) GetProjectId() *string { return v.ProjectId }
+
+// GetSortOrder returns ProjectMilestoneUpdateInput.SortOrder, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneUpdateInput) GetSortOrder() *float64 { return v.SortOrder }
+
+// GetTargetDate returns ProjectMilestoneUpdateInput.TargetDate, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneUpdateInput) GetTargetDate() *string { return v.TargetDate }
+
+// ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayload includes the requested fields of the GraphQL type ProjectMilestonePayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a project milestone mutation.
+type ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The project milestone that was created or updated.
+	ProjectMilestone *ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone `json:"projectMilestone"`
+}
+
+// GetSuccess returns ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayload.Success, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetProjectMilestone returns ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayload.ProjectMilestone, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayload) GetProjectMilestone() *ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone {
+	return v.ProjectMilestone
+}
+
+// ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone includes the requested fields of the GraphQL type ProjectMilestone.
+// The GraphQL type's documentation follows.
+//
+// A milestone within a project. Milestones break a project into phases or target
+// checkpoints, each with its own target date and set of issues. Issues can be
+// assigned to a milestone to track progress toward that checkpoint.
+type ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone struct {
+	ProjectMilestoneFields `json:"-"`
+}
+
+// GetId returns ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone.Id, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone) GetId() string {
+	return v.ProjectMilestoneFields.Id
+}
+
+// GetName returns ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone.Name, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone) GetName() string {
+	return v.ProjectMilestoneFields.Name
+}
+
+// GetDescription returns ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone.Description, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone) GetDescription() *string {
+	return v.ProjectMilestoneFields.Description
+}
+
+// GetTargetDate returns ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone.TargetDate, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone) GetTargetDate() *string {
+	return v.ProjectMilestoneFields.TargetDate
+}
+
+// GetStatus returns ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone.Status, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone) GetStatus() ProjectMilestoneStatus {
+	return v.ProjectMilestoneFields.Status
+}
+
+// GetSortOrder returns ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone.SortOrder, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone) GetSortOrder() float64 {
+	return v.ProjectMilestoneFields.SortOrder
+}
+
+// GetProgress returns ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone.Progress, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone) GetProgress() float64 {
+	return v.ProjectMilestoneFields.Progress
+}
+
+// GetCreatedAt returns ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone) GetCreatedAt() time.Time {
+	return v.ProjectMilestoneFields.CreatedAt
+}
+
+// GetUpdatedAt returns ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone) GetUpdatedAt() time.Time {
+	return v.ProjectMilestoneFields.UpdatedAt
+}
+
+func (v *ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.ProjectMilestoneFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Description *string `json:"description"`
+
+	TargetDate *string `json:"targetDate"`
+
+	Status ProjectMilestoneStatus `json:"status"`
+
+	SortOrder float64 `json:"sortOrder"`
+
+	Progress float64 `json:"progress"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+func (v *ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone) __premarshalJSON() (*__premarshalProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone, error) {
+	var retval __premarshalProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayloadProjectMilestone
+
+	retval.Id = v.ProjectMilestoneFields.Id
+	retval.Name = v.ProjectMilestoneFields.Name
+	retval.Description = v.ProjectMilestoneFields.Description
+	retval.TargetDate = v.ProjectMilestoneFields.TargetDate
+	retval.Status = v.ProjectMilestoneFields.Status
+	retval.SortOrder = v.ProjectMilestoneFields.SortOrder
+	retval.Progress = v.ProjectMilestoneFields.Progress
+	retval.CreatedAt = v.ProjectMilestoneFields.CreatedAt
+	retval.UpdatedAt = v.ProjectMilestoneFields.UpdatedAt
+	return &retval, nil
+}
+
+// ProjectMilestoneUpdateResponse is returned by ProjectMilestoneUpdate on success.
+type ProjectMilestoneUpdateResponse struct {
+	// Updates a project milestone.
+	ProjectMilestoneUpdate *ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayload `json:"projectMilestoneUpdate"`
+}
+
+// GetProjectMilestoneUpdate returns ProjectMilestoneUpdateResponse.ProjectMilestoneUpdate, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneUpdateResponse) GetProjectMilestoneUpdate() *ProjectMilestoneUpdateProjectMilestoneUpdateProjectMilestonePayload {
+	return v.ProjectMilestoneUpdate
+}
+
+// ProjectStatusFields includes the GraphQL fields of ProjectStatus requested by the fragment ProjectStatusFields.
+// The GraphQL type's documentation follows.
+//
+// A custom project status within a workspace. Statuses are grouped by type
+// (backlog, planned, started, paused, completed, canceled) and define the
+// lifecycle stages a project can move through. Each workspace can customize the
+// names and colors of its project statuses.
+type ProjectStatusFields struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the status.
+	Name string `json:"name"`
+	// The category type of the project status (e.g., backlog, planned, started,
+	// paused, completed, canceled). Determines the status's behavior and position in
+	// the project lifecycle.
+	Type ProjectStatusType `json:"type"`
+	// The color of the status as a HEX string, used for display in the UI.
+	Color string `json:"color"`
+	// The position of the status within its type group in the workspace's project
+	// flow. Used for ordering statuses of the same type.
+	Position float64 `json:"position"`
+}
+
+// GetId returns ProjectStatusFields.Id, and is useful for accessing the field via an interface.
+func (v *ProjectStatusFields) GetId() string { return v.Id }
+
+// GetName returns ProjectStatusFields.Name, and is useful for accessing the field via an interface.
+func (v *ProjectStatusFields) GetName() string { return v.Name }
+
+// GetType returns ProjectStatusFields.Type, and is useful for accessing the field via an interface.
+func (v *ProjectStatusFields) GetType() ProjectStatusType { return v.Type }
+
+// GetColor returns ProjectStatusFields.Color, and is useful for accessing the field via an interface.
+func (v *ProjectStatusFields) GetColor() string { return v.Color }
+
+// GetPosition returns ProjectStatusFields.Position, and is useful for accessing the field via an interface.
+func (v *ProjectStatusFields) GetPosition() float64 { return v.Position }
 
 // Project status filtering options.
 type ProjectStatusFilter struct {
@@ -15428,6 +17014,80 @@ func (v *ProjectStatusFilter) GetType() *StringComparator { return v.Type }
 // GetUpdatedAt returns ProjectStatusFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *ProjectStatusFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
 
+// A type of project status.
+type ProjectStatusType string
+
+const (
+	ProjectStatusTypeBacklog   ProjectStatusType = "backlog"
+	ProjectStatusTypePlanned   ProjectStatusType = "planned"
+	ProjectStatusTypeStarted   ProjectStatusType = "started"
+	ProjectStatusTypePaused    ProjectStatusType = "paused"
+	ProjectStatusTypeCompleted ProjectStatusType = "completed"
+	ProjectStatusTypeCanceled  ProjectStatusType = "canceled"
+)
+
+var AllProjectStatusType = []ProjectStatusType{
+	ProjectStatusTypeBacklog,
+	ProjectStatusTypePlanned,
+	ProjectStatusTypeStarted,
+	ProjectStatusTypePaused,
+	ProjectStatusTypeCompleted,
+	ProjectStatusTypeCanceled,
+}
+
+// ProjectUnarchiveProjectUnarchiveProjectArchivePayload includes the requested fields of the GraphQL type ProjectArchivePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity archive mutations.
+type ProjectUnarchiveProjectUnarchiveProjectArchivePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The archived/unarchived entity. Null if entity was deleted.
+	Entity *ProjectUnarchiveProjectUnarchiveProjectArchivePayloadEntityProject `json:"entity"`
+}
+
+// GetSuccess returns ProjectUnarchiveProjectUnarchiveProjectArchivePayload.Success, and is useful for accessing the field via an interface.
+func (v *ProjectUnarchiveProjectUnarchiveProjectArchivePayload) GetSuccess() bool { return v.Success }
+
+// GetEntity returns ProjectUnarchiveProjectUnarchiveProjectArchivePayload.Entity, and is useful for accessing the field via an interface.
+func (v *ProjectUnarchiveProjectUnarchiveProjectArchivePayload) GetEntity() *ProjectUnarchiveProjectUnarchiveProjectArchivePayloadEntityProject {
+	return v.Entity
+}
+
+// ProjectUnarchiveProjectUnarchiveProjectArchivePayloadEntityProject includes the requested fields of the GraphQL type Project.
+// The GraphQL type's documentation follows.
+//
+// A project is a collection of issues working toward a shared goal. Projects have
+// start and target dates, milestones, status tracking, and progress metrics. They
+// can span multiple teams and be grouped under initiatives.
+type ProjectUnarchiveProjectUnarchiveProjectArchivePayloadEntityProject struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the project.
+	Name string `json:"name"`
+}
+
+// GetId returns ProjectUnarchiveProjectUnarchiveProjectArchivePayloadEntityProject.Id, and is useful for accessing the field via an interface.
+func (v *ProjectUnarchiveProjectUnarchiveProjectArchivePayloadEntityProject) GetId() string {
+	return v.Id
+}
+
+// GetName returns ProjectUnarchiveProjectUnarchiveProjectArchivePayloadEntityProject.Name, and is useful for accessing the field via an interface.
+func (v *ProjectUnarchiveProjectUnarchiveProjectArchivePayloadEntityProject) GetName() string {
+	return v.Name
+}
+
+// ProjectUnarchiveResponse is returned by ProjectUnarchive on success.
+type ProjectUnarchiveResponse struct {
+	// Restores a previously trashed or archived project.
+	ProjectUnarchive *ProjectUnarchiveProjectUnarchiveProjectArchivePayload `json:"projectUnarchive"`
+}
+
+// GetProjectUnarchive returns ProjectUnarchiveResponse.ProjectUnarchive, and is useful for accessing the field via an interface.
+func (v *ProjectUnarchiveResponse) GetProjectUnarchive() *ProjectUnarchiveProjectUnarchiveProjectArchivePayload {
+	return v.ProjectUnarchive
+}
+
 // The health type when the project update is created.
 type ProjectUpdateHealthType string
 
@@ -15442,6 +17102,177 @@ var AllProjectUpdateHealthType = []ProjectUpdateHealthType{
 	ProjectUpdateHealthTypeAtrisk,
 	ProjectUpdateHealthTypeOfftrack,
 }
+
+// Input for updating an existing project. All fields are optional; only provided
+// fields will be updated. Setting a field to null (where supported) will clear the value.
+type ProjectUpdateInput struct {
+	// The time at which the project was canceled.
+	CanceledAt *time.Time `json:"canceledAt"`
+	// The color of the project.
+	Color *string `json:"color"`
+	// The time at which the project was completed.
+	CompletedAt *time.Time `json:"completedAt"`
+	// The project content as markdown.
+	Content *string `json:"content"`
+	// The ID of the issue from which that project is created.
+	ConvertedFromIssueId *string `json:"convertedFromIssueId"`
+	// The description for the project.
+	Description *string `json:"description"`
+	// The resolution type for the update reminder frequency (e.g., weekly, biweekly).
+	FrequencyResolution *FrequencyResolutionType `json:"frequencyResolution"`
+	// The icon of the project.
+	Icon *string `json:"icon"`
+	// The identifiers of the project labels associated with this project.
+	LabelIds []string `json:"labelIds"`
+	// The ID of the last template applied to the project.
+	LastAppliedTemplateId *string `json:"lastAppliedTemplateId"`
+	// The identifier of the project lead.
+	LeadId *string `json:"leadId"`
+	// The identifiers of the members of this project.
+	MemberIds []string `json:"memberIds"`
+	// The name of the project.
+	Name *string `json:"name"`
+	// The priority of the project. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
+	Priority *int `json:"priority"`
+	// The sort order for the project within shared views, when ordered by priority.
+	PrioritySortOrder *float64 `json:"prioritySortOrder"`
+	// The time until which project update reminders are paused. Set to null to resume reminders.
+	ProjectUpdateRemindersPausedUntilAt *time.Time `json:"projectUpdateRemindersPausedUntilAt"`
+	// Whether to send new issue comment notifications to Slack.
+	SlackIssueComments *bool `json:"slackIssueComments"`
+	// Whether to send issue status update notifications to Slack.
+	SlackIssueStatuses *bool `json:"slackIssueStatuses"`
+	// Whether to send new issue notifications to Slack.
+	SlackNewIssue *bool `json:"slackNewIssue"`
+	// The sort order for the project in shared views.
+	SortOrder *float64 `json:"sortOrder"`
+	// The planned start date of the project.
+	StartDate *string `json:"startDate"`
+	// The resolution of the project's start date.
+	StartDateResolution *DateResolutionType `json:"startDateResolution"`
+	// The ID of the project status.
+	StatusId *string `json:"statusId"`
+	// The planned target date of the project.
+	TargetDate *string `json:"targetDate"`
+	// The resolution of the project's estimated completion date.
+	TargetDateResolution *DateResolutionType `json:"targetDateResolution"`
+	// The identifiers of the teams this project is associated with.
+	TeamIds []string `json:"teamIds"`
+	// Whether the project has been trashed. Set to true to trash, or null to restore.
+	Trashed *bool `json:"trashed"`
+	// The frequency at which to prompt for project updates. When not set, reminders are inherited from workspace settings.
+	UpdateReminderFrequency *float64 `json:"updateReminderFrequency"`
+	// The n-weekly frequency at which to prompt for project updates. When not set,
+	// reminders are inherited from workspace settings.
+	UpdateReminderFrequencyInWeeks *float64 `json:"updateReminderFrequencyInWeeks"`
+	// The day of the week on which to prompt for project updates.
+	UpdateRemindersDay *Day `json:"updateRemindersDay"`
+	// The hour of the day (0-23) at which to prompt for project updates.
+	UpdateRemindersHour *int `json:"updateRemindersHour"`
+}
+
+// GetCanceledAt returns ProjectUpdateInput.CanceledAt, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetCanceledAt() *time.Time { return v.CanceledAt }
+
+// GetColor returns ProjectUpdateInput.Color, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetColor() *string { return v.Color }
+
+// GetCompletedAt returns ProjectUpdateInput.CompletedAt, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetCompletedAt() *time.Time { return v.CompletedAt }
+
+// GetContent returns ProjectUpdateInput.Content, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetContent() *string { return v.Content }
+
+// GetConvertedFromIssueId returns ProjectUpdateInput.ConvertedFromIssueId, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetConvertedFromIssueId() *string { return v.ConvertedFromIssueId }
+
+// GetDescription returns ProjectUpdateInput.Description, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetDescription() *string { return v.Description }
+
+// GetFrequencyResolution returns ProjectUpdateInput.FrequencyResolution, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetFrequencyResolution() *FrequencyResolutionType {
+	return v.FrequencyResolution
+}
+
+// GetIcon returns ProjectUpdateInput.Icon, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetIcon() *string { return v.Icon }
+
+// GetLabelIds returns ProjectUpdateInput.LabelIds, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetLabelIds() []string { return v.LabelIds }
+
+// GetLastAppliedTemplateId returns ProjectUpdateInput.LastAppliedTemplateId, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetLastAppliedTemplateId() *string { return v.LastAppliedTemplateId }
+
+// GetLeadId returns ProjectUpdateInput.LeadId, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetLeadId() *string { return v.LeadId }
+
+// GetMemberIds returns ProjectUpdateInput.MemberIds, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetMemberIds() []string { return v.MemberIds }
+
+// GetName returns ProjectUpdateInput.Name, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetName() *string { return v.Name }
+
+// GetPriority returns ProjectUpdateInput.Priority, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetPriority() *int { return v.Priority }
+
+// GetPrioritySortOrder returns ProjectUpdateInput.PrioritySortOrder, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetPrioritySortOrder() *float64 { return v.PrioritySortOrder }
+
+// GetProjectUpdateRemindersPausedUntilAt returns ProjectUpdateInput.ProjectUpdateRemindersPausedUntilAt, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetProjectUpdateRemindersPausedUntilAt() *time.Time {
+	return v.ProjectUpdateRemindersPausedUntilAt
+}
+
+// GetSlackIssueComments returns ProjectUpdateInput.SlackIssueComments, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetSlackIssueComments() *bool { return v.SlackIssueComments }
+
+// GetSlackIssueStatuses returns ProjectUpdateInput.SlackIssueStatuses, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetSlackIssueStatuses() *bool { return v.SlackIssueStatuses }
+
+// GetSlackNewIssue returns ProjectUpdateInput.SlackNewIssue, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetSlackNewIssue() *bool { return v.SlackNewIssue }
+
+// GetSortOrder returns ProjectUpdateInput.SortOrder, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetSortOrder() *float64 { return v.SortOrder }
+
+// GetStartDate returns ProjectUpdateInput.StartDate, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetStartDate() *string { return v.StartDate }
+
+// GetStartDateResolution returns ProjectUpdateInput.StartDateResolution, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetStartDateResolution() *DateResolutionType {
+	return v.StartDateResolution
+}
+
+// GetStatusId returns ProjectUpdateInput.StatusId, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetStatusId() *string { return v.StatusId }
+
+// GetTargetDate returns ProjectUpdateInput.TargetDate, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetTargetDate() *string { return v.TargetDate }
+
+// GetTargetDateResolution returns ProjectUpdateInput.TargetDateResolution, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetTargetDateResolution() *DateResolutionType {
+	return v.TargetDateResolution
+}
+
+// GetTeamIds returns ProjectUpdateInput.TeamIds, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetTeamIds() []string { return v.TeamIds }
+
+// GetTrashed returns ProjectUpdateInput.Trashed, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetTrashed() *bool { return v.Trashed }
+
+// GetUpdateReminderFrequency returns ProjectUpdateInput.UpdateReminderFrequency, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetUpdateReminderFrequency() *float64 { return v.UpdateReminderFrequency }
+
+// GetUpdateReminderFrequencyInWeeks returns ProjectUpdateInput.UpdateReminderFrequencyInWeeks, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetUpdateReminderFrequencyInWeeks() *float64 {
+	return v.UpdateReminderFrequencyInWeeks
+}
+
+// GetUpdateRemindersDay returns ProjectUpdateInput.UpdateRemindersDay, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetUpdateRemindersDay() *Day { return v.UpdateRemindersDay }
+
+// GetUpdateRemindersHour returns ProjectUpdateInput.UpdateRemindersHour, and is useful for accessing the field via an interface.
+func (v *ProjectUpdateInput) GetUpdateRemindersHour() *int { return v.UpdateRemindersHour }
 
 // Collection filtering options for filtering projects by project updates.
 type ProjectUpdatesCollectionFilter struct {
@@ -17773,6 +19604,183 @@ func (v *UpdateIssueResponse) GetIssueUpdate() *UpdateIssueIssueUpdateIssuePaylo
 	return v.IssueUpdate
 }
 
+// UpdateProjectProjectUpdateProjectPayload includes the requested fields of the GraphQL type ProjectPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a project mutation.
+type UpdateProjectProjectUpdateProjectPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The project that was created or updated.
+	Project *UpdateProjectProjectUpdateProjectPayloadProject `json:"project"`
+}
+
+// GetSuccess returns UpdateProjectProjectUpdateProjectPayload.Success, and is useful for accessing the field via an interface.
+func (v *UpdateProjectProjectUpdateProjectPayload) GetSuccess() bool { return v.Success }
+
+// GetProject returns UpdateProjectProjectUpdateProjectPayload.Project, and is useful for accessing the field via an interface.
+func (v *UpdateProjectProjectUpdateProjectPayload) GetProject() *UpdateProjectProjectUpdateProjectPayloadProject {
+	return v.Project
+}
+
+// UpdateProjectProjectUpdateProjectPayloadProject includes the requested fields of the GraphQL type Project.
+// The GraphQL type's documentation follows.
+//
+// A project is a collection of issues working toward a shared goal. Projects have
+// start and target dates, milestones, status tracking, and progress metrics. They
+// can span multiple teams and be grouped under initiatives.
+type UpdateProjectProjectUpdateProjectPayloadProject struct {
+	ProjectListFields `json:"-"`
+}
+
+// GetId returns UpdateProjectProjectUpdateProjectPayloadProject.Id, and is useful for accessing the field via an interface.
+func (v *UpdateProjectProjectUpdateProjectPayloadProject) GetId() string {
+	return v.ProjectListFields.Id
+}
+
+// GetName returns UpdateProjectProjectUpdateProjectPayloadProject.Name, and is useful for accessing the field via an interface.
+func (v *UpdateProjectProjectUpdateProjectPayloadProject) GetName() string {
+	return v.ProjectListFields.Name
+}
+
+// GetDescription returns UpdateProjectProjectUpdateProjectPayloadProject.Description, and is useful for accessing the field via an interface.
+func (v *UpdateProjectProjectUpdateProjectPayloadProject) GetDescription() string {
+	return v.ProjectListFields.Description
+}
+
+// GetState returns UpdateProjectProjectUpdateProjectPayloadProject.State, and is useful for accessing the field via an interface.
+func (v *UpdateProjectProjectUpdateProjectPayloadProject) GetState() string {
+	return v.ProjectListFields.State
+}
+
+// GetProgress returns UpdateProjectProjectUpdateProjectPayloadProject.Progress, and is useful for accessing the field via an interface.
+func (v *UpdateProjectProjectUpdateProjectPayloadProject) GetProgress() float64 {
+	return v.ProjectListFields.Progress
+}
+
+// GetStartDate returns UpdateProjectProjectUpdateProjectPayloadProject.StartDate, and is useful for accessing the field via an interface.
+func (v *UpdateProjectProjectUpdateProjectPayloadProject) GetStartDate() *string {
+	return v.ProjectListFields.StartDate
+}
+
+// GetTargetDate returns UpdateProjectProjectUpdateProjectPayloadProject.TargetDate, and is useful for accessing the field via an interface.
+func (v *UpdateProjectProjectUpdateProjectPayloadProject) GetTargetDate() *string {
+	return v.ProjectListFields.TargetDate
+}
+
+// GetUrl returns UpdateProjectProjectUpdateProjectPayloadProject.Url, and is useful for accessing the field via an interface.
+func (v *UpdateProjectProjectUpdateProjectPayloadProject) GetUrl() string {
+	return v.ProjectListFields.Url
+}
+
+// GetCreatedAt returns UpdateProjectProjectUpdateProjectPayloadProject.CreatedAt, and is useful for accessing the field via an interface.
+func (v *UpdateProjectProjectUpdateProjectPayloadProject) GetCreatedAt() time.Time {
+	return v.ProjectListFields.CreatedAt
+}
+
+// GetUpdatedAt returns UpdateProjectProjectUpdateProjectPayloadProject.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *UpdateProjectProjectUpdateProjectPayloadProject) GetUpdatedAt() time.Time {
+	return v.ProjectListFields.UpdatedAt
+}
+
+// GetLead returns UpdateProjectProjectUpdateProjectPayloadProject.Lead, and is useful for accessing the field via an interface.
+func (v *UpdateProjectProjectUpdateProjectPayloadProject) GetLead() *ProjectListFieldsLeadUser {
+	return v.ProjectListFields.Lead
+}
+
+// GetTeams returns UpdateProjectProjectUpdateProjectPayloadProject.Teams, and is useful for accessing the field via an interface.
+func (v *UpdateProjectProjectUpdateProjectPayloadProject) GetTeams() *ProjectListFieldsTeamsTeamConnection {
+	return v.ProjectListFields.Teams
+}
+
+func (v *UpdateProjectProjectUpdateProjectPayloadProject) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*UpdateProjectProjectUpdateProjectPayloadProject
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.UpdateProjectProjectUpdateProjectPayloadProject = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.ProjectListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalUpdateProjectProjectUpdateProjectPayloadProject struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Description string `json:"description"`
+
+	State string `json:"state"`
+
+	Progress float64 `json:"progress"`
+
+	StartDate *string `json:"startDate"`
+
+	TargetDate *string `json:"targetDate"`
+
+	Url string `json:"url"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	Lead *ProjectListFieldsLeadUser `json:"lead"`
+
+	Teams *ProjectListFieldsTeamsTeamConnection `json:"teams"`
+}
+
+func (v *UpdateProjectProjectUpdateProjectPayloadProject) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *UpdateProjectProjectUpdateProjectPayloadProject) __premarshalJSON() (*__premarshalUpdateProjectProjectUpdateProjectPayloadProject, error) {
+	var retval __premarshalUpdateProjectProjectUpdateProjectPayloadProject
+
+	retval.Id = v.ProjectListFields.Id
+	retval.Name = v.ProjectListFields.Name
+	retval.Description = v.ProjectListFields.Description
+	retval.State = v.ProjectListFields.State
+	retval.Progress = v.ProjectListFields.Progress
+	retval.StartDate = v.ProjectListFields.StartDate
+	retval.TargetDate = v.ProjectListFields.TargetDate
+	retval.Url = v.ProjectListFields.Url
+	retval.CreatedAt = v.ProjectListFields.CreatedAt
+	retval.UpdatedAt = v.ProjectListFields.UpdatedAt
+	retval.Lead = v.ProjectListFields.Lead
+	retval.Teams = v.ProjectListFields.Teams
+	return &retval, nil
+}
+
+// UpdateProjectResponse is returned by UpdateProject on success.
+type UpdateProjectResponse struct {
+	// Updates a project.
+	ProjectUpdate *UpdateProjectProjectUpdateProjectPayload `json:"projectUpdate"`
+}
+
+// GetProjectUpdate returns UpdateProjectResponse.ProjectUpdate, and is useful for accessing the field via an interface.
+func (v *UpdateProjectResponse) GetProjectUpdate() *UpdateProjectProjectUpdateProjectPayload {
+	return v.ProjectUpdate
+}
+
 // User filtering options.
 type UserCollectionFilter struct {
 	// Comparator for the user's activity status.
@@ -18186,6 +20194,14 @@ type __CreateIssueRelationInput struct {
 // GetInput returns __CreateIssueRelationInput.Input, and is useful for accessing the field via an interface.
 func (v *__CreateIssueRelationInput) GetInput() *IssueRelationCreateInput { return v.Input }
 
+// __CreateProjectInput is used internally by genqlient
+type __CreateProjectInput struct {
+	Input *ProjectCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __CreateProjectInput.Input, and is useful for accessing the field via an interface.
+func (v *__CreateProjectInput) GetInput() *ProjectCreateInput { return v.Input }
+
 // __DeleteIssueRelationInput is used internally by genqlient
 type __DeleteIssueRelationInput struct {
 	Id string `json:"id"`
@@ -18257,6 +20273,14 @@ type __GetProjectInput struct {
 
 // GetId returns __GetProjectInput.Id, and is useful for accessing the field via an interface.
 func (v *__GetProjectInput) GetId() string { return v.Id }
+
+// __GetProjectMilestoneInput is used internally by genqlient
+type __GetProjectMilestoneInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __GetProjectMilestoneInput.Id, and is useful for accessing the field via an interface.
+func (v *__GetProjectMilestoneInput) GetId() string { return v.Id }
 
 // __GetTeamInput is used internally by genqlient
 type __GetTeamInput struct {
@@ -18554,6 +20578,26 @@ func (v *__ListIssuesInput) GetAfter() *string { return v.After }
 // GetOrderBy returns __ListIssuesInput.OrderBy, and is useful for accessing the field via an interface.
 func (v *__ListIssuesInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy }
 
+// __ListProjectMilestonesInput is used internally by genqlient
+type __ListProjectMilestonesInput struct {
+	ProjectId string `json:"projectId"`
+	First     *int   `json:"first"`
+}
+
+// GetProjectId returns __ListProjectMilestonesInput.ProjectId, and is useful for accessing the field via an interface.
+func (v *__ListProjectMilestonesInput) GetProjectId() string { return v.ProjectId }
+
+// GetFirst returns __ListProjectMilestonesInput.First, and is useful for accessing the field via an interface.
+func (v *__ListProjectMilestonesInput) GetFirst() *int { return v.First }
+
+// __ListProjectStatusesInput is used internally by genqlient
+type __ListProjectStatusesInput struct {
+	First *int `json:"first"`
+}
+
+// GetFirst returns __ListProjectStatusesInput.First, and is useful for accessing the field via an interface.
+func (v *__ListProjectStatusesInput) GetFirst() *int { return v.First }
+
 // __ListProjectsInput is used internally by genqlient
 type __ListProjectsInput struct {
 	Filter  *ProjectFilter     `json:"filter,omitempty"`
@@ -18605,6 +20649,62 @@ func (v *__ListUsersInput) GetAfter() *string { return v.After }
 
 // GetOrderBy returns __ListUsersInput.OrderBy, and is useful for accessing the field via an interface.
 func (v *__ListUsersInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy }
+
+// __ProjectDeleteInput is used internally by genqlient
+type __ProjectDeleteInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __ProjectDeleteInput.Id, and is useful for accessing the field via an interface.
+func (v *__ProjectDeleteInput) GetId() string { return v.Id }
+
+// __ProjectMilestoneCreateInput is used internally by genqlient
+type __ProjectMilestoneCreateInput struct {
+	Input *ProjectMilestoneCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __ProjectMilestoneCreateInput.Input, and is useful for accessing the field via an interface.
+func (v *__ProjectMilestoneCreateInput) GetInput() *ProjectMilestoneCreateInput { return v.Input }
+
+// __ProjectMilestoneDeleteInput is used internally by genqlient
+type __ProjectMilestoneDeleteInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __ProjectMilestoneDeleteInput.Id, and is useful for accessing the field via an interface.
+func (v *__ProjectMilestoneDeleteInput) GetId() string { return v.Id }
+
+// __ProjectMilestoneMoveInput is used internally by genqlient
+type __ProjectMilestoneMoveInput struct {
+	Id    string                     `json:"id"`
+	Input *ProjectMilestoneMoveInput `json:"input,omitempty"`
+}
+
+// GetId returns __ProjectMilestoneMoveInput.Id, and is useful for accessing the field via an interface.
+func (v *__ProjectMilestoneMoveInput) GetId() string { return v.Id }
+
+// GetInput returns __ProjectMilestoneMoveInput.Input, and is useful for accessing the field via an interface.
+func (v *__ProjectMilestoneMoveInput) GetInput() *ProjectMilestoneMoveInput { return v.Input }
+
+// __ProjectMilestoneUpdateInput is used internally by genqlient
+type __ProjectMilestoneUpdateInput struct {
+	Id    string                       `json:"id"`
+	Input *ProjectMilestoneUpdateInput `json:"input,omitempty"`
+}
+
+// GetId returns __ProjectMilestoneUpdateInput.Id, and is useful for accessing the field via an interface.
+func (v *__ProjectMilestoneUpdateInput) GetId() string { return v.Id }
+
+// GetInput returns __ProjectMilestoneUpdateInput.Input, and is useful for accessing the field via an interface.
+func (v *__ProjectMilestoneUpdateInput) GetInput() *ProjectMilestoneUpdateInput { return v.Input }
+
+// __ProjectUnarchiveInput is used internally by genqlient
+type __ProjectUnarchiveInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __ProjectUnarchiveInput.Id, and is useful for accessing the field via an interface.
+func (v *__ProjectUnarchiveInput) GetId() string { return v.Id }
 
 // __SearchIssuesInput is used internally by genqlient
 type __SearchIssuesInput struct {
@@ -18681,6 +20781,18 @@ func (v *__UpdateIssueInput) GetId() string { return v.Id }
 
 // GetInput returns __UpdateIssueInput.Input, and is useful for accessing the field via an interface.
 func (v *__UpdateIssueInput) GetInput() *IssueUpdateInput { return v.Input }
+
+// __UpdateProjectInput is used internally by genqlient
+type __UpdateProjectInput struct {
+	Id    string              `json:"id"`
+	Input *ProjectUpdateInput `json:"input,omitempty"`
+}
+
+// GetId returns __UpdateProjectInput.Id, and is useful for accessing the field via an interface.
+func (v *__UpdateProjectInput) GetId() string { return v.Id }
+
+// GetInput returns __UpdateProjectInput.Input, and is useful for accessing the field via an interface.
+func (v *__UpdateProjectInput) GetInput() *ProjectUpdateInput { return v.Input }
 
 // The mutation executed by AttachmentCreate.
 const AttachmentCreate_Operation = `
@@ -19124,6 +21236,68 @@ func CreateIssueRelation(
 	}
 
 	data_ = &CreateIssueRelationResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by CreateProject.
+const CreateProject_Operation = `
+mutation CreateProject ($input: ProjectCreateInput!) {
+	projectCreate(input: $input) {
+		success
+		project {
+			... ProjectListFields
+		}
+	}
+}
+fragment ProjectListFields on Project {
+	id
+	name
+	description
+	state
+	progress
+	startDate
+	targetDate
+	url
+	createdAt
+	updatedAt
+	lead {
+		id
+		name
+		email
+	}
+	teams {
+		nodes {
+			id
+			key
+			name
+		}
+	}
+}
+`
+
+// Mutation: Create a new project
+func CreateProject(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *ProjectCreateInput,
+) (data_ *CreateProjectResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "CreateProject",
+		Query:  CreateProject_Operation,
+		Variables: &__CreateProjectInput{
+			Input: input,
+		},
+	}
+
+	data_ = &CreateProjectResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -19904,6 +22078,55 @@ func GetProjectInitiativeLinks(
 	}
 
 	data_ = &GetProjectInitiativeLinksResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by GetProjectMilestone.
+const GetProjectMilestone_Operation = `
+query GetProjectMilestone ($id: String!) {
+	projectMilestone(id: $id) {
+		... ProjectMilestoneFields
+		project {
+			id
+			name
+		}
+	}
+}
+fragment ProjectMilestoneFields on ProjectMilestone {
+	id
+	name
+	description
+	targetDate
+	status
+	sortOrder
+	progress
+	createdAt
+	updatedAt
+}
+`
+
+func GetProjectMilestone(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *GetProjectMilestoneResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetProjectMilestone",
+		Query:  GetProjectMilestone_Operation,
+		Variables: &__GetProjectMilestoneInput{
+			Id: id,
+		},
+	}
+
+	data_ = &GetProjectMilestoneResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -21214,6 +23437,108 @@ func ListIssues(
 	return data_, err_
 }
 
+// The query executed by ListProjectMilestones.
+const ListProjectMilestones_Operation = `
+query ListProjectMilestones ($projectId: String!, $first: Int) {
+	project(id: $projectId) {
+		projectMilestones(first: $first) {
+			nodes {
+				... ProjectMilestoneFields
+			}
+			pageInfo {
+				hasNextPage
+				endCursor
+			}
+		}
+	}
+}
+fragment ProjectMilestoneFields on ProjectMilestone {
+	id
+	name
+	description
+	targetDate
+	status
+	sortOrder
+	progress
+	createdAt
+	updatedAt
+}
+`
+
+// Query: list a project's milestones. Queried via Project.projectMilestones
+// rather than the top-level projectMilestones(filter:) connection - simpler,
+// and avoids needing ProjectMilestoneFilter's NullableProjectFilter shape
+// just to match on project id.
+func ListProjectMilestones(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	projectId string,
+	first *int,
+) (data_ *ListProjectMilestonesResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ListProjectMilestones",
+		Query:  ListProjectMilestones_Operation,
+		Variables: &__ListProjectMilestonesInput{
+			ProjectId: projectId,
+			First:     first,
+		},
+	}
+
+	data_ = &ListProjectMilestonesResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by ListProjectStatuses.
+const ListProjectStatuses_Operation = `
+query ListProjectStatuses ($first: Int) {
+	projectStatuses(first: $first) {
+		nodes {
+			... ProjectStatusFields
+		}
+	}
+}
+fragment ProjectStatusFields on ProjectStatus {
+	id
+	name
+	type
+	color
+	position
+}
+`
+
+func ListProjectStatuses(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	first *int,
+) (data_ *ListProjectStatusesResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ListProjectStatuses",
+		Query:  ListProjectStatuses_Operation,
+		Variables: &__ListProjectStatusesInput{
+			First: first,
+		},
+	}
+
+	data_ = &ListProjectStatusesResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The query executed by ListProjects.
 const ListProjects_Operation = `
 query ListProjects ($filter: ProjectFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
@@ -21381,6 +23706,281 @@ func ListUsers(
 	}
 
 	data_ = &ListUsersResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by ProjectDelete.
+const ProjectDelete_Operation = `
+mutation ProjectDelete ($id: String!) {
+	projectDelete(id: $id) {
+		success
+		entity {
+			id
+			name
+		}
+	}
+}
+`
+
+// Mutation: Delete (trash) a project. Can be restored with ProjectUnarchive.
+//
+// Returns ProjectArchivePayload (entity: Project, or null if deleted), unlike
+// the DeletePayload (entityId) shape used by InitiativeDelete - Project's
+// delete mutation is actually a soft "trash" (see the mutation's own schema
+// description), so the entity is still returned.
+func ProjectDelete(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *ProjectDeleteResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ProjectDelete",
+		Query:  ProjectDelete_Operation,
+		Variables: &__ProjectDeleteInput{
+			Id: id,
+		},
+	}
+
+	data_ = &ProjectDeleteResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by ProjectMilestoneCreate.
+const ProjectMilestoneCreate_Operation = `
+mutation ProjectMilestoneCreate ($input: ProjectMilestoneCreateInput!) {
+	projectMilestoneCreate(input: $input) {
+		success
+		projectMilestone {
+			... ProjectMilestoneFields
+		}
+	}
+}
+fragment ProjectMilestoneFields on ProjectMilestone {
+	id
+	name
+	description
+	targetDate
+	status
+	sortOrder
+	progress
+	createdAt
+	updatedAt
+}
+`
+
+func ProjectMilestoneCreate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *ProjectMilestoneCreateInput,
+) (data_ *ProjectMilestoneCreateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ProjectMilestoneCreate",
+		Query:  ProjectMilestoneCreate_Operation,
+		Variables: &__ProjectMilestoneCreateInput{
+			Input: input,
+		},
+	}
+
+	data_ = &ProjectMilestoneCreateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by ProjectMilestoneDelete.
+const ProjectMilestoneDelete_Operation = `
+mutation ProjectMilestoneDelete ($id: String!) {
+	projectMilestoneDelete(id: $id) {
+		success
+		entityId
+	}
+}
+`
+
+func ProjectMilestoneDelete(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *ProjectMilestoneDeleteResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ProjectMilestoneDelete",
+		Query:  ProjectMilestoneDelete_Operation,
+		Variables: &__ProjectMilestoneDeleteInput{
+			Id: id,
+		},
+	}
+
+	data_ = &ProjectMilestoneDeleteResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by ProjectMilestoneMove.
+const ProjectMilestoneMove_Operation = `
+mutation ProjectMilestoneMove ($id: String!, $input: ProjectMilestoneMoveInput!) {
+	projectMilestoneMove(id: $id, input: $input) {
+		success
+		projectMilestone {
+			... ProjectMilestoneFields
+			project {
+				id
+				name
+			}
+		}
+	}
+}
+fragment ProjectMilestoneFields on ProjectMilestone {
+	id
+	name
+	description
+	targetDate
+	status
+	sortOrder
+	progress
+	createdAt
+	updatedAt
+}
+`
+
+// ProjectMilestoneMoveInput has no sortOrder field (verified against
+// schema.graphql) - only projectId (plus team-mismatch escape hatches this
+// CLI doesn't need). `project milestone move --sort-order` is implemented as
+// this move followed by a ProjectMilestoneUpdate call when --sort-order is
+// given; see cmd/project.go.
+func ProjectMilestoneMove(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	input *ProjectMilestoneMoveInput,
+) (data_ *ProjectMilestoneMoveResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ProjectMilestoneMove",
+		Query:  ProjectMilestoneMove_Operation,
+		Variables: &__ProjectMilestoneMoveInput{
+			Id:    id,
+			Input: input,
+		},
+	}
+
+	data_ = &ProjectMilestoneMoveResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by ProjectMilestoneUpdate.
+const ProjectMilestoneUpdate_Operation = `
+mutation ProjectMilestoneUpdate ($id: String!, $input: ProjectMilestoneUpdateInput!) {
+	projectMilestoneUpdate(id: $id, input: $input) {
+		success
+		projectMilestone {
+			... ProjectMilestoneFields
+		}
+	}
+}
+fragment ProjectMilestoneFields on ProjectMilestone {
+	id
+	name
+	description
+	targetDate
+	status
+	sortOrder
+	progress
+	createdAt
+	updatedAt
+}
+`
+
+func ProjectMilestoneUpdate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	input *ProjectMilestoneUpdateInput,
+) (data_ *ProjectMilestoneUpdateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ProjectMilestoneUpdate",
+		Query:  ProjectMilestoneUpdate_Operation,
+		Variables: &__ProjectMilestoneUpdateInput{
+			Id:    id,
+			Input: input,
+		},
+	}
+
+	data_ = &ProjectMilestoneUpdateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by ProjectUnarchive.
+const ProjectUnarchive_Operation = `
+mutation ProjectUnarchive ($id: String!) {
+	projectUnarchive(id: $id) {
+		success
+		entity {
+			id
+			name
+		}
+	}
+}
+`
+
+// Mutation: Unarchive (restore) a previously deleted/archived project
+func ProjectUnarchive(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *ProjectUnarchiveResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ProjectUnarchive",
+		Query:  ProjectUnarchive_Operation,
+		Variables: &__ProjectUnarchiveInput{
+			Id: id,
+		},
+	}
+
+	data_ = &ProjectUnarchiveResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -21721,6 +24321,74 @@ func UpdateIssue(
 	}
 
 	data_ = &UpdateIssueResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by UpdateProject.
+const UpdateProject_Operation = `
+mutation UpdateProject ($id: String!, $input: ProjectUpdateInput!) {
+	projectUpdate(id: $id, input: $input) {
+		success
+		project {
+			... ProjectListFields
+		}
+	}
+}
+fragment ProjectListFields on Project {
+	id
+	name
+	description
+	state
+	progress
+	startDate
+	targetDate
+	url
+	createdAt
+	updatedAt
+	lead {
+		id
+		name
+		email
+	}
+	teams {
+		nodes {
+			id
+			key
+			name
+		}
+	}
+}
+`
+
+// Mutation: Update an existing project's record (name, description, lead,
+// dates, status, members, etc). ProjectUpdateInput has no `state`/`health`
+// fields (verified against schema.graphql) - health is only set via a
+// project update *post* (a separate ProjectUpdate mutation/entity, not
+// covered here), and state is derived from the project's status.
+func UpdateProject(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	input *ProjectUpdateInput,
+) (data_ *UpdateProjectResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "UpdateProject",
+		Query:  UpdateProject_Operation,
+		Variables: &__UpdateProjectInput{
+			Id:    id,
+			Input: input,
+		},
+	}
+
+	data_ = &UpdateProjectResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(

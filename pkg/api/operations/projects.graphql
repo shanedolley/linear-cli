@@ -182,3 +182,158 @@ query GetProject($id: String!) {
     ...ProjectDetailFields
   }
 }
+
+# Mutation: Create a new project
+mutation CreateProject($input: ProjectCreateInput!) {
+  projectCreate(input: $input) {
+    success
+    project {
+      ...ProjectListFields
+    }
+  }
+}
+
+# Mutation: Update an existing project's record (name, description, lead,
+# dates, status, members, etc). ProjectUpdateInput has no `state`/`health`
+# fields (verified against schema.graphql) - health is only set via a
+# project update *post* (a separate ProjectUpdate mutation/entity, not
+# covered here), and state is derived from the project's status.
+mutation UpdateProject($id: String!, $input: ProjectUpdateInput!) {
+  projectUpdate(id: $id, input: $input) {
+    success
+    project {
+      ...ProjectListFields
+    }
+  }
+}
+
+# Mutation: Delete (trash) a project. Can be restored with ProjectUnarchive.
+#
+# Returns ProjectArchivePayload (entity: Project, or null if deleted), unlike
+# the DeletePayload (entityId) shape used by InitiativeDelete - Project's
+# delete mutation is actually a soft "trash" (see the mutation's own schema
+# description), so the entity is still returned.
+mutation ProjectDelete($id: String!) {
+  projectDelete(id: $id) {
+    success
+    entity {
+      id
+      name
+    }
+  }
+}
+
+# Mutation: Unarchive (restore) a previously deleted/archived project
+mutation ProjectUnarchive($id: String!) {
+  projectUnarchive(id: $id) {
+    success
+    entity {
+      id
+      name
+    }
+  }
+}
+
+# --- Project statuses (workspace-wide catalog, used to resolve --status
+# name -> statusId; see resolveProjectStatus in cmd/resolve.go) ---
+
+fragment ProjectStatusFields on ProjectStatus {
+  id
+  name
+  type
+  color
+  position
+}
+
+query ListProjectStatuses($first: Int) {
+  projectStatuses(first: $first) {
+    nodes {
+      ...ProjectStatusFields
+    }
+  }
+}
+
+# --- Project milestones ---
+
+fragment ProjectMilestoneFields on ProjectMilestone {
+  id
+  name
+  description
+  targetDate
+  status
+  sortOrder
+  progress
+  createdAt
+  updatedAt
+}
+
+# Query: list a project's milestones. Queried via Project.projectMilestones
+# rather than the top-level projectMilestones(filter:) connection - simpler,
+# and avoids needing ProjectMilestoneFilter's NullableProjectFilter shape
+# just to match on project id.
+query ListProjectMilestones($projectId: String!, $first: Int) {
+  project(id: $projectId) {
+    projectMilestones(first: $first) {
+      nodes {
+        ...ProjectMilestoneFields
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+}
+
+query GetProjectMilestone($id: String!) {
+  projectMilestone(id: $id) {
+    ...ProjectMilestoneFields
+    project {
+      id
+      name
+    }
+  }
+}
+
+mutation ProjectMilestoneCreate($input: ProjectMilestoneCreateInput!) {
+  projectMilestoneCreate(input: $input) {
+    success
+    projectMilestone {
+      ...ProjectMilestoneFields
+    }
+  }
+}
+
+mutation ProjectMilestoneUpdate($id: String!, $input: ProjectMilestoneUpdateInput!) {
+  projectMilestoneUpdate(id: $id, input: $input) {
+    success
+    projectMilestone {
+      ...ProjectMilestoneFields
+    }
+  }
+}
+
+# ProjectMilestoneMoveInput has no sortOrder field (verified against
+# schema.graphql) - only projectId (plus team-mismatch escape hatches this
+# CLI doesn't need). `project milestone move --sort-order` is implemented as
+# this move followed by a ProjectMilestoneUpdate call when --sort-order is
+# given; see cmd/project.go.
+mutation ProjectMilestoneMove($id: String!, $input: ProjectMilestoneMoveInput!) {
+  projectMilestoneMove(id: $id, input: $input) {
+    success
+    projectMilestone {
+      ...ProjectMilestoneFields
+      project {
+        id
+        name
+      }
+    }
+  }
+}
+
+mutation ProjectMilestoneDelete($id: String!) {
+  projectMilestoneDelete(id: $id) {
+    success
+    entityId
+  }
+}

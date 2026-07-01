@@ -756,6 +756,192 @@ func TestResolveWorkflowState_CacheHit(t *testing.T) {
 	}
 }
 
+// --- resolveProjectStatus ---
+
+func TestResolveProjectStatus_UUIDPassthrough(t *testing.T) {
+	client := newMockGraphQLClient()
+	cache := newResolverCache()
+
+	id := "550e8400-e29b-41d4-a716-446655440000"
+	got, err := resolveProjectStatus(context.Background(), client, cache, id)
+	if err != nil {
+		t.Fatalf("resolveProjectStatus() error = %v", err)
+	}
+	if got != id {
+		t.Errorf("resolveProjectStatus() = %q, want %q", got, id)
+	}
+	if len(client.calls) != 0 {
+		t.Errorf("expected no API calls for UUID passthrough, got %v", client.calls)
+	}
+}
+
+func TestResolveProjectStatus_ExactMatch(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListProjectStatuses"] = `{"projectStatuses": {"nodes": [
+		{"id": "status-uuid-1", "name": "Backlog", "type": "backlog", "color": "#000", "position": 0},
+		{"id": "status-uuid-2", "name": "In Progress", "type": "started", "color": "#000", "position": 1},
+		{"id": "status-uuid-3", "name": "Completed", "type": "completed", "color": "#000", "position": 2}
+	]}}`
+	cache := newResolverCache()
+
+	got, err := resolveProjectStatus(context.Background(), client, cache, "in progress")
+	if err != nil {
+		t.Fatalf("resolveProjectStatus() error = %v", err)
+	}
+	if got != "status-uuid-2" {
+		t.Errorf("resolveProjectStatus() = %q, want %q", got, "status-uuid-2")
+	}
+	if client.callCount("ListProjectStatuses") != 1 {
+		t.Errorf("expected exactly 1 ListProjectStatuses call, got %d", client.callCount("ListProjectStatuses"))
+	}
+}
+
+func TestResolveProjectStatus_NotFound(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListProjectStatuses"] = `{"projectStatuses": {"nodes": [
+		{"id": "status-uuid-1", "name": "Backlog", "type": "backlog", "color": "#000", "position": 0}
+	]}}`
+	cache := newResolverCache()
+
+	_, err := resolveProjectStatus(context.Background(), client, cache, "Nonexistent")
+	if err == nil {
+		t.Fatal("expected error for unknown status name, got nil")
+	}
+	if !strings.Contains(err.Error(), "Nonexistent") {
+		t.Errorf("expected error to mention the status name, got: %v", err)
+	}
+	if !strings.Contains(err.Error(), "Backlog") {
+		t.Errorf("expected error to list the valid status names, got: %v", err)
+	}
+}
+
+func TestResolveProjectStatus_CacheHit(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListProjectStatuses"] = `{"projectStatuses": {"nodes": [
+		{"id": "status-uuid-1", "name": "Backlog", "type": "backlog", "color": "#000", "position": 0}
+	]}}`
+	cache := newResolverCache()
+
+	if _, err := resolveProjectStatus(context.Background(), client, cache, "Backlog"); err != nil {
+		t.Fatalf("first resolveProjectStatus() error = %v", err)
+	}
+	if client.callCount("ListProjectStatuses") != 1 {
+		t.Fatalf("expected exactly 1 ListProjectStatuses call after first resolve, got %d", client.callCount("ListProjectStatuses"))
+	}
+
+	got, err := resolveProjectStatus(context.Background(), client, cache, "backlog")
+	if err != nil {
+		t.Fatalf("second resolveProjectStatus() error = %v", err)
+	}
+	if got != "status-uuid-1" {
+		t.Errorf("resolveProjectStatus() = %q, want %q", got, "status-uuid-1")
+	}
+	if client.callCount("ListProjectStatuses") != 1 {
+		t.Errorf("expected cache hit to avoid a second ListProjectStatuses call, total calls = %d", client.callCount("ListProjectStatuses"))
+	}
+}
+
+// --- resolveMilestone ---
+
+func TestResolveMilestone_UUIDPassthrough(t *testing.T) {
+	client := newMockGraphQLClient()
+	cache := newResolverCache()
+
+	id := "550e8400-e29b-41d4-a716-446655440000"
+	got, err := resolveMilestone(context.Background(), client, cache, "project-uuid-1", id)
+	if err != nil {
+		t.Fatalf("resolveMilestone() error = %v", err)
+	}
+	if got != id {
+		t.Errorf("resolveMilestone() = %q, want %q", got, id)
+	}
+	if len(client.calls) != 0 {
+		t.Errorf("expected no API calls for UUID passthrough, got %v", client.calls)
+	}
+}
+
+func TestResolveMilestone_ExactMatch(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListProjectMilestones"] = `{"project": {"projectMilestones": {"nodes": [
+		{"id": "milestone-uuid-1", "name": "Alpha", "description": null, "targetDate": null, "status": "unstarted", "sortOrder": 0, "progress": 0, "createdAt": "2024-01-01T00:00:00Z", "updatedAt": "2024-01-01T00:00:00Z"},
+		{"id": "milestone-uuid-2", "name": "Beta", "description": null, "targetDate": null, "status": "next", "sortOrder": 1, "progress": 0, "createdAt": "2024-01-01T00:00:00Z", "updatedAt": "2024-01-01T00:00:00Z"}
+	], "pageInfo": {"hasNextPage": false, "endCursor": null}}}}`
+	cache := newResolverCache()
+
+	got, err := resolveMilestone(context.Background(), client, cache, "project-uuid-1", "beta")
+	if err != nil {
+		t.Fatalf("resolveMilestone() error = %v", err)
+	}
+	if got != "milestone-uuid-2" {
+		t.Errorf("resolveMilestone() = %q, want %q", got, "milestone-uuid-2")
+	}
+	if client.callCount("ListProjectMilestones") != 1 {
+		t.Errorf("expected exactly 1 ListProjectMilestones call, got %d", client.callCount("ListProjectMilestones"))
+	}
+}
+
+func TestResolveMilestone_Ambiguous(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListProjectMilestones"] = `{"project": {"projectMilestones": {"nodes": [
+		{"id": "milestone-uuid-1", "name": "Launch", "description": null, "targetDate": null, "status": "unstarted", "sortOrder": 0, "progress": 0, "createdAt": "2024-01-01T00:00:00Z", "updatedAt": "2024-01-01T00:00:00Z"},
+		{"id": "milestone-uuid-2", "name": "launch", "description": null, "targetDate": null, "status": "next", "sortOrder": 1, "progress": 0, "createdAt": "2024-01-01T00:00:00Z", "updatedAt": "2024-01-01T00:00:00Z"}
+	], "pageInfo": {"hasNextPage": false, "endCursor": null}}}}`
+	cache := newResolverCache()
+
+	_, err := resolveMilestone(context.Background(), client, cache, "project-uuid-1", "Launch")
+	if err == nil {
+		t.Fatal("expected error for ambiguous milestone name, got nil")
+	}
+	if !strings.Contains(err.Error(), "milestone-uuid-1") || !strings.Contains(err.Error(), "milestone-uuid-2") {
+		t.Errorf("expected error to list both candidates, got: %v", err)
+	}
+}
+
+func TestResolveMilestone_NotFound(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListProjectMilestones"] = `{"project": {"projectMilestones": {"nodes": [
+		{"id": "milestone-uuid-1", "name": "Alpha", "description": null, "targetDate": null, "status": "unstarted", "sortOrder": 0, "progress": 0, "createdAt": "2024-01-01T00:00:00Z", "updatedAt": "2024-01-01T00:00:00Z"}
+	], "pageInfo": {"hasNextPage": false, "endCursor": null}}}}`
+	cache := newResolverCache()
+
+	_, err := resolveMilestone(context.Background(), client, cache, "project-uuid-1", "Nonexistent")
+	if err == nil {
+		t.Fatal("expected error for unknown milestone name, got nil")
+	}
+	if !strings.Contains(err.Error(), "Nonexistent") {
+		t.Errorf("expected error to mention the milestone name, got: %v", err)
+	}
+	if !strings.Contains(err.Error(), "Alpha") {
+		t.Errorf("expected error to list the available milestone names, got: %v", err)
+	}
+}
+
+func TestResolveMilestone_CacheHit(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListProjectMilestones"] = `{"project": {"projectMilestones": {"nodes": [
+		{"id": "milestone-uuid-1", "name": "Alpha", "description": null, "targetDate": null, "status": "unstarted", "sortOrder": 0, "progress": 0, "createdAt": "2024-01-01T00:00:00Z", "updatedAt": "2024-01-01T00:00:00Z"}
+	], "pageInfo": {"hasNextPage": false, "endCursor": null}}}}`
+	cache := newResolverCache()
+
+	if _, err := resolveMilestone(context.Background(), client, cache, "project-uuid-1", "Alpha"); err != nil {
+		t.Fatalf("first resolveMilestone() error = %v", err)
+	}
+	if client.callCount("ListProjectMilestones") != 1 {
+		t.Fatalf("expected exactly 1 ListProjectMilestones call after first resolve, got %d", client.callCount("ListProjectMilestones"))
+	}
+
+	got, err := resolveMilestone(context.Background(), client, cache, "project-uuid-1", "alpha")
+	if err != nil {
+		t.Fatalf("second resolveMilestone() error = %v", err)
+	}
+	if got != "milestone-uuid-1" {
+		t.Errorf("resolveMilestone() = %q, want %q", got, "milestone-uuid-1")
+	}
+	if client.callCount("ListProjectMilestones") != 1 {
+		t.Errorf("expected cache hit to avoid a second ListProjectMilestones call, total calls = %d", client.callCount("ListProjectMilestones"))
+	}
+}
+
 // Sanity check that our mock actually satisfies genqlient's graphql.Client
 // interface, since that's what makes it usable with the generated api.* functions.
 var _ graphql.Client = (*mockGraphQLClient)(nil)

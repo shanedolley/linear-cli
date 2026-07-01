@@ -29,6 +29,22 @@ type workflowStateInfo struct {
 	name string
 }
 
+// projectStatusInfo is a minimal, resolver-local view of a workspace-wide
+// ProjectStatus, used for case-insensitive name matching and building "not
+// found" error messages in resolveProjectStatus.
+type projectStatusInfo struct {
+	id   string
+	name string
+}
+
+// milestoneInfo is a minimal, resolver-local view of a ProjectMilestone,
+// used for case-insensitive name matching and building "not found"/
+// "ambiguous" error messages in resolveMilestone.
+type milestoneInfo struct {
+	id   string
+	name string
+}
+
 // ResolverCache memoizes entity resolution (team/user/project/state) for the
 // lifetime of a single command invocation. It is intentionally simple: a
 // fresh cache is created per invocation via newResolverCache, so entries
@@ -41,6 +57,16 @@ type ResolverCache struct {
 	states           map[string][]workflowStateInfo
 	labels           map[string]string
 	initiativeLabels map[string]string
+
+	// projectStatuses caches the workspace's ProjectStatus catalog, fetched
+	// at most once per invocation. It is workspace-wide (not keyed by
+	// anything), unlike states which are per-team. projectStatusesLoaded
+	// distinguishes "not fetched yet" from "fetched, workspace has none".
+	projectStatuses       []projectStatusInfo
+	projectStatusesLoaded bool
+
+	// milestones caches each project's milestone list, keyed by project ID.
+	milestones map[string][]milestoneInfo
 }
 
 // newResolverCache creates an empty ResolverCache. Call this once per
@@ -56,6 +82,7 @@ func newResolverCache() *ResolverCache {
 		states:           make(map[string][]workflowStateInfo),
 		labels:           make(map[string]string),
 		initiativeLabels: make(map[string]string),
+		milestones:       make(map[string][]milestoneInfo),
 	}
 }
 
@@ -373,4 +400,99 @@ func resolveWorkflowState(ctx context.Context, client graphql.Client, cache *Res
 		names = append(names, s.name)
 	}
 	return "", fmt.Errorf("State '%s' not found in team '%s'. Available states: %s", nameOrID, teamKeyOrID, strings.Join(names, ", "))
+}
+
+// resolveProjectStatus resolves a project status name or UUID to a
+// ProjectStatus ID. ProjectStatus is a workspace-wide catalog (unlike
+// workflow states, which are per-team), so the fetched list is cached
+// unscoped on the ResolverCache. Name matching is case-insensitive. A name
+// matching no status returns an error listing the workspace's valid status
+// names.
+func resolveProjectStatus(ctx context.Context, client graphql.Client, cache *ResolverCache, nameOrID string) (string, error) {
+	if isUUID(nameOrID) {
+		return nameOrID, nil
+	}
+
+	if !cache.projectStatusesLoaded {
+		limit := 250
+		resp, err := api.ListProjectStatuses(ctx, client, &limit)
+		if err != nil {
+			return "", fmt.Errorf("failed to list project statuses: %w", err)
+		}
+
+		statuses := []projectStatusInfo{}
+		if resp.ProjectStatuses != nil {
+			for _, s := range resp.ProjectStatuses.Nodes {
+				statuses = append(statuses, projectStatusInfo{id: s.ProjectStatusFields.Id, name: s.ProjectStatusFields.Name})
+			}
+		}
+		cache.projectStatuses = statuses
+		cache.projectStatusesLoaded = true
+	}
+
+	for _, s := range cache.projectStatuses {
+		if strings.EqualFold(s.name, nameOrID) {
+			return s.id, nil
+		}
+	}
+
+	names := make([]string, 0, len(cache.projectStatuses))
+	for _, s := range cache.projectStatuses {
+		names = append(names, s.name)
+	}
+	return "", fmt.Errorf("Project status '%s' not found. Valid values: %s", nameOrID, strings.Join(names, ", "))
+}
+
+// resolveMilestone resolves a project milestone name or UUID to a
+// ProjectMilestone ID, scoped to the given project. Name matching is
+// case-insensitive. A name matching more than one milestone within the
+// project returns an error listing the candidates (name and id); a name
+// matching none returns a "not found" error listing the project's milestone
+// names.
+func resolveMilestone(ctx context.Context, client graphql.Client, cache *ResolverCache, projectID, nameOrID string) (string, error) {
+	if isUUID(nameOrID) {
+		return nameOrID, nil
+	}
+
+	milestones, ok := cache.milestones[projectID]
+	if !ok {
+		limit := 250
+		resp, err := api.ListProjectMilestones(ctx, client, projectID, &limit)
+		if err != nil {
+			return "", fmt.Errorf("failed to list milestones for project: %w", err)
+		}
+		if resp.Project == nil || resp.Project.ProjectMilestones == nil {
+			return "", fmt.Errorf("project not found or has no milestones")
+		}
+
+		milestones = make([]milestoneInfo, 0, len(resp.Project.ProjectMilestones.Nodes))
+		for _, m := range resp.Project.ProjectMilestones.Nodes {
+			milestones = append(milestones, milestoneInfo{id: m.ProjectMilestoneFields.Id, name: m.ProjectMilestoneFields.Name})
+		}
+		cache.milestones[projectID] = milestones
+	}
+
+	var matches []milestoneInfo
+	for _, m := range milestones {
+		if strings.EqualFold(m.name, nameOrID) {
+			matches = append(matches, m)
+		}
+	}
+
+	if len(matches) == 0 {
+		names := make([]string, 0, len(milestones))
+		for _, m := range milestones {
+			names = append(names, m.name)
+		}
+		return "", fmt.Errorf("Milestone '%s' not found in project. Available milestones: %s", nameOrID, strings.Join(names, ", "))
+	}
+	if len(matches) > 1 {
+		candidates := make([]string, 0, len(matches))
+		for _, m := range matches {
+			candidates = append(candidates, fmt.Sprintf("%s (%s)", m.name, m.id))
+		}
+		return "", fmt.Errorf("Multiple matches for '%s': %s", nameOrID, strings.Join(candidates, ", "))
+	}
+
+	return matches[0].id, nil
 }
