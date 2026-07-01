@@ -1,0 +1,165 @@
+# GraphQL operations for Initiative entity
+#
+# Note: Initiative has no `progress` field in the schema (unlike Project).
+# The closest analog is `health` (onTrack/atRisk/offTrack, derived from the
+# most recent initiative update), which is used in its place in list output.
+#
+# Nested subgroups (project links via InitiativeToProject, InitiativeLabel,
+# InitiativeRelation, and InitiativeUpdate status posts) are intentionally
+# left out of these fragments; they arrive in a later pass.
+
+# Fragment for basic initiative fields used in list views
+fragment InitiativeListFields on Initiative {
+  id
+  name
+  status
+  health
+  icon
+  color
+  targetDate
+  url
+  createdAt
+  updatedAt
+  owner {
+    id
+    name
+    email
+  }
+}
+
+# Fragment for detailed initiative fields used in single initiative view
+#
+# Note: `identifier` is intentionally omitted. It's gated behind a
+# workspace-level "Initiative IDs" feature flag; querying it on a workspace
+# where that feature isn't enabled fails the entire request with a GraphQL
+# error ("Feature 'Initiative IDs' is not enabled"), confirmed against the
+# live API.
+fragment InitiativeDetailFields on Initiative {
+  id
+  slugId
+  name
+  description
+  content
+  icon
+  color
+  status
+  health
+  healthUpdatedAt
+  priority
+  startedAt
+  targetDate
+  targetDateResolution
+  visibility
+  url
+  createdAt
+  updatedAt
+  completedAt
+  canceledAt
+  archivedAt
+  creator {
+    id
+    name
+    email
+  }
+  owner {
+    id
+    name
+    email
+  }
+  leadTeam {
+    id
+    key
+    name
+  }
+}
+
+# Query: Get paginated list of initiatives with optional filtering.
+#
+# includeArchived is an addition beyond the base (filter, first, after,
+# orderBy) signature: Initiative has no state-based way to select archived
+# records (unlike Project's "completed"/"canceled" states), so the
+# connection's own includeArchived arg is the only way to support the
+# `initiative list --include-archived` flag.
+query ListInitiatives($filter: InitiativeFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy, $includeArchived: Boolean) {
+  initiatives(filter: $filter, first: $first, after: $after, orderBy: $orderBy, includeArchived: $includeArchived) {
+    nodes {
+      ...InitiativeListFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+# Query: Get a single initiative by ID with all details
+query GetInitiative($id: String!) {
+  initiative(id: $id) {
+    ...InitiativeDetailFields
+  }
+}
+
+# Mutation: Create a new initiative
+mutation CreateInitiative($input: InitiativeCreateInput!) {
+  initiativeCreate(input: $input) {
+    success
+    initiative {
+      ...InitiativeListFields
+    }
+  }
+}
+
+# Mutation: Update an existing initiative's record (name, description, owner,
+# target date, status, etc). This is distinct from posting an initiative
+# status update, which is a separate InitiativeUpdate mutation not covered here.
+mutation UpdateInitiative($id: String!, $input: InitiativeUpdateInput!) {
+  initiativeUpdate(id: $id, input: $input) {
+    success
+    initiative {
+      ...InitiativeListFields
+    }
+  }
+}
+
+# Mutation: Archive an initiative
+mutation InitiativeArchive($id: String!) {
+  initiativeArchive(id: $id) {
+    success
+    entity {
+      id
+      name
+      archivedAt
+    }
+  }
+}
+
+# Mutation: Unarchive an initiative
+mutation InitiativeUnarchive($id: String!) {
+  initiativeUnarchive(id: $id) {
+    success
+    entity {
+      id
+      name
+      archivedAt
+    }
+  }
+}
+
+# Mutation: Delete (trash) an initiative
+mutation InitiativeDelete($id: String!) {
+  initiativeDelete(id: $id) {
+    success
+    entityId
+  }
+}
+
+# Mutation: Update an initiative's lead team, optionally cascading to
+# matching editable sub-initiatives.
+mutation InitiativeLeadTeamUpdate($id: String!, $leadTeamId: String, $mode: InitiativeLeadTeamChangeMode) {
+  initiativeLeadTeamUpdate(id: $id, leadTeamId: $leadTeamId, mode: $mode) {
+    success
+    initiative {
+      ...InitiativeListFields
+    }
+  }
+}

@@ -34,21 +34,24 @@ type workflowStateInfo struct {
 // fresh cache is created per invocation via newResolverCache, so entries
 // never need to be invalidated or expired.
 type ResolverCache struct {
-	teams    map[string]string
-	users    map[string]string
-	projects map[string]string
-	states   map[string][]workflowStateInfo
+	teams       map[string]string
+	users       map[string]string
+	projects    map[string]string
+	initiatives map[string]string
+	states      map[string][]workflowStateInfo
 }
 
 // newResolverCache creates an empty ResolverCache. Call this once per
 // command invocation and thread it through any resolve* calls so repeated
-// references to the same team/user/project/state only hit the API once.
+// references to the same team/user/project/initiative/state only hit the
+// API once.
 func newResolverCache() *ResolverCache {
 	return &ResolverCache{
-		teams:    make(map[string]string),
-		users:    make(map[string]string),
-		projects: make(map[string]string),
-		states:   make(map[string][]workflowStateInfo),
+		teams:       make(map[string]string),
+		users:       make(map[string]string),
+		projects:    make(map[string]string),
+		initiatives: make(map[string]string),
+		states:      make(map[string][]workflowStateInfo),
 	}
 }
 
@@ -193,6 +196,46 @@ func resolveProject(ctx context.Context, client graphql.Client, cache *ResolverC
 
 	id := nodes[0].ProjectListFields.Id
 	cache.projects[cacheKey] = id
+	return id, nil
+}
+
+// resolveInitiative resolves an initiative name or UUID to an initiative ID.
+// Name matching is case-insensitive. A name matching more than one initiative
+// returns an error listing the candidates (name and id); a name matching no
+// initiative returns a "not found" error.
+func resolveInitiative(ctx context.Context, client graphql.Client, cache *ResolverCache, nameOrID string) (string, error) {
+	if isUUID(nameOrID) {
+		return nameOrID, nil
+	}
+
+	cacheKey := strings.ToLower(nameOrID)
+	if id, ok := cache.initiatives[cacheKey]; ok {
+		return id, nil
+	}
+
+	filter := &api.InitiativeFilter{
+		Name: &api.StringComparator{EqIgnoreCase: &nameOrID},
+	}
+	limit := 10
+	resp, err := api.ListInitiatives(ctx, client, filter, &limit, nil, nil, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to find initiative '%s': %w", nameOrID, err)
+	}
+
+	nodes := resp.Initiatives.Nodes
+	if len(nodes) == 0 {
+		return "", fmt.Errorf("Initiative not found: %s", nameOrID)
+	}
+	if len(nodes) > 1 {
+		candidates := make([]string, 0, len(nodes))
+		for _, n := range nodes {
+			candidates = append(candidates, fmt.Sprintf("%s (%s)", n.InitiativeListFields.Name, n.InitiativeListFields.Id))
+		}
+		return "", fmt.Errorf("Multiple matches for '%s': %s", nameOrID, strings.Join(candidates, ", "))
+	}
+
+	id := nodes[0].InitiativeListFields.Id
+	cache.initiatives[cacheKey] = id
 	return id, nil
 }
 

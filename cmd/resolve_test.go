@@ -106,7 +106,7 @@ func TestNewResolverCacheIsEmpty(t *testing.T) {
 	if cache == nil {
 		t.Fatal("newResolverCache() returned nil")
 	}
-	if len(cache.teams) != 0 || len(cache.users) != 0 || len(cache.projects) != 0 || len(cache.states) != 0 {
+	if len(cache.teams) != 0 || len(cache.users) != 0 || len(cache.projects) != 0 || len(cache.initiatives) != 0 || len(cache.states) != 0 {
 		t.Fatal("newResolverCache() should return a cache with empty maps")
 	}
 }
@@ -386,6 +386,100 @@ func TestResolveProject_CacheHit(t *testing.T) {
 	}
 	if client.callCount("ListProjects") != 1 {
 		t.Errorf("expected cache hit to avoid a second ListProjects call, total calls = %d", client.callCount("ListProjects"))
+	}
+}
+
+// --- resolveInitiative ---
+
+func TestResolveInitiative_UUIDPassthrough(t *testing.T) {
+	client := newMockGraphQLClient()
+	cache := newResolverCache()
+
+	id := "550e8400-e29b-41d4-a716-446655440000"
+	got, err := resolveInitiative(context.Background(), client, cache, id)
+	if err != nil {
+		t.Fatalf("resolveInitiative() error = %v", err)
+	}
+	if got != id {
+		t.Errorf("resolveInitiative() = %q, want %q", got, id)
+	}
+	if len(client.calls) != 0 {
+		t.Errorf("expected no API calls for UUID passthrough, got %v", client.calls)
+	}
+}
+
+func TestResolveInitiative_ExactMatch(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListInitiatives"] = `{"initiatives": {"nodes": [{"id": "initiative-uuid-1", "name": "Platform Modernization", "status": "Active", "health": null, "icon": null, "color": null, "targetDate": null, "url": "https://linear.app/i/1", "createdAt": "2024-01-01T00:00:00Z", "updatedAt": "2024-01-01T00:00:00Z", "owner": null}], "pageInfo": {"hasNextPage": false, "endCursor": null}}}`
+	cache := newResolverCache()
+
+	got, err := resolveInitiative(context.Background(), client, cache, "platform modernization")
+	if err != nil {
+		t.Fatalf("resolveInitiative() error = %v", err)
+	}
+	if got != "initiative-uuid-1" {
+		t.Errorf("resolveInitiative() = %q, want %q", got, "initiative-uuid-1")
+	}
+	if client.callCount("ListInitiatives") != 1 {
+		t.Errorf("expected exactly 1 ListInitiatives call, got %d", client.callCount("ListInitiatives"))
+	}
+}
+
+func TestResolveInitiative_Ambiguous(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListInitiatives"] = `{"initiatives": {"nodes": [
+		{"id": "initiative-uuid-1", "name": "Growth", "status": "Active", "health": null, "icon": null, "color": null, "targetDate": null, "url": "https://linear.app/i/1", "createdAt": "2024-01-01T00:00:00Z", "updatedAt": "2024-01-01T00:00:00Z", "owner": null},
+		{"id": "initiative-uuid-2", "name": "Growth", "status": "Planned", "health": null, "icon": null, "color": null, "targetDate": null, "url": "https://linear.app/i/2", "createdAt": "2024-01-01T00:00:00Z", "updatedAt": "2024-01-01T00:00:00Z", "owner": null}
+	], "pageInfo": {"hasNextPage": false, "endCursor": null}}}`
+	cache := newResolverCache()
+
+	_, err := resolveInitiative(context.Background(), client, cache, "Growth")
+	if err == nil {
+		t.Fatal("expected an ambiguous match error, got nil")
+	}
+	if !strings.Contains(err.Error(), "Multiple matches") {
+		t.Errorf("expected ambiguous error message, got: %v", err)
+	}
+	if !strings.Contains(err.Error(), "initiative-uuid-1") || !strings.Contains(err.Error(), "initiative-uuid-2") {
+		t.Errorf("expected error to list both candidate ids, got: %v", err)
+	}
+}
+
+func TestResolveInitiative_NotFound(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListInitiatives"] = `{"initiatives": {"nodes": [], "pageInfo": {"hasNextPage": false, "endCursor": null}}}`
+	cache := newResolverCache()
+
+	_, err := resolveInitiative(context.Background(), client, cache, "Nonexistent")
+	if err == nil {
+		t.Fatal("expected error for unknown initiative, got nil")
+	}
+	if !strings.Contains(err.Error(), "Nonexistent") {
+		t.Errorf("expected error to mention the initiative name, got: %v", err)
+	}
+}
+
+func TestResolveInitiative_CacheHit(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListInitiatives"] = `{"initiatives": {"nodes": [{"id": "initiative-uuid-1", "name": "Platform Modernization", "status": "Active", "health": null, "icon": null, "color": null, "targetDate": null, "url": "https://linear.app/i/1", "createdAt": "2024-01-01T00:00:00Z", "updatedAt": "2024-01-01T00:00:00Z", "owner": null}], "pageInfo": {"hasNextPage": false, "endCursor": null}}}`
+	cache := newResolverCache()
+
+	if _, err := resolveInitiative(context.Background(), client, cache, "Platform Modernization"); err != nil {
+		t.Fatalf("first resolveInitiative() error = %v", err)
+	}
+	if client.callCount("ListInitiatives") != 1 {
+		t.Fatalf("expected exactly 1 ListInitiatives call after first resolve, got %d", client.callCount("ListInitiatives"))
+	}
+
+	got, err := resolveInitiative(context.Background(), client, cache, "platform modernization")
+	if err != nil {
+		t.Fatalf("second resolveInitiative() error = %v", err)
+	}
+	if got != "initiative-uuid-1" {
+		t.Errorf("resolveInitiative() = %q, want %q", got, "initiative-uuid-1")
+	}
+	if client.callCount("ListInitiatives") != 1 {
+		t.Errorf("expected cache hit to avoid a second ListInitiatives call, total calls = %d", client.callCount("ListInitiatives"))
 	}
 }
 
