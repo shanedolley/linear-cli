@@ -20,9 +20,13 @@ go.work
 # IDE files
 .vscode/
 .idea/
+.obsidian/
 *.swp
 *.swo
 *~
+
+# Tooling metadata
+.serena/
 
 # OS files
 .DS_Store
@@ -52,3 +56,7 @@ coverage.html
 # Generated code from genqlient
 # Note: Keeping generated.go in git during migration for easier review.
 # Will be excluded from git after migration is stable and tested.
+
+# Claude local instructions (personal, not shared)
+CLAUDE.local.md
+**/CLAUDE.local.md
