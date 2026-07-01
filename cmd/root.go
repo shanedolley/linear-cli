@@ -21,6 +21,15 @@ var (
 // default value is for local dev builds
 var version = "dev"
 
+// derefStr returns the value of a *string, or an empty string when it is nil.
+// It keeps printf-style formatting safe for nullable schema fields.
+func derefStr(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+
 // generateHeader creates a nice header box with proper Unicode box drawing
 func generateHeader() string {
 	lines := []string{

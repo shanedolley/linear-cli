@@ -385,7 +385,7 @@ var issueGetCmd = &cobra.Command{
 					fmt.Printf("  - Description: %s\n", *issue.IssueDetailFields.Team.Description)
 				}
 			}
-			fmt.Printf("- **Priority**: %s (%.0f)\n", priorityToString(int(issue.IssueDetailFields.Priority)), int(issue.IssueDetailFields.Priority))
+			fmt.Printf("- **Priority**: %s (%d)\n", priorityToString(int(issue.IssueDetailFields.Priority)), int(issue.IssueDetailFields.Priority))
 			if issue.IssueDetailFields.PriorityLabel != "" {
 				fmt.Printf("- **Priority Label**: %s\n", issue.IssueDetailFields.PriorityLabel)
 			}
@@ -433,7 +433,7 @@ var issueGetCmd = &cobra.Command{
 				fmt.Printf("- **Integration Source**: %s\n", *issue.IssueDetailFields.IntegrationSourceType)
 			}
 			if issue.IssueDetailFields.ExternalUserCreator != nil {
-				fmt.Printf("- **External Creator**: %s (%s)\n", issue.IssueDetailFields.ExternalUserCreator.Name, issue.IssueDetailFields.ExternalUserCreator.Email)
+				fmt.Printf("- **External Creator**: %s (%s)\n", issue.IssueDetailFields.ExternalUserCreator.Name, derefStr(issue.IssueDetailFields.ExternalUserCreator.Email))
 			}
 			fmt.Printf("- **URL**: %s\n", issue.IssueDetailFields.Url)
 
@@ -453,7 +453,7 @@ var issueGetCmd = &cobra.Command{
 
 			if issue.IssueDetailFields.Cycle != nil {
 				fmt.Printf("\n## Cycle\n")
-				fmt.Printf("- **Name**: %s (#%.0f)\n", issue.IssueDetailFields.Cycle.Name, issue.IssueDetailFields.Cycle.Number)
+				fmt.Printf("- **Name**: %s (#%.0f)\n", derefStr(issue.IssueDetailFields.Cycle.Name), issue.IssueDetailFields.Cycle.Number)
 				if issue.IssueDetailFields.Cycle.Description != nil && *issue.IssueDetailFields.Cycle.Description != "" {
 					fmt.Printf("- **Description**: %s\n", *issue.IssueDetailFields.Cycle.Description)
 				}
@@ -614,7 +614,7 @@ var issueGetCmd = &cobra.Command{
 						changes = append(changes, fmt.Sprintf("Title: \"%s\" → \"%s\"", *entry.FromTitle, *entry.ToTitle))
 					}
 					if entry.FromCycle != nil && entry.ToCycle != nil {
-						changes = append(changes, fmt.Sprintf("Cycle: %s → %s", entry.FromCycle.Name, entry.ToCycle.Name))
+						changes = append(changes, fmt.Sprintf("Cycle: %s → %s", derefStr(entry.FromCycle.Name), derefStr(entry.ToCycle.Name)))
 					}
 					if entry.FromProject != nil && entry.ToProject != nil {
 						changes = append(changes, fmt.Sprintf("Project: %s → %s", entry.FromProject.Name, entry.ToProject.Name))

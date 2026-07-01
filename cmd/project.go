@@ -372,12 +372,12 @@ var projectGetCmd = &cobra.Command{
 					if doc.Icon != nil && *doc.Icon != "" {
 						fmt.Printf("- **Icon**: %s\n", *doc.Icon)
 					}
-					fmt.Printf("- **Color**: %s\n", doc.Color)
+					fmt.Printf("- **Color**: %s\n", derefStr(doc.Color))
 					fmt.Printf("- **Created**: %s by %s\n", doc.CreatedAt.Format("2006-01-02"), doc.Creator.Name)
 					if doc.UpdatedBy != nil {
 						fmt.Printf("- **Updated**: %s by %s\n", doc.UpdatedAt.Format("2006-01-02"), doc.UpdatedBy.Name)
 					}
-					fmt.Printf("\n%s\n", doc.Content)
+					fmt.Printf("\n%s\n", derefStr(doc.Content))
 				}
 			}
 
