@@ -1274,6 +1274,203 @@ func (v *CreateInitiativeResponse) GetInitiativeCreate() *CreateInitiativeInitia
 	return v.InitiativeCreate
 }
 
+// CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayload includes the requested fields of the GraphQL type InitiativeUpdatePayload.
+// The GraphQL type's documentation follows.
+//
+// The result of an initiative update mutation.
+type CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The initiative update that was created or updated.
+	InitiativeUpdate *CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate `json:"initiativeUpdate"`
+}
+
+// GetSuccess returns CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayload.Success, and is useful for accessing the field via an interface.
+func (v *CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetInitiativeUpdate returns CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayload.InitiativeUpdate, and is useful for accessing the field via an interface.
+func (v *CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayload) GetInitiativeUpdate() *CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate {
+	return v.InitiativeUpdate
+}
+
+// CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate includes the requested fields of the GraphQL type InitiativeUpdate.
+// The GraphQL type's documentation follows.
+//
+// A status update posted to an initiative. Initiative updates communicate
+// progress, health, and blockers to stakeholders. Each update captures the
+// initiative's health at the time of writing and includes a rich-text body with
+// the update content.
+type CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate struct {
+	InitiativeUpdateFields `json:"-"`
+}
+
+// GetId returns CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate.Id, and is useful for accessing the field via an interface.
+func (v *CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate) GetId() string {
+	return v.InitiativeUpdateFields.Id
+}
+
+// GetSlugId returns CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate.SlugId, and is useful for accessing the field via an interface.
+func (v *CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate) GetSlugId() string {
+	return v.InitiativeUpdateFields.SlugId
+}
+
+// GetBody returns CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate.Body, and is useful for accessing the field via an interface.
+func (v *CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate) GetBody() string {
+	return v.InitiativeUpdateFields.Body
+}
+
+// GetHealth returns CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate.Health, and is useful for accessing the field via an interface.
+func (v *CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate) GetHealth() InitiativeUpdateHealthType {
+	return v.InitiativeUpdateFields.Health
+}
+
+// GetCreatedAt returns CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate.CreatedAt, and is useful for accessing the field via an interface.
+func (v *CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate) GetCreatedAt() time.Time {
+	return v.InitiativeUpdateFields.CreatedAt
+}
+
+// GetUpdatedAt returns CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate) GetUpdatedAt() time.Time {
+	return v.InitiativeUpdateFields.UpdatedAt
+}
+
+// GetEditedAt returns CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate.EditedAt, and is useful for accessing the field via an interface.
+func (v *CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate) GetEditedAt() *time.Time {
+	return v.InitiativeUpdateFields.EditedAt
+}
+
+// GetArchivedAt returns CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate.ArchivedAt, and is useful for accessing the field via an interface.
+func (v *CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate) GetArchivedAt() *time.Time {
+	return v.InitiativeUpdateFields.ArchivedAt
+}
+
+// GetUrl returns CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate.Url, and is useful for accessing the field via an interface.
+func (v *CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate) GetUrl() string {
+	return v.InitiativeUpdateFields.Url
+}
+
+// GetUser returns CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate.User, and is useful for accessing the field via an interface.
+func (v *CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate) GetUser() *InitiativeUpdateFieldsUser {
+	return v.InitiativeUpdateFields.User
+}
+
+// GetInitiative returns CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate.Initiative, and is useful for accessing the field via an interface.
+func (v *CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate) GetInitiative() *InitiativeUpdateFieldsInitiative {
+	return v.InitiativeUpdateFields.Initiative
+}
+
+func (v *CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.InitiativeUpdateFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate struct {
+	Id string `json:"id"`
+
+	SlugId string `json:"slugId"`
+
+	Body string `json:"body"`
+
+	Health InitiativeUpdateHealthType `json:"health"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	EditedAt *time.Time `json:"editedAt"`
+
+	ArchivedAt *time.Time `json:"archivedAt"`
+
+	Url string `json:"url"`
+
+	User *InitiativeUpdateFieldsUser `json:"user"`
+
+	Initiative *InitiativeUpdateFieldsInitiative `json:"initiative"`
+}
+
+func (v *CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate) __premarshalJSON() (*__premarshalCreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate, error) {
+	var retval __premarshalCreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayloadInitiativeUpdate
+
+	retval.Id = v.InitiativeUpdateFields.Id
+	retval.SlugId = v.InitiativeUpdateFields.SlugId
+	retval.Body = v.InitiativeUpdateFields.Body
+	retval.Health = v.InitiativeUpdateFields.Health
+	retval.CreatedAt = v.InitiativeUpdateFields.CreatedAt
+	retval.UpdatedAt = v.InitiativeUpdateFields.UpdatedAt
+	retval.EditedAt = v.InitiativeUpdateFields.EditedAt
+	retval.ArchivedAt = v.InitiativeUpdateFields.ArchivedAt
+	retval.Url = v.InitiativeUpdateFields.Url
+	retval.User = v.InitiativeUpdateFields.User
+	retval.Initiative = v.InitiativeUpdateFields.Initiative
+	return &retval, nil
+}
+
+// CreateInitiativeUpdateReminderCreateInitiativeUpdateReminderInitiativeUpdateReminderPayload includes the requested fields of the GraphQL type InitiativeUpdateReminderPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of an initiative update reminder mutation.
+type CreateInitiativeUpdateReminderCreateInitiativeUpdateReminderInitiativeUpdateReminderPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+}
+
+// GetSuccess returns CreateInitiativeUpdateReminderCreateInitiativeUpdateReminderInitiativeUpdateReminderPayload.Success, and is useful for accessing the field via an interface.
+func (v *CreateInitiativeUpdateReminderCreateInitiativeUpdateReminderInitiativeUpdateReminderPayload) GetSuccess() bool {
+	return v.Success
+}
+
+// CreateInitiativeUpdateReminderResponse is returned by CreateInitiativeUpdateReminder on success.
+type CreateInitiativeUpdateReminderResponse struct {
+	// Create a notification to remind a user about an initiative update.
+	CreateInitiativeUpdateReminder *CreateInitiativeUpdateReminderCreateInitiativeUpdateReminderInitiativeUpdateReminderPayload `json:"createInitiativeUpdateReminder"`
+}
+
+// GetCreateInitiativeUpdateReminder returns CreateInitiativeUpdateReminderResponse.CreateInitiativeUpdateReminder, and is useful for accessing the field via an interface.
+func (v *CreateInitiativeUpdateReminderResponse) GetCreateInitiativeUpdateReminder() *CreateInitiativeUpdateReminderCreateInitiativeUpdateReminderInitiativeUpdateReminderPayload {
+	return v.CreateInitiativeUpdateReminder
+}
+
+// CreateInitiativeUpdateResponse is returned by CreateInitiativeUpdate on success.
+type CreateInitiativeUpdateResponse struct {
+	// Creates an initiative update.
+	InitiativeUpdateCreate *CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayload `json:"initiativeUpdateCreate"`
+}
+
+// GetInitiativeUpdateCreate returns CreateInitiativeUpdateResponse.InitiativeUpdateCreate, and is useful for accessing the field via an interface.
+func (v *CreateInitiativeUpdateResponse) GetInitiativeUpdateCreate() *CreateInitiativeUpdateInitiativeUpdateCreateInitiativeUpdatePayload {
+	return v.InitiativeUpdateCreate
+}
+
 // CreateIssueIssueCreateIssuePayload includes the requested fields of the GraphQL type IssuePayload.
 // The GraphQL type's documentation follows.
 //
@@ -2394,6 +2591,21 @@ func (v *GetInitiativeInitiative) GetLeadTeam() *InitiativeDetailFieldsLeadTeam 
 	return v.InitiativeDetailFields.LeadTeam
 }
 
+// GetProjects returns GetInitiativeInitiative.Projects, and is useful for accessing the field via an interface.
+func (v *GetInitiativeInitiative) GetProjects() *InitiativeDetailFieldsProjectsProjectConnection {
+	return v.InitiativeDetailFields.Projects
+}
+
+// GetParentInitiatives returns GetInitiativeInitiative.ParentInitiatives, and is useful for accessing the field via an interface.
+func (v *GetInitiativeInitiative) GetParentInitiatives() *InitiativeDetailFieldsParentInitiativesInitiativeConnection {
+	return v.InitiativeDetailFields.ParentInitiatives
+}
+
+// GetSubInitiatives returns GetInitiativeInitiative.SubInitiatives, and is useful for accessing the field via an interface.
+func (v *GetInitiativeInitiative) GetSubInitiatives() *InitiativeDetailFieldsSubInitiativesInitiativeConnection {
+	return v.InitiativeDetailFields.SubInitiatives
+}
+
 func (v *GetInitiativeInitiative) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
@@ -2467,6 +2679,12 @@ type __premarshalGetInitiativeInitiative struct {
 	Owner *InitiativeDetailFieldsOwnerUser `json:"owner"`
 
 	LeadTeam *InitiativeDetailFieldsLeadTeam `json:"leadTeam"`
+
+	Projects *InitiativeDetailFieldsProjectsProjectConnection `json:"projects"`
+
+	ParentInitiatives *InitiativeDetailFieldsParentInitiativesInitiativeConnection `json:"parentInitiatives"`
+
+	SubInitiatives *InitiativeDetailFieldsSubInitiativesInitiativeConnection `json:"subInitiatives"`
 }
 
 func (v *GetInitiativeInitiative) MarshalJSON() ([]byte, error) {
@@ -2504,7 +2722,77 @@ func (v *GetInitiativeInitiative) __premarshalJSON() (*__premarshalGetInitiative
 	retval.Creator = v.InitiativeDetailFields.Creator
 	retval.Owner = v.InitiativeDetailFields.Owner
 	retval.LeadTeam = v.InitiativeDetailFields.LeadTeam
+	retval.Projects = v.InitiativeDetailFields.Projects
+	retval.ParentInitiatives = v.InitiativeDetailFields.ParentInitiatives
+	retval.SubInitiatives = v.InitiativeDetailFields.SubInitiatives
 	return &retval, nil
+}
+
+// GetInitiativeLabelsInitiative includes the requested fields of the GraphQL type Initiative.
+// The GraphQL type's documentation follows.
+//
+// An initiative is a high-level strategic grouping of projects toward a business
+// goal. Initiatives can contain multiple projects, have their own status updates
+// and health tracking, and can be organized hierarchically with parent-child relationships.
+type GetInitiativeLabelsInitiative struct {
+	// [Internal] Labels associated with this initiative.
+	Labels *GetInitiativeLabelsInitiativeLabelsInitiativeLabelConnection `json:"labels"`
+}
+
+// GetLabels returns GetInitiativeLabelsInitiative.Labels, and is useful for accessing the field via an interface.
+func (v *GetInitiativeLabelsInitiative) GetLabels() *GetInitiativeLabelsInitiativeLabelsInitiativeLabelConnection {
+	return v.Labels
+}
+
+// GetInitiativeLabelsInitiativeLabelsInitiativeLabelConnection includes the requested fields of the GraphQL type InitiativeLabelConnection.
+type GetInitiativeLabelsInitiativeLabelsInitiativeLabelConnection struct {
+	Nodes []*GetInitiativeLabelsInitiativeLabelsInitiativeLabelConnectionNodesInitiativeLabel `json:"nodes"`
+}
+
+// GetNodes returns GetInitiativeLabelsInitiativeLabelsInitiativeLabelConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *GetInitiativeLabelsInitiativeLabelsInitiativeLabelConnection) GetNodes() []*GetInitiativeLabelsInitiativeLabelsInitiativeLabelConnectionNodesInitiativeLabel {
+	return v.Nodes
+}
+
+// GetInitiativeLabelsInitiativeLabelsInitiativeLabelConnectionNodesInitiativeLabel includes the requested fields of the GraphQL type InitiativeLabel.
+// The GraphQL type's documentation follows.
+//
+// A label that can be applied to initiatives for categorization. Initiative labels
+// are workspace-level and can be organized into groups with a parent-child
+// hierarchy. Only child labels (not group labels) can be directly applied to initiatives.
+type GetInitiativeLabelsInitiativeLabelsInitiativeLabelConnectionNodesInitiativeLabel struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The label's name.
+	Name string `json:"name"`
+	// The label's color as a HEX string (e.g., '#EB5757'). Used for visual identification of the label in the UI.
+	Color string `json:"color"`
+}
+
+// GetId returns GetInitiativeLabelsInitiativeLabelsInitiativeLabelConnectionNodesInitiativeLabel.Id, and is useful for accessing the field via an interface.
+func (v *GetInitiativeLabelsInitiativeLabelsInitiativeLabelConnectionNodesInitiativeLabel) GetId() string {
+	return v.Id
+}
+
+// GetName returns GetInitiativeLabelsInitiativeLabelsInitiativeLabelConnectionNodesInitiativeLabel.Name, and is useful for accessing the field via an interface.
+func (v *GetInitiativeLabelsInitiativeLabelsInitiativeLabelConnectionNodesInitiativeLabel) GetName() string {
+	return v.Name
+}
+
+// GetColor returns GetInitiativeLabelsInitiativeLabelsInitiativeLabelConnectionNodesInitiativeLabel.Color, and is useful for accessing the field via an interface.
+func (v *GetInitiativeLabelsInitiativeLabelsInitiativeLabelConnectionNodesInitiativeLabel) GetColor() string {
+	return v.Color
+}
+
+// GetInitiativeLabelsResponse is returned by GetInitiativeLabels on success.
+type GetInitiativeLabelsResponse struct {
+	// Returns a single initiative by its identifier or URL slug.
+	Initiative *GetInitiativeLabelsInitiative `json:"initiative"`
+}
+
+// GetInitiative returns GetInitiativeLabelsResponse.Initiative, and is useful for accessing the field via an interface.
+func (v *GetInitiativeLabelsResponse) GetInitiative() *GetInitiativeLabelsInitiative {
+	return v.Initiative
 }
 
 // GetInitiativeResponse is returned by GetInitiative on success.
@@ -2515,6 +2803,151 @@ type GetInitiativeResponse struct {
 
 // GetInitiative returns GetInitiativeResponse.Initiative, and is useful for accessing the field via an interface.
 func (v *GetInitiativeResponse) GetInitiative() *GetInitiativeInitiative { return v.Initiative }
+
+// GetInitiativeUpdateInitiativeUpdate includes the requested fields of the GraphQL type InitiativeUpdate.
+// The GraphQL type's documentation follows.
+//
+// A status update posted to an initiative. Initiative updates communicate
+// progress, health, and blockers to stakeholders. Each update captures the
+// initiative's health at the time of writing and includes a rich-text body with
+// the update content.
+type GetInitiativeUpdateInitiativeUpdate struct {
+	InitiativeUpdateFields `json:"-"`
+}
+
+// GetId returns GetInitiativeUpdateInitiativeUpdate.Id, and is useful for accessing the field via an interface.
+func (v *GetInitiativeUpdateInitiativeUpdate) GetId() string { return v.InitiativeUpdateFields.Id }
+
+// GetSlugId returns GetInitiativeUpdateInitiativeUpdate.SlugId, and is useful for accessing the field via an interface.
+func (v *GetInitiativeUpdateInitiativeUpdate) GetSlugId() string {
+	return v.InitiativeUpdateFields.SlugId
+}
+
+// GetBody returns GetInitiativeUpdateInitiativeUpdate.Body, and is useful for accessing the field via an interface.
+func (v *GetInitiativeUpdateInitiativeUpdate) GetBody() string { return v.InitiativeUpdateFields.Body }
+
+// GetHealth returns GetInitiativeUpdateInitiativeUpdate.Health, and is useful for accessing the field via an interface.
+func (v *GetInitiativeUpdateInitiativeUpdate) GetHealth() InitiativeUpdateHealthType {
+	return v.InitiativeUpdateFields.Health
+}
+
+// GetCreatedAt returns GetInitiativeUpdateInitiativeUpdate.CreatedAt, and is useful for accessing the field via an interface.
+func (v *GetInitiativeUpdateInitiativeUpdate) GetCreatedAt() time.Time {
+	return v.InitiativeUpdateFields.CreatedAt
+}
+
+// GetUpdatedAt returns GetInitiativeUpdateInitiativeUpdate.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *GetInitiativeUpdateInitiativeUpdate) GetUpdatedAt() time.Time {
+	return v.InitiativeUpdateFields.UpdatedAt
+}
+
+// GetEditedAt returns GetInitiativeUpdateInitiativeUpdate.EditedAt, and is useful for accessing the field via an interface.
+func (v *GetInitiativeUpdateInitiativeUpdate) GetEditedAt() *time.Time {
+	return v.InitiativeUpdateFields.EditedAt
+}
+
+// GetArchivedAt returns GetInitiativeUpdateInitiativeUpdate.ArchivedAt, and is useful for accessing the field via an interface.
+func (v *GetInitiativeUpdateInitiativeUpdate) GetArchivedAt() *time.Time {
+	return v.InitiativeUpdateFields.ArchivedAt
+}
+
+// GetUrl returns GetInitiativeUpdateInitiativeUpdate.Url, and is useful for accessing the field via an interface.
+func (v *GetInitiativeUpdateInitiativeUpdate) GetUrl() string { return v.InitiativeUpdateFields.Url }
+
+// GetUser returns GetInitiativeUpdateInitiativeUpdate.User, and is useful for accessing the field via an interface.
+func (v *GetInitiativeUpdateInitiativeUpdate) GetUser() *InitiativeUpdateFieldsUser {
+	return v.InitiativeUpdateFields.User
+}
+
+// GetInitiative returns GetInitiativeUpdateInitiativeUpdate.Initiative, and is useful for accessing the field via an interface.
+func (v *GetInitiativeUpdateInitiativeUpdate) GetInitiative() *InitiativeUpdateFieldsInitiative {
+	return v.InitiativeUpdateFields.Initiative
+}
+
+func (v *GetInitiativeUpdateInitiativeUpdate) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*GetInitiativeUpdateInitiativeUpdate
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.GetInitiativeUpdateInitiativeUpdate = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.InitiativeUpdateFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalGetInitiativeUpdateInitiativeUpdate struct {
+	Id string `json:"id"`
+
+	SlugId string `json:"slugId"`
+
+	Body string `json:"body"`
+
+	Health InitiativeUpdateHealthType `json:"health"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	EditedAt *time.Time `json:"editedAt"`
+
+	ArchivedAt *time.Time `json:"archivedAt"`
+
+	Url string `json:"url"`
+
+	User *InitiativeUpdateFieldsUser `json:"user"`
+
+	Initiative *InitiativeUpdateFieldsInitiative `json:"initiative"`
+}
+
+func (v *GetInitiativeUpdateInitiativeUpdate) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *GetInitiativeUpdateInitiativeUpdate) __premarshalJSON() (*__premarshalGetInitiativeUpdateInitiativeUpdate, error) {
+	var retval __premarshalGetInitiativeUpdateInitiativeUpdate
+
+	retval.Id = v.InitiativeUpdateFields.Id
+	retval.SlugId = v.InitiativeUpdateFields.SlugId
+	retval.Body = v.InitiativeUpdateFields.Body
+	retval.Health = v.InitiativeUpdateFields.Health
+	retval.CreatedAt = v.InitiativeUpdateFields.CreatedAt
+	retval.UpdatedAt = v.InitiativeUpdateFields.UpdatedAt
+	retval.EditedAt = v.InitiativeUpdateFields.EditedAt
+	retval.ArchivedAt = v.InitiativeUpdateFields.ArchivedAt
+	retval.Url = v.InitiativeUpdateFields.Url
+	retval.User = v.InitiativeUpdateFields.User
+	retval.Initiative = v.InitiativeUpdateFields.Initiative
+	return &retval, nil
+}
+
+// GetInitiativeUpdateResponse is returned by GetInitiativeUpdate on success.
+type GetInitiativeUpdateResponse struct {
+	// Returns a single initiative update by its identifier.
+	InitiativeUpdate *GetInitiativeUpdateInitiativeUpdate `json:"initiativeUpdate"`
+}
+
+// GetInitiativeUpdate returns GetInitiativeUpdateResponse.InitiativeUpdate, and is useful for accessing the field via an interface.
+func (v *GetInitiativeUpdateResponse) GetInitiativeUpdate() *GetInitiativeUpdateInitiativeUpdate {
+	return v.InitiativeUpdate
+}
 
 // GetIssueIssue includes the requested fields of the GraphQL type Issue.
 // The GraphQL type's documentation follows.
@@ -2840,6 +3273,96 @@ type GetIssueResponse struct {
 
 // GetIssue returns GetIssueResponse.Issue, and is useful for accessing the field via an interface.
 func (v *GetIssueResponse) GetIssue() *GetIssueIssue { return v.Issue }
+
+// GetProjectInitiativeLinksProject includes the requested fields of the GraphQL type Project.
+// The GraphQL type's documentation follows.
+//
+// A project is a collection of issues working toward a shared goal. Projects have
+// start and target dates, milestones, status tracking, and progress metrics. They
+// can span multiple teams and be grouped under initiatives.
+type GetProjectInitiativeLinksProject struct {
+	// Associations of this project to parent initiatives.
+	InitiativeToProjects *GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnection `json:"initiativeToProjects"`
+}
+
+// GetInitiativeToProjects returns GetProjectInitiativeLinksProject.InitiativeToProjects, and is useful for accessing the field via an interface.
+func (v *GetProjectInitiativeLinksProject) GetInitiativeToProjects() *GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnection {
+	return v.InitiativeToProjects
+}
+
+// GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnection includes the requested fields of the GraphQL type InitiativeToProjectConnection.
+type GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnection struct {
+	Nodes []*GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnectionNodesInitiativeToProject `json:"nodes"`
+}
+
+// GetNodes returns GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnection) GetNodes() []*GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnectionNodesInitiativeToProject {
+	return v.Nodes
+}
+
+// GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnectionNodesInitiativeToProject includes the requested fields of the GraphQL type InitiativeToProject.
+// The GraphQL type's documentation follows.
+//
+// The join entity linking a project to an initiative. A project can only appear
+// once in an initiative hierarchy -- it cannot be on both an initiative and one of
+// its ancestor or descendant initiatives.
+type GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnectionNodesInitiativeToProject struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The sort order of the project within its parent initiative.
+	SortOrder string `json:"sortOrder"`
+	// The initiative that the project is associated with.
+	Initiative *GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnectionNodesInitiativeToProjectInitiative `json:"initiative"`
+}
+
+// GetId returns GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnectionNodesInitiativeToProject.Id, and is useful for accessing the field via an interface.
+func (v *GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnectionNodesInitiativeToProject) GetId() string {
+	return v.Id
+}
+
+// GetSortOrder returns GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnectionNodesInitiativeToProject.SortOrder, and is useful for accessing the field via an interface.
+func (v *GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnectionNodesInitiativeToProject) GetSortOrder() string {
+	return v.SortOrder
+}
+
+// GetInitiative returns GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnectionNodesInitiativeToProject.Initiative, and is useful for accessing the field via an interface.
+func (v *GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnectionNodesInitiativeToProject) GetInitiative() *GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnectionNodesInitiativeToProjectInitiative {
+	return v.Initiative
+}
+
+// GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnectionNodesInitiativeToProjectInitiative includes the requested fields of the GraphQL type Initiative.
+// The GraphQL type's documentation follows.
+//
+// An initiative is a high-level strategic grouping of projects toward a business
+// goal. Initiatives can contain multiple projects, have their own status updates
+// and health tracking, and can be organized hierarchically with parent-child relationships.
+type GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnectionNodesInitiativeToProjectInitiative struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the initiative.
+	Name string `json:"name"`
+}
+
+// GetId returns GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnectionNodesInitiativeToProjectInitiative.Id, and is useful for accessing the field via an interface.
+func (v *GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnectionNodesInitiativeToProjectInitiative) GetId() string {
+	return v.Id
+}
+
+// GetName returns GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnectionNodesInitiativeToProjectInitiative.Name, and is useful for accessing the field via an interface.
+func (v *GetProjectInitiativeLinksProjectInitiativeToProjectsInitiativeToProjectConnectionNodesInitiativeToProjectInitiative) GetName() string {
+	return v.Name
+}
+
+// GetProjectInitiativeLinksResponse is returned by GetProjectInitiativeLinks on success.
+type GetProjectInitiativeLinksResponse struct {
+	// Returns a single project by its identifier or URL slug.
+	Project *GetProjectInitiativeLinksProject `json:"project"`
+}
+
+// GetProject returns GetProjectInitiativeLinksResponse.Project, and is useful for accessing the field via an interface.
+func (v *GetProjectInitiativeLinksResponse) GetProject() *GetProjectInitiativeLinksProject {
+	return v.Project
+}
 
 // GetProjectProject includes the requested fields of the GraphQL type Project.
 // The GraphQL type's documentation follows.
@@ -3708,6 +4231,175 @@ func (v *IDComparator) GetNeq() *string { return v.Neq }
 // GetNin returns IDComparator.Nin, and is useful for accessing the field via an interface.
 func (v *IDComparator) GetNin() []string { return v.Nin }
 
+// InitiativeAddLabelInitiativeAddLabelInitiativePayload includes the requested fields of the GraphQL type InitiativePayload.
+// The GraphQL type's documentation follows.
+//
+// The payload returned by the initiative mutations.
+type InitiativeAddLabelInitiativeAddLabelInitiativePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The initiative that was created or updated.
+	Initiative *InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative `json:"initiative"`
+}
+
+// GetSuccess returns InitiativeAddLabelInitiativeAddLabelInitiativePayload.Success, and is useful for accessing the field via an interface.
+func (v *InitiativeAddLabelInitiativeAddLabelInitiativePayload) GetSuccess() bool { return v.Success }
+
+// GetInitiative returns InitiativeAddLabelInitiativeAddLabelInitiativePayload.Initiative, and is useful for accessing the field via an interface.
+func (v *InitiativeAddLabelInitiativeAddLabelInitiativePayload) GetInitiative() *InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative {
+	return v.Initiative
+}
+
+// InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative includes the requested fields of the GraphQL type Initiative.
+// The GraphQL type's documentation follows.
+//
+// An initiative is a high-level strategic grouping of projects toward a business
+// goal. Initiatives can contain multiple projects, have their own status updates
+// and health tracking, and can be organized hierarchically with parent-child relationships.
+type InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative struct {
+	InitiativeListFields `json:"-"`
+}
+
+// GetId returns InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative) GetId() string {
+	return v.InitiativeListFields.Id
+}
+
+// GetName returns InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative.Name, and is useful for accessing the field via an interface.
+func (v *InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative) GetName() string {
+	return v.InitiativeListFields.Name
+}
+
+// GetStatus returns InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative.Status, and is useful for accessing the field via an interface.
+func (v *InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative) GetStatus() InitiativeStatus {
+	return v.InitiativeListFields.Status
+}
+
+// GetHealth returns InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative.Health, and is useful for accessing the field via an interface.
+func (v *InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative) GetHealth() *InitiativeUpdateHealthType {
+	return v.InitiativeListFields.Health
+}
+
+// GetIcon returns InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative.Icon, and is useful for accessing the field via an interface.
+func (v *InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative) GetIcon() *string {
+	return v.InitiativeListFields.Icon
+}
+
+// GetColor returns InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative.Color, and is useful for accessing the field via an interface.
+func (v *InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative) GetColor() *string {
+	return v.InitiativeListFields.Color
+}
+
+// GetTargetDate returns InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative.TargetDate, and is useful for accessing the field via an interface.
+func (v *InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative) GetTargetDate() *string {
+	return v.InitiativeListFields.TargetDate
+}
+
+// GetUrl returns InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative.Url, and is useful for accessing the field via an interface.
+func (v *InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative) GetUrl() string {
+	return v.InitiativeListFields.Url
+}
+
+// GetCreatedAt returns InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative.CreatedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative) GetCreatedAt() time.Time {
+	return v.InitiativeListFields.CreatedAt
+}
+
+// GetUpdatedAt returns InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative) GetUpdatedAt() time.Time {
+	return v.InitiativeListFields.UpdatedAt
+}
+
+// GetOwner returns InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative.Owner, and is useful for accessing the field via an interface.
+func (v *InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative) GetOwner() *InitiativeListFieldsOwnerUser {
+	return v.InitiativeListFields.Owner
+}
+
+func (v *InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.InitiativeListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalInitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Status InitiativeStatus `json:"status"`
+
+	Health *InitiativeUpdateHealthType `json:"health"`
+
+	Icon *string `json:"icon"`
+
+	Color *string `json:"color"`
+
+	TargetDate *string `json:"targetDate"`
+
+	Url string `json:"url"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	Owner *InitiativeListFieldsOwnerUser `json:"owner"`
+}
+
+func (v *InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *InitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative) __premarshalJSON() (*__premarshalInitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative, error) {
+	var retval __premarshalInitiativeAddLabelInitiativeAddLabelInitiativePayloadInitiative
+
+	retval.Id = v.InitiativeListFields.Id
+	retval.Name = v.InitiativeListFields.Name
+	retval.Status = v.InitiativeListFields.Status
+	retval.Health = v.InitiativeListFields.Health
+	retval.Icon = v.InitiativeListFields.Icon
+	retval.Color = v.InitiativeListFields.Color
+	retval.TargetDate = v.InitiativeListFields.TargetDate
+	retval.Url = v.InitiativeListFields.Url
+	retval.CreatedAt = v.InitiativeListFields.CreatedAt
+	retval.UpdatedAt = v.InitiativeListFields.UpdatedAt
+	retval.Owner = v.InitiativeListFields.Owner
+	return &retval, nil
+}
+
+// InitiativeAddLabelResponse is returned by InitiativeAddLabel on success.
+type InitiativeAddLabelResponse struct {
+	// [Internal]Adds a label to an initiative.
+	InitiativeAddLabel *InitiativeAddLabelInitiativeAddLabelInitiativePayload `json:"initiativeAddLabel"`
+}
+
+// GetInitiativeAddLabel returns InitiativeAddLabelResponse.InitiativeAddLabel, and is useful for accessing the field via an interface.
+func (v *InitiativeAddLabelResponse) GetInitiativeAddLabel() *InitiativeAddLabelInitiativeAddLabelInitiativePayload {
+	return v.InitiativeAddLabel
+}
+
 // InitiativeArchiveInitiativeArchiveInitiativeArchivePayload includes the requested fields of the GraphQL type InitiativeArchivePayload.
 // The GraphQL type's documentation follows.
 //
@@ -4016,12 +4708,6 @@ func (v *InitiativeDeleteResponse) GetInitiativeDelete() *InitiativeDeleteInitia
 }
 
 // Fragment for detailed initiative fields used in single initiative view
-//
-// Note: `identifier` is intentionally omitted. It's gated behind a
-// workspace-level "Initiative IDs" feature flag; querying it on a workspace
-// where that feature isn't enabled fails the entire request with a GraphQL
-// error ("Feature 'Initiative IDs' is not enabled"), confirmed against the
-// live API.
 type InitiativeDetailFields struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
@@ -4078,6 +4764,12 @@ type InitiativeDetailFields struct {
 	Owner *InitiativeDetailFieldsOwnerUser `json:"owner"`
 	// [ALPHA] The team that leads the initiative. Null if no lead team is assigned.
 	LeadTeam *InitiativeDetailFieldsLeadTeam `json:"leadTeam"`
+	// Projects associated with the initiative.
+	Projects *InitiativeDetailFieldsProjectsProjectConnection `json:"projects"`
+	// [Internal] Parent initiatives associated with the initiative.
+	ParentInitiatives *InitiativeDetailFieldsParentInitiativesInitiativeConnection `json:"parentInitiatives"`
+	// Sub-initiatives associated with the initiative.
+	SubInitiatives *InitiativeDetailFieldsSubInitiativesInitiativeConnection `json:"subInitiatives"`
 }
 
 // GetId returns InitiativeDetailFields.Id, and is useful for accessing the field via an interface.
@@ -4154,6 +4846,21 @@ func (v *InitiativeDetailFields) GetOwner() *InitiativeDetailFieldsOwnerUser { r
 // GetLeadTeam returns InitiativeDetailFields.LeadTeam, and is useful for accessing the field via an interface.
 func (v *InitiativeDetailFields) GetLeadTeam() *InitiativeDetailFieldsLeadTeam { return v.LeadTeam }
 
+// GetProjects returns InitiativeDetailFields.Projects, and is useful for accessing the field via an interface.
+func (v *InitiativeDetailFields) GetProjects() *InitiativeDetailFieldsProjectsProjectConnection {
+	return v.Projects
+}
+
+// GetParentInitiatives returns InitiativeDetailFields.ParentInitiatives, and is useful for accessing the field via an interface.
+func (v *InitiativeDetailFields) GetParentInitiatives() *InitiativeDetailFieldsParentInitiativesInitiativeConnection {
+	return v.ParentInitiatives
+}
+
+// GetSubInitiatives returns InitiativeDetailFields.SubInitiatives, and is useful for accessing the field via an interface.
+func (v *InitiativeDetailFields) GetSubInitiatives() *InitiativeDetailFieldsSubInitiativesInitiativeConnection {
+	return v.SubInitiatives
+}
+
 // InitiativeDetailFieldsCreatorUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
@@ -4229,6 +4936,101 @@ func (v *InitiativeDetailFieldsOwnerUser) GetName() string { return v.Name }
 
 // GetEmail returns InitiativeDetailFieldsOwnerUser.Email, and is useful for accessing the field via an interface.
 func (v *InitiativeDetailFieldsOwnerUser) GetEmail() string { return v.Email }
+
+// InitiativeDetailFieldsParentInitiativesInitiativeConnection includes the requested fields of the GraphQL type InitiativeConnection.
+type InitiativeDetailFieldsParentInitiativesInitiativeConnection struct {
+	Nodes []*InitiativeDetailFieldsParentInitiativesInitiativeConnectionNodesInitiative `json:"nodes"`
+}
+
+// GetNodes returns InitiativeDetailFieldsParentInitiativesInitiativeConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *InitiativeDetailFieldsParentInitiativesInitiativeConnection) GetNodes() []*InitiativeDetailFieldsParentInitiativesInitiativeConnectionNodesInitiative {
+	return v.Nodes
+}
+
+// InitiativeDetailFieldsParentInitiativesInitiativeConnectionNodesInitiative includes the requested fields of the GraphQL type Initiative.
+// The GraphQL type's documentation follows.
+//
+// An initiative is a high-level strategic grouping of projects toward a business
+// goal. Initiatives can contain multiple projects, have their own status updates
+// and health tracking, and can be organized hierarchically with parent-child relationships.
+type InitiativeDetailFieldsParentInitiativesInitiativeConnectionNodesInitiative struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the initiative.
+	Name string `json:"name"`
+}
+
+// GetId returns InitiativeDetailFieldsParentInitiativesInitiativeConnectionNodesInitiative.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeDetailFieldsParentInitiativesInitiativeConnectionNodesInitiative) GetId() string {
+	return v.Id
+}
+
+// GetName returns InitiativeDetailFieldsParentInitiativesInitiativeConnectionNodesInitiative.Name, and is useful for accessing the field via an interface.
+func (v *InitiativeDetailFieldsParentInitiativesInitiativeConnectionNodesInitiative) GetName() string {
+	return v.Name
+}
+
+// InitiativeDetailFieldsProjectsProjectConnection includes the requested fields of the GraphQL type ProjectConnection.
+type InitiativeDetailFieldsProjectsProjectConnection struct {
+	Nodes []*InitiativeDetailFieldsProjectsProjectConnectionNodesProject `json:"nodes"`
+}
+
+// GetNodes returns InitiativeDetailFieldsProjectsProjectConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *InitiativeDetailFieldsProjectsProjectConnection) GetNodes() []*InitiativeDetailFieldsProjectsProjectConnectionNodesProject {
+	return v.Nodes
+}
+
+// InitiativeDetailFieldsProjectsProjectConnectionNodesProject includes the requested fields of the GraphQL type Project.
+// The GraphQL type's documentation follows.
+//
+// A project is a collection of issues working toward a shared goal. Projects have
+// start and target dates, milestones, status tracking, and progress metrics. They
+// can span multiple teams and be grouped under initiatives.
+type InitiativeDetailFieldsProjectsProjectConnectionNodesProject struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the project.
+	Name string `json:"name"`
+}
+
+// GetId returns InitiativeDetailFieldsProjectsProjectConnectionNodesProject.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeDetailFieldsProjectsProjectConnectionNodesProject) GetId() string { return v.Id }
+
+// GetName returns InitiativeDetailFieldsProjectsProjectConnectionNodesProject.Name, and is useful for accessing the field via an interface.
+func (v *InitiativeDetailFieldsProjectsProjectConnectionNodesProject) GetName() string { return v.Name }
+
+// InitiativeDetailFieldsSubInitiativesInitiativeConnection includes the requested fields of the GraphQL type InitiativeConnection.
+type InitiativeDetailFieldsSubInitiativesInitiativeConnection struct {
+	Nodes []*InitiativeDetailFieldsSubInitiativesInitiativeConnectionNodesInitiative `json:"nodes"`
+}
+
+// GetNodes returns InitiativeDetailFieldsSubInitiativesInitiativeConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *InitiativeDetailFieldsSubInitiativesInitiativeConnection) GetNodes() []*InitiativeDetailFieldsSubInitiativesInitiativeConnectionNodesInitiative {
+	return v.Nodes
+}
+
+// InitiativeDetailFieldsSubInitiativesInitiativeConnectionNodesInitiative includes the requested fields of the GraphQL type Initiative.
+// The GraphQL type's documentation follows.
+//
+// An initiative is a high-level strategic grouping of projects toward a business
+// goal. Initiatives can contain multiple projects, have their own status updates
+// and health tracking, and can be organized hierarchically with parent-child relationships.
+type InitiativeDetailFieldsSubInitiativesInitiativeConnectionNodesInitiative struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the initiative.
+	Name string `json:"name"`
+}
+
+// GetId returns InitiativeDetailFieldsSubInitiativesInitiativeConnectionNodesInitiative.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeDetailFieldsSubInitiativesInitiativeConnectionNodesInitiative) GetId() string {
+	return v.Id
+}
+
+// GetName returns InitiativeDetailFieldsSubInitiativesInitiativeConnectionNodesInitiative.Name, and is useful for accessing the field via an interface.
+func (v *InitiativeDetailFieldsSubInitiativesInitiativeConnectionNodesInitiative) GetName() string {
+	return v.Name
+}
 
 // Initiative filtering options.
 type InitiativeFilter struct {
@@ -4742,6 +5544,350 @@ func (v *InitiativeListFieldsOwnerUser) GetName() string { return v.Name }
 // GetEmail returns InitiativeListFieldsOwnerUser.Email, and is useful for accessing the field via an interface.
 func (v *InitiativeListFieldsOwnerUser) GetEmail() string { return v.Email }
 
+// InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayload includes the requested fields of the GraphQL type InitiativeRelationPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of an initiative relation mutation.
+type InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The initiative relation that was created or updated.
+	InitiativeRelation *InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelation `json:"initiativeRelation"`
+}
+
+// GetSuccess returns InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayload.Success, and is useful for accessing the field via an interface.
+func (v *InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetInitiativeRelation returns InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayload.InitiativeRelation, and is useful for accessing the field via an interface.
+func (v *InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayload) GetInitiativeRelation() *InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelation {
+	return v.InitiativeRelation
+}
+
+// InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelation includes the requested fields of the GraphQL type InitiativeRelation.
+// The GraphQL type's documentation follows.
+//
+// A parent-child relation between two initiatives, forming a hierarchy. The
+// initiative field is the parent and relatedInitiative is the child. Cycles and
+// excessive nesting depth are prevented.
+type InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelation struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The sort order of the child initiative within its parent initiative.
+	SortOrder float64 `json:"sortOrder"`
+	// The parent initiative in this hierarchical relation.
+	Initiative *InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelationInitiative `json:"initiative"`
+	// The child initiative in this hierarchical relation.
+	RelatedInitiative *InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelationRelatedInitiative `json:"relatedInitiative"`
+}
+
+// GetId returns InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelation.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelation) GetId() string {
+	return v.Id
+}
+
+// GetSortOrder returns InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelation.SortOrder, and is useful for accessing the field via an interface.
+func (v *InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelation) GetSortOrder() float64 {
+	return v.SortOrder
+}
+
+// GetInitiative returns InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelation.Initiative, and is useful for accessing the field via an interface.
+func (v *InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelation) GetInitiative() *InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelationInitiative {
+	return v.Initiative
+}
+
+// GetRelatedInitiative returns InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelation.RelatedInitiative, and is useful for accessing the field via an interface.
+func (v *InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelation) GetRelatedInitiative() *InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelationRelatedInitiative {
+	return v.RelatedInitiative
+}
+
+// InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelationInitiative includes the requested fields of the GraphQL type Initiative.
+// The GraphQL type's documentation follows.
+//
+// An initiative is a high-level strategic grouping of projects toward a business
+// goal. Initiatives can contain multiple projects, have their own status updates
+// and health tracking, and can be organized hierarchically with parent-child relationships.
+type InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelationInitiative struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the initiative.
+	Name string `json:"name"`
+}
+
+// GetId returns InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelationInitiative.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelationInitiative) GetId() string {
+	return v.Id
+}
+
+// GetName returns InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelationInitiative.Name, and is useful for accessing the field via an interface.
+func (v *InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelationInitiative) GetName() string {
+	return v.Name
+}
+
+// InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelationRelatedInitiative includes the requested fields of the GraphQL type Initiative.
+// The GraphQL type's documentation follows.
+//
+// An initiative is a high-level strategic grouping of projects toward a business
+// goal. Initiatives can contain multiple projects, have their own status updates
+// and health tracking, and can be organized hierarchically with parent-child relationships.
+type InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelationRelatedInitiative struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the initiative.
+	Name string `json:"name"`
+}
+
+// GetId returns InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelationRelatedInitiative.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelationRelatedInitiative) GetId() string {
+	return v.Id
+}
+
+// GetName returns InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelationRelatedInitiative.Name, and is useful for accessing the field via an interface.
+func (v *InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayloadInitiativeRelationRelatedInitiative) GetName() string {
+	return v.Name
+}
+
+// Input for creating a parent-child relationship between two initiatives. The
+// initiativeId is the parent and the relatedInitiativeId is the child.
+type InitiativeRelationCreateInput struct {
+	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
+	Id *string `json:"id"`
+	// The identifier of the parent initiative in the hierarchy.
+	InitiativeId string `json:"initiativeId"`
+	// The identifier of the child initiative in the hierarchy.
+	RelatedInitiativeId string `json:"relatedInitiativeId"`
+	// The sort order of the child initiative within its parent.
+	SortOrder *float64 `json:"sortOrder"`
+}
+
+// GetId returns InitiativeRelationCreateInput.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeRelationCreateInput) GetId() *string { return v.Id }
+
+// GetInitiativeId returns InitiativeRelationCreateInput.InitiativeId, and is useful for accessing the field via an interface.
+func (v *InitiativeRelationCreateInput) GetInitiativeId() string { return v.InitiativeId }
+
+// GetRelatedInitiativeId returns InitiativeRelationCreateInput.RelatedInitiativeId, and is useful for accessing the field via an interface.
+func (v *InitiativeRelationCreateInput) GetRelatedInitiativeId() string { return v.RelatedInitiativeId }
+
+// GetSortOrder returns InitiativeRelationCreateInput.SortOrder, and is useful for accessing the field via an interface.
+func (v *InitiativeRelationCreateInput) GetSortOrder() *float64 { return v.SortOrder }
+
+// InitiativeRelationCreateResponse is returned by InitiativeRelationCreate on success.
+type InitiativeRelationCreateResponse struct {
+	// Creates a new parent-child relation between two initiatives. The relation
+	// cannot create cycles or exceed maximum nesting depth.
+	InitiativeRelationCreate *InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayload `json:"initiativeRelationCreate"`
+}
+
+// GetInitiativeRelationCreate returns InitiativeRelationCreateResponse.InitiativeRelationCreate, and is useful for accessing the field via an interface.
+func (v *InitiativeRelationCreateResponse) GetInitiativeRelationCreate() *InitiativeRelationCreateInitiativeRelationCreateInitiativeRelationPayload {
+	return v.InitiativeRelationCreate
+}
+
+// InitiativeRelationDeleteInitiativeRelationDeleteDeletePayload includes the requested fields of the GraphQL type DeletePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity deletion mutations.
+type InitiativeRelationDeleteInitiativeRelationDeleteDeletePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The identifier of the deleted entity.
+	EntityId string `json:"entityId"`
+}
+
+// GetSuccess returns InitiativeRelationDeleteInitiativeRelationDeleteDeletePayload.Success, and is useful for accessing the field via an interface.
+func (v *InitiativeRelationDeleteInitiativeRelationDeleteDeletePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetEntityId returns InitiativeRelationDeleteInitiativeRelationDeleteDeletePayload.EntityId, and is useful for accessing the field via an interface.
+func (v *InitiativeRelationDeleteInitiativeRelationDeleteDeletePayload) GetEntityId() string {
+	return v.EntityId
+}
+
+// InitiativeRelationDeleteResponse is returned by InitiativeRelationDelete on success.
+type InitiativeRelationDeleteResponse struct {
+	// Deletes an initiative relation.
+	InitiativeRelationDelete *InitiativeRelationDeleteInitiativeRelationDeleteDeletePayload `json:"initiativeRelationDelete"`
+}
+
+// GetInitiativeRelationDelete returns InitiativeRelationDeleteResponse.InitiativeRelationDelete, and is useful for accessing the field via an interface.
+func (v *InitiativeRelationDeleteResponse) GetInitiativeRelationDelete() *InitiativeRelationDeleteInitiativeRelationDeleteDeletePayload {
+	return v.InitiativeRelationDelete
+}
+
+// InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayload includes the requested fields of the GraphQL type InitiativePayload.
+// The GraphQL type's documentation follows.
+//
+// The payload returned by the initiative mutations.
+type InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The initiative that was created or updated.
+	Initiative *InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative `json:"initiative"`
+}
+
+// GetSuccess returns InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayload.Success, and is useful for accessing the field via an interface.
+func (v *InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetInitiative returns InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayload.Initiative, and is useful for accessing the field via an interface.
+func (v *InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayload) GetInitiative() *InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative {
+	return v.Initiative
+}
+
+// InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative includes the requested fields of the GraphQL type Initiative.
+// The GraphQL type's documentation follows.
+//
+// An initiative is a high-level strategic grouping of projects toward a business
+// goal. Initiatives can contain multiple projects, have their own status updates
+// and health tracking, and can be organized hierarchically with parent-child relationships.
+type InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative struct {
+	InitiativeListFields `json:"-"`
+}
+
+// GetId returns InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative) GetId() string {
+	return v.InitiativeListFields.Id
+}
+
+// GetName returns InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative.Name, and is useful for accessing the field via an interface.
+func (v *InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative) GetName() string {
+	return v.InitiativeListFields.Name
+}
+
+// GetStatus returns InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative.Status, and is useful for accessing the field via an interface.
+func (v *InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative) GetStatus() InitiativeStatus {
+	return v.InitiativeListFields.Status
+}
+
+// GetHealth returns InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative.Health, and is useful for accessing the field via an interface.
+func (v *InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative) GetHealth() *InitiativeUpdateHealthType {
+	return v.InitiativeListFields.Health
+}
+
+// GetIcon returns InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative.Icon, and is useful for accessing the field via an interface.
+func (v *InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative) GetIcon() *string {
+	return v.InitiativeListFields.Icon
+}
+
+// GetColor returns InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative.Color, and is useful for accessing the field via an interface.
+func (v *InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative) GetColor() *string {
+	return v.InitiativeListFields.Color
+}
+
+// GetTargetDate returns InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative.TargetDate, and is useful for accessing the field via an interface.
+func (v *InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative) GetTargetDate() *string {
+	return v.InitiativeListFields.TargetDate
+}
+
+// GetUrl returns InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative.Url, and is useful for accessing the field via an interface.
+func (v *InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative) GetUrl() string {
+	return v.InitiativeListFields.Url
+}
+
+// GetCreatedAt returns InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative.CreatedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative) GetCreatedAt() time.Time {
+	return v.InitiativeListFields.CreatedAt
+}
+
+// GetUpdatedAt returns InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative) GetUpdatedAt() time.Time {
+	return v.InitiativeListFields.UpdatedAt
+}
+
+// GetOwner returns InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative.Owner, and is useful for accessing the field via an interface.
+func (v *InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative) GetOwner() *InitiativeListFieldsOwnerUser {
+	return v.InitiativeListFields.Owner
+}
+
+func (v *InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.InitiativeListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalInitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Status InitiativeStatus `json:"status"`
+
+	Health *InitiativeUpdateHealthType `json:"health"`
+
+	Icon *string `json:"icon"`
+
+	Color *string `json:"color"`
+
+	TargetDate *string `json:"targetDate"`
+
+	Url string `json:"url"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	Owner *InitiativeListFieldsOwnerUser `json:"owner"`
+}
+
+func (v *InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative) __premarshalJSON() (*__premarshalInitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative, error) {
+	var retval __premarshalInitiativeRemoveLabelInitiativeRemoveLabelInitiativePayloadInitiative
+
+	retval.Id = v.InitiativeListFields.Id
+	retval.Name = v.InitiativeListFields.Name
+	retval.Status = v.InitiativeListFields.Status
+	retval.Health = v.InitiativeListFields.Health
+	retval.Icon = v.InitiativeListFields.Icon
+	retval.Color = v.InitiativeListFields.Color
+	retval.TargetDate = v.InitiativeListFields.TargetDate
+	retval.Url = v.InitiativeListFields.Url
+	retval.CreatedAt = v.InitiativeListFields.CreatedAt
+	retval.UpdatedAt = v.InitiativeListFields.UpdatedAt
+	retval.Owner = v.InitiativeListFields.Owner
+	return &retval, nil
+}
+
+// InitiativeRemoveLabelResponse is returned by InitiativeRemoveLabel on success.
+type InitiativeRemoveLabelResponse struct {
+	// [Internal]Removes a label from an initiative.
+	InitiativeRemoveLabel *InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayload `json:"initiativeRemoveLabel"`
+}
+
+// GetInitiativeRemoveLabel returns InitiativeRemoveLabelResponse.InitiativeRemoveLabel, and is useful for accessing the field via an interface.
+func (v *InitiativeRemoveLabelResponse) GetInitiativeRemoveLabel() *InitiativeRemoveLabelInitiativeRemoveLabelInitiativePayload {
+	return v.InitiativeRemoveLabel
+}
+
 type InitiativeStatus string
 
 const (
@@ -4758,6 +5904,301 @@ var AllInitiativeStatus = []InitiativeStatus{
 	InitiativeStatusActive,
 	InitiativeStatusCompleted,
 	InitiativeStatusCanceled,
+}
+
+// InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayload includes the requested fields of the GraphQL type InitiativeToProjectPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of an initiative-to-project mutation.
+type InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The initiative-to-project association that was created or updated.
+	InitiativeToProject *InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProject `json:"initiativeToProject"`
+}
+
+// GetSuccess returns InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayload.Success, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetInitiativeToProject returns InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayload.InitiativeToProject, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayload) GetInitiativeToProject() *InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProject {
+	return v.InitiativeToProject
+}
+
+// InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProject includes the requested fields of the GraphQL type InitiativeToProject.
+// The GraphQL type's documentation follows.
+//
+// The join entity linking a project to an initiative. A project can only appear
+// once in an initiative hierarchy -- it cannot be on both an initiative and one of
+// its ancestor or descendant initiatives.
+type InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProject struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The sort order of the project within its parent initiative.
+	SortOrder string `json:"sortOrder"`
+	// The initiative that the project is associated with.
+	Initiative *InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProjectInitiative `json:"initiative"`
+	// The project that the initiative is associated with.
+	Project *InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProjectProject `json:"project"`
+}
+
+// GetId returns InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProject.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProject) GetId() string {
+	return v.Id
+}
+
+// GetSortOrder returns InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProject.SortOrder, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProject) GetSortOrder() string {
+	return v.SortOrder
+}
+
+// GetInitiative returns InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProject.Initiative, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProject) GetInitiative() *InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProjectInitiative {
+	return v.Initiative
+}
+
+// GetProject returns InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProject.Project, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProject) GetProject() *InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProjectProject {
+	return v.Project
+}
+
+// InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProjectInitiative includes the requested fields of the GraphQL type Initiative.
+// The GraphQL type's documentation follows.
+//
+// An initiative is a high-level strategic grouping of projects toward a business
+// goal. Initiatives can contain multiple projects, have their own status updates
+// and health tracking, and can be organized hierarchically with parent-child relationships.
+type InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProjectInitiative struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the initiative.
+	Name string `json:"name"`
+}
+
+// GetId returns InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProjectInitiative.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProjectInitiative) GetId() string {
+	return v.Id
+}
+
+// GetName returns InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProjectInitiative.Name, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProjectInitiative) GetName() string {
+	return v.Name
+}
+
+// InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProjectProject includes the requested fields of the GraphQL type Project.
+// The GraphQL type's documentation follows.
+//
+// A project is a collection of issues working toward a shared goal. Projects have
+// start and target dates, milestones, status tracking, and progress metrics. They
+// can span multiple teams and be grouped under initiatives.
+type InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProjectProject struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the project.
+	Name string `json:"name"`
+}
+
+// GetId returns InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProjectProject.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProjectProject) GetId() string {
+	return v.Id
+}
+
+// GetName returns InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProjectProject.Name, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayloadInitiativeToProjectProject) GetName() string {
+	return v.Name
+}
+
+// The properties of the initiativeToProject to create.
+type InitiativeToProjectCreateInput struct {
+	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
+	Id *string `json:"id"`
+	// The identifier of the initiative.
+	InitiativeId string `json:"initiativeId"`
+	// The identifier of the project.
+	ProjectId string `json:"projectId"`
+	// The sort order for the project within the initiative.
+	SortOrder *float64 `json:"sortOrder"`
+}
+
+// GetId returns InitiativeToProjectCreateInput.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectCreateInput) GetId() *string { return v.Id }
+
+// GetInitiativeId returns InitiativeToProjectCreateInput.InitiativeId, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectCreateInput) GetInitiativeId() string { return v.InitiativeId }
+
+// GetProjectId returns InitiativeToProjectCreateInput.ProjectId, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectCreateInput) GetProjectId() string { return v.ProjectId }
+
+// GetSortOrder returns InitiativeToProjectCreateInput.SortOrder, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectCreateInput) GetSortOrder() *float64 { return v.SortOrder }
+
+// InitiativeToProjectCreateResponse is returned by InitiativeToProjectCreate on success.
+type InitiativeToProjectCreateResponse struct {
+	// Associates a project with an initiative. A project can only appear once in an initiative hierarchy.
+	InitiativeToProjectCreate *InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayload `json:"initiativeToProjectCreate"`
+}
+
+// GetInitiativeToProjectCreate returns InitiativeToProjectCreateResponse.InitiativeToProjectCreate, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectCreateResponse) GetInitiativeToProjectCreate() *InitiativeToProjectCreateInitiativeToProjectCreateInitiativeToProjectPayload {
+	return v.InitiativeToProjectCreate
+}
+
+// InitiativeToProjectDeleteInitiativeToProjectDeleteDeletePayload includes the requested fields of the GraphQL type DeletePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity deletion mutations.
+type InitiativeToProjectDeleteInitiativeToProjectDeleteDeletePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The identifier of the deleted entity.
+	EntityId string `json:"entityId"`
+}
+
+// GetSuccess returns InitiativeToProjectDeleteInitiativeToProjectDeleteDeletePayload.Success, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectDeleteInitiativeToProjectDeleteDeletePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetEntityId returns InitiativeToProjectDeleteInitiativeToProjectDeleteDeletePayload.EntityId, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectDeleteInitiativeToProjectDeleteDeletePayload) GetEntityId() string {
+	return v.EntityId
+}
+
+// InitiativeToProjectDeleteResponse is returned by InitiativeToProjectDelete on success.
+type InitiativeToProjectDeleteResponse struct {
+	// Removes a project from an initiative.
+	InitiativeToProjectDelete *InitiativeToProjectDeleteInitiativeToProjectDeleteDeletePayload `json:"initiativeToProjectDelete"`
+}
+
+// GetInitiativeToProjectDelete returns InitiativeToProjectDeleteResponse.InitiativeToProjectDelete, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectDeleteResponse) GetInitiativeToProjectDelete() *InitiativeToProjectDeleteInitiativeToProjectDeleteDeletePayload {
+	return v.InitiativeToProjectDelete
+}
+
+// InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayload includes the requested fields of the GraphQL type InitiativeToProjectPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of an initiative-to-project mutation.
+type InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The initiative-to-project association that was created or updated.
+	InitiativeToProject *InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProject `json:"initiativeToProject"`
+}
+
+// GetSuccess returns InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayload.Success, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetInitiativeToProject returns InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayload.InitiativeToProject, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayload) GetInitiativeToProject() *InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProject {
+	return v.InitiativeToProject
+}
+
+// InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProject includes the requested fields of the GraphQL type InitiativeToProject.
+// The GraphQL type's documentation follows.
+//
+// The join entity linking a project to an initiative. A project can only appear
+// once in an initiative hierarchy -- it cannot be on both an initiative and one of
+// its ancestor or descendant initiatives.
+type InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProject struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The sort order of the project within its parent initiative.
+	SortOrder string `json:"sortOrder"`
+	// The initiative that the project is associated with.
+	Initiative *InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProjectInitiative `json:"initiative"`
+	// The project that the initiative is associated with.
+	Project *InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProjectProject `json:"project"`
+}
+
+// GetId returns InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProject.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProject) GetId() string {
+	return v.Id
+}
+
+// GetSortOrder returns InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProject.SortOrder, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProject) GetSortOrder() string {
+	return v.SortOrder
+}
+
+// GetInitiative returns InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProject.Initiative, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProject) GetInitiative() *InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProjectInitiative {
+	return v.Initiative
+}
+
+// GetProject returns InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProject.Project, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProject) GetProject() *InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProjectProject {
+	return v.Project
+}
+
+// InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProjectInitiative includes the requested fields of the GraphQL type Initiative.
+// The GraphQL type's documentation follows.
+//
+// An initiative is a high-level strategic grouping of projects toward a business
+// goal. Initiatives can contain multiple projects, have their own status updates
+// and health tracking, and can be organized hierarchically with parent-child relationships.
+type InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProjectInitiative struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the initiative.
+	Name string `json:"name"`
+}
+
+// GetId returns InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProjectInitiative.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProjectInitiative) GetId() string {
+	return v.Id
+}
+
+// GetName returns InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProjectInitiative.Name, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProjectInitiative) GetName() string {
+	return v.Name
+}
+
+// InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProjectProject includes the requested fields of the GraphQL type Project.
+// The GraphQL type's documentation follows.
+//
+// A project is a collection of issues working toward a shared goal. Projects have
+// start and target dates, milestones, status tracking, and progress metrics. They
+// can span multiple teams and be grouped under initiatives.
+type InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProjectProject struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the project.
+	Name string `json:"name"`
+}
+
+// GetId returns InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProjectProject.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProjectProject) GetId() string {
+	return v.Id
+}
+
+// GetName returns InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProjectProject.Name, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayloadInitiativeToProjectProject) GetName() string {
+	return v.Name
+}
+
+// The properties of the initiative-to-project association to update.
+type InitiativeToProjectUpdateInput struct {
+	// The sort order for the project within the initiative.
+	SortOrder *float64 `json:"sortOrder"`
+}
+
+// GetSortOrder returns InitiativeToProjectUpdateInput.SortOrder, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectUpdateInput) GetSortOrder() *float64 { return v.SortOrder }
+
+// InitiativeToProjectUpdateResponse is returned by InitiativeToProjectUpdate on success.
+type InitiativeToProjectUpdateResponse struct {
+	// Updates an initiative-to-project association, such as its sort order.
+	InitiativeToProjectUpdate *InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayload `json:"initiativeToProjectUpdate"`
+}
+
+// GetInitiativeToProjectUpdate returns InitiativeToProjectUpdateResponse.InitiativeToProjectUpdate, and is useful for accessing the field via an interface.
+func (v *InitiativeToProjectUpdateResponse) GetInitiativeToProjectUpdate() *InitiativeToProjectUpdateInitiativeToProjectUpdateInitiativeToProjectPayload {
+	return v.InitiativeToProjectUpdate
 }
 
 // InitiativeUnarchiveInitiativeUnarchiveInitiativeArchivePayload includes the requested fields of the GraphQL type InitiativeArchivePayload.
@@ -4821,6 +6262,252 @@ type InitiativeUnarchiveResponse struct {
 func (v *InitiativeUnarchiveResponse) GetInitiativeUnarchive() *InitiativeUnarchiveInitiativeUnarchiveInitiativeArchivePayload {
 	return v.InitiativeUnarchive
 }
+
+// InitiativeUpdateArchiveInitiativeUpdateArchiveInitiativeUpdateArchivePayload includes the requested fields of the GraphQL type InitiativeUpdateArchivePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity archive mutations.
+type InitiativeUpdateArchiveInitiativeUpdateArchiveInitiativeUpdateArchivePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The archived/unarchived entity. Null if entity was deleted.
+	Entity *InitiativeUpdateArchiveInitiativeUpdateArchiveInitiativeUpdateArchivePayloadEntityInitiativeUpdate `json:"entity"`
+}
+
+// GetSuccess returns InitiativeUpdateArchiveInitiativeUpdateArchiveInitiativeUpdateArchivePayload.Success, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateArchiveInitiativeUpdateArchiveInitiativeUpdateArchivePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetEntity returns InitiativeUpdateArchiveInitiativeUpdateArchiveInitiativeUpdateArchivePayload.Entity, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateArchiveInitiativeUpdateArchiveInitiativeUpdateArchivePayload) GetEntity() *InitiativeUpdateArchiveInitiativeUpdateArchiveInitiativeUpdateArchivePayloadEntityInitiativeUpdate {
+	return v.Entity
+}
+
+// InitiativeUpdateArchiveInitiativeUpdateArchiveInitiativeUpdateArchivePayloadEntityInitiativeUpdate includes the requested fields of the GraphQL type InitiativeUpdate.
+// The GraphQL type's documentation follows.
+//
+// A status update posted to an initiative. Initiative updates communicate
+// progress, health, and blockers to stakeholders. Each update captures the
+// initiative's health at the time of writing and includes a rich-text body with
+// the update content.
+type InitiativeUpdateArchiveInitiativeUpdateArchiveInitiativeUpdateArchivePayloadEntityInitiativeUpdate struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The time at which the entity was archived. Null if the entity has not been archived.
+	ArchivedAt *time.Time `json:"archivedAt"`
+}
+
+// GetId returns InitiativeUpdateArchiveInitiativeUpdateArchiveInitiativeUpdateArchivePayloadEntityInitiativeUpdate.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateArchiveInitiativeUpdateArchiveInitiativeUpdateArchivePayloadEntityInitiativeUpdate) GetId() string {
+	return v.Id
+}
+
+// GetArchivedAt returns InitiativeUpdateArchiveInitiativeUpdateArchiveInitiativeUpdateArchivePayloadEntityInitiativeUpdate.ArchivedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateArchiveInitiativeUpdateArchiveInitiativeUpdateArchivePayloadEntityInitiativeUpdate) GetArchivedAt() *time.Time {
+	return v.ArchivedAt
+}
+
+// InitiativeUpdateArchiveResponse is returned by InitiativeUpdateArchive on success.
+type InitiativeUpdateArchiveResponse struct {
+	// Archives an initiative update.
+	InitiativeUpdateArchive *InitiativeUpdateArchiveInitiativeUpdateArchiveInitiativeUpdateArchivePayload `json:"initiativeUpdateArchive"`
+}
+
+// GetInitiativeUpdateArchive returns InitiativeUpdateArchiveResponse.InitiativeUpdateArchive, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateArchiveResponse) GetInitiativeUpdateArchive() *InitiativeUpdateArchiveInitiativeUpdateArchiveInitiativeUpdateArchivePayload {
+	return v.InitiativeUpdateArchive
+}
+
+// Input for creating a new initiative update.
+type InitiativeUpdateCreateInput struct {
+	// The content of the update in markdown format.
+	Body *string `json:"body"`
+	// [Internal] The content of the update as a Prosemirror document.
+	BodyData *interface{} `json:"bodyData"`
+	// The health of the initiative at the time of the update.
+	Health *InitiativeUpdateHealthType `json:"health"`
+	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
+	Id *string `json:"id"`
+	// The initiative to associate the update with.
+	InitiativeId string `json:"initiativeId"`
+	// Whether the diff between the current update and the previous one should be hidden.
+	IsDiffHidden *bool `json:"isDiffHidden"`
+}
+
+// GetBody returns InitiativeUpdateCreateInput.Body, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateCreateInput) GetBody() *string { return v.Body }
+
+// GetBodyData returns InitiativeUpdateCreateInput.BodyData, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateCreateInput) GetBodyData() *interface{} { return v.BodyData }
+
+// GetHealth returns InitiativeUpdateCreateInput.Health, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateCreateInput) GetHealth() *InitiativeUpdateHealthType { return v.Health }
+
+// GetId returns InitiativeUpdateCreateInput.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateCreateInput) GetId() *string { return v.Id }
+
+// GetInitiativeId returns InitiativeUpdateCreateInput.InitiativeId, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateCreateInput) GetInitiativeId() string { return v.InitiativeId }
+
+// GetIsDiffHidden returns InitiativeUpdateCreateInput.IsDiffHidden, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateCreateInput) GetIsDiffHidden() *bool { return v.IsDiffHidden }
+
+// InitiativeUpdateFields includes the GraphQL fields of InitiativeUpdate requested by the fragment InitiativeUpdateFields.
+// The GraphQL type's documentation follows.
+//
+// A status update posted to an initiative. Initiative updates communicate
+// progress, health, and blockers to stakeholders. Each update captures the
+// initiative's health at the time of writing and includes a rich-text body with
+// the update content.
+type InitiativeUpdateFields struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The update's unique URL slug.
+	SlugId string `json:"slugId"`
+	// The update content in markdown format.
+	Body string `json:"body"`
+	// The health of the initiative at the time this update was posted. Possible values are onTrack, atRisk, or offTrack.
+	Health InitiativeUpdateHealthType `json:"health"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+	// been updated after creation.
+	UpdatedAt time.Time `json:"updatedAt"`
+	// The time the update was edited.
+	EditedAt *time.Time `json:"editedAt"`
+	// The time at which the entity was archived. Null if the entity has not been archived.
+	ArchivedAt *time.Time `json:"archivedAt"`
+	// The URL to the initiative update.
+	Url string `json:"url"`
+	// The user who wrote the update.
+	User *InitiativeUpdateFieldsUser `json:"user"`
+	// The initiative that this status update was posted to.
+	Initiative *InitiativeUpdateFieldsInitiative `json:"initiative"`
+}
+
+// GetId returns InitiativeUpdateFields.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFields) GetId() string { return v.Id }
+
+// GetSlugId returns InitiativeUpdateFields.SlugId, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFields) GetSlugId() string { return v.SlugId }
+
+// GetBody returns InitiativeUpdateFields.Body, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFields) GetBody() string { return v.Body }
+
+// GetHealth returns InitiativeUpdateFields.Health, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFields) GetHealth() InitiativeUpdateHealthType { return v.Health }
+
+// GetCreatedAt returns InitiativeUpdateFields.CreatedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFields) GetCreatedAt() time.Time { return v.CreatedAt }
+
+// GetUpdatedAt returns InitiativeUpdateFields.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFields) GetUpdatedAt() time.Time { return v.UpdatedAt }
+
+// GetEditedAt returns InitiativeUpdateFields.EditedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFields) GetEditedAt() *time.Time { return v.EditedAt }
+
+// GetArchivedAt returns InitiativeUpdateFields.ArchivedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFields) GetArchivedAt() *time.Time { return v.ArchivedAt }
+
+// GetUrl returns InitiativeUpdateFields.Url, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFields) GetUrl() string { return v.Url }
+
+// GetUser returns InitiativeUpdateFields.User, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFields) GetUser() *InitiativeUpdateFieldsUser { return v.User }
+
+// GetInitiative returns InitiativeUpdateFields.Initiative, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFields) GetInitiative() *InitiativeUpdateFieldsInitiative {
+	return v.Initiative
+}
+
+// InitiativeUpdateFieldsInitiative includes the requested fields of the GraphQL type Initiative.
+// The GraphQL type's documentation follows.
+//
+// An initiative is a high-level strategic grouping of projects toward a business
+// goal. Initiatives can contain multiple projects, have their own status updates
+// and health tracking, and can be organized hierarchically with parent-child relationships.
+type InitiativeUpdateFieldsInitiative struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the initiative.
+	Name string `json:"name"`
+}
+
+// GetId returns InitiativeUpdateFieldsInitiative.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFieldsInitiative) GetId() string { return v.Id }
+
+// GetName returns InitiativeUpdateFieldsInitiative.Name, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFieldsInitiative) GetName() string { return v.Name }
+
+// InitiativeUpdateFieldsUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
+type InitiativeUpdateFieldsUser struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The user's full name.
+	Name string `json:"name"`
+	// The user's email address.
+	Email string `json:"email"`
+}
+
+// GetId returns InitiativeUpdateFieldsUser.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFieldsUser) GetId() string { return v.Id }
+
+// GetName returns InitiativeUpdateFieldsUser.Name, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFieldsUser) GetName() string { return v.Name }
+
+// GetEmail returns InitiativeUpdateFieldsUser.Email, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFieldsUser) GetEmail() string { return v.Email }
+
+// Options for filtering initiative updates.
+type InitiativeUpdateFilter struct {
+	// Compound filters, all of which need to be matched by the InitiativeUpdate.
+	And []*InitiativeUpdateFilter `json:"and,omitempty"`
+	// Comparator for the created at date.
+	CreatedAt *DateComparator `json:"createdAt,omitempty"`
+	// Comparator for the identifier.
+	Id *IDComparator `json:"id,omitempty"`
+	// Filters that the initiative update initiative must satisfy.
+	Initiative *InitiativeFilter `json:"initiative,omitempty"`
+	// Compound filters, one of which need to be matched by the InitiativeUpdate.
+	Or []*InitiativeUpdateFilter `json:"or,omitempty"`
+	// Filters that the initiative updates reactions must satisfy.
+	Reactions *ReactionCollectionFilter `json:"reactions,omitempty"`
+	// Comparator for the updated at date.
+	UpdatedAt *DateComparator `json:"updatedAt,omitempty"`
+	// Filters that the initiative update creator must satisfy.
+	User *UserFilter `json:"user,omitempty"`
+}
+
+// GetAnd returns InitiativeUpdateFilter.And, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFilter) GetAnd() []*InitiativeUpdateFilter { return v.And }
+
+// GetCreatedAt returns InitiativeUpdateFilter.CreatedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFilter) GetCreatedAt() *DateComparator { return v.CreatedAt }
+
+// GetId returns InitiativeUpdateFilter.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFilter) GetId() *IDComparator { return v.Id }
+
+// GetInitiative returns InitiativeUpdateFilter.Initiative, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFilter) GetInitiative() *InitiativeFilter { return v.Initiative }
+
+// GetOr returns InitiativeUpdateFilter.Or, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFilter) GetOr() []*InitiativeUpdateFilter { return v.Or }
+
+// GetReactions returns InitiativeUpdateFilter.Reactions, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFilter) GetReactions() *ReactionCollectionFilter { return v.Reactions }
+
+// GetUpdatedAt returns InitiativeUpdateFilter.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
+// GetUser returns InitiativeUpdateFilter.User, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateFilter) GetUser() *UserFilter { return v.User }
 
 // The health type when the update is created.
 type InitiativeUpdateHealthType string
@@ -4954,6 +6641,81 @@ func (v *InitiativeUpdateInput) GetUpdateRemindersDay() *Day { return v.UpdateRe
 
 // GetUpdateRemindersHour returns InitiativeUpdateInput.UpdateRemindersHour, and is useful for accessing the field via an interface.
 func (v *InitiativeUpdateInput) GetUpdateRemindersHour() *int { return v.UpdateRemindersHour }
+
+// InitiativeUpdateUnarchiveInitiativeUpdateUnarchiveInitiativeUpdateArchivePayload includes the requested fields of the GraphQL type InitiativeUpdateArchivePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity archive mutations.
+type InitiativeUpdateUnarchiveInitiativeUpdateUnarchiveInitiativeUpdateArchivePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The archived/unarchived entity. Null if entity was deleted.
+	Entity *InitiativeUpdateUnarchiveInitiativeUpdateUnarchiveInitiativeUpdateArchivePayloadEntityInitiativeUpdate `json:"entity"`
+}
+
+// GetSuccess returns InitiativeUpdateUnarchiveInitiativeUpdateUnarchiveInitiativeUpdateArchivePayload.Success, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateUnarchiveInitiativeUpdateUnarchiveInitiativeUpdateArchivePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetEntity returns InitiativeUpdateUnarchiveInitiativeUpdateUnarchiveInitiativeUpdateArchivePayload.Entity, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateUnarchiveInitiativeUpdateUnarchiveInitiativeUpdateArchivePayload) GetEntity() *InitiativeUpdateUnarchiveInitiativeUpdateUnarchiveInitiativeUpdateArchivePayloadEntityInitiativeUpdate {
+	return v.Entity
+}
+
+// InitiativeUpdateUnarchiveInitiativeUpdateUnarchiveInitiativeUpdateArchivePayloadEntityInitiativeUpdate includes the requested fields of the GraphQL type InitiativeUpdate.
+// The GraphQL type's documentation follows.
+//
+// A status update posted to an initiative. Initiative updates communicate
+// progress, health, and blockers to stakeholders. Each update captures the
+// initiative's health at the time of writing and includes a rich-text body with
+// the update content.
+type InitiativeUpdateUnarchiveInitiativeUpdateUnarchiveInitiativeUpdateArchivePayloadEntityInitiativeUpdate struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The time at which the entity was archived. Null if the entity has not been archived.
+	ArchivedAt *time.Time `json:"archivedAt"`
+}
+
+// GetId returns InitiativeUpdateUnarchiveInitiativeUpdateUnarchiveInitiativeUpdateArchivePayloadEntityInitiativeUpdate.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateUnarchiveInitiativeUpdateUnarchiveInitiativeUpdateArchivePayloadEntityInitiativeUpdate) GetId() string {
+	return v.Id
+}
+
+// GetArchivedAt returns InitiativeUpdateUnarchiveInitiativeUpdateUnarchiveInitiativeUpdateArchivePayloadEntityInitiativeUpdate.ArchivedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateUnarchiveInitiativeUpdateUnarchiveInitiativeUpdateArchivePayloadEntityInitiativeUpdate) GetArchivedAt() *time.Time {
+	return v.ArchivedAt
+}
+
+// InitiativeUpdateUnarchiveResponse is returned by InitiativeUpdateUnarchive on success.
+type InitiativeUpdateUnarchiveResponse struct {
+	// Unarchives an initiative update.
+	InitiativeUpdateUnarchive *InitiativeUpdateUnarchiveInitiativeUpdateUnarchiveInitiativeUpdateArchivePayload `json:"initiativeUpdateUnarchive"`
+}
+
+// GetInitiativeUpdateUnarchive returns InitiativeUpdateUnarchiveResponse.InitiativeUpdateUnarchive, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateUnarchiveResponse) GetInitiativeUpdateUnarchive() *InitiativeUpdateUnarchiveInitiativeUpdateUnarchiveInitiativeUpdateArchivePayload {
+	return v.InitiativeUpdateUnarchive
+}
+
+// Input for updating an existing initiative update.
+type InitiativeUpdateUpdateInput struct {
+	// The content of the update in markdown format.
+	Body *string `json:"body"`
+	// The content of the update as a Prosemirror document.
+	BodyData *interface{} `json:"bodyData"`
+	// The health of the initiative at the time of the update.
+	Health *InitiativeUpdateHealthType `json:"health"`
+}
+
+// GetBody returns InitiativeUpdateUpdateInput.Body, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateUpdateInput) GetBody() *string { return v.Body }
+
+// GetBodyData returns InitiativeUpdateUpdateInput.BodyData, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateUpdateInput) GetBodyData() *interface{} { return v.BodyData }
+
+// GetHealth returns InitiativeUpdateUpdateInput.Health, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdateUpdateInput) GetHealth() *InitiativeUpdateHealthType { return v.Health }
 
 // Collection filtering options for filtering initiatives by initiative updates.
 type InitiativeUpdatesCollectionFilter struct {
@@ -8881,6 +10643,367 @@ type ListCommentsResponse struct {
 // GetIssue returns ListCommentsResponse.Issue, and is useful for accessing the field via an interface.
 func (v *ListCommentsResponse) GetIssue() *ListCommentsIssue { return v.Issue }
 
+// ListInitiativeLabelsInitiativeLabelsInitiativeLabelConnection includes the requested fields of the GraphQL type InitiativeLabelConnection.
+type ListInitiativeLabelsInitiativeLabelsInitiativeLabelConnection struct {
+	Nodes []*ListInitiativeLabelsInitiativeLabelsInitiativeLabelConnectionNodesInitiativeLabel `json:"nodes"`
+}
+
+// GetNodes returns ListInitiativeLabelsInitiativeLabelsInitiativeLabelConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ListInitiativeLabelsInitiativeLabelsInitiativeLabelConnection) GetNodes() []*ListInitiativeLabelsInitiativeLabelsInitiativeLabelConnectionNodesInitiativeLabel {
+	return v.Nodes
+}
+
+// ListInitiativeLabelsInitiativeLabelsInitiativeLabelConnectionNodesInitiativeLabel includes the requested fields of the GraphQL type InitiativeLabel.
+// The GraphQL type's documentation follows.
+//
+// A label that can be applied to initiatives for categorization. Initiative labels
+// are workspace-level and can be organized into groups with a parent-child
+// hierarchy. Only child labels (not group labels) can be directly applied to initiatives.
+type ListInitiativeLabelsInitiativeLabelsInitiativeLabelConnectionNodesInitiativeLabel struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The label's name.
+	Name string `json:"name"`
+	// The label's color as a HEX string (e.g., '#EB5757'). Used for visual identification of the label in the UI.
+	Color string `json:"color"`
+}
+
+// GetId returns ListInitiativeLabelsInitiativeLabelsInitiativeLabelConnectionNodesInitiativeLabel.Id, and is useful for accessing the field via an interface.
+func (v *ListInitiativeLabelsInitiativeLabelsInitiativeLabelConnectionNodesInitiativeLabel) GetId() string {
+	return v.Id
+}
+
+// GetName returns ListInitiativeLabelsInitiativeLabelsInitiativeLabelConnectionNodesInitiativeLabel.Name, and is useful for accessing the field via an interface.
+func (v *ListInitiativeLabelsInitiativeLabelsInitiativeLabelConnectionNodesInitiativeLabel) GetName() string {
+	return v.Name
+}
+
+// GetColor returns ListInitiativeLabelsInitiativeLabelsInitiativeLabelConnectionNodesInitiativeLabel.Color, and is useful for accessing the field via an interface.
+func (v *ListInitiativeLabelsInitiativeLabelsInitiativeLabelConnectionNodesInitiativeLabel) GetColor() string {
+	return v.Color
+}
+
+// ListInitiativeLabelsResponse is returned by ListInitiativeLabels on success.
+type ListInitiativeLabelsResponse struct {
+	// [Internal] Returns all initiative labels in the workspace, with optional filtering.
+	//
+	// Not present in the schema snapshot checked into this repo (captured before
+	// this field was exposed); confirmed directly against the live API via
+	// introspection on 2026-07-01.
+	InitiativeLabels *ListInitiativeLabelsInitiativeLabelsInitiativeLabelConnection `json:"initiativeLabels"`
+}
+
+// GetInitiativeLabels returns ListInitiativeLabelsResponse.InitiativeLabels, and is useful for accessing the field via an interface.
+func (v *ListInitiativeLabelsResponse) GetInitiativeLabels() *ListInitiativeLabelsInitiativeLabelsInitiativeLabelConnection {
+	return v.InitiativeLabels
+}
+
+// ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnection includes the requested fields of the GraphQL type InitiativeRelationConnection.
+type ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnection struct {
+	Nodes    []*ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelation `json:"nodes"`
+	PageInfo *ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionPageInfo                  `json:"pageInfo"`
+}
+
+// GetNodes returns ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnection) GetNodes() []*ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelation {
+	return v.Nodes
+}
+
+// GetPageInfo returns ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnection) GetPageInfo() *ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionPageInfo {
+	return v.PageInfo
+}
+
+// ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelation includes the requested fields of the GraphQL type InitiativeRelation.
+// The GraphQL type's documentation follows.
+//
+// A parent-child relation between two initiatives, forming a hierarchy. The
+// initiative field is the parent and relatedInitiative is the child. Cycles and
+// excessive nesting depth are prevented.
+type ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelation struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The parent initiative in this hierarchical relation.
+	Initiative *ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelationInitiative `json:"initiative"`
+	// The child initiative in this hierarchical relation.
+	RelatedInitiative *ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelationRelatedInitiative `json:"relatedInitiative"`
+}
+
+// GetId returns ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelation.Id, and is useful for accessing the field via an interface.
+func (v *ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelation) GetId() string {
+	return v.Id
+}
+
+// GetInitiative returns ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelation.Initiative, and is useful for accessing the field via an interface.
+func (v *ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelation) GetInitiative() *ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelationInitiative {
+	return v.Initiative
+}
+
+// GetRelatedInitiative returns ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelation.RelatedInitiative, and is useful for accessing the field via an interface.
+func (v *ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelation) GetRelatedInitiative() *ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelationRelatedInitiative {
+	return v.RelatedInitiative
+}
+
+// ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelationInitiative includes the requested fields of the GraphQL type Initiative.
+// The GraphQL type's documentation follows.
+//
+// An initiative is a high-level strategic grouping of projects toward a business
+// goal. Initiatives can contain multiple projects, have their own status updates
+// and health tracking, and can be organized hierarchically with parent-child relationships.
+type ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelationInitiative struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the initiative.
+	Name string `json:"name"`
+}
+
+// GetId returns ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelationInitiative.Id, and is useful for accessing the field via an interface.
+func (v *ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelationInitiative) GetId() string {
+	return v.Id
+}
+
+// GetName returns ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelationInitiative.Name, and is useful for accessing the field via an interface.
+func (v *ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelationInitiative) GetName() string {
+	return v.Name
+}
+
+// ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelationRelatedInitiative includes the requested fields of the GraphQL type Initiative.
+// The GraphQL type's documentation follows.
+//
+// An initiative is a high-level strategic grouping of projects toward a business
+// goal. Initiatives can contain multiple projects, have their own status updates
+// and health tracking, and can be organized hierarchically with parent-child relationships.
+type ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelationRelatedInitiative struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the initiative.
+	Name string `json:"name"`
+}
+
+// GetId returns ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelationRelatedInitiative.Id, and is useful for accessing the field via an interface.
+func (v *ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelationRelatedInitiative) GetId() string {
+	return v.Id
+}
+
+// GetName returns ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelationRelatedInitiative.Name, and is useful for accessing the field via an interface.
+func (v *ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionNodesInitiativeRelationRelatedInitiative) GetName() string {
+	return v.Name
+}
+
+// ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+type ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionPageInfo struct {
+	// Indicates if there are more results when paginating forward.
+	HasNextPage bool `json:"hasNextPage"`
+	// Cursor representing the last result in the paginated results.
+	EndCursor *string `json:"endCursor"`
+}
+
+// GetHasNextPage returns ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// GetEndCursor returns ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// ListInitiativeRelationsResponse is returned by ListInitiativeRelations on success.
+type ListInitiativeRelationsResponse struct {
+	// Returns all initiative parent-child relations in the workspace.
+	InitiativeRelations *ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnection `json:"initiativeRelations"`
+}
+
+// GetInitiativeRelations returns ListInitiativeRelationsResponse.InitiativeRelations, and is useful for accessing the field via an interface.
+func (v *ListInitiativeRelationsResponse) GetInitiativeRelations() *ListInitiativeRelationsInitiativeRelationsInitiativeRelationConnection {
+	return v.InitiativeRelations
+}
+
+// ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnection includes the requested fields of the GraphQL type InitiativeUpdateConnection.
+type ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnection struct {
+	Nodes    []*ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate `json:"nodes"`
+	PageInfo *ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionPageInfo                `json:"pageInfo"`
+}
+
+// GetNodes returns ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnection) GetNodes() []*ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate {
+	return v.Nodes
+}
+
+// GetPageInfo returns ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnection) GetPageInfo() *ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionPageInfo {
+	return v.PageInfo
+}
+
+// ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate includes the requested fields of the GraphQL type InitiativeUpdate.
+// The GraphQL type's documentation follows.
+//
+// A status update posted to an initiative. Initiative updates communicate
+// progress, health, and blockers to stakeholders. Each update captures the
+// initiative's health at the time of writing and includes a rich-text body with
+// the update content.
+type ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate struct {
+	InitiativeUpdateFields `json:"-"`
+}
+
+// GetId returns ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate.Id, and is useful for accessing the field via an interface.
+func (v *ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate) GetId() string {
+	return v.InitiativeUpdateFields.Id
+}
+
+// GetSlugId returns ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate.SlugId, and is useful for accessing the field via an interface.
+func (v *ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate) GetSlugId() string {
+	return v.InitiativeUpdateFields.SlugId
+}
+
+// GetBody returns ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate.Body, and is useful for accessing the field via an interface.
+func (v *ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate) GetBody() string {
+	return v.InitiativeUpdateFields.Body
+}
+
+// GetHealth returns ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate.Health, and is useful for accessing the field via an interface.
+func (v *ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate) GetHealth() InitiativeUpdateHealthType {
+	return v.InitiativeUpdateFields.Health
+}
+
+// GetCreatedAt returns ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate) GetCreatedAt() time.Time {
+	return v.InitiativeUpdateFields.CreatedAt
+}
+
+// GetUpdatedAt returns ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate) GetUpdatedAt() time.Time {
+	return v.InitiativeUpdateFields.UpdatedAt
+}
+
+// GetEditedAt returns ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate.EditedAt, and is useful for accessing the field via an interface.
+func (v *ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate) GetEditedAt() *time.Time {
+	return v.InitiativeUpdateFields.EditedAt
+}
+
+// GetArchivedAt returns ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate.ArchivedAt, and is useful for accessing the field via an interface.
+func (v *ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate) GetArchivedAt() *time.Time {
+	return v.InitiativeUpdateFields.ArchivedAt
+}
+
+// GetUrl returns ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate.Url, and is useful for accessing the field via an interface.
+func (v *ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate) GetUrl() string {
+	return v.InitiativeUpdateFields.Url
+}
+
+// GetUser returns ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate.User, and is useful for accessing the field via an interface.
+func (v *ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate) GetUser() *InitiativeUpdateFieldsUser {
+	return v.InitiativeUpdateFields.User
+}
+
+// GetInitiative returns ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate.Initiative, and is useful for accessing the field via an interface.
+func (v *ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate) GetInitiative() *InitiativeUpdateFieldsInitiative {
+	return v.InitiativeUpdateFields.Initiative
+}
+
+func (v *ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.InitiativeUpdateFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate struct {
+	Id string `json:"id"`
+
+	SlugId string `json:"slugId"`
+
+	Body string `json:"body"`
+
+	Health InitiativeUpdateHealthType `json:"health"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	EditedAt *time.Time `json:"editedAt"`
+
+	ArchivedAt *time.Time `json:"archivedAt"`
+
+	Url string `json:"url"`
+
+	User *InitiativeUpdateFieldsUser `json:"user"`
+
+	Initiative *InitiativeUpdateFieldsInitiative `json:"initiative"`
+}
+
+func (v *ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate) __premarshalJSON() (*__premarshalListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate, error) {
+	var retval __premarshalListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionNodesInitiativeUpdate
+
+	retval.Id = v.InitiativeUpdateFields.Id
+	retval.SlugId = v.InitiativeUpdateFields.SlugId
+	retval.Body = v.InitiativeUpdateFields.Body
+	retval.Health = v.InitiativeUpdateFields.Health
+	retval.CreatedAt = v.InitiativeUpdateFields.CreatedAt
+	retval.UpdatedAt = v.InitiativeUpdateFields.UpdatedAt
+	retval.EditedAt = v.InitiativeUpdateFields.EditedAt
+	retval.ArchivedAt = v.InitiativeUpdateFields.ArchivedAt
+	retval.Url = v.InitiativeUpdateFields.Url
+	retval.User = v.InitiativeUpdateFields.User
+	retval.Initiative = v.InitiativeUpdateFields.Initiative
+	return &retval, nil
+}
+
+// ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+type ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionPageInfo struct {
+	// Indicates if there are more results when paginating forward.
+	HasNextPage bool `json:"hasNextPage"`
+	// Cursor representing the last result in the paginated results.
+	EndCursor *string `json:"endCursor"`
+}
+
+// GetHasNextPage returns ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// GetEndCursor returns ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// ListInitiativeUpdatesResponse is returned by ListInitiativeUpdates on success.
+type ListInitiativeUpdatesResponse struct {
+	// Returns all initiative status updates in the workspace, with optional filtering.
+	InitiativeUpdates *ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnection `json:"initiativeUpdates"`
+}
+
+// GetInitiativeUpdates returns ListInitiativeUpdatesResponse.InitiativeUpdates, and is useful for accessing the field via an interface.
+func (v *ListInitiativeUpdatesResponse) GetInitiativeUpdates() *ListInitiativeUpdatesInitiativeUpdatesInitiativeUpdateConnection {
+	return v.InitiativeUpdates
+}
+
 // ListInitiativesInitiativesInitiativeConnection includes the requested fields of the GraphQL type InitiativeConnection.
 type ListInitiativesInitiativesInitiativeConnection struct {
 	Nodes    []*ListInitiativesInitiativesInitiativeConnectionNodesInitiative `json:"nodes"`
@@ -9063,6 +11186,58 @@ type ListInitiativesResponse struct {
 // GetInitiatives returns ListInitiativesResponse.Initiatives, and is useful for accessing the field via an interface.
 func (v *ListInitiativesResponse) GetInitiatives() *ListInitiativesInitiativesInitiativeConnection {
 	return v.Initiatives
+}
+
+// ListIssueLabelsIssueLabelsIssueLabelConnection includes the requested fields of the GraphQL type IssueLabelConnection.
+type ListIssueLabelsIssueLabelsIssueLabelConnection struct {
+	Nodes []*ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel `json:"nodes"`
+}
+
+// GetNodes returns ListIssueLabelsIssueLabelsIssueLabelConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ListIssueLabelsIssueLabelsIssueLabelConnection) GetNodes() []*ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel {
+	return v.Nodes
+}
+
+// ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel includes the requested fields of the GraphQL type IssueLabel.
+// The GraphQL type's documentation follows.
+//
+// Labels that can be associated with issues. Labels help categorize and filter
+// issues across a workspace. They can be workspace-level (shared across all teams)
+// or team-scoped. Labels have a color for visual identification and can be
+// organized hierarchically into groups, where a parent label acts as a group
+// containing child labels. Labels may also be inherited from parent teams to sub-teams.
+type ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The label's name.
+	Name string `json:"name"`
+	// The label's color as a HEX string (e.g., '#EB5757'). Used for visual identification of the label in the UI.
+	Color string `json:"color"`
+}
+
+// GetId returns ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel.Id, and is useful for accessing the field via an interface.
+func (v *ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel) GetId() string { return v.Id }
+
+// GetName returns ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel.Name, and is useful for accessing the field via an interface.
+func (v *ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel) GetName() string {
+	return v.Name
+}
+
+// GetColor returns ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel.Color, and is useful for accessing the field via an interface.
+func (v *ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel) GetColor() string {
+	return v.Color
+}
+
+// ListIssueLabelsResponse is returned by ListIssueLabels on success.
+type ListIssueLabelsResponse struct {
+	// All issue labels. Returns a paginated list of labels visible to the
+	// authenticated user, including both workspace-level and team-scoped labels.
+	IssueLabels *ListIssueLabelsIssueLabelsIssueLabelConnection `json:"issueLabels"`
+}
+
+// GetIssueLabels returns ListIssueLabelsResponse.IssueLabels, and is useful for accessing the field via an interface.
+func (v *ListIssueLabelsResponse) GetIssueLabels() *ListIssueLabelsIssueLabelsIssueLabelConnection {
+	return v.IssueLabels
 }
 
 // ListIssuesIssuesIssueConnection includes the requested fields of the GraphQL type IssueConnection.
@@ -15241,6 +17416,178 @@ func (v *UpdateInitiativeResponse) GetInitiativeUpdate() *UpdateInitiativeInitia
 	return v.InitiativeUpdate
 }
 
+// UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayload includes the requested fields of the GraphQL type InitiativeUpdatePayload.
+// The GraphQL type's documentation follows.
+//
+// The result of an initiative update mutation.
+type UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The initiative update that was created or updated.
+	InitiativeUpdate *UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate `json:"initiativeUpdate"`
+}
+
+// GetSuccess returns UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayload.Success, and is useful for accessing the field via an interface.
+func (v *UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetInitiativeUpdate returns UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayload.InitiativeUpdate, and is useful for accessing the field via an interface.
+func (v *UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayload) GetInitiativeUpdate() *UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate {
+	return v.InitiativeUpdate
+}
+
+// UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate includes the requested fields of the GraphQL type InitiativeUpdate.
+// The GraphQL type's documentation follows.
+//
+// A status update posted to an initiative. Initiative updates communicate
+// progress, health, and blockers to stakeholders. Each update captures the
+// initiative's health at the time of writing and includes a rich-text body with
+// the update content.
+type UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate struct {
+	InitiativeUpdateFields `json:"-"`
+}
+
+// GetId returns UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate.Id, and is useful for accessing the field via an interface.
+func (v *UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate) GetId() string {
+	return v.InitiativeUpdateFields.Id
+}
+
+// GetSlugId returns UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate.SlugId, and is useful for accessing the field via an interface.
+func (v *UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate) GetSlugId() string {
+	return v.InitiativeUpdateFields.SlugId
+}
+
+// GetBody returns UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate.Body, and is useful for accessing the field via an interface.
+func (v *UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate) GetBody() string {
+	return v.InitiativeUpdateFields.Body
+}
+
+// GetHealth returns UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate.Health, and is useful for accessing the field via an interface.
+func (v *UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate) GetHealth() InitiativeUpdateHealthType {
+	return v.InitiativeUpdateFields.Health
+}
+
+// GetCreatedAt returns UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate.CreatedAt, and is useful for accessing the field via an interface.
+func (v *UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate) GetCreatedAt() time.Time {
+	return v.InitiativeUpdateFields.CreatedAt
+}
+
+// GetUpdatedAt returns UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate) GetUpdatedAt() time.Time {
+	return v.InitiativeUpdateFields.UpdatedAt
+}
+
+// GetEditedAt returns UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate.EditedAt, and is useful for accessing the field via an interface.
+func (v *UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate) GetEditedAt() *time.Time {
+	return v.InitiativeUpdateFields.EditedAt
+}
+
+// GetArchivedAt returns UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate.ArchivedAt, and is useful for accessing the field via an interface.
+func (v *UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate) GetArchivedAt() *time.Time {
+	return v.InitiativeUpdateFields.ArchivedAt
+}
+
+// GetUrl returns UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate.Url, and is useful for accessing the field via an interface.
+func (v *UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate) GetUrl() string {
+	return v.InitiativeUpdateFields.Url
+}
+
+// GetUser returns UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate.User, and is useful for accessing the field via an interface.
+func (v *UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate) GetUser() *InitiativeUpdateFieldsUser {
+	return v.InitiativeUpdateFields.User
+}
+
+// GetInitiative returns UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate.Initiative, and is useful for accessing the field via an interface.
+func (v *UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate) GetInitiative() *InitiativeUpdateFieldsInitiative {
+	return v.InitiativeUpdateFields.Initiative
+}
+
+func (v *UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.InitiativeUpdateFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalUpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate struct {
+	Id string `json:"id"`
+
+	SlugId string `json:"slugId"`
+
+	Body string `json:"body"`
+
+	Health InitiativeUpdateHealthType `json:"health"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	EditedAt *time.Time `json:"editedAt"`
+
+	ArchivedAt *time.Time `json:"archivedAt"`
+
+	Url string `json:"url"`
+
+	User *InitiativeUpdateFieldsUser `json:"user"`
+
+	Initiative *InitiativeUpdateFieldsInitiative `json:"initiative"`
+}
+
+func (v *UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate) __premarshalJSON() (*__premarshalUpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate, error) {
+	var retval __premarshalUpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayloadInitiativeUpdate
+
+	retval.Id = v.InitiativeUpdateFields.Id
+	retval.SlugId = v.InitiativeUpdateFields.SlugId
+	retval.Body = v.InitiativeUpdateFields.Body
+	retval.Health = v.InitiativeUpdateFields.Health
+	retval.CreatedAt = v.InitiativeUpdateFields.CreatedAt
+	retval.UpdatedAt = v.InitiativeUpdateFields.UpdatedAt
+	retval.EditedAt = v.InitiativeUpdateFields.EditedAt
+	retval.ArchivedAt = v.InitiativeUpdateFields.ArchivedAt
+	retval.Url = v.InitiativeUpdateFields.Url
+	retval.User = v.InitiativeUpdateFields.User
+	retval.Initiative = v.InitiativeUpdateFields.Initiative
+	return &retval, nil
+}
+
+// UpdateInitiativeUpdateResponse is returned by UpdateInitiativeUpdate on success.
+type UpdateInitiativeUpdateResponse struct {
+	// Updates an initiative update.
+	InitiativeUpdateUpdate *UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayload `json:"initiativeUpdateUpdate"`
+}
+
+// GetInitiativeUpdateUpdate returns UpdateInitiativeUpdateResponse.InitiativeUpdateUpdate, and is useful for accessing the field via an interface.
+func (v *UpdateInitiativeUpdateResponse) GetInitiativeUpdateUpdate() *UpdateInitiativeUpdateInitiativeUpdateUpdateInitiativeUpdatePayload {
+	return v.InitiativeUpdateUpdate
+}
+
 // UpdateIssueIssueUpdateIssuePayload includes the requested fields of the GraphQL type IssuePayload.
 // The GraphQL type's documentation follows.
 //
@@ -15803,6 +18150,26 @@ type __CreateInitiativeInput struct {
 // GetInput returns __CreateInitiativeInput.Input, and is useful for accessing the field via an interface.
 func (v *__CreateInitiativeInput) GetInput() *InitiativeCreateInput { return v.Input }
 
+// __CreateInitiativeUpdateInput is used internally by genqlient
+type __CreateInitiativeUpdateInput struct {
+	Input *InitiativeUpdateCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __CreateInitiativeUpdateInput.Input, and is useful for accessing the field via an interface.
+func (v *__CreateInitiativeUpdateInput) GetInput() *InitiativeUpdateCreateInput { return v.Input }
+
+// __CreateInitiativeUpdateReminderInput is used internally by genqlient
+type __CreateInitiativeUpdateReminderInput struct {
+	InitiativeId string  `json:"initiativeId"`
+	UserId       *string `json:"userId"`
+}
+
+// GetInitiativeId returns __CreateInitiativeUpdateReminderInput.InitiativeId, and is useful for accessing the field via an interface.
+func (v *__CreateInitiativeUpdateReminderInput) GetInitiativeId() string { return v.InitiativeId }
+
+// GetUserId returns __CreateInitiativeUpdateReminderInput.UserId, and is useful for accessing the field via an interface.
+func (v *__CreateInitiativeUpdateReminderInput) GetUserId() *string { return v.UserId }
+
 // __CreateIssueInput is used internally by genqlient
 type __CreateIssueInput struct {
 	Input *IssueCreateInput `json:"input,omitempty"`
@@ -15851,6 +18218,22 @@ type __GetInitiativeInput struct {
 // GetId returns __GetInitiativeInput.Id, and is useful for accessing the field via an interface.
 func (v *__GetInitiativeInput) GetId() string { return v.Id }
 
+// __GetInitiativeLabelsInput is used internally by genqlient
+type __GetInitiativeLabelsInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __GetInitiativeLabelsInput.Id, and is useful for accessing the field via an interface.
+func (v *__GetInitiativeLabelsInput) GetId() string { return v.Id }
+
+// __GetInitiativeUpdateInput is used internally by genqlient
+type __GetInitiativeUpdateInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __GetInitiativeUpdateInput.Id, and is useful for accessing the field via an interface.
+func (v *__GetInitiativeUpdateInput) GetId() string { return v.Id }
+
 // __GetIssueInput is used internally by genqlient
 type __GetIssueInput struct {
 	Id string `json:"id"`
@@ -15858,6 +18241,14 @@ type __GetIssueInput struct {
 
 // GetId returns __GetIssueInput.Id, and is useful for accessing the field via an interface.
 func (v *__GetIssueInput) GetId() string { return v.Id }
+
+// __GetProjectInitiativeLinksInput is used internally by genqlient
+type __GetProjectInitiativeLinksInput struct {
+	ProjectId string `json:"projectId"`
+}
+
+// GetProjectId returns __GetProjectInitiativeLinksInput.ProjectId, and is useful for accessing the field via an interface.
+func (v *__GetProjectInitiativeLinksInput) GetProjectId() string { return v.ProjectId }
 
 // __GetProjectInput is used internally by genqlient
 type __GetProjectInput struct {
@@ -15899,6 +18290,18 @@ type __GetUserByEmailInput struct {
 // GetFilter returns __GetUserByEmailInput.Filter, and is useful for accessing the field via an interface.
 func (v *__GetUserByEmailInput) GetFilter() *UserFilter { return v.Filter }
 
+// __InitiativeAddLabelInput is used internally by genqlient
+type __InitiativeAddLabelInput struct {
+	Id      string `json:"id"`
+	LabelId string `json:"labelId"`
+}
+
+// GetId returns __InitiativeAddLabelInput.Id, and is useful for accessing the field via an interface.
+func (v *__InitiativeAddLabelInput) GetId() string { return v.Id }
+
+// GetLabelId returns __InitiativeAddLabelInput.LabelId, and is useful for accessing the field via an interface.
+func (v *__InitiativeAddLabelInput) GetLabelId() string { return v.LabelId }
+
 // __InitiativeArchiveInput is used internally by genqlient
 type __InitiativeArchiveInput struct {
 	Id string `json:"id"`
@@ -15931,6 +18334,62 @@ func (v *__InitiativeLeadTeamUpdateInput) GetLeadTeamId() *string { return v.Lea
 // GetMode returns __InitiativeLeadTeamUpdateInput.Mode, and is useful for accessing the field via an interface.
 func (v *__InitiativeLeadTeamUpdateInput) GetMode() *InitiativeLeadTeamChangeMode { return v.Mode }
 
+// __InitiativeRelationCreateInput is used internally by genqlient
+type __InitiativeRelationCreateInput struct {
+	Input *InitiativeRelationCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __InitiativeRelationCreateInput.Input, and is useful for accessing the field via an interface.
+func (v *__InitiativeRelationCreateInput) GetInput() *InitiativeRelationCreateInput { return v.Input }
+
+// __InitiativeRelationDeleteInput is used internally by genqlient
+type __InitiativeRelationDeleteInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __InitiativeRelationDeleteInput.Id, and is useful for accessing the field via an interface.
+func (v *__InitiativeRelationDeleteInput) GetId() string { return v.Id }
+
+// __InitiativeRemoveLabelInput is used internally by genqlient
+type __InitiativeRemoveLabelInput struct {
+	Id      string `json:"id"`
+	LabelId string `json:"labelId"`
+}
+
+// GetId returns __InitiativeRemoveLabelInput.Id, and is useful for accessing the field via an interface.
+func (v *__InitiativeRemoveLabelInput) GetId() string { return v.Id }
+
+// GetLabelId returns __InitiativeRemoveLabelInput.LabelId, and is useful for accessing the field via an interface.
+func (v *__InitiativeRemoveLabelInput) GetLabelId() string { return v.LabelId }
+
+// __InitiativeToProjectCreateInput is used internally by genqlient
+type __InitiativeToProjectCreateInput struct {
+	Input *InitiativeToProjectCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __InitiativeToProjectCreateInput.Input, and is useful for accessing the field via an interface.
+func (v *__InitiativeToProjectCreateInput) GetInput() *InitiativeToProjectCreateInput { return v.Input }
+
+// __InitiativeToProjectDeleteInput is used internally by genqlient
+type __InitiativeToProjectDeleteInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __InitiativeToProjectDeleteInput.Id, and is useful for accessing the field via an interface.
+func (v *__InitiativeToProjectDeleteInput) GetId() string { return v.Id }
+
+// __InitiativeToProjectUpdateInput is used internally by genqlient
+type __InitiativeToProjectUpdateInput struct {
+	Id    string                          `json:"id"`
+	Input *InitiativeToProjectUpdateInput `json:"input,omitempty"`
+}
+
+// GetId returns __InitiativeToProjectUpdateInput.Id, and is useful for accessing the field via an interface.
+func (v *__InitiativeToProjectUpdateInput) GetId() string { return v.Id }
+
+// GetInput returns __InitiativeToProjectUpdateInput.Input, and is useful for accessing the field via an interface.
+func (v *__InitiativeToProjectUpdateInput) GetInput() *InitiativeToProjectUpdateInput { return v.Input }
+
 // __InitiativeUnarchiveInput is used internally by genqlient
 type __InitiativeUnarchiveInput struct {
 	Id string `json:"id"`
@@ -15938,6 +18397,22 @@ type __InitiativeUnarchiveInput struct {
 
 // GetId returns __InitiativeUnarchiveInput.Id, and is useful for accessing the field via an interface.
 func (v *__InitiativeUnarchiveInput) GetId() string { return v.Id }
+
+// __InitiativeUpdateArchiveInput is used internally by genqlient
+type __InitiativeUpdateArchiveInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __InitiativeUpdateArchiveInput.Id, and is useful for accessing the field via an interface.
+func (v *__InitiativeUpdateArchiveInput) GetId() string { return v.Id }
+
+// __InitiativeUpdateUnarchiveInput is used internally by genqlient
+type __InitiativeUpdateUnarchiveInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __InitiativeUpdateUnarchiveInput.Id, and is useful for accessing the field via an interface.
+func (v *__InitiativeUpdateUnarchiveInput) GetId() string { return v.Id }
 
 // __ListAttachmentsInput is used internally by genqlient
 type __ListAttachmentsInput struct {
@@ -15979,6 +18454,50 @@ func (v *__ListCommentsInput) GetAfter() *string { return v.After }
 // GetOrderBy returns __ListCommentsInput.OrderBy, and is useful for accessing the field via an interface.
 func (v *__ListCommentsInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy }
 
+// __ListInitiativeLabelsInput is used internally by genqlient
+type __ListInitiativeLabelsInput struct {
+	Filter *InitiativeLabelFilter `json:"filter,omitempty"`
+	First  *int                   `json:"first"`
+}
+
+// GetFilter returns __ListInitiativeLabelsInput.Filter, and is useful for accessing the field via an interface.
+func (v *__ListInitiativeLabelsInput) GetFilter() *InitiativeLabelFilter { return v.Filter }
+
+// GetFirst returns __ListInitiativeLabelsInput.First, and is useful for accessing the field via an interface.
+func (v *__ListInitiativeLabelsInput) GetFirst() *int { return v.First }
+
+// __ListInitiativeRelationsInput is used internally by genqlient
+type __ListInitiativeRelationsInput struct {
+	First *int    `json:"first"`
+	After *string `json:"after"`
+}
+
+// GetFirst returns __ListInitiativeRelationsInput.First, and is useful for accessing the field via an interface.
+func (v *__ListInitiativeRelationsInput) GetFirst() *int { return v.First }
+
+// GetAfter returns __ListInitiativeRelationsInput.After, and is useful for accessing the field via an interface.
+func (v *__ListInitiativeRelationsInput) GetAfter() *string { return v.After }
+
+// __ListInitiativeUpdatesInput is used internally by genqlient
+type __ListInitiativeUpdatesInput struct {
+	Filter  *InitiativeUpdateFilter `json:"filter,omitempty"`
+	First   *int                    `json:"first"`
+	After   *string                 `json:"after"`
+	OrderBy *PaginationOrderBy      `json:"orderBy"`
+}
+
+// GetFilter returns __ListInitiativeUpdatesInput.Filter, and is useful for accessing the field via an interface.
+func (v *__ListInitiativeUpdatesInput) GetFilter() *InitiativeUpdateFilter { return v.Filter }
+
+// GetFirst returns __ListInitiativeUpdatesInput.First, and is useful for accessing the field via an interface.
+func (v *__ListInitiativeUpdatesInput) GetFirst() *int { return v.First }
+
+// GetAfter returns __ListInitiativeUpdatesInput.After, and is useful for accessing the field via an interface.
+func (v *__ListInitiativeUpdatesInput) GetAfter() *string { return v.After }
+
+// GetOrderBy returns __ListInitiativeUpdatesInput.OrderBy, and is useful for accessing the field via an interface.
+func (v *__ListInitiativeUpdatesInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy }
+
 // __ListInitiativesInput is used internally by genqlient
 type __ListInitiativesInput struct {
 	Filter          *InitiativeFilter  `json:"filter,omitempty"`
@@ -16002,6 +18521,18 @@ func (v *__ListInitiativesInput) GetOrderBy() *PaginationOrderBy { return v.Orde
 
 // GetIncludeArchived returns __ListInitiativesInput.IncludeArchived, and is useful for accessing the field via an interface.
 func (v *__ListInitiativesInput) GetIncludeArchived() *bool { return v.IncludeArchived }
+
+// __ListIssueLabelsInput is used internally by genqlient
+type __ListIssueLabelsInput struct {
+	Filter *IssueLabelFilter `json:"filter,omitempty"`
+	First  *int              `json:"first"`
+}
+
+// GetFilter returns __ListIssueLabelsInput.Filter, and is useful for accessing the field via an interface.
+func (v *__ListIssueLabelsInput) GetFilter() *IssueLabelFilter { return v.Filter }
+
+// GetFirst returns __ListIssueLabelsInput.First, and is useful for accessing the field via an interface.
+func (v *__ListIssueLabelsInput) GetFirst() *int { return v.First }
 
 // __ListIssuesInput is used internally by genqlient
 type __ListIssuesInput struct {
@@ -16126,6 +18657,18 @@ func (v *__UpdateInitiativeInput) GetId() string { return v.Id }
 
 // GetInput returns __UpdateInitiativeInput.Input, and is useful for accessing the field via an interface.
 func (v *__UpdateInitiativeInput) GetInput() *InitiativeUpdateInput { return v.Input }
+
+// __UpdateInitiativeUpdateInput is used internally by genqlient
+type __UpdateInitiativeUpdateInput struct {
+	Id    string                       `json:"id"`
+	Input *InitiativeUpdateUpdateInput `json:"input,omitempty"`
+}
+
+// GetId returns __UpdateInitiativeUpdateInput.Id, and is useful for accessing the field via an interface.
+func (v *__UpdateInitiativeUpdateInput) GetId() string { return v.Id }
+
+// GetInput returns __UpdateInitiativeUpdateInput.Input, and is useful for accessing the field via an interface.
+func (v *__UpdateInitiativeUpdateInput) GetInput() *InitiativeUpdateUpdateInput { return v.Input }
 
 // __UpdateIssueInput is used internally by genqlient
 type __UpdateIssueInput struct {
@@ -16364,6 +18907,102 @@ func CreateInitiative(
 	}
 
 	data_ = &CreateInitiativeResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by CreateInitiativeUpdate.
+const CreateInitiativeUpdate_Operation = `
+mutation CreateInitiativeUpdate ($input: InitiativeUpdateCreateInput!) {
+	initiativeUpdateCreate(input: $input) {
+		success
+		initiativeUpdate {
+			... InitiativeUpdateFields
+		}
+	}
+}
+fragment InitiativeUpdateFields on InitiativeUpdate {
+	id
+	slugId
+	body
+	health
+	createdAt
+	updatedAt
+	editedAt
+	archivedAt
+	url
+	user {
+		id
+		name
+		email
+	}
+	initiative {
+		id
+		name
+	}
+}
+`
+
+// Mutation: post a new status update to an initiative
+func CreateInitiativeUpdate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *InitiativeUpdateCreateInput,
+) (data_ *CreateInitiativeUpdateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "CreateInitiativeUpdate",
+		Query:  CreateInitiativeUpdate_Operation,
+		Variables: &__CreateInitiativeUpdateInput{
+			Input: input,
+		},
+	}
+
+	data_ = &CreateInitiativeUpdateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by CreateInitiativeUpdateReminder.
+const CreateInitiativeUpdateReminder_Operation = `
+mutation CreateInitiativeUpdateReminder ($initiativeId: String!, $userId: String) {
+	createInitiativeUpdateReminder(initiativeId: $initiativeId, userId: $userId) {
+		success
+	}
+}
+`
+
+// Mutation: notify a user (defaults to the initiative owner) to post an
+// initiative status update.
+func CreateInitiativeUpdateReminder(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	initiativeId string,
+	userId *string,
+) (data_ *CreateInitiativeUpdateReminderResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "CreateInitiativeUpdateReminder",
+		Query:  CreateInitiativeUpdateReminder_Operation,
+		Variables: &__CreateInitiativeUpdateReminderInput{
+			InitiativeId: initiativeId,
+			UserId:       userId,
+		},
+	}
+
+	data_ = &CreateInitiativeUpdateReminderResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -16622,6 +19261,24 @@ fragment InitiativeDetailFields on Initiative {
 		key
 		name
 	}
+	projects {
+		nodes {
+			id
+			name
+		}
+	}
+	parentInitiatives {
+		nodes {
+			id
+			name
+		}
+	}
+	subInitiatives {
+		nodes {
+			id
+			name
+		}
+	}
 }
 `
 
@@ -16640,6 +19297,106 @@ func GetInitiative(
 	}
 
 	data_ = &GetInitiativeResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by GetInitiativeLabels.
+const GetInitiativeLabels_Operation = `
+query GetInitiativeLabels ($id: String!) {
+	initiative(id: $id) {
+		labels {
+			nodes {
+				id
+				name
+				color
+			}
+		}
+	}
+}
+`
+
+// Query: Best-effort fetch of an initiative's labels, kept separate from
+// GetInitiative. See the header note above: querying `labels` inline with
+// other fields fails the whole request when the workspace-level initiative
+// labels feature is off, so callers issue this as its own request and treat
+// an error as "no labels to show" rather than a hard failure.
+func GetInitiativeLabels(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *GetInitiativeLabelsResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetInitiativeLabels",
+		Query:  GetInitiativeLabels_Operation,
+		Variables: &__GetInitiativeLabelsInput{
+			Id: id,
+		},
+	}
+
+	data_ = &GetInitiativeLabelsResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by GetInitiativeUpdate.
+const GetInitiativeUpdate_Operation = `
+query GetInitiativeUpdate ($id: String!) {
+	initiativeUpdate(id: $id) {
+		... InitiativeUpdateFields
+	}
+}
+fragment InitiativeUpdateFields on InitiativeUpdate {
+	id
+	slugId
+	body
+	health
+	createdAt
+	updatedAt
+	editedAt
+	archivedAt
+	url
+	user {
+		id
+		name
+		email
+	}
+	initiative {
+		id
+		name
+	}
+}
+`
+
+// Query: get a single status update by id
+func GetInitiativeUpdate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *GetInitiativeUpdateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetInitiativeUpdate",
+		Query:  GetInitiativeUpdate_Operation,
+		Variables: &__GetInitiativeUpdateInput{
+			Id: id,
+		},
+	}
+
+	data_ = &GetInitiativeUpdateResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -17111,6 +19868,53 @@ func GetProject(
 	return data_, err_
 }
 
+// The query executed by GetProjectInitiativeLinks.
+const GetProjectInitiativeLinks_Operation = `
+query GetProjectInitiativeLinks ($projectId: String!) {
+	project(id: $projectId) {
+		initiativeToProjects {
+			nodes {
+				id
+				sortOrder
+				initiative {
+					id
+					name
+				}
+			}
+		}
+	}
+}
+`
+
+// Query: find the InitiativeToProject join record(s) for a project. Used to
+// locate the link id for a given (initiative, project) pair before calling
+// InitiativeToProjectDelete/InitiativeToProjectUpdate - see header note on
+// why this must be queried from the Project side.
+func GetProjectInitiativeLinks(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	projectId string,
+) (data_ *GetProjectInitiativeLinksResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetProjectInitiativeLinks",
+		Query:  GetProjectInitiativeLinks_Operation,
+		Variables: &__GetProjectInitiativeLinksInput{
+			ProjectId: projectId,
+		},
+	}
+
+	data_ = &GetProjectInitiativeLinksResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The query executed by GetTeam.
 const GetTeam_Operation = `
 query GetTeam ($key: String!) {
@@ -17344,6 +20148,63 @@ func GetViewer(
 	return data_, err_
 }
 
+// The mutation executed by InitiativeAddLabel.
+const InitiativeAddLabel_Operation = `
+mutation InitiativeAddLabel ($id: String!, $labelId: String!) {
+	initiativeAddLabel(id: $id, labelId: $labelId) {
+		success
+		initiative {
+			... InitiativeListFields
+		}
+	}
+}
+fragment InitiativeListFields on Initiative {
+	id
+	name
+	status
+	health
+	icon
+	color
+	targetDate
+	url
+	createdAt
+	updatedAt
+	owner {
+		id
+		name
+		email
+	}
+}
+`
+
+// Mutation: Add a label to an initiative
+func InitiativeAddLabel(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	labelId string,
+) (data_ *InitiativeAddLabelResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "InitiativeAddLabel",
+		Query:  InitiativeAddLabel_Operation,
+		Variables: &__InitiativeAddLabelInput{
+			Id:      id,
+			LabelId: labelId,
+		},
+	}
+
+	data_ = &InitiativeAddLabelResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The mutation executed by InitiativeArchive.
 const InitiativeArchive_Operation = `
 mutation InitiativeArchive ($id: String!) {
@@ -17480,6 +20341,280 @@ func InitiativeLeadTeamUpdate(
 	return data_, err_
 }
 
+// The mutation executed by InitiativeRelationCreate.
+const InitiativeRelationCreate_Operation = `
+mutation InitiativeRelationCreate ($input: InitiativeRelationCreateInput!) {
+	initiativeRelationCreate(input: $input) {
+		success
+		initiativeRelation {
+			id
+			sortOrder
+			initiative {
+				id
+				name
+			}
+			relatedInitiative {
+				id
+				name
+			}
+		}
+	}
+}
+`
+
+// Mutation: Create a parent-child relation between two initiatives.
+// `initiativeId` is the parent, `relatedInitiativeId` is the child. Requires
+// the Linear Enterprise plan (sub-initiatives) - confirmed live.
+func InitiativeRelationCreate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *InitiativeRelationCreateInput,
+) (data_ *InitiativeRelationCreateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "InitiativeRelationCreate",
+		Query:  InitiativeRelationCreate_Operation,
+		Variables: &__InitiativeRelationCreateInput{
+			Input: input,
+		},
+	}
+
+	data_ = &InitiativeRelationCreateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by InitiativeRelationDelete.
+const InitiativeRelationDelete_Operation = `
+mutation InitiativeRelationDelete ($id: String!) {
+	initiativeRelationDelete(id: $id) {
+		success
+		entityId
+	}
+}
+`
+
+// Mutation: Delete an initiative relation
+func InitiativeRelationDelete(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *InitiativeRelationDeleteResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "InitiativeRelationDelete",
+		Query:  InitiativeRelationDelete_Operation,
+		Variables: &__InitiativeRelationDeleteInput{
+			Id: id,
+		},
+	}
+
+	data_ = &InitiativeRelationDeleteResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by InitiativeRemoveLabel.
+const InitiativeRemoveLabel_Operation = `
+mutation InitiativeRemoveLabel ($id: String!, $labelId: String!) {
+	initiativeRemoveLabel(id: $id, labelId: $labelId) {
+		success
+		initiative {
+			... InitiativeListFields
+		}
+	}
+}
+fragment InitiativeListFields on Initiative {
+	id
+	name
+	status
+	health
+	icon
+	color
+	targetDate
+	url
+	createdAt
+	updatedAt
+	owner {
+		id
+		name
+		email
+	}
+}
+`
+
+// Mutation: Remove a label from an initiative
+func InitiativeRemoveLabel(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	labelId string,
+) (data_ *InitiativeRemoveLabelResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "InitiativeRemoveLabel",
+		Query:  InitiativeRemoveLabel_Operation,
+		Variables: &__InitiativeRemoveLabelInput{
+			Id:      id,
+			LabelId: labelId,
+		},
+	}
+
+	data_ = &InitiativeRemoveLabelResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by InitiativeToProjectCreate.
+const InitiativeToProjectCreate_Operation = `
+mutation InitiativeToProjectCreate ($input: InitiativeToProjectCreateInput!) {
+	initiativeToProjectCreate(input: $input) {
+		success
+		initiativeToProject {
+			id
+			sortOrder
+			initiative {
+				id
+				name
+			}
+			project {
+				id
+				name
+			}
+		}
+	}
+}
+`
+
+// Mutation: Associate a project with an initiative
+func InitiativeToProjectCreate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *InitiativeToProjectCreateInput,
+) (data_ *InitiativeToProjectCreateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "InitiativeToProjectCreate",
+		Query:  InitiativeToProjectCreate_Operation,
+		Variables: &__InitiativeToProjectCreateInput{
+			Input: input,
+		},
+	}
+
+	data_ = &InitiativeToProjectCreateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by InitiativeToProjectDelete.
+const InitiativeToProjectDelete_Operation = `
+mutation InitiativeToProjectDelete ($id: String!) {
+	initiativeToProjectDelete(id: $id) {
+		success
+		entityId
+	}
+}
+`
+
+// Mutation: Remove a project from an initiative
+func InitiativeToProjectDelete(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *InitiativeToProjectDeleteResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "InitiativeToProjectDelete",
+		Query:  InitiativeToProjectDelete_Operation,
+		Variables: &__InitiativeToProjectDeleteInput{
+			Id: id,
+		},
+	}
+
+	data_ = &InitiativeToProjectDeleteResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by InitiativeToProjectUpdate.
+const InitiativeToProjectUpdate_Operation = `
+mutation InitiativeToProjectUpdate ($id: String!, $input: InitiativeToProjectUpdateInput!) {
+	initiativeToProjectUpdate(id: $id, input: $input) {
+		success
+		initiativeToProject {
+			id
+			sortOrder
+			initiative {
+				id
+				name
+			}
+			project {
+				id
+				name
+			}
+		}
+	}
+}
+`
+
+// Mutation: Update an initiative-to-project association's sort order
+func InitiativeToProjectUpdate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	input *InitiativeToProjectUpdateInput,
+) (data_ *InitiativeToProjectUpdateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "InitiativeToProjectUpdate",
+		Query:  InitiativeToProjectUpdate_Operation,
+		Variables: &__InitiativeToProjectUpdateInput{
+			Id:    id,
+			Input: input,
+		},
+	}
+
+	data_ = &InitiativeToProjectUpdateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The mutation executed by InitiativeUnarchive.
 const InitiativeUnarchive_Operation = `
 mutation InitiativeUnarchive ($id: String!) {
@@ -17509,6 +20644,84 @@ func InitiativeUnarchive(
 	}
 
 	data_ = &InitiativeUnarchiveResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by InitiativeUpdateArchive.
+const InitiativeUpdateArchive_Operation = `
+mutation InitiativeUpdateArchive ($id: String!) {
+	initiativeUpdateArchive(id: $id) {
+		success
+		entity {
+			id
+			archivedAt
+		}
+	}
+}
+`
+
+// Mutation: archive a status update
+func InitiativeUpdateArchive(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *InitiativeUpdateArchiveResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "InitiativeUpdateArchive",
+		Query:  InitiativeUpdateArchive_Operation,
+		Variables: &__InitiativeUpdateArchiveInput{
+			Id: id,
+		},
+	}
+
+	data_ = &InitiativeUpdateArchiveResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by InitiativeUpdateUnarchive.
+const InitiativeUpdateUnarchive_Operation = `
+mutation InitiativeUpdateUnarchive ($id: String!) {
+	initiativeUpdateUnarchive(id: $id) {
+		success
+		entity {
+			id
+			archivedAt
+		}
+	}
+}
+`
+
+// Mutation: unarchive a status update
+func InitiativeUpdateUnarchive(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *InitiativeUpdateUnarchiveResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "InitiativeUpdateUnarchive",
+		Query:  InitiativeUpdateUnarchive_Operation,
+		Variables: &__InitiativeUpdateUnarchiveInput{
+			Id: id,
+		},
+	}
+
+	data_ = &InitiativeUpdateUnarchiveResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -17637,6 +20850,172 @@ func ListComments(
 	return data_, err_
 }
 
+// The query executed by ListInitiativeLabels.
+const ListInitiativeLabels_Operation = `
+query ListInitiativeLabels ($filter: InitiativeLabelFilter, $first: Int) {
+	initiativeLabels(filter: $filter, first: $first) {
+		nodes {
+			id
+			name
+			color
+		}
+	}
+}
+`
+
+// Query: resolve an initiative label by name. See header note: `labelId` on
+// initiativeAddLabel/initiativeRemoveLabel is an InitiativeLabel id, not an
+// IssueLabel id.
+func ListInitiativeLabels(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter *InitiativeLabelFilter,
+	first *int,
+) (data_ *ListInitiativeLabelsResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ListInitiativeLabels",
+		Query:  ListInitiativeLabels_Operation,
+		Variables: &__ListInitiativeLabelsInput{
+			Filter: filter,
+			First:  first,
+		},
+	}
+
+	data_ = &ListInitiativeLabelsResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by ListInitiativeRelations.
+const ListInitiativeRelations_Operation = `
+query ListInitiativeRelations ($first: Int, $after: String) {
+	initiativeRelations(first: $first, after: $after) {
+		nodes {
+			id
+			initiative {
+				id
+				name
+			}
+			relatedInitiative {
+				id
+				name
+			}
+		}
+		pageInfo {
+			hasNextPage
+			endCursor
+		}
+	}
+}
+`
+
+// Query: list initiative parent-child relations in the workspace. There is
+// no filter argument on this connection (unlike most others in this
+// schema), so finding the join id for a specific (initiative,
+// relatedInitiative) pair means paginating this and matching client-side -
+// see header note.
+func ListInitiativeRelations(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	first *int,
+	after *string,
+) (data_ *ListInitiativeRelationsResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ListInitiativeRelations",
+		Query:  ListInitiativeRelations_Operation,
+		Variables: &__ListInitiativeRelationsInput{
+			First: first,
+			After: after,
+		},
+	}
+
+	data_ = &ListInitiativeRelationsResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by ListInitiativeUpdates.
+const ListInitiativeUpdates_Operation = `
+query ListInitiativeUpdates ($filter: InitiativeUpdateFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
+	initiativeUpdates(filter: $filter, first: $first, after: $after, orderBy: $orderBy) {
+		nodes {
+			... InitiativeUpdateFields
+		}
+		pageInfo {
+			hasNextPage
+			endCursor
+		}
+	}
+}
+fragment InitiativeUpdateFields on InitiativeUpdate {
+	id
+	slugId
+	body
+	health
+	createdAt
+	updatedAt
+	editedAt
+	archivedAt
+	url
+	user {
+		id
+		name
+		email
+	}
+	initiative {
+		id
+		name
+	}
+}
+`
+
+// Query: list status updates for an initiative (via InitiativeUpdateFilter's
+// `initiative` field, matched by id).
+func ListInitiativeUpdates(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter *InitiativeUpdateFilter,
+	first *int,
+	after *string,
+	orderBy *PaginationOrderBy,
+) (data_ *ListInitiativeUpdatesResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ListInitiativeUpdates",
+		Query:  ListInitiativeUpdates_Operation,
+		Variables: &__ListInitiativeUpdatesInput{
+			Filter:  filter,
+			First:   first,
+			After:   after,
+			OrderBy: orderBy,
+		},
+	}
+
+	data_ = &ListInitiativeUpdatesResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The query executed by ListInitiatives.
 const ListInitiatives_Operation = `
 query ListInitiatives ($filter: InitiativeFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy, $includeArchived: Boolean) {
@@ -17698,6 +21077,50 @@ func ListInitiatives(
 	}
 
 	data_ = &ListInitiativesResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by ListIssueLabels.
+const ListIssueLabels_Operation = `
+query ListIssueLabels ($filter: IssueLabelFilter, $first: Int) {
+	issueLabels(filter: $filter, first: $first) {
+		nodes {
+			id
+			name
+			color
+		}
+	}
+}
+`
+
+// Query: minimal issue-label lookup, reused later by the labels domain
+// (issue label add/remove commands). Not used by the initiative label
+// commands above - those resolve against the separate InitiativeLabel
+// catalog via ListInitiativeLabels instead (see header note).
+func ListIssueLabels(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter *IssueLabelFilter,
+	first *int,
+) (data_ *ListIssueLabelsResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ListIssueLabels",
+		Query:  ListIssueLabels_Operation,
+		Variables: &__ListIssueLabelsInput{
+			Filter: filter,
+			First:  first,
+		},
+	}
+
+	data_ = &ListIssueLabelsResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -18164,6 +21587,66 @@ func UpdateInitiative(
 	}
 
 	data_ = &UpdateInitiativeResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by UpdateInitiativeUpdate.
+const UpdateInitiativeUpdate_Operation = `
+mutation UpdateInitiativeUpdate ($id: String!, $input: InitiativeUpdateUpdateInput!) {
+	initiativeUpdateUpdate(id: $id, input: $input) {
+		success
+		initiativeUpdate {
+			... InitiativeUpdateFields
+		}
+	}
+}
+fragment InitiativeUpdateFields on InitiativeUpdate {
+	id
+	slugId
+	body
+	health
+	createdAt
+	updatedAt
+	editedAt
+	archivedAt
+	url
+	user {
+		id
+		name
+		email
+	}
+	initiative {
+		id
+		name
+	}
+}
+`
+
+// Mutation: edit an existing status update's body/health
+func UpdateInitiativeUpdate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	input *InitiativeUpdateUpdateInput,
+) (data_ *UpdateInitiativeUpdateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "UpdateInitiativeUpdate",
+		Query:  UpdateInitiativeUpdate_Operation,
+		Variables: &__UpdateInitiativeUpdateInput{
+			Id:    id,
+			Input: input,
+		},
+	}
+
+	data_ = &UpdateInitiativeUpdateResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(

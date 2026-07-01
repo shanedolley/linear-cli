@@ -29987,6 +29987,51 @@ type Query {
   initiative(id: String!): Initiative!
 
   """
+  [Internal] Returns a single initiative label by its identifier.
+
+  Not present in the schema snapshot checked into this repo (captured before
+  this field was exposed); confirmed directly against the live API via
+  introspection on 2026-07-01.
+  """
+  initiativeLabel(id: String!): InitiativeLabel!
+
+  """
+  [Internal] Returns all initiative labels in the workspace, with optional filtering.
+
+  Not present in the schema snapshot checked into this repo (captured before
+  this field was exposed); confirmed directly against the live API via
+  introspection on 2026-07-01.
+  """
+  initiativeLabels(
+    """A cursor to be used with first for forward pagination"""
+    after: String
+
+    """A cursor to be used with last for backward pagination."""
+    before: String
+
+    """Filter returned initiative labels."""
+    filter: InitiativeLabelFilter
+
+    """
+    The number of items to forward paginate (used with after). Defaults to 50.
+    """
+    first: Int
+
+    """Should archived resources be included (default: false)"""
+    includeArchived: Boolean
+
+    """
+    The number of items to backward paginate (used with before). Defaults to 50.
+    """
+    last: Int
+
+    """
+    By which field should the pagination order by. Available options are createdAt (default) and updatedAt.
+    """
+    orderBy: PaginationOrderBy
+  ): InitiativeLabelConnection!
+
+  """
   [Internal] Returns the impact of changing an initiative's lead team before
   applying the update to matching sub-initiatives.
   """

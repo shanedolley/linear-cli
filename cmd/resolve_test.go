@@ -106,7 +106,7 @@ func TestNewResolverCacheIsEmpty(t *testing.T) {
 	if cache == nil {
 		t.Fatal("newResolverCache() returned nil")
 	}
-	if len(cache.teams) != 0 || len(cache.users) != 0 || len(cache.projects) != 0 || len(cache.initiatives) != 0 || len(cache.states) != 0 {
+	if len(cache.teams) != 0 || len(cache.users) != 0 || len(cache.projects) != 0 || len(cache.initiatives) != 0 || len(cache.states) != 0 || len(cache.labels) != 0 || len(cache.initiativeLabels) != 0 {
 		t.Fatal("newResolverCache() should return a cache with empty maps")
 	}
 }
@@ -480,6 +480,194 @@ func TestResolveInitiative_CacheHit(t *testing.T) {
 	}
 	if client.callCount("ListInitiatives") != 1 {
 		t.Errorf("expected cache hit to avoid a second ListInitiatives call, total calls = %d", client.callCount("ListInitiatives"))
+	}
+}
+
+// --- resolveLabel ---
+
+func TestResolveLabel_UUIDPassthrough(t *testing.T) {
+	client := newMockGraphQLClient()
+	cache := newResolverCache()
+
+	id := "550e8400-e29b-41d4-a716-446655440000"
+	got, err := resolveLabel(context.Background(), client, cache, id)
+	if err != nil {
+		t.Fatalf("resolveLabel() error = %v", err)
+	}
+	if got != id {
+		t.Errorf("resolveLabel() = %q, want %q", got, id)
+	}
+	if len(client.calls) != 0 {
+		t.Errorf("expected no API calls for UUID passthrough, got %v", client.calls)
+	}
+}
+
+func TestResolveLabel_ExactMatch(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListIssueLabels"] = `{"issueLabels": {"nodes": [{"id": "label-uuid-1", "name": "Bug", "color": "#eb5757"}]}}`
+	cache := newResolverCache()
+
+	got, err := resolveLabel(context.Background(), client, cache, "bug")
+	if err != nil {
+		t.Fatalf("resolveLabel() error = %v", err)
+	}
+	if got != "label-uuid-1" {
+		t.Errorf("resolveLabel() = %q, want %q", got, "label-uuid-1")
+	}
+	if client.callCount("ListIssueLabels") != 1 {
+		t.Errorf("expected exactly 1 ListIssueLabels call, got %d", client.callCount("ListIssueLabels"))
+	}
+}
+
+func TestResolveLabel_Ambiguous(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListIssueLabels"] = `{"issueLabels": {"nodes": [
+		{"id": "label-uuid-1", "name": "Bug", "color": "#eb5757"},
+		{"id": "label-uuid-2", "name": "Bug", "color": "#000000"}
+	]}}`
+	cache := newResolverCache()
+
+	_, err := resolveLabel(context.Background(), client, cache, "Bug")
+	if err == nil {
+		t.Fatal("expected an ambiguous match error, got nil")
+	}
+	if !strings.Contains(err.Error(), "Multiple matches") {
+		t.Errorf("expected ambiguous error message, got: %v", err)
+	}
+	if !strings.Contains(err.Error(), "label-uuid-1") || !strings.Contains(err.Error(), "label-uuid-2") {
+		t.Errorf("expected error to list both candidate ids, got: %v", err)
+	}
+}
+
+func TestResolveLabel_NotFound(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListIssueLabels"] = `{"issueLabels": {"nodes": []}}`
+	cache := newResolverCache()
+
+	_, err := resolveLabel(context.Background(), client, cache, "Nonexistent")
+	if err == nil {
+		t.Fatal("expected error for unknown label, got nil")
+	}
+	if !strings.Contains(err.Error(), "Nonexistent") {
+		t.Errorf("expected error to mention the label name, got: %v", err)
+	}
+}
+
+func TestResolveLabel_CacheHit(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListIssueLabels"] = `{"issueLabels": {"nodes": [{"id": "label-uuid-1", "name": "Bug", "color": "#eb5757"}]}}`
+	cache := newResolverCache()
+
+	if _, err := resolveLabel(context.Background(), client, cache, "Bug"); err != nil {
+		t.Fatalf("first resolveLabel() error = %v", err)
+	}
+	if client.callCount("ListIssueLabels") != 1 {
+		t.Fatalf("expected exactly 1 ListIssueLabels call after first resolve, got %d", client.callCount("ListIssueLabels"))
+	}
+
+	got, err := resolveLabel(context.Background(), client, cache, "bug")
+	if err != nil {
+		t.Fatalf("second resolveLabel() error = %v", err)
+	}
+	if got != "label-uuid-1" {
+		t.Errorf("resolveLabel() = %q, want %q", got, "label-uuid-1")
+	}
+	if client.callCount("ListIssueLabels") != 1 {
+		t.Errorf("expected cache hit to avoid a second ListIssueLabels call, total calls = %d", client.callCount("ListIssueLabels"))
+	}
+}
+
+// --- resolveInitiativeLabel ---
+
+func TestResolveInitiativeLabel_UUIDPassthrough(t *testing.T) {
+	client := newMockGraphQLClient()
+	cache := newResolverCache()
+
+	id := "550e8400-e29b-41d4-a716-446655440000"
+	got, err := resolveInitiativeLabel(context.Background(), client, cache, id)
+	if err != nil {
+		t.Fatalf("resolveInitiativeLabel() error = %v", err)
+	}
+	if got != id {
+		t.Errorf("resolveInitiativeLabel() = %q, want %q", got, id)
+	}
+	if len(client.calls) != 0 {
+		t.Errorf("expected no API calls for UUID passthrough, got %v", client.calls)
+	}
+}
+
+func TestResolveInitiativeLabel_ExactMatch(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListInitiativeLabels"] = `{"initiativeLabels": {"nodes": [{"id": "ilabel-uuid-1", "name": "Strategic", "color": "#5e6ad2"}]}}`
+	cache := newResolverCache()
+
+	got, err := resolveInitiativeLabel(context.Background(), client, cache, "strategic")
+	if err != nil {
+		t.Fatalf("resolveInitiativeLabel() error = %v", err)
+	}
+	if got != "ilabel-uuid-1" {
+		t.Errorf("resolveInitiativeLabel() = %q, want %q", got, "ilabel-uuid-1")
+	}
+	if client.callCount("ListInitiativeLabels") != 1 {
+		t.Errorf("expected exactly 1 ListInitiativeLabels call, got %d", client.callCount("ListInitiativeLabels"))
+	}
+}
+
+func TestResolveInitiativeLabel_Ambiguous(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListInitiativeLabels"] = `{"initiativeLabels": {"nodes": [
+		{"id": "ilabel-uuid-1", "name": "Strategic", "color": "#5e6ad2"},
+		{"id": "ilabel-uuid-2", "name": "Strategic", "color": "#000000"}
+	]}}`
+	cache := newResolverCache()
+
+	_, err := resolveInitiativeLabel(context.Background(), client, cache, "Strategic")
+	if err == nil {
+		t.Fatal("expected an ambiguous match error, got nil")
+	}
+	if !strings.Contains(err.Error(), "Multiple matches") {
+		t.Errorf("expected ambiguous error message, got: %v", err)
+	}
+	if !strings.Contains(err.Error(), "ilabel-uuid-1") || !strings.Contains(err.Error(), "ilabel-uuid-2") {
+		t.Errorf("expected error to list both candidate ids, got: %v", err)
+	}
+}
+
+func TestResolveInitiativeLabel_NotFound(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListInitiativeLabels"] = `{"initiativeLabels": {"nodes": []}}`
+	cache := newResolverCache()
+
+	_, err := resolveInitiativeLabel(context.Background(), client, cache, "Nonexistent")
+	if err == nil {
+		t.Fatal("expected error for unknown initiative label, got nil")
+	}
+	if !strings.Contains(err.Error(), "Nonexistent") {
+		t.Errorf("expected error to mention the label name, got: %v", err)
+	}
+}
+
+func TestResolveInitiativeLabel_CacheHit(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListInitiativeLabels"] = `{"initiativeLabels": {"nodes": [{"id": "ilabel-uuid-1", "name": "Strategic", "color": "#5e6ad2"}]}}`
+	cache := newResolverCache()
+
+	if _, err := resolveInitiativeLabel(context.Background(), client, cache, "Strategic"); err != nil {
+		t.Fatalf("first resolveInitiativeLabel() error = %v", err)
+	}
+	if client.callCount("ListInitiativeLabels") != 1 {
+		t.Fatalf("expected exactly 1 ListInitiativeLabels call after first resolve, got %d", client.callCount("ListInitiativeLabels"))
+	}
+
+	got, err := resolveInitiativeLabel(context.Background(), client, cache, "strategic")
+	if err != nil {
+		t.Fatalf("second resolveInitiativeLabel() error = %v", err)
+	}
+	if got != "ilabel-uuid-1" {
+		t.Errorf("resolveInitiativeLabel() = %q, want %q", got, "ilabel-uuid-1")
+	}
+	if client.callCount("ListInitiativeLabels") != 1 {
+		t.Errorf("expected cache hit to avoid a second ListInitiativeLabels call, total calls = %d", client.callCount("ListInitiativeLabels"))
 	}
 }
 

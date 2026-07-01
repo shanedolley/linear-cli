@@ -34,24 +34,28 @@ type workflowStateInfo struct {
 // fresh cache is created per invocation via newResolverCache, so entries
 // never need to be invalidated or expired.
 type ResolverCache struct {
-	teams       map[string]string
-	users       map[string]string
-	projects    map[string]string
-	initiatives map[string]string
-	states      map[string][]workflowStateInfo
+	teams            map[string]string
+	users            map[string]string
+	projects         map[string]string
+	initiatives      map[string]string
+	states           map[string][]workflowStateInfo
+	labels           map[string]string
+	initiativeLabels map[string]string
 }
 
 // newResolverCache creates an empty ResolverCache. Call this once per
 // command invocation and thread it through any resolve* calls so repeated
-// references to the same team/user/project/initiative/state only hit the
-// API once.
+// references to the same team/user/project/initiative/state/label only hit
+// the API once.
 func newResolverCache() *ResolverCache {
 	return &ResolverCache{
-		teams:       make(map[string]string),
-		users:       make(map[string]string),
-		projects:    make(map[string]string),
-		initiatives: make(map[string]string),
-		states:      make(map[string][]workflowStateInfo),
+		teams:            make(map[string]string),
+		users:            make(map[string]string),
+		projects:         make(map[string]string),
+		initiatives:      make(map[string]string),
+		states:           make(map[string][]workflowStateInfo),
+		labels:           make(map[string]string),
+		initiativeLabels: make(map[string]string),
 	}
 }
 
@@ -236,6 +240,98 @@ func resolveInitiative(ctx context.Context, client graphql.Client, cache *Resolv
 
 	id := nodes[0].InitiativeListFields.Id
 	cache.initiatives[cacheKey] = id
+	return id, nil
+}
+
+// resolveLabel resolves an issue label name or UUID to an IssueLabel ID.
+// Name matching is case-insensitive. A name matching more than one label
+// returns an error listing the candidates (name and id); a name matching no
+// label returns a "not found" error.
+//
+// This resolves against the IssueLabel catalog (issues/teams). It is not
+// used by the `initiative label` commands: initiative labels are a
+// separate InitiativeLabel catalog with its own id space (confirmed live -
+// initiativeAddLabel/initiativeRemoveLabel reject an IssueLabel id). See
+// resolveInitiativeLabel for that catalog.
+func resolveLabel(ctx context.Context, client graphql.Client, cache *ResolverCache, nameOrID string) (string, error) {
+	if isUUID(nameOrID) {
+		return nameOrID, nil
+	}
+
+	cacheKey := strings.ToLower(nameOrID)
+	if id, ok := cache.labels[cacheKey]; ok {
+		return id, nil
+	}
+
+	filter := &api.IssueLabelFilter{
+		Name: &api.StringComparator{EqIgnoreCase: &nameOrID},
+	}
+	limit := 10
+	resp, err := api.ListIssueLabels(ctx, client, filter, &limit)
+	if err != nil {
+		return "", fmt.Errorf("failed to find label '%s': %w", nameOrID, err)
+	}
+
+	nodes := resp.IssueLabels.Nodes
+	if len(nodes) == 0 {
+		return "", fmt.Errorf("Label not found: %s", nameOrID)
+	}
+	if len(nodes) > 1 {
+		candidates := make([]string, 0, len(nodes))
+		for _, n := range nodes {
+			candidates = append(candidates, fmt.Sprintf("%s (%s)", n.Name, n.Id))
+		}
+		return "", fmt.Errorf("Multiple matches for '%s': %s", nameOrID, strings.Join(candidates, ", "))
+	}
+
+	id := nodes[0].Id
+	cache.labels[cacheKey] = id
+	return id, nil
+}
+
+// resolveInitiativeLabel resolves an initiative label name or UUID to an
+// InitiativeLabel ID. Name matching is case-insensitive. A name matching
+// more than one label returns an error listing the candidates (name and
+// id); a name matching no label returns a "not found" error.
+//
+// Initiative labels are a distinct catalog from IssueLabel (see
+// resolveLabel), confirmed live against the Linear API. The whole feature
+// is workspace-gated; on a workspace where it's disabled, the underlying
+// ListInitiativeLabels call fails with a clear "Feature ... is not enabled"
+// error from Linear, which is surfaced as-is.
+func resolveInitiativeLabel(ctx context.Context, client graphql.Client, cache *ResolverCache, nameOrID string) (string, error) {
+	if isUUID(nameOrID) {
+		return nameOrID, nil
+	}
+
+	cacheKey := strings.ToLower(nameOrID)
+	if id, ok := cache.initiativeLabels[cacheKey]; ok {
+		return id, nil
+	}
+
+	filter := &api.InitiativeLabelFilter{
+		Name: &api.StringComparator{EqIgnoreCase: &nameOrID},
+	}
+	limit := 10
+	resp, err := api.ListInitiativeLabels(ctx, client, filter, &limit)
+	if err != nil {
+		return "", fmt.Errorf("failed to find initiative label '%s': %w", nameOrID, err)
+	}
+
+	nodes := resp.InitiativeLabels.Nodes
+	if len(nodes) == 0 {
+		return "", fmt.Errorf("Initiative label not found: %s", nameOrID)
+	}
+	if len(nodes) > 1 {
+		candidates := make([]string, 0, len(nodes))
+		for _, n := range nodes {
+			candidates = append(candidates, fmt.Sprintf("%s (%s)", n.Name, n.Id))
+		}
+		return "", fmt.Errorf("Multiple matches for '%s': %s", nameOrID, strings.Join(candidates, ", "))
+	}
+
+	id := nodes[0].Id
+	cache.initiativeLabels[cacheKey] = id
 	return id, nil
 }
 
