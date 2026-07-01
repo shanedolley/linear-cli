@@ -10,6 +10,89 @@ import (
 	"github.com/Khan/genqlient/graphql"
 )
 
+// Activity collection filtering options.
+type ActivityCollectionFilter struct {
+	// Compound filters, all of which need to be matched by the activity.
+	And []*ActivityCollectionFilter `json:"and,omitempty"`
+	// Comparator for the created at date.
+	CreatedAt *DateComparator `json:"createdAt,omitempty"`
+	// Filters that needs to be matched by all activities.
+	Every *ActivityFilter `json:"every,omitempty"`
+	// Comparator for the identifier.
+	Id *IDComparator `json:"id,omitempty"`
+	// Comparator for the collection length.
+	Length *NumberComparator `json:"length,omitempty"`
+	// Compound filters, one of which need to be matched by the activity.
+	Or []*ActivityCollectionFilter `json:"or,omitempty"`
+	// Filters that needs to be matched by some activities.
+	Some *ActivityFilter `json:"some,omitempty"`
+	// Comparator for the updated at date.
+	UpdatedAt *DateComparator `json:"updatedAt,omitempty"`
+	// Filters that the activity's user must satisfy.
+	User *UserFilter `json:"user,omitempty"`
+}
+
+// GetAnd returns ActivityCollectionFilter.And, and is useful for accessing the field via an interface.
+func (v *ActivityCollectionFilter) GetAnd() []*ActivityCollectionFilter { return v.And }
+
+// GetCreatedAt returns ActivityCollectionFilter.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ActivityCollectionFilter) GetCreatedAt() *DateComparator { return v.CreatedAt }
+
+// GetEvery returns ActivityCollectionFilter.Every, and is useful for accessing the field via an interface.
+func (v *ActivityCollectionFilter) GetEvery() *ActivityFilter { return v.Every }
+
+// GetId returns ActivityCollectionFilter.Id, and is useful for accessing the field via an interface.
+func (v *ActivityCollectionFilter) GetId() *IDComparator { return v.Id }
+
+// GetLength returns ActivityCollectionFilter.Length, and is useful for accessing the field via an interface.
+func (v *ActivityCollectionFilter) GetLength() *NumberComparator { return v.Length }
+
+// GetOr returns ActivityCollectionFilter.Or, and is useful for accessing the field via an interface.
+func (v *ActivityCollectionFilter) GetOr() []*ActivityCollectionFilter { return v.Or }
+
+// GetSome returns ActivityCollectionFilter.Some, and is useful for accessing the field via an interface.
+func (v *ActivityCollectionFilter) GetSome() *ActivityFilter { return v.Some }
+
+// GetUpdatedAt returns ActivityCollectionFilter.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ActivityCollectionFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
+// GetUser returns ActivityCollectionFilter.User, and is useful for accessing the field via an interface.
+func (v *ActivityCollectionFilter) GetUser() *UserFilter { return v.User }
+
+// Activity filtering options.
+type ActivityFilter struct {
+	// Compound filters, all of which need to be matched by the activity.
+	And []*ActivityFilter `json:"and,omitempty"`
+	// Comparator for the created at date.
+	CreatedAt *DateComparator `json:"createdAt,omitempty"`
+	// Comparator for the identifier.
+	Id *IDComparator `json:"id,omitempty"`
+	// Compound filters, one of which need to be matched by the activity.
+	Or []*ActivityFilter `json:"or,omitempty"`
+	// Comparator for the updated at date.
+	UpdatedAt *DateComparator `json:"updatedAt,omitempty"`
+	// Filters that the activity's user must satisfy.
+	User *UserFilter `json:"user,omitempty"`
+}
+
+// GetAnd returns ActivityFilter.And, and is useful for accessing the field via an interface.
+func (v *ActivityFilter) GetAnd() []*ActivityFilter { return v.And }
+
+// GetCreatedAt returns ActivityFilter.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ActivityFilter) GetCreatedAt() *DateComparator { return v.CreatedAt }
+
+// GetId returns ActivityFilter.Id, and is useful for accessing the field via an interface.
+func (v *ActivityFilter) GetId() *IDComparator { return v.Id }
+
+// GetOr returns ActivityFilter.Or, and is useful for accessing the field via an interface.
+func (v *ActivityFilter) GetOr() []*ActivityFilter { return v.Or }
+
+// GetUpdatedAt returns ActivityFilter.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ActivityFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
+// GetUser returns ActivityFilter.User, and is useful for accessing the field via an interface.
+func (v *ActivityFilter) GetUser() *UserFilter { return v.User }
+
 // Attachment collection filtering options.
 type AttachmentCollectionFilter struct {
 	// Compound filters, all of which need to be matched by the attachment.
@@ -80,6 +163,9 @@ func (v *AttachmentCollectionFilter) GetUpdatedAt() *DateComparator { return v.U
 func (v *AttachmentCollectionFilter) GetUrl() *StringComparator { return v.Url }
 
 // AttachmentCreateAttachmentCreateAttachmentPayload includes the requested fields of the GraphQL type AttachmentPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of an attachment mutation.
 type AttachmentCreateAttachmentCreateAttachmentPayload struct {
 	// Whether the operation was successful.
 	Success bool `json:"success"`
@@ -98,13 +184,20 @@ func (v *AttachmentCreateAttachmentCreateAttachmentPayload) GetAttachment() *Att
 // AttachmentCreateAttachmentCreateAttachmentPayloadAttachment includes the requested fields of the GraphQL type Attachment.
 // The GraphQL type's documentation follows.
 //
-// Issue attachment (e.g. support ticket, pull request).
+// An attachment linking external content to an issue. Attachments represent
+// connections to external resources such as GitHub pull requests, Slack messages,
+// Zendesk tickets, Figma files, Sentry issues, Intercom conversations, and plain
+// URLs. Each attachment has a title and subtitle displayed in the Linear UI, a URL
+// serving as both the link destination and unique identifier per issue, and
+// optional metadata specific to the source integration.
 type AttachmentCreateAttachmentCreateAttachmentPayloadAttachment struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
 	// Content for the title line in the Linear attachment widget.
 	Title string `json:"title"`
-	// Location of the attachment which is also used as an identifier.
+	// The URL of the external resource this attachment links to. Also serves as a
+	// unique identifier for the attachment within an issue; no two attachments on
+	// the same issue can share the same URL.
 	Url string `json:"url"`
 	// The time at which the entity was created.
 	CreatedAt time.Time `json:"createdAt"`
@@ -126,6 +219,7 @@ func (v *AttachmentCreateAttachmentCreateAttachmentPayloadAttachment) GetCreated
 	return v.CreatedAt
 }
 
+// Input for creating a new issue attachment.
 type AttachmentCreateInput struct {
 	// Create a linked comment with markdown body.
 	CommentBody *string `json:"commentBody"`
@@ -134,6 +228,10 @@ type AttachmentCreateInput struct {
 	// Create attachment as a user with the provided name. This option is only
 	// available to OAuth applications creating attachments in `actor=application` mode.
 	CreateAsUser *string `json:"createAsUser"`
+	// Provide an external user avatar URL. Can only be used in conjunction with the
+	// `createAsUser` options. This option is only available to OAuth applications
+	// creating attachments in `actor=app` mode.
+	DisplayIconUrl *string `json:"displayIconUrl"`
 	// Indicates if attachments for the same source application should be grouped in the Linear UI.
 	GroupBySource *bool `json:"groupBySource"`
 	// An icon url to display with the attachment. Should be of jpg or png format.
@@ -141,7 +239,7 @@ type AttachmentCreateInput struct {
 	IconUrl *string `json:"iconUrl"`
 	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
 	Id *string `json:"id"`
-	// The issue to associate the attachment with.
+	// The issue to associate the attachment with. Can be a UUID or issue identifier (e.g., 'LIN-123').
 	IssueId string `json:"issueId"`
 	// Attachment metadata object with string and number values.
 	Metadata *map[string]interface{} `json:"metadata"`
@@ -165,6 +263,9 @@ func (v *AttachmentCreateInput) GetCommentBodyData() *map[string]interface{} {
 
 // GetCreateAsUser returns AttachmentCreateInput.CreateAsUser, and is useful for accessing the field via an interface.
 func (v *AttachmentCreateInput) GetCreateAsUser() *string { return v.CreateAsUser }
+
+// GetDisplayIconUrl returns AttachmentCreateInput.DisplayIconUrl, and is useful for accessing the field via an interface.
+func (v *AttachmentCreateInput) GetDisplayIconUrl() *string { return v.DisplayIconUrl }
 
 // GetGroupBySource returns AttachmentCreateInput.GroupBySource, and is useful for accessing the field via an interface.
 func (v *AttachmentCreateInput) GetGroupBySource() *bool { return v.GroupBySource }
@@ -192,7 +293,10 @@ func (v *AttachmentCreateInput) GetUrl() string { return v.Url }
 
 // AttachmentCreateResponse is returned by AttachmentCreate on success.
 type AttachmentCreateResponse struct {
-	// Creates a new attachment, or updates existing if the same `url` and `issueId` is used.
+	// Creates a new attachment, or updates existing if the same `url` and `issueId`
+	// is used. To create an integration-aware attachment, use the
+	// integration-specific mutations such as `attachmentLinkZendesk`,
+	// `attachmentLinkSlack`, or `attachmentLinkURL` instead.
 	AttachmentCreate *AttachmentCreateAttachmentCreateAttachmentPayload `json:"attachmentCreate"`
 }
 
@@ -279,6 +383,9 @@ func (v *AttachmentFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
 func (v *AttachmentFilter) GetUrl() *StringComparator { return v.Url }
 
 // AttachmentUpdateAttachmentUpdateAttachmentPayload includes the requested fields of the GraphQL type AttachmentPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of an attachment mutation.
 type AttachmentUpdateAttachmentUpdateAttachmentPayload struct {
 	// Whether the operation was successful.
 	Success bool `json:"success"`
@@ -297,7 +404,12 @@ func (v *AttachmentUpdateAttachmentUpdateAttachmentPayload) GetAttachment() *Att
 // AttachmentUpdateAttachmentUpdateAttachmentPayloadAttachment includes the requested fields of the GraphQL type Attachment.
 // The GraphQL type's documentation follows.
 //
-// Issue attachment (e.g. support ticket, pull request).
+// An attachment linking external content to an issue. Attachments represent
+// connections to external resources such as GitHub pull requests, Slack messages,
+// Zendesk tickets, Figma files, Sentry issues, Intercom conversations, and plain
+// URLs. Each attachment has a title and subtitle displayed in the Linear UI, a URL
+// serving as both the link destination and unique identifier per issue, and
+// optional metadata specific to the source integration.
 type AttachmentUpdateAttachmentUpdateAttachmentPayloadAttachment struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
@@ -305,7 +417,9 @@ type AttachmentUpdateAttachmentUpdateAttachmentPayloadAttachment struct {
 	Title string `json:"title"`
 	// Content for the subtitle line in the Linear attachment widget.
 	Subtitle *string `json:"subtitle"`
-	// Location of the attachment which is also used as an identifier.
+	// The URL of the external resource this attachment links to. Also serves as a
+	// unique identifier for the attachment within an issue; no two attachments on
+	// the same issue can share the same URL.
 	Url string `json:"url"`
 }
 
@@ -325,6 +439,7 @@ func (v *AttachmentUpdateAttachmentUpdateAttachmentPayloadAttachment) GetSubtitl
 // GetUrl returns AttachmentUpdateAttachmentUpdateAttachmentPayloadAttachment.Url, and is useful for accessing the field via an interface.
 func (v *AttachmentUpdateAttachmentUpdateAttachmentPayloadAttachment) GetUrl() string { return v.Url }
 
+// Input for updating an existing issue attachment.
 type AttachmentUpdateInput struct {
 	// An icon url to display with the attachment. Should be of jpg or png format.
 	// Maximum of 1MB in size. Dimensions should be 20x20px for optimal display quality.
@@ -388,6 +503,8 @@ type CommentCollectionFilter struct {
 	Every *CommentFilter `json:"every,omitempty"`
 	// Comparator for the identifier.
 	Id *IDComparator `json:"id,omitempty"`
+	// [Internal] Filters that the comment's initiative must satisfy.
+	Initiative *NullableInitiativeFilter `json:"initiative,omitempty"`
 	// Filters that the comment's issue must satisfy.
 	Issue *NullableIssueFilter `json:"issue,omitempty"`
 	// Comparator for the collection length.
@@ -398,6 +515,8 @@ type CommentCollectionFilter struct {
 	Or []*CommentCollectionFilter `json:"or,omitempty"`
 	// Filters that the comment parent must satisfy.
 	Parent *NullableCommentFilter `json:"parent,omitempty"`
+	// [Internal] Filters that the comment's project must satisfy.
+	Project *NullableProjectFilter `json:"project,omitempty"`
 	// Filters that the comment's project update must satisfy.
 	ProjectUpdate *NullableProjectUpdateFilter `json:"projectUpdate,omitempty"`
 	// Filters that the comment's reactions must satisfy.
@@ -430,6 +549,9 @@ func (v *CommentCollectionFilter) GetEvery() *CommentFilter { return v.Every }
 // GetId returns CommentCollectionFilter.Id, and is useful for accessing the field via an interface.
 func (v *CommentCollectionFilter) GetId() *IDComparator { return v.Id }
 
+// GetInitiative returns CommentCollectionFilter.Initiative, and is useful for accessing the field via an interface.
+func (v *CommentCollectionFilter) GetInitiative() *NullableInitiativeFilter { return v.Initiative }
+
 // GetIssue returns CommentCollectionFilter.Issue, and is useful for accessing the field via an interface.
 func (v *CommentCollectionFilter) GetIssue() *NullableIssueFilter { return v.Issue }
 
@@ -444,6 +566,9 @@ func (v *CommentCollectionFilter) GetOr() []*CommentCollectionFilter { return v.
 
 // GetParent returns CommentCollectionFilter.Parent, and is useful for accessing the field via an interface.
 func (v *CommentCollectionFilter) GetParent() *NullableCommentFilter { return v.Parent }
+
+// GetProject returns CommentCollectionFilter.Project, and is useful for accessing the field via an interface.
+func (v *CommentCollectionFilter) GetProject() *NullableProjectFilter { return v.Project }
 
 // GetProjectUpdate returns CommentCollectionFilter.ProjectUpdate, and is useful for accessing the field via an interface.
 func (v *CommentCollectionFilter) GetProjectUpdate() *NullableProjectUpdateFilter {
@@ -462,6 +587,7 @@ func (v *CommentCollectionFilter) GetUpdatedAt() *DateComparator { return v.Upda
 // GetUser returns CommentCollectionFilter.User, and is useful for accessing the field via an interface.
 func (v *CommentCollectionFilter) GetUser() *UserFilter { return v.User }
 
+// Input for creating a new comment.
 type CommentCreateInput struct {
 	// The comment content in markdown format.
 	Body *string `json:"body"`
@@ -470,11 +596,14 @@ type CommentCreateInput struct {
 	// Create comment as a user with the provided name. This option is only available
 	// to OAuth applications creating comments in `actor=app` mode.
 	CreateAsUser *string `json:"createAsUser"`
-	// The date when the comment was created (e.g. if importing from another system).
-	// Must be a date in the past. If none is provided, the backend will generate the time as now.
+	// The time at which the comment was created (e.g. if importing from another
+	// system). Must be a time in the past. If none is provided, the backend will
+	// generate the time as now.
 	CreatedAt *time.Time `json:"createdAt"`
 	// Flag to indicate this comment should be created on the issue's synced Slack
-	// comment thread. If no synced Slack comment thread exists, the mutation will fail.
+	// comment thread. If no synced Slack comment thread exists, the mutation will
+	// fail. If there are multiple synced Slack threads on the issue, the oldest one
+	// will be targeted.
 	CreateOnSyncedSlackThread *bool `json:"createOnSyncedSlackThread"`
 	// Provide an external user avatar URL. Can only be used in conjunction with the
 	// `createAsUser` options. This option is only available to OAuth applications
@@ -486,14 +615,18 @@ type CommentCreateInput struct {
 	DoNotSubscribeToIssue *bool `json:"doNotSubscribeToIssue"`
 	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
 	Id *string `json:"id"`
+	// The initiative to associate the comment with.
+	InitiativeId *string `json:"initiativeId"`
 	// The initiative update to associate the comment with.
 	InitiativeUpdateId *string `json:"initiativeUpdateId"`
-	// The issue to associate the comment with.
+	// The issue to associate the comment with. Can be a UUID or issue identifier (e.g., 'LIN-123').
 	IssueId *string `json:"issueId"`
 	// The parent comment under which to nest a current comment.
 	ParentId *string `json:"parentId"`
 	// The post to associate the comment with.
 	PostId *string `json:"postId"`
+	// The project to associate the comment with.
+	ProjectId *string `json:"projectId"`
 	// The project update to associate the comment with.
 	ProjectUpdateId *string `json:"projectUpdateId"`
 	// The text that this comment references. Only defined for inline comments.
@@ -529,6 +662,9 @@ func (v *CommentCreateInput) GetDoNotSubscribeToIssue() *bool { return v.DoNotSu
 // GetId returns CommentCreateInput.Id, and is useful for accessing the field via an interface.
 func (v *CommentCreateInput) GetId() *string { return v.Id }
 
+// GetInitiativeId returns CommentCreateInput.InitiativeId, and is useful for accessing the field via an interface.
+func (v *CommentCreateInput) GetInitiativeId() *string { return v.InitiativeId }
+
 // GetInitiativeUpdateId returns CommentCreateInput.InitiativeUpdateId, and is useful for accessing the field via an interface.
 func (v *CommentCreateInput) GetInitiativeUpdateId() *string { return v.InitiativeUpdateId }
 
@@ -540,6 +676,9 @@ func (v *CommentCreateInput) GetParentId() *string { return v.ParentId }
 
 // GetPostId returns CommentCreateInput.PostId, and is useful for accessing the field via an interface.
 func (v *CommentCreateInput) GetPostId() *string { return v.PostId }
+
+// GetProjectId returns CommentCreateInput.ProjectId, and is useful for accessing the field via an interface.
+func (v *CommentCreateInput) GetProjectId() *string { return v.ProjectId }
 
 // GetProjectUpdateId returns CommentCreateInput.ProjectUpdateId, and is useful for accessing the field via an interface.
 func (v *CommentCreateInput) GetProjectUpdateId() *string { return v.ProjectUpdateId }
@@ -554,18 +693,18 @@ func (v *CommentCreateInput) GetSubscriberIds() []string { return v.SubscriberId
 type CommentFields struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The comment content in markdown format.
+	// The comment content in markdown format. This is a derived representation of the canonical bodyData ProseMirror content.
 	Body string `json:"body"`
 	// The time at which the entity was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
 	// been updated after creation.
 	UpdatedAt time.Time `json:"updatedAt"`
-	// The time user edited the comment.
+	// The time the comment was last edited by its author. Null if the comment has not been edited since creation.
 	EditedAt *time.Time `json:"editedAt"`
-	// The user who wrote the comment.
+	// The user who wrote the comment. Null for comments created by integrations or bots without a user association.
 	User *CommentFieldsUser `json:"user"`
-	// The parent comment under which the current comment is nested.
+	// The parent comment under which the current comment is nested. Null for top-level comments that are not replies.
 	Parent *CommentFieldsParentComment `json:"parent"`
 	// The children of the comment.
 	Children *CommentFieldsChildrenCommentConnection `json:"children"`
@@ -608,13 +747,17 @@ func (v *CommentFieldsChildrenCommentConnection) GetNodes() []*CommentFieldsChil
 // CommentFieldsChildrenCommentConnectionNodesComment includes the requested fields of the GraphQL type Comment.
 // The GraphQL type's documentation follows.
 //
-// A comment associated with an issue.
+// A comment associated with an issue, project update, initiative update, document
+// content, post, project, or initiative. Comments support rich text (ProseMirror),
+// emoji reactions, and threaded replies via parentId. Comments can be created by
+// workspace users or by external users through integrations (e.g., Slack,
+// Intercom). Each comment belongs to exactly one parent entity.
 type CommentFieldsChildrenCommentConnectionNodesComment struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The comment content in markdown format.
+	// The comment content in markdown format. This is a derived representation of the canonical bodyData ProseMirror content.
 	Body string `json:"body"`
-	// The user who wrote the comment.
+	// The user who wrote the comment. Null for comments created by integrations or bots without a user association.
 	User *CommentFieldsChildrenCommentConnectionNodesCommentUser `json:"user"`
 }
 
@@ -632,7 +775,10 @@ func (v *CommentFieldsChildrenCommentConnectionNodesComment) GetUser() *CommentF
 // CommentFieldsChildrenCommentConnectionNodesCommentUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type CommentFieldsChildrenCommentConnectionNodesCommentUser struct {
 	// The user's full name.
 	Name string `json:"name"`
@@ -644,7 +790,11 @@ func (v *CommentFieldsChildrenCommentConnectionNodesCommentUser) GetName() strin
 // CommentFieldsParentComment includes the requested fields of the GraphQL type Comment.
 // The GraphQL type's documentation follows.
 //
-// A comment associated with an issue.
+// A comment associated with an issue, project update, initiative update, document
+// content, post, project, or initiative. Comments support rich text (ProseMirror),
+// emoji reactions, and threaded replies via parentId. Comments can be created by
+// workspace users or by external users through integrations (e.g., Slack,
+// Intercom). Each comment belongs to exactly one parent entity.
 type CommentFieldsParentComment struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
@@ -656,7 +806,10 @@ func (v *CommentFieldsParentComment) GetId() string { return v.Id }
 // CommentFieldsUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type CommentFieldsUser struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
@@ -692,6 +845,8 @@ type CommentFilter struct {
 	DocumentContent *NullableDocumentContentFilter `json:"documentContent,omitempty"`
 	// Comparator for the identifier.
 	Id *IDComparator `json:"id,omitempty"`
+	// [Internal] Filters that the comment's initiative must satisfy.
+	Initiative *NullableInitiativeFilter `json:"initiative,omitempty"`
 	// Filters that the comment's issue must satisfy.
 	Issue *NullableIssueFilter `json:"issue,omitempty"`
 	// Filters that the comment's customer needs must satisfy.
@@ -700,6 +855,8 @@ type CommentFilter struct {
 	Or []*CommentFilter `json:"or,omitempty"`
 	// Filters that the comment parent must satisfy.
 	Parent *NullableCommentFilter `json:"parent,omitempty"`
+	// [Internal] Filters that the comment's project must satisfy.
+	Project *NullableProjectFilter `json:"project,omitempty"`
 	// Filters that the comment's project update must satisfy.
 	ProjectUpdate *NullableProjectUpdateFilter `json:"projectUpdate,omitempty"`
 	// Filters that the comment's reactions must satisfy.
@@ -725,6 +882,9 @@ func (v *CommentFilter) GetDocumentContent() *NullableDocumentContentFilter { re
 // GetId returns CommentFilter.Id, and is useful for accessing the field via an interface.
 func (v *CommentFilter) GetId() *IDComparator { return v.Id }
 
+// GetInitiative returns CommentFilter.Initiative, and is useful for accessing the field via an interface.
+func (v *CommentFilter) GetInitiative() *NullableInitiativeFilter { return v.Initiative }
+
 // GetIssue returns CommentFilter.Issue, and is useful for accessing the field via an interface.
 func (v *CommentFilter) GetIssue() *NullableIssueFilter { return v.Issue }
 
@@ -736,6 +896,9 @@ func (v *CommentFilter) GetOr() []*CommentFilter { return v.Or }
 
 // GetParent returns CommentFilter.Parent, and is useful for accessing the field via an interface.
 func (v *CommentFilter) GetParent() *NullableCommentFilter { return v.Parent }
+
+// GetProject returns CommentFilter.Project, and is useful for accessing the field via an interface.
+func (v *CommentFilter) GetProject() *NullableProjectFilter { return v.Project }
 
 // GetProjectUpdate returns CommentFilter.ProjectUpdate, and is useful for accessing the field via an interface.
 func (v *CommentFilter) GetProjectUpdate() *NullableProjectUpdateFilter { return v.ProjectUpdate }
@@ -749,6 +912,7 @@ func (v *CommentFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
 // GetUser returns CommentFilter.User, and is useful for accessing the field via an interface.
 func (v *CommentFilter) GetUser() *UserFilter { return v.User }
 
+// Input for updating an existing comment.
 type CommentUpdateInput struct {
 	// The comment content.
 	Body *string `json:"body"`
@@ -802,6 +966,9 @@ func (v *ContentComparator) GetContains() *string { return v.Contains }
 func (v *ContentComparator) GetNotContains() *string { return v.NotContains }
 
 // CreateCommentCommentCreateCommentPayload includes the requested fields of the GraphQL type CommentPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a comment mutation.
 type CreateCommentCommentCreateCommentPayload struct {
 	// The comment that was created or updated.
 	Comment *CreateCommentCommentCreateCommentPayloadComment `json:"comment"`
@@ -815,7 +982,11 @@ func (v *CreateCommentCommentCreateCommentPayload) GetComment() *CreateCommentCo
 // CreateCommentCommentCreateCommentPayloadComment includes the requested fields of the GraphQL type Comment.
 // The GraphQL type's documentation follows.
 //
-// A comment associated with an issue.
+// A comment associated with an issue, project update, initiative update, document
+// content, post, project, or initiative. Comments support rich text (ProseMirror),
+// emoji reactions, and threaded replies via parentId. Comments can be created by
+// workspace users or by external users through integrations (e.g., Slack,
+// Intercom). Each comment belongs to exactly one parent entity.
 type CreateCommentCommentCreateCommentPayloadComment struct {
 	CommentFields `json:"-"`
 }
@@ -935,6 +1106,9 @@ func (v *CreateCommentResponse) GetCommentCreate() *CreateCommentCommentCreateCo
 }
 
 // CreateIssueIssueCreateIssuePayload includes the requested fields of the GraphQL type IssuePayload.
+// The GraphQL type's documentation follows.
+//
+// The result of an issue mutation, containing the created or updated issue and a success indicator.
 type CreateIssueIssueCreateIssuePayload struct {
 	// The issue that was created or updated.
 	Issue *CreateIssueIssueCreateIssuePayloadIssue `json:"issue"`
@@ -948,7 +1122,12 @@ func (v *CreateIssueIssueCreateIssuePayload) GetIssue() *CreateIssueIssueCreateI
 // CreateIssueIssueCreateIssuePayloadIssue includes the requested fields of the GraphQL type Issue.
 // The GraphQL type's documentation follows.
 //
-// An issue.
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
 type CreateIssueIssueCreateIssuePayloadIssue struct {
 	IssueListFields `json:"-"`
 }
@@ -1101,6 +1280,9 @@ func (v *CreateIssueIssueCreateIssuePayloadIssue) __premarshalJSON() (*__premars
 }
 
 // CreateIssueRelationIssueRelationCreateIssueRelationPayload includes the requested fields of the GraphQL type IssueRelationPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of an issue relation mutation, containing the created or updated issue relation and a success indicator.
 type CreateIssueRelationIssueRelationCreateIssueRelationPayload struct {
 	// The issue relation that was created or updated.
 	IssueRelation *CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelation `json:"issueRelation"`
@@ -1121,15 +1303,20 @@ func (v *CreateIssueRelationIssueRelationCreateIssueRelationPayload) GetSuccess(
 // CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelation includes the requested fields of the GraphQL type IssueRelation.
 // The GraphQL type's documentation follows.
 //
-// A relation between two issues.
+// A relation between two issues. Issue relations represent directional
+// relationships such as blocking, being blocked by, relating to, or duplicating
+// another issue. Each relation connects a source issue to a related issue with a
+// specific type describing the nature of the relationship.
 type CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelation struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The relationship of the issue with the related issue.
+	// The type of relationship between the source issue and the related issue.
+	// Possible values include blocks, duplicate, and related.
 	Type string `json:"type"`
-	// The issue whose relationship is being described.
+	// The source issue whose relationship is being described. This is the issue from which the relation originates.
 	Issue *CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationIssue `json:"issue"`
-	// The related issue.
+	// The target issue that the source issue is related to. The relation type
+	// describes how the source issue relates to this issue.
 	RelatedIssue *CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationRelatedIssue `json:"relatedIssue"`
 }
 
@@ -1156,13 +1343,18 @@ func (v *CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelation
 // CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationIssue includes the requested fields of the GraphQL type Issue.
 // The GraphQL type's documentation follows.
 //
-// An issue.
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
 type CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationIssue struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
 	// Issue's human readable identifier (e.g. ENG-123).
 	Identifier string `json:"identifier"`
-	// The issue's title.
+	// The issue's title. This is the primary human-readable summary of the work item.
 	Title string `json:"title"`
 }
 
@@ -1184,13 +1376,18 @@ func (v *CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelation
 // CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationRelatedIssue includes the requested fields of the GraphQL type Issue.
 // The GraphQL type's documentation follows.
 //
-// An issue.
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
 type CreateIssueRelationIssueRelationCreateIssueRelationPayloadIssueRelationRelatedIssue struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
 	// Issue's human readable identifier (e.g. ENG-123).
 	Identifier string `json:"identifier"`
-	// The issue's title.
+	// The issue's title. This is the primary human-readable summary of the work item.
 	Title string `json:"title"`
 }
 
@@ -1418,10 +1615,10 @@ type CustomerTierFilter struct {
 	CreatedAt *DateComparator `json:"createdAt,omitempty"`
 	// Comparator for the customer tier description.
 	Description *StringComparator `json:"description,omitempty"`
+	// Comparator for the customer tier display name.
+	DisplayName *StringComparator `json:"displayName,omitempty"`
 	// Comparator for the identifier.
 	Id *IDComparator `json:"id,omitempty"`
-	// Comparator for the customer tier name.
-	Name *StringComparator `json:"name,omitempty"`
 	// Compound filters, one of which needs to be matched by the customer tier.
 	Or []*CustomerTierFilter `json:"or,omitempty"`
 	// Comparator for the customer tier position.
@@ -1442,11 +1639,11 @@ func (v *CustomerTierFilter) GetCreatedAt() *DateComparator { return v.CreatedAt
 // GetDescription returns CustomerTierFilter.Description, and is useful for accessing the field via an interface.
 func (v *CustomerTierFilter) GetDescription() *StringComparator { return v.Description }
 
+// GetDisplayName returns CustomerTierFilter.DisplayName, and is useful for accessing the field via an interface.
+func (v *CustomerTierFilter) GetDisplayName() *StringComparator { return v.DisplayName }
+
 // GetId returns CustomerTierFilter.Id, and is useful for accessing the field via an interface.
 func (v *CustomerTierFilter) GetId() *IDComparator { return v.Id }
-
-// GetName returns CustomerTierFilter.Name, and is useful for accessing the field via an interface.
-func (v *CustomerTierFilter) GetName() *StringComparator { return v.Name }
 
 // GetOr returns CustomerTierFilter.Or, and is useful for accessing the field via an interface.
 func (v *CustomerTierFilter) GetOr() []*CustomerTierFilter { return v.Or }
@@ -1456,6 +1653,105 @@ func (v *CustomerTierFilter) GetPosition() *NumberComparator { return v.Position
 
 // GetUpdatedAt returns CustomerTierFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *CustomerTierFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
+// Cycle filtering options.
+type CycleFilter struct {
+	// Compound filters, all of which need to be matched by the cycle.
+	And []*CycleFilter `json:"and,omitempty"`
+	// Comparator for the cycle completed at date.
+	CompletedAt *DateComparator `json:"completedAt,omitempty"`
+	// Comparator for the created at date.
+	CreatedAt *DateComparator `json:"createdAt,omitempty"`
+	// Comparator for the cycle ends at date.
+	EndsAt *DateComparator `json:"endsAt,omitempty"`
+	// Comparator for the identifier.
+	Id *IDComparator `json:"id,omitempty"`
+	// Comparator for the inherited cycle ID.
+	InheritedFromId *IDComparator `json:"inheritedFromId,omitempty"`
+	// Comparator for the filtering active cycle.
+	IsActive *BooleanComparator `json:"isActive,omitempty"`
+	// Comparator for the filtering future cycles.
+	IsFuture *BooleanComparator `json:"isFuture,omitempty"`
+	// Comparator for filtering for whether the cycle is currently in cooldown.
+	IsInCooldown *BooleanComparator `json:"isInCooldown,omitempty"`
+	// Comparator for the filtering next cycle.
+	IsNext *BooleanComparator `json:"isNext,omitempty"`
+	// Comparator for the filtering past cycles.
+	IsPast *BooleanComparator `json:"isPast,omitempty"`
+	// Comparator for the filtering previous cycle.
+	IsPrevious *BooleanComparator `json:"isPrevious,omitempty"`
+	// Filters that the cycles issues must satisfy.
+	Issues *IssueCollectionFilter `json:"issues,omitempty"`
+	// Comparator for the cycle name.
+	Name *StringComparator `json:"name,omitempty"`
+	// Comparator for the cycle number.
+	Number *NumberComparator `json:"number,omitempty"`
+	// Compound filters, one of which need to be matched by the cycle.
+	Or []*CycleFilter `json:"or,omitempty"`
+	// Comparator for the cycle start date.
+	StartsAt *DateComparator `json:"startsAt,omitempty"`
+	// Filters that the cycles team must satisfy.
+	Team *TeamFilter `json:"team,omitempty"`
+	// Comparator for the updated at date.
+	UpdatedAt *DateComparator `json:"updatedAt,omitempty"`
+}
+
+// GetAnd returns CycleFilter.And, and is useful for accessing the field via an interface.
+func (v *CycleFilter) GetAnd() []*CycleFilter { return v.And }
+
+// GetCompletedAt returns CycleFilter.CompletedAt, and is useful for accessing the field via an interface.
+func (v *CycleFilter) GetCompletedAt() *DateComparator { return v.CompletedAt }
+
+// GetCreatedAt returns CycleFilter.CreatedAt, and is useful for accessing the field via an interface.
+func (v *CycleFilter) GetCreatedAt() *DateComparator { return v.CreatedAt }
+
+// GetEndsAt returns CycleFilter.EndsAt, and is useful for accessing the field via an interface.
+func (v *CycleFilter) GetEndsAt() *DateComparator { return v.EndsAt }
+
+// GetId returns CycleFilter.Id, and is useful for accessing the field via an interface.
+func (v *CycleFilter) GetId() *IDComparator { return v.Id }
+
+// GetInheritedFromId returns CycleFilter.InheritedFromId, and is useful for accessing the field via an interface.
+func (v *CycleFilter) GetInheritedFromId() *IDComparator { return v.InheritedFromId }
+
+// GetIsActive returns CycleFilter.IsActive, and is useful for accessing the field via an interface.
+func (v *CycleFilter) GetIsActive() *BooleanComparator { return v.IsActive }
+
+// GetIsFuture returns CycleFilter.IsFuture, and is useful for accessing the field via an interface.
+func (v *CycleFilter) GetIsFuture() *BooleanComparator { return v.IsFuture }
+
+// GetIsInCooldown returns CycleFilter.IsInCooldown, and is useful for accessing the field via an interface.
+func (v *CycleFilter) GetIsInCooldown() *BooleanComparator { return v.IsInCooldown }
+
+// GetIsNext returns CycleFilter.IsNext, and is useful for accessing the field via an interface.
+func (v *CycleFilter) GetIsNext() *BooleanComparator { return v.IsNext }
+
+// GetIsPast returns CycleFilter.IsPast, and is useful for accessing the field via an interface.
+func (v *CycleFilter) GetIsPast() *BooleanComparator { return v.IsPast }
+
+// GetIsPrevious returns CycleFilter.IsPrevious, and is useful for accessing the field via an interface.
+func (v *CycleFilter) GetIsPrevious() *BooleanComparator { return v.IsPrevious }
+
+// GetIssues returns CycleFilter.Issues, and is useful for accessing the field via an interface.
+func (v *CycleFilter) GetIssues() *IssueCollectionFilter { return v.Issues }
+
+// GetName returns CycleFilter.Name, and is useful for accessing the field via an interface.
+func (v *CycleFilter) GetName() *StringComparator { return v.Name }
+
+// GetNumber returns CycleFilter.Number, and is useful for accessing the field via an interface.
+func (v *CycleFilter) GetNumber() *NumberComparator { return v.Number }
+
+// GetOr returns CycleFilter.Or, and is useful for accessing the field via an interface.
+func (v *CycleFilter) GetOr() []*CycleFilter { return v.Or }
+
+// GetStartsAt returns CycleFilter.StartsAt, and is useful for accessing the field via an interface.
+func (v *CycleFilter) GetStartsAt() *DateComparator { return v.StartsAt }
+
+// GetTeam returns CycleFilter.Team, and is useful for accessing the field via an interface.
+func (v *CycleFilter) GetTeam() *TeamFilter { return v.Team }
+
+// GetUpdatedAt returns CycleFilter.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *CycleFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
 
 type CyclePeriod string
 
@@ -1575,6 +1871,8 @@ type DocumentFilter struct {
 	CreatedAt *DateComparator `json:"createdAt,omitempty"`
 	// Filters that the document's creator must satisfy.
 	Creator *UserFilter `json:"creator,omitempty"`
+	// Filters that the document's cycle must satisfy.
+	Cycle *CycleFilter `json:"cycle,omitempty"`
 	// Comparator for the identifier.
 	Id *IDComparator `json:"id,omitempty"`
 	// Filters that the document's initiative must satisfy.
@@ -1585,8 +1883,12 @@ type DocumentFilter struct {
 	Or []*DocumentFilter `json:"or,omitempty"`
 	// Filters that the document's project must satisfy.
 	Project *ProjectFilter `json:"project,omitempty"`
+	// Filters that the document's release must satisfy.
+	Release *ReleaseFilter `json:"release,omitempty"`
 	// Comparator for the document slug ID.
 	SlugId *StringComparator `json:"slugId,omitempty"`
+	// Filters that the document's team must satisfy.
+	Team *NullableTeamFilter `json:"team,omitempty"`
 	// Comparator for the document title.
 	Title *StringComparator `json:"title,omitempty"`
 	// Comparator for the updated at date.
@@ -1601,6 +1903,9 @@ func (v *DocumentFilter) GetCreatedAt() *DateComparator { return v.CreatedAt }
 
 // GetCreator returns DocumentFilter.Creator, and is useful for accessing the field via an interface.
 func (v *DocumentFilter) GetCreator() *UserFilter { return v.Creator }
+
+// GetCycle returns DocumentFilter.Cycle, and is useful for accessing the field via an interface.
+func (v *DocumentFilter) GetCycle() *CycleFilter { return v.Cycle }
 
 // GetId returns DocumentFilter.Id, and is useful for accessing the field via an interface.
 func (v *DocumentFilter) GetId() *IDComparator { return v.Id }
@@ -1617,8 +1922,14 @@ func (v *DocumentFilter) GetOr() []*DocumentFilter { return v.Or }
 // GetProject returns DocumentFilter.Project, and is useful for accessing the field via an interface.
 func (v *DocumentFilter) GetProject() *ProjectFilter { return v.Project }
 
+// GetRelease returns DocumentFilter.Release, and is useful for accessing the field via an interface.
+func (v *DocumentFilter) GetRelease() *ReleaseFilter { return v.Release }
+
 // GetSlugId returns DocumentFilter.SlugId, and is useful for accessing the field via an interface.
 func (v *DocumentFilter) GetSlugId() *StringComparator { return v.SlugId }
+
+// GetTeam returns DocumentFilter.Team, and is useful for accessing the field via an interface.
+func (v *DocumentFilter) GetTeam() *NullableTeamFilter { return v.Team }
 
 // GetTitle returns DocumentFilter.Title, and is useful for accessing the field via an interface.
 func (v *DocumentFilter) GetTitle() *StringComparator { return v.Title }
@@ -1689,7 +2000,7 @@ func (v *EstimateComparator) GetOr() []*NullableNumberComparator { return v.Or }
 type FileUploadFileUploadUploadPayload struct {
 	// Whether the operation was successful.
 	Success bool `json:"success"`
-	// Object describing the file to be uploaded.
+	// The upload file details including signed URL, asset URL, and required headers. Null if the upload could not be prepared.
 	UploadFile *FileUploadFileUploadUploadPayloadUploadFile `json:"uploadFile"`
 }
 
@@ -1704,13 +2015,15 @@ func (v *FileUploadFileUploadUploadPayload) GetUploadFile() *FileUploadFileUploa
 // FileUploadFileUploadUploadPayloadUploadFile includes the requested fields of the GraphQL type UploadFile.
 // The GraphQL type's documentation follows.
 //
-// Object representing Google Cloud upload policy, plus additional data.
+// Represents a file upload destination with a pre-signed upload URL, asset URL,
+// and required request headers for uploading to cloud storage.
 type FileUploadFileUploadUploadPayloadUploadFile struct {
-	// The signed URL the for the uploaded file. (assigned automatically).
+	// The pre-signed URL to which the file should be uploaded via a PUT request.
 	UploadUrl string `json:"uploadUrl"`
-	// The asset URL for the uploaded file. (assigned automatically).
-	AssetUrl string                                                                `json:"assetUrl"`
-	Headers  []*FileUploadFileUploadUploadPayloadUploadFileHeadersUploadFileHeader `json:"headers"`
+	// The permanent asset URL where the file will be accessible after upload.
+	AssetUrl string `json:"assetUrl"`
+	// HTTP headers that must be included in the PUT request to the upload URL.
+	Headers []*FileUploadFileUploadUploadPayloadUploadFileHeadersUploadFileHeader `json:"headers"`
 }
 
 // GetUploadUrl returns FileUploadFileUploadUploadPayloadUploadFile.UploadUrl, and is useful for accessing the field via an interface.
@@ -1754,7 +2067,12 @@ func (v *FileUploadResponse) GetFileUpload() *FileUploadFileUploadUploadPayload 
 // GetIssueIssue includes the requested fields of the GraphQL type Issue.
 // The GraphQL type's documentation follows.
 //
-// An issue.
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
 type GetIssueIssue struct {
 	IssueDetailFields `json:"-"`
 }
@@ -2064,7 +2382,7 @@ func (v *GetIssueIssue) __premarshalJSON() (*__premarshalGetIssueIssue, error) {
 
 // GetIssueResponse is returned by GetIssue on success.
 type GetIssueResponse struct {
-	// One specific issue.
+	// One specific issue, looked up by its unique identifier.
 	Issue *GetIssueIssue `json:"issue"`
 }
 
@@ -2074,7 +2392,9 @@ func (v *GetIssueResponse) GetIssue() *GetIssueIssue { return v.Issue }
 // GetProjectProject includes the requested fields of the GraphQL type Project.
 // The GraphQL type's documentation follows.
 //
-// A project.
+// A project is a collection of issues working toward a shared goal. Projects have
+// start and target dates, milestones, status tracking, and progress metrics. They
+// can span multiple teams and be grouped under initiatives.
 type GetProjectProject struct {
 	ProjectDetailFields `json:"-"`
 }
@@ -2328,7 +2648,7 @@ func (v *GetProjectProject) __premarshalJSON() (*__premarshalGetProjectProject, 
 
 // GetProjectResponse is returned by GetProject on success.
 type GetProjectResponse struct {
-	// One specific project.
+	// Returns a single project by its identifier or URL slug.
 	Project *GetProjectProject `json:"project"`
 }
 
@@ -2337,7 +2657,7 @@ func (v *GetProjectResponse) GetProject() *GetProjectProject { return v.Project 
 
 // GetTeamMembersResponse is returned by GetTeamMembers on success.
 type GetTeamMembersResponse struct {
-	// One specific team.
+	// Fetches a specific team by its ID.
 	Team *GetTeamMembersTeam `json:"team"`
 }
 
@@ -2347,9 +2667,13 @@ func (v *GetTeamMembersResponse) GetTeam() *GetTeamMembersTeam { return v.Team }
 // GetTeamMembersTeam includes the requested fields of the GraphQL type Team.
 // The GraphQL type's documentation follows.
 //
-// An organizational unit that contains issues.
+// A team is the primary organizational unit in Linear. Issues belong to teams, and
+// each team has its own workflow states, cycles, labels, and settings. Teams can
+// be public (visible to all workspace members), private (visible only to team
+// members), or restricted (visible only within an enclosing private-team
+// boundary). Teams can also have sub-teams that inherit settings from their parent.
 type GetTeamMembersTeam struct {
-	// Users who are members of this team.
+	// Users who are members of this team. Supports filtering and pagination.
 	Members *GetTeamMembersTeamMembersUserConnection `json:"members"`
 }
 
@@ -2375,7 +2699,10 @@ func (v *GetTeamMembersTeamMembersUserConnection) GetPageInfo() *GetTeamMembersT
 // GetTeamMembersTeamMembersUserConnectionNodesUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type GetTeamMembersTeamMembersUserConnectionNodesUser struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
@@ -2389,7 +2716,7 @@ type GetTeamMembersTeamMembersUserConnectionNodesUser struct {
 	IsMe bool `json:"isMe"`
 	// Whether the user account is active or disabled (suspended).
 	Active bool `json:"active"`
-	// Whether the user is an organization administrator.
+	// Whether the user is a workspace administrator. On Free plans, all members are treated as admins.
 	Admin bool `json:"admin"`
 }
 
@@ -2430,7 +2757,7 @@ func (v *GetTeamMembersTeamMembersUserConnectionPageInfo) GetEndCursor() *string
 
 // GetTeamResponse is returned by GetTeam on success.
 type GetTeamResponse struct {
-	// One specific team.
+	// Fetches a specific team by its ID.
 	Team *GetTeamTeam `json:"team"`
 }
 
@@ -2439,7 +2766,7 @@ func (v *GetTeamResponse) GetTeam() *GetTeamTeam { return v.Team }
 
 // GetTeamStatesResponse is returned by GetTeamStates on success.
 type GetTeamStatesResponse struct {
-	// One specific team.
+	// Fetches a specific team by its ID.
 	Team *GetTeamStatesTeam `json:"team"`
 }
 
@@ -2449,7 +2776,11 @@ func (v *GetTeamStatesResponse) GetTeam() *GetTeamStatesTeam { return v.Team }
 // GetTeamStatesTeam includes the requested fields of the GraphQL type Team.
 // The GraphQL type's documentation follows.
 //
-// An organizational unit that contains issues.
+// A team is the primary organizational unit in Linear. Issues belong to teams, and
+// each team has its own workflow states, cycles, labels, and settings. Teams can
+// be public (visible to all workspace members), private (visible only to team
+// members), or restricted (visible only within an enclosing private-team
+// boundary). Teams can also have sub-teams that inherit settings from their parent.
 type GetTeamStatesTeam struct {
 	// The states that define the workflow associated with the team.
 	States *GetTeamStatesTeamStatesWorkflowStateConnection `json:"states"`
@@ -2473,19 +2804,26 @@ func (v *GetTeamStatesTeamStatesWorkflowStateConnection) GetNodes() []*GetTeamSt
 // GetTeamStatesTeamStatesWorkflowStateConnectionNodesWorkflowState includes the requested fields of the GraphQL type WorkflowState.
 // The GraphQL type's documentation follows.
 //
-// A state in a team workflow.
+// A state in a team's workflow, representing an issue status such as Triage,
+// Backlog, Todo, In Progress, In Review, Done, or Canceled. Each team has its own
+// set of workflow states that define the progression of issues through the team's
+// process. Workflow states have a type that categorizes them (triage, backlog,
+// unstarted, started, completed, canceled), a position that determines their
+// display order, and a color for visual identification. States can be inherited
+// from parent teams to sub-teams.
 type GetTeamStatesTeamStatesWorkflowStateConnectionNodesWorkflowState struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The state's name.
+	// The state's human-readable name (e.g., 'In Progress', 'Done', 'Backlog').
 	Name string `json:"name"`
-	// The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled".
+	// The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled", "duplicate".
 	Type string `json:"type"`
 	// The state's UI color as a HEX string.
 	Color string `json:"color"`
 	// Description of the state.
 	Description *string `json:"description"`
-	// The position of the state in the team flow.
+	// The position of the state in the team's workflow. States are displayed in
+	// ascending order of position within their type group.
 	Position float64 `json:"position"`
 }
 
@@ -2522,7 +2860,11 @@ func (v *GetTeamStatesTeamStatesWorkflowStateConnectionNodesWorkflowState) GetPo
 // GetTeamTeam includes the requested fields of the GraphQL type Team.
 // The GraphQL type's documentation follows.
 //
-// An organizational unit that contains issues.
+// A team is the primary organizational unit in Linear. Issues belong to teams, and
+// each team has its own workflow states, cycles, labels, and settings. Teams can
+// be public (visible to all workspace members), private (visible only to team
+// members), or restricted (visible only within an enclosing private-team
+// boundary). Teams can also have sub-teams that inherit settings from their parent.
 type GetTeamTeam struct {
 	TeamDetailFields `json:"-"`
 }
@@ -2642,7 +2984,7 @@ func (v *GetTeamTeam) __premarshalJSON() (*__premarshalGetTeamTeam, error) {
 
 // GetUserByEmailResponse is returned by GetUserByEmail on success.
 type GetUserByEmailResponse struct {
-	// All users for the organization.
+	// All users in the workspace. Supports filtering, sorting, and pagination.
 	Users *GetUserByEmailUsersUserConnection `json:"users"`
 }
 
@@ -2662,7 +3004,10 @@ func (v *GetUserByEmailUsersUserConnection) GetNodes() []*GetUserByEmailUsersUse
 // GetUserByEmailUsersUserConnectionNodesUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type GetUserByEmailUsersUserConnectionNodesUser struct {
 	UserDetailFields `json:"-"`
 }
@@ -2774,7 +3119,7 @@ func (v *GetUserByEmailUsersUserConnectionNodesUser) __premarshalJSON() (*__prem
 
 // GetViewerResponse is returned by GetViewer on success.
 type GetViewerResponse struct {
-	// The currently authenticated user.
+	// The currently authenticated user making the API request.
 	Viewer *GetViewerViewerUser `json:"viewer"`
 }
 
@@ -2784,7 +3129,10 @@ func (v *GetViewerResponse) GetViewer() *GetViewerViewerUser { return v.Viewer }
 // GetViewerViewerUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type GetViewerViewerUser struct {
 	UserDetailFields `json:"-"`
 }
@@ -2916,6 +3264,10 @@ type InitiativeCollectionFilter struct {
 	Ancestors *InitiativeCollectionFilter `json:"ancestors,omitempty"`
 	// Compound filters, all of which need to be matched by the initiative.
 	And []*InitiativeCollectionFilter `json:"and,omitempty"`
+	// [Internal] Comparator for the initiative canceled at date.
+	CanceledAt *NullableDateComparator `json:"canceledAt,omitempty"`
+	// Comparator for the initiative completed at date.
+	CompletedAt *NullableDateComparator `json:"completedAt,omitempty"`
 	// Comparator for the created at date.
 	CreatedAt *DateComparator `json:"createdAt,omitempty"`
 	// Filters that the initiative creator must satisfy.
@@ -2928,6 +3280,12 @@ type InitiativeCollectionFilter struct {
 	HealthWithAge *StringComparator `json:"healthWithAge,omitempty"`
 	// Comparator for the identifier.
 	Id *IDComparator `json:"id,omitempty"`
+	// Filters that the initiative updates must satisfy.
+	InitiativeUpdates *InitiativeUpdatesCollectionFilter `json:"initiativeUpdates,omitempty"`
+	// [Internal] Filters that the initiative labels must satisfy.
+	Labels *InitiativeLabelCollectionFilter `json:"labels,omitempty"`
+	// [ALPHA] Filters that the initiative lead team must satisfy.
+	LeadTeam *NullableTeamFilter `json:"leadTeam,omitempty"`
 	// Comparator for the collection length.
 	Length *NumberComparator `json:"length,omitempty"`
 	// Comparator for the initiative name.
@@ -2936,11 +3294,15 @@ type InitiativeCollectionFilter struct {
 	Or []*InitiativeCollectionFilter `json:"or,omitempty"`
 	// Filters that the initiative owner must satisfy.
 	Owner *NullableUserFilter `json:"owner,omitempty"`
+	// [Internal] Comparator for the initiative priority.
+	Priority *NullableNumberComparator `json:"priority,omitempty"`
 	// Comparator for the initiative slug ID.
 	SlugId *StringComparator `json:"slugId,omitempty"`
 	// Filters that needs to be matched by some initiatives.
 	Some *InitiativeFilter `json:"some,omitempty"`
-	// Comparator for the initiative status: Planned, Active, Completed
+	// Comparator for the initiative started at date.
+	StartedAt *NullableDateComparator `json:"startedAt,omitempty"`
+	// Comparator for the initiative status: Proposed, Planned, Active, Completed, Canceled
 	Status *StringComparator `json:"status,omitempty"`
 	// Comparator for the initiative target date.
 	TargetDate *NullableDateComparator `json:"targetDate,omitempty"`
@@ -2958,6 +3320,12 @@ func (v *InitiativeCollectionFilter) GetAncestors() *InitiativeCollectionFilter 
 
 // GetAnd returns InitiativeCollectionFilter.And, and is useful for accessing the field via an interface.
 func (v *InitiativeCollectionFilter) GetAnd() []*InitiativeCollectionFilter { return v.And }
+
+// GetCanceledAt returns InitiativeCollectionFilter.CanceledAt, and is useful for accessing the field via an interface.
+func (v *InitiativeCollectionFilter) GetCanceledAt() *NullableDateComparator { return v.CanceledAt }
+
+// GetCompletedAt returns InitiativeCollectionFilter.CompletedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeCollectionFilter) GetCompletedAt() *NullableDateComparator { return v.CompletedAt }
 
 // GetCreatedAt returns InitiativeCollectionFilter.CreatedAt, and is useful for accessing the field via an interface.
 func (v *InitiativeCollectionFilter) GetCreatedAt() *DateComparator { return v.CreatedAt }
@@ -2977,6 +3345,17 @@ func (v *InitiativeCollectionFilter) GetHealthWithAge() *StringComparator { retu
 // GetId returns InitiativeCollectionFilter.Id, and is useful for accessing the field via an interface.
 func (v *InitiativeCollectionFilter) GetId() *IDComparator { return v.Id }
 
+// GetInitiativeUpdates returns InitiativeCollectionFilter.InitiativeUpdates, and is useful for accessing the field via an interface.
+func (v *InitiativeCollectionFilter) GetInitiativeUpdates() *InitiativeUpdatesCollectionFilter {
+	return v.InitiativeUpdates
+}
+
+// GetLabels returns InitiativeCollectionFilter.Labels, and is useful for accessing the field via an interface.
+func (v *InitiativeCollectionFilter) GetLabels() *InitiativeLabelCollectionFilter { return v.Labels }
+
+// GetLeadTeam returns InitiativeCollectionFilter.LeadTeam, and is useful for accessing the field via an interface.
+func (v *InitiativeCollectionFilter) GetLeadTeam() *NullableTeamFilter { return v.LeadTeam }
+
 // GetLength returns InitiativeCollectionFilter.Length, and is useful for accessing the field via an interface.
 func (v *InitiativeCollectionFilter) GetLength() *NumberComparator { return v.Length }
 
@@ -2989,11 +3368,17 @@ func (v *InitiativeCollectionFilter) GetOr() []*InitiativeCollectionFilter { ret
 // GetOwner returns InitiativeCollectionFilter.Owner, and is useful for accessing the field via an interface.
 func (v *InitiativeCollectionFilter) GetOwner() *NullableUserFilter { return v.Owner }
 
+// GetPriority returns InitiativeCollectionFilter.Priority, and is useful for accessing the field via an interface.
+func (v *InitiativeCollectionFilter) GetPriority() *NullableNumberComparator { return v.Priority }
+
 // GetSlugId returns InitiativeCollectionFilter.SlugId, and is useful for accessing the field via an interface.
 func (v *InitiativeCollectionFilter) GetSlugId() *StringComparator { return v.SlugId }
 
 // GetSome returns InitiativeCollectionFilter.Some, and is useful for accessing the field via an interface.
 func (v *InitiativeCollectionFilter) GetSome() *InitiativeFilter { return v.Some }
+
+// GetStartedAt returns InitiativeCollectionFilter.StartedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeCollectionFilter) GetStartedAt() *NullableDateComparator { return v.StartedAt }
 
 // GetStatus returns InitiativeCollectionFilter.Status, and is useful for accessing the field via an interface.
 func (v *InitiativeCollectionFilter) GetStatus() *StringComparator { return v.Status }
@@ -3015,6 +3400,10 @@ type InitiativeFilter struct {
 	Ancestors *InitiativeCollectionFilter `json:"ancestors,omitempty"`
 	// Compound filters, all of which need to be matched by the initiative.
 	And []*InitiativeFilter `json:"and,omitempty"`
+	// [Internal] Comparator for the initiative canceled at date.
+	CanceledAt *NullableDateComparator `json:"canceledAt,omitempty"`
+	// Comparator for the initiative completed at date.
+	CompletedAt *NullableDateComparator `json:"completedAt,omitempty"`
 	// Comparator for the created at date.
 	CreatedAt *DateComparator `json:"createdAt,omitempty"`
 	// Filters that the initiative creator must satisfy.
@@ -3025,15 +3414,25 @@ type InitiativeFilter struct {
 	HealthWithAge *StringComparator `json:"healthWithAge,omitempty"`
 	// Comparator for the identifier.
 	Id *IDComparator `json:"id,omitempty"`
+	// Filters that the initiative updates must satisfy.
+	InitiativeUpdates *InitiativeUpdatesCollectionFilter `json:"initiativeUpdates,omitempty"`
+	// [Internal] Filters that the initiative labels must satisfy.
+	Labels *InitiativeLabelCollectionFilter `json:"labels,omitempty"`
+	// [ALPHA] Filters that the initiative lead team must satisfy.
+	LeadTeam *NullableTeamFilter `json:"leadTeam,omitempty"`
 	// Comparator for the initiative name.
 	Name *StringComparator `json:"name,omitempty"`
 	// Compound filters, one of which need to be matched by the initiative.
 	Or []*InitiativeFilter `json:"or,omitempty"`
 	// Filters that the initiative owner must satisfy.
 	Owner *NullableUserFilter `json:"owner,omitempty"`
+	// [Internal] Comparator for the initiative priority.
+	Priority *NullableNumberComparator `json:"priority,omitempty"`
 	// Comparator for the initiative slug ID.
 	SlugId *StringComparator `json:"slugId,omitempty"`
-	// Comparator for the initiative status: Planned, Active, Completed
+	// Comparator for the initiative started at date.
+	StartedAt *NullableDateComparator `json:"startedAt,omitempty"`
+	// Comparator for the initiative status: Proposed, Planned, Active, Completed, Canceled
 	Status *StringComparator `json:"status,omitempty"`
 	// Comparator for the initiative target date.
 	TargetDate *NullableDateComparator `json:"targetDate,omitempty"`
@@ -3052,6 +3451,12 @@ func (v *InitiativeFilter) GetAncestors() *InitiativeCollectionFilter { return v
 // GetAnd returns InitiativeFilter.And, and is useful for accessing the field via an interface.
 func (v *InitiativeFilter) GetAnd() []*InitiativeFilter { return v.And }
 
+// GetCanceledAt returns InitiativeFilter.CanceledAt, and is useful for accessing the field via an interface.
+func (v *InitiativeFilter) GetCanceledAt() *NullableDateComparator { return v.CanceledAt }
+
+// GetCompletedAt returns InitiativeFilter.CompletedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeFilter) GetCompletedAt() *NullableDateComparator { return v.CompletedAt }
+
 // GetCreatedAt returns InitiativeFilter.CreatedAt, and is useful for accessing the field via an interface.
 func (v *InitiativeFilter) GetCreatedAt() *DateComparator { return v.CreatedAt }
 
@@ -3067,6 +3472,17 @@ func (v *InitiativeFilter) GetHealthWithAge() *StringComparator { return v.Healt
 // GetId returns InitiativeFilter.Id, and is useful for accessing the field via an interface.
 func (v *InitiativeFilter) GetId() *IDComparator { return v.Id }
 
+// GetInitiativeUpdates returns InitiativeFilter.InitiativeUpdates, and is useful for accessing the field via an interface.
+func (v *InitiativeFilter) GetInitiativeUpdates() *InitiativeUpdatesCollectionFilter {
+	return v.InitiativeUpdates
+}
+
+// GetLabels returns InitiativeFilter.Labels, and is useful for accessing the field via an interface.
+func (v *InitiativeFilter) GetLabels() *InitiativeLabelCollectionFilter { return v.Labels }
+
+// GetLeadTeam returns InitiativeFilter.LeadTeam, and is useful for accessing the field via an interface.
+func (v *InitiativeFilter) GetLeadTeam() *NullableTeamFilter { return v.LeadTeam }
+
 // GetName returns InitiativeFilter.Name, and is useful for accessing the field via an interface.
 func (v *InitiativeFilter) GetName() *StringComparator { return v.Name }
 
@@ -3076,8 +3492,14 @@ func (v *InitiativeFilter) GetOr() []*InitiativeFilter { return v.Or }
 // GetOwner returns InitiativeFilter.Owner, and is useful for accessing the field via an interface.
 func (v *InitiativeFilter) GetOwner() *NullableUserFilter { return v.Owner }
 
+// GetPriority returns InitiativeFilter.Priority, and is useful for accessing the field via an interface.
+func (v *InitiativeFilter) GetPriority() *NullableNumberComparator { return v.Priority }
+
 // GetSlugId returns InitiativeFilter.SlugId, and is useful for accessing the field via an interface.
 func (v *InitiativeFilter) GetSlugId() *StringComparator { return v.SlugId }
+
+// GetStartedAt returns InitiativeFilter.StartedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeFilter) GetStartedAt() *NullableDateComparator { return v.StartedAt }
 
 // GetStatus returns InitiativeFilter.Status, and is useful for accessing the field via an interface.
 func (v *InitiativeFilter) GetStatus() *StringComparator { return v.Status }
@@ -3090,6 +3512,199 @@ func (v *InitiativeFilter) GetTeams() *TeamCollectionFilter { return v.Teams }
 
 // GetUpdatedAt returns InitiativeFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *InitiativeFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
+// Initiative label filtering options.
+type InitiativeLabelCollectionFilter struct {
+	// Compound filters, all of which need to be matched by the label.
+	And []*InitiativeLabelCollectionFilter `json:"and,omitempty"`
+	// Comparator for the created at date.
+	CreatedAt *DateComparator `json:"createdAt,omitempty"`
+	// Filters that the initiative labels creator must satisfy.
+	Creator *NullableUserFilter `json:"creator,omitempty"`
+	// Filters that needs to be matched by all initiative labels.
+	Every *InitiativeLabelFilter `json:"every,omitempty"`
+	// Comparator for the identifier.
+	Id *IDComparator `json:"id,omitempty"`
+	// Comparator for whether the label is a group label.
+	IsGroup *BooleanComparator `json:"isGroup,omitempty"`
+	// Comparator for the collection length.
+	Length *NumberComparator `json:"length,omitempty"`
+	// Comparator for the name.
+	Name *StringComparator `json:"name,omitempty"`
+	// Filter based on the existence of the relation.
+	Null *bool `json:"null"`
+	// Compound filters, one of which need to be matched by the label.
+	Or []*InitiativeLabelCollectionFilter `json:"or,omitempty"`
+	// Filters that the initiative label's parent label must satisfy.
+	Parent *InitiativeLabelFilter `json:"parent,omitempty"`
+	// Filters that needs to be matched by some initiative labels.
+	Some *InitiativeLabelCollectionFilter `json:"some,omitempty"`
+	// Comparator for the updated at date.
+	UpdatedAt *DateComparator `json:"updatedAt,omitempty"`
+}
+
+// GetAnd returns InitiativeLabelCollectionFilter.And, and is useful for accessing the field via an interface.
+func (v *InitiativeLabelCollectionFilter) GetAnd() []*InitiativeLabelCollectionFilter { return v.And }
+
+// GetCreatedAt returns InitiativeLabelCollectionFilter.CreatedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeLabelCollectionFilter) GetCreatedAt() *DateComparator { return v.CreatedAt }
+
+// GetCreator returns InitiativeLabelCollectionFilter.Creator, and is useful for accessing the field via an interface.
+func (v *InitiativeLabelCollectionFilter) GetCreator() *NullableUserFilter { return v.Creator }
+
+// GetEvery returns InitiativeLabelCollectionFilter.Every, and is useful for accessing the field via an interface.
+func (v *InitiativeLabelCollectionFilter) GetEvery() *InitiativeLabelFilter { return v.Every }
+
+// GetId returns InitiativeLabelCollectionFilter.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeLabelCollectionFilter) GetId() *IDComparator { return v.Id }
+
+// GetIsGroup returns InitiativeLabelCollectionFilter.IsGroup, and is useful for accessing the field via an interface.
+func (v *InitiativeLabelCollectionFilter) GetIsGroup() *BooleanComparator { return v.IsGroup }
+
+// GetLength returns InitiativeLabelCollectionFilter.Length, and is useful for accessing the field via an interface.
+func (v *InitiativeLabelCollectionFilter) GetLength() *NumberComparator { return v.Length }
+
+// GetName returns InitiativeLabelCollectionFilter.Name, and is useful for accessing the field via an interface.
+func (v *InitiativeLabelCollectionFilter) GetName() *StringComparator { return v.Name }
+
+// GetNull returns InitiativeLabelCollectionFilter.Null, and is useful for accessing the field via an interface.
+func (v *InitiativeLabelCollectionFilter) GetNull() *bool { return v.Null }
+
+// GetOr returns InitiativeLabelCollectionFilter.Or, and is useful for accessing the field via an interface.
+func (v *InitiativeLabelCollectionFilter) GetOr() []*InitiativeLabelCollectionFilter { return v.Or }
+
+// GetParent returns InitiativeLabelCollectionFilter.Parent, and is useful for accessing the field via an interface.
+func (v *InitiativeLabelCollectionFilter) GetParent() *InitiativeLabelFilter { return v.Parent }
+
+// GetSome returns InitiativeLabelCollectionFilter.Some, and is useful for accessing the field via an interface.
+func (v *InitiativeLabelCollectionFilter) GetSome() *InitiativeLabelCollectionFilter { return v.Some }
+
+// GetUpdatedAt returns InitiativeLabelCollectionFilter.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeLabelCollectionFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
+// Initiative label filtering options.
+type InitiativeLabelFilter struct {
+	// Compound filters, all of which need to be matched by the label.
+	And []*InitiativeLabelFilter `json:"and,omitempty"`
+	// Comparator for the created at date.
+	CreatedAt *DateComparator `json:"createdAt,omitempty"`
+	// Filters that the initiative labels creator must satisfy.
+	Creator *NullableUserFilter `json:"creator,omitempty"`
+	// Comparator for the identifier.
+	Id *IDComparator `json:"id,omitempty"`
+	// Comparator for whether the label is a group label.
+	IsGroup *BooleanComparator `json:"isGroup,omitempty"`
+	// Comparator for the name.
+	Name *StringComparator `json:"name,omitempty"`
+	// Compound filters, one of which need to be matched by the label.
+	Or []*InitiativeLabelFilter `json:"or,omitempty"`
+	// Filters that the initiative label's parent label must satisfy.
+	Parent *InitiativeLabelFilter `json:"parent,omitempty"`
+	// Comparator for the updated at date.
+	UpdatedAt *DateComparator `json:"updatedAt,omitempty"`
+}
+
+// GetAnd returns InitiativeLabelFilter.And, and is useful for accessing the field via an interface.
+func (v *InitiativeLabelFilter) GetAnd() []*InitiativeLabelFilter { return v.And }
+
+// GetCreatedAt returns InitiativeLabelFilter.CreatedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeLabelFilter) GetCreatedAt() *DateComparator { return v.CreatedAt }
+
+// GetCreator returns InitiativeLabelFilter.Creator, and is useful for accessing the field via an interface.
+func (v *InitiativeLabelFilter) GetCreator() *NullableUserFilter { return v.Creator }
+
+// GetId returns InitiativeLabelFilter.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeLabelFilter) GetId() *IDComparator { return v.Id }
+
+// GetIsGroup returns InitiativeLabelFilter.IsGroup, and is useful for accessing the field via an interface.
+func (v *InitiativeLabelFilter) GetIsGroup() *BooleanComparator { return v.IsGroup }
+
+// GetName returns InitiativeLabelFilter.Name, and is useful for accessing the field via an interface.
+func (v *InitiativeLabelFilter) GetName() *StringComparator { return v.Name }
+
+// GetOr returns InitiativeLabelFilter.Or, and is useful for accessing the field via an interface.
+func (v *InitiativeLabelFilter) GetOr() []*InitiativeLabelFilter { return v.Or }
+
+// GetParent returns InitiativeLabelFilter.Parent, and is useful for accessing the field via an interface.
+func (v *InitiativeLabelFilter) GetParent() *InitiativeLabelFilter { return v.Parent }
+
+// GetUpdatedAt returns InitiativeLabelFilter.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeLabelFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
+// Collection filtering options for filtering initiatives by initiative updates.
+type InitiativeUpdatesCollectionFilter struct {
+	// Compound filters, all of which need to be matched by the initiative update.
+	And []*InitiativeUpdatesCollectionFilter `json:"and,omitempty"`
+	// Comparator for the created at date.
+	CreatedAt *DateComparator `json:"createdAt,omitempty"`
+	// Filters that needs to be matched by all initiative updates.
+	Every *InitiativeUpdatesFilter `json:"every,omitempty"`
+	// Comparator for the identifier.
+	Id *IDComparator `json:"id,omitempty"`
+	// Comparator for the collection length.
+	Length *NumberComparator `json:"length,omitempty"`
+	// Compound filters, one of which need to be matched by the update.
+	Or []*InitiativeUpdatesCollectionFilter `json:"or,omitempty"`
+	// Filters that needs to be matched by some initiative updates.
+	Some *InitiativeUpdatesFilter `json:"some,omitempty"`
+	// Comparator for the updated at date.
+	UpdatedAt *DateComparator `json:"updatedAt,omitempty"`
+}
+
+// GetAnd returns InitiativeUpdatesCollectionFilter.And, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdatesCollectionFilter) GetAnd() []*InitiativeUpdatesCollectionFilter {
+	return v.And
+}
+
+// GetCreatedAt returns InitiativeUpdatesCollectionFilter.CreatedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdatesCollectionFilter) GetCreatedAt() *DateComparator { return v.CreatedAt }
+
+// GetEvery returns InitiativeUpdatesCollectionFilter.Every, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdatesCollectionFilter) GetEvery() *InitiativeUpdatesFilter { return v.Every }
+
+// GetId returns InitiativeUpdatesCollectionFilter.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdatesCollectionFilter) GetId() *IDComparator { return v.Id }
+
+// GetLength returns InitiativeUpdatesCollectionFilter.Length, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdatesCollectionFilter) GetLength() *NumberComparator { return v.Length }
+
+// GetOr returns InitiativeUpdatesCollectionFilter.Or, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdatesCollectionFilter) GetOr() []*InitiativeUpdatesCollectionFilter { return v.Or }
+
+// GetSome returns InitiativeUpdatesCollectionFilter.Some, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdatesCollectionFilter) GetSome() *InitiativeUpdatesFilter { return v.Some }
+
+// GetUpdatedAt returns InitiativeUpdatesCollectionFilter.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdatesCollectionFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
+// Options for filtering initiatives by initiative updates.
+type InitiativeUpdatesFilter struct {
+	// Compound filters, all of which need to be matched by the initiative updates.
+	And []*InitiativeUpdatesFilter `json:"and,omitempty"`
+	// Comparator for the created at date.
+	CreatedAt *DateComparator `json:"createdAt,omitempty"`
+	// Comparator for the identifier.
+	Id *IDComparator `json:"id,omitempty"`
+	// Compound filters, one of which need to be matched by the initiative updates.
+	Or []*InitiativeUpdatesFilter `json:"or,omitempty"`
+	// Comparator for the updated at date.
+	UpdatedAt *DateComparator `json:"updatedAt,omitempty"`
+}
+
+// GetAnd returns InitiativeUpdatesFilter.And, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdatesFilter) GetAnd() []*InitiativeUpdatesFilter { return v.And }
+
+// GetCreatedAt returns InitiativeUpdatesFilter.CreatedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdatesFilter) GetCreatedAt() *DateComparator { return v.CreatedAt }
+
+// GetId returns InitiativeUpdatesFilter.Id, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdatesFilter) GetId() *IDComparator { return v.Id }
+
+// GetOr returns InitiativeUpdatesFilter.Or, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdatesFilter) GetOr() []*InitiativeUpdatesFilter { return v.Or }
+
+// GetUpdatedAt returns InitiativeUpdatesFilter.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *InitiativeUpdatesFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
 
 // Linear supported integration services.
 type IntegrationService string
@@ -3122,6 +3737,7 @@ const (
 	IntegrationServiceSalesforce                    IntegrationService = "salesforce"
 	IntegrationServiceSlack                         IntegrationService = "slack"
 	IntegrationServiceSlackasks                     IntegrationService = "slackAsks"
+	IntegrationServiceAsksweb                       IntegrationService = "asksWeb"
 	IntegrationServiceSlackcustomviewnotifications  IntegrationService = "slackCustomViewNotifications"
 	IntegrationServiceSlackorgprojectupdatespost    IntegrationService = "slackOrgProjectUpdatesPost"
 	IntegrationServiceSlackorginitiativeupdatespost IntegrationService = "slackOrgInitiativeUpdatesPost"
@@ -3135,6 +3751,9 @@ const (
 	IntegrationServiceEmail                         IntegrationService = "email"
 	IntegrationServiceMcpserverpersonal             IntegrationService = "mcpServerPersonal"
 	IntegrationServiceMcpserver                     IntegrationService = "mcpServer"
+	IntegrationServiceMicrosoftteams                IntegrationService = "microsoftTeams"
+	IntegrationServiceMicrosoftpersonal             IntegrationService = "microsoftPersonal"
+	IntegrationServiceMicrosoftteamsprojectpost     IntegrationService = "microsoftTeamsProjectPost"
 )
 
 var AllIntegrationService = []IntegrationService{
@@ -3165,6 +3784,7 @@ var AllIntegrationService = []IntegrationService{
 	IntegrationServiceSalesforce,
 	IntegrationServiceSlack,
 	IntegrationServiceSlackasks,
+	IntegrationServiceAsksweb,
 	IntegrationServiceSlackcustomviewnotifications,
 	IntegrationServiceSlackorgprojectupdatespost,
 	IntegrationServiceSlackorginitiativeupdatespost,
@@ -3178,12 +3798,17 @@ var AllIntegrationService = []IntegrationService{
 	IntegrationServiceEmail,
 	IntegrationServiceMcpserverpersonal,
 	IntegrationServiceMcpserver,
+	IntegrationServiceMicrosoftteams,
+	IntegrationServiceMicrosoftpersonal,
+	IntegrationServiceMicrosoftteamsprojectpost,
 }
 
 // Issue filtering options.
 type IssueCollectionFilter struct {
 	// [Internal] Comparator for the issue's accumulatedStateUpdatedAt date.
 	AccumulatedStateUpdatedAt *NullableDateComparator `json:"accumulatedStateUpdatedAt,omitempty"`
+	// Filters that the issue's activities must satisfy.
+	Activity *ActivityCollectionFilter `json:"activity,omitempty"`
 	// Comparator for the issues added to cycle at date.
 	AddedToCycleAt *NullableDateComparator `json:"addedToCycleAt,omitempty"`
 	// Comparator for the period when issue was added to a cycle.
@@ -3232,14 +3857,27 @@ type IssueCollectionFilter struct {
 	Estimate *EstimateComparator `json:"estimate,omitempty"`
 	// Filters that needs to be matched by all issues.
 	Every *IssueFilter `json:"every,omitempty"`
+	// [Internal] Comparator for filtering issues bucketed as having active agent
+	// sessions, no closed agent pull requests, and no merged agent pull requests.
+	HasActiveAgentSessions *RelationExistsComparator `json:"hasActiveAgentSessions,omitempty"`
 	// Comparator for filtering issues which are blocked.
 	HasBlockedByRelations *RelationExistsComparator `json:"hasBlockedByRelations,omitempty"`
 	// Comparator for filtering issues which are blocking.
 	HasBlockingRelations *RelationExistsComparator `json:"hasBlockingRelations,omitempty"`
+	// [Internal] Comparator for filtering issues bucketed as having all agent
+	// sessions dismissed or closed, and no merged agent pull requests.
+	HasDismissedAgentSessions *RelationExistsComparator `json:"hasDismissedAgentSessions,omitempty"`
 	// Comparator for filtering issues which are duplicates.
 	HasDuplicateRelations *RelationExistsComparator `json:"hasDuplicateRelations,omitempty"`
+	// [Internal] Comparator for filtering issues bucketed as having an errored agent
+	// session, no active sessions, and no merged agent pull requests.
+	HasErroredAgentSessions *RelationExistsComparator `json:"hasErroredAgentSessions,omitempty"`
+	// [Internal] Comparator for filtering issues which have agent-session-linked pull requests that were merged.
+	HasMergedAgentPullRequests *RelationExistsComparator `json:"hasMergedAgentPullRequests,omitempty"`
 	// Comparator for filtering issues with relations.
 	HasRelatedRelations *RelationExistsComparator `json:"hasRelatedRelations,omitempty"`
+	// Comparator for filtering issues which have been shared with users outside of the team.
+	HasSharedUsers *RelationExistsComparator `json:"hasSharedUsers,omitempty"`
 	// [Internal] Comparator for filtering issues which have suggested assignees.
 	HasSuggestedAssignees *RelationExistsComparator `json:"hasSuggestedAssignees,omitempty"`
 	// [Internal] Comparator for filtering issues which have suggested labels.
@@ -3253,7 +3891,7 @@ type IssueCollectionFilter struct {
 	// [Internal] Comparator for filtering issues which have suggested teams.
 	HasSuggestedTeams *RelationExistsComparator `json:"hasSuggestedTeams,omitempty"`
 	// Comparator for the identifier.
-	Id *IDComparator `json:"id,omitempty"`
+	Id *IssueIDComparator `json:"id,omitempty"`
 	// Filters that issue labels must satisfy.
 	Labels *IssueLabelCollectionFilter `json:"labels,omitempty"`
 	// Filters that the last applied template must satisfy.
@@ -3270,7 +3908,7 @@ type IssueCollectionFilter struct {
 	Or []*IssueCollectionFilter `json:"or,omitempty"`
 	// Filters that the issue parent must satisfy.
 	Parent *NullableIssueFilter `json:"parent,omitempty"`
-	// Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+	// Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
 	Priority *NullableNumberComparator `json:"priority,omitempty"`
 	// Filters that the issues project must satisfy.
 	Project *NullableProjectFilter `json:"project,omitempty"`
@@ -3280,8 +3918,14 @@ type IssueCollectionFilter struct {
 	Reactions *ReactionCollectionFilter `json:"reactions,omitempty"`
 	// [ALPHA] Filters that the recurring issue template must satisfy.
 	RecurringIssueTemplate *NullableTemplateFilter `json:"recurringIssueTemplate,omitempty"`
+	// Filters that the issue's releases must satisfy.
+	Releases *ReleaseCollectionFilter `json:"releases,omitempty"`
 	// [Internal] Comparator for the issues content.
 	SearchableContent *ContentComparator `json:"searchableContent,omitempty"`
+	// Filters that users the issue has been shared with must satisfy.
+	SharedWith *UserCollectionFilter `json:"sharedWith,omitempty"`
+	// Comparator for the issue's SLA breach date.
+	SlaBreachesAt *NullableDateComparator `json:"slaBreachesAt,omitempty"`
 	// Comparator for the issues sla status.
 	SlaStatus *SlaStatusComparator `json:"slaStatus,omitempty"`
 	// Filters that the issues snoozer must satisfy.
@@ -3316,6 +3960,9 @@ type IssueCollectionFilter struct {
 func (v *IssueCollectionFilter) GetAccumulatedStateUpdatedAt() *NullableDateComparator {
 	return v.AccumulatedStateUpdatedAt
 }
+
+// GetActivity returns IssueCollectionFilter.Activity, and is useful for accessing the field via an interface.
+func (v *IssueCollectionFilter) GetActivity() *ActivityCollectionFilter { return v.Activity }
 
 // GetAddedToCycleAt returns IssueCollectionFilter.AddedToCycleAt, and is useful for accessing the field via an interface.
 func (v *IssueCollectionFilter) GetAddedToCycleAt() *NullableDateComparator { return v.AddedToCycleAt }
@@ -3393,6 +4040,11 @@ func (v *IssueCollectionFilter) GetEstimate() *EstimateComparator { return v.Est
 // GetEvery returns IssueCollectionFilter.Every, and is useful for accessing the field via an interface.
 func (v *IssueCollectionFilter) GetEvery() *IssueFilter { return v.Every }
 
+// GetHasActiveAgentSessions returns IssueCollectionFilter.HasActiveAgentSessions, and is useful for accessing the field via an interface.
+func (v *IssueCollectionFilter) GetHasActiveAgentSessions() *RelationExistsComparator {
+	return v.HasActiveAgentSessions
+}
+
 // GetHasBlockedByRelations returns IssueCollectionFilter.HasBlockedByRelations, and is useful for accessing the field via an interface.
 func (v *IssueCollectionFilter) GetHasBlockedByRelations() *RelationExistsComparator {
 	return v.HasBlockedByRelations
@@ -3403,14 +4055,34 @@ func (v *IssueCollectionFilter) GetHasBlockingRelations() *RelationExistsCompara
 	return v.HasBlockingRelations
 }
 
+// GetHasDismissedAgentSessions returns IssueCollectionFilter.HasDismissedAgentSessions, and is useful for accessing the field via an interface.
+func (v *IssueCollectionFilter) GetHasDismissedAgentSessions() *RelationExistsComparator {
+	return v.HasDismissedAgentSessions
+}
+
 // GetHasDuplicateRelations returns IssueCollectionFilter.HasDuplicateRelations, and is useful for accessing the field via an interface.
 func (v *IssueCollectionFilter) GetHasDuplicateRelations() *RelationExistsComparator {
 	return v.HasDuplicateRelations
 }
 
+// GetHasErroredAgentSessions returns IssueCollectionFilter.HasErroredAgentSessions, and is useful for accessing the field via an interface.
+func (v *IssueCollectionFilter) GetHasErroredAgentSessions() *RelationExistsComparator {
+	return v.HasErroredAgentSessions
+}
+
+// GetHasMergedAgentPullRequests returns IssueCollectionFilter.HasMergedAgentPullRequests, and is useful for accessing the field via an interface.
+func (v *IssueCollectionFilter) GetHasMergedAgentPullRequests() *RelationExistsComparator {
+	return v.HasMergedAgentPullRequests
+}
+
 // GetHasRelatedRelations returns IssueCollectionFilter.HasRelatedRelations, and is useful for accessing the field via an interface.
 func (v *IssueCollectionFilter) GetHasRelatedRelations() *RelationExistsComparator {
 	return v.HasRelatedRelations
+}
+
+// GetHasSharedUsers returns IssueCollectionFilter.HasSharedUsers, and is useful for accessing the field via an interface.
+func (v *IssueCollectionFilter) GetHasSharedUsers() *RelationExistsComparator {
+	return v.HasSharedUsers
 }
 
 // GetHasSuggestedAssignees returns IssueCollectionFilter.HasSuggestedAssignees, and is useful for accessing the field via an interface.
@@ -3444,7 +4116,7 @@ func (v *IssueCollectionFilter) GetHasSuggestedTeams() *RelationExistsComparator
 }
 
 // GetId returns IssueCollectionFilter.Id, and is useful for accessing the field via an interface.
-func (v *IssueCollectionFilter) GetId() *IDComparator { return v.Id }
+func (v *IssueCollectionFilter) GetId() *IssueIDComparator { return v.Id }
 
 // GetLabels returns IssueCollectionFilter.Labels, and is useful for accessing the field via an interface.
 func (v *IssueCollectionFilter) GetLabels() *IssueLabelCollectionFilter { return v.Labels }
@@ -3491,8 +4163,17 @@ func (v *IssueCollectionFilter) GetRecurringIssueTemplate() *NullableTemplateFil
 	return v.RecurringIssueTemplate
 }
 
+// GetReleases returns IssueCollectionFilter.Releases, and is useful for accessing the field via an interface.
+func (v *IssueCollectionFilter) GetReleases() *ReleaseCollectionFilter { return v.Releases }
+
 // GetSearchableContent returns IssueCollectionFilter.SearchableContent, and is useful for accessing the field via an interface.
 func (v *IssueCollectionFilter) GetSearchableContent() *ContentComparator { return v.SearchableContent }
+
+// GetSharedWith returns IssueCollectionFilter.SharedWith, and is useful for accessing the field via an interface.
+func (v *IssueCollectionFilter) GetSharedWith() *UserCollectionFilter { return v.SharedWith }
+
+// GetSlaBreachesAt returns IssueCollectionFilter.SlaBreachesAt, and is useful for accessing the field via an interface.
+func (v *IssueCollectionFilter) GetSlaBreachesAt() *NullableDateComparator { return v.SlaBreachesAt }
 
 // GetSlaStatus returns IssueCollectionFilter.SlaStatus, and is useful for accessing the field via an interface.
 func (v *IssueCollectionFilter) GetSlaStatus() *SlaStatusComparator { return v.SlaStatus }
@@ -3540,18 +4221,22 @@ func (v *IssueCollectionFilter) GetTriageTime() *NullableDurationComparator { re
 // GetUpdatedAt returns IssueCollectionFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *IssueCollectionFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
 
+// Input for creating a new issue. At minimum, a team must be specified. A title is
+// required unless a template is provided. All other fields are optional and will
+// use defaults from the team or template if not specified.
 type IssueCreateInput struct {
 	// The identifier of the user to assign the issue to.
 	AssigneeId *string `json:"assigneeId"`
-	// The date when the issue was completed (e.g. if importing from another system).
-	// Must be a date in the past and after createdAt date. Cannot be provided with
-	// an incompatible workflow state.
+	// The time at which the issue was completed (e.g. if importing from another
+	// system). Must be a time in the past and after createdAt. Cannot be provided
+	// with an incompatible workflow state.
 	CompletedAt *time.Time `json:"completedAt"`
 	// Create issue as a user with the provided name. This option is only available
 	// to OAuth applications creating issues in `actor=app` mode.
 	CreateAsUser *string `json:"createAsUser"`
-	// The date when the issue was created (e.g. if importing from another system).
-	// Must be a date in the past. If none is provided, the backend will generate the time as now.
+	// The time at which the issue was created (e.g. if importing from another
+	// system). Must be a time in the past. If none is provided, the backend will
+	// generate the time as now.
 	CreatedAt *time.Time `json:"createdAt"`
 	// The cycle associated with the issue.
 	CycleId *string `json:"cycleId"`
@@ -3571,15 +4256,19 @@ type IssueCreateInput struct {
 	Estimate *int `json:"estimate"`
 	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
 	Id *string `json:"id"`
+	// [Internal] Whether this issue should inherit shared access from its parent
+	// issue. Set to false to opt out of automatic shared access inheritance when
+	// creating a sub-issue.
+	InheritsSharedAccess *bool `json:"inheritsSharedAccess"`
 	// The identifiers of the issue labels associated with this ticket.
 	LabelIds []string `json:"labelIds"`
 	// The ID of the last template applied to the issue.
 	LastAppliedTemplateId *string `json:"lastAppliedTemplateId"`
-	// The identifier of the parent issue.
+	// The identifier of the parent issue. Can be a UUID or issue identifier (e.g., 'LIN-123').
 	ParentId *string `json:"parentId"`
 	// Whether the passed sort order should be preserved.
 	PreserveSortOrderOnCreate *bool `json:"preserveSortOrderOnCreate"`
-	// The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+	// The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
 	Priority *int `json:"priority"`
 	// The position of the issue related to other issues, when ordered by priority.
 	PrioritySortOrder *float64 `json:"prioritySortOrder"`
@@ -3589,9 +4278,11 @@ type IssueCreateInput struct {
 	ProjectMilestoneId *string `json:"projectMilestoneId"`
 	// The comment the issue is referencing.
 	ReferenceCommentId *string `json:"referenceCommentId"`
-	// [Internal] The timestamp at which an issue will be considered in breach of SLA.
+	// The identifiers of the releases to associate with this issue.
+	ReleaseIds []string `json:"releaseIds"`
+	// [Internal] The time at which an issue will be considered in breach of SLA.
 	SlaBreachesAt *time.Time `json:"slaBreachesAt"`
-	// [Internal] The timestamp at which the issue's SLA was started.
+	// [Internal] The time at which the issue's SLA was started.
 	SlaStartedAt *time.Time `json:"slaStartedAt"`
 	// The SLA day count type for the issue. Whether SLA should be business days only or calendar days (default).
 	SlaType *SLADayCountType `json:"slaType"`
@@ -3655,6 +4346,9 @@ func (v *IssueCreateInput) GetEstimate() *int { return v.Estimate }
 // GetId returns IssueCreateInput.Id, and is useful for accessing the field via an interface.
 func (v *IssueCreateInput) GetId() *string { return v.Id }
 
+// GetInheritsSharedAccess returns IssueCreateInput.InheritsSharedAccess, and is useful for accessing the field via an interface.
+func (v *IssueCreateInput) GetInheritsSharedAccess() *bool { return v.InheritsSharedAccess }
+
 // GetLabelIds returns IssueCreateInput.LabelIds, and is useful for accessing the field via an interface.
 func (v *IssueCreateInput) GetLabelIds() []string { return v.LabelIds }
 
@@ -3681,6 +4375,9 @@ func (v *IssueCreateInput) GetProjectMilestoneId() *string { return v.ProjectMil
 
 // GetReferenceCommentId returns IssueCreateInput.ReferenceCommentId, and is useful for accessing the field via an interface.
 func (v *IssueCreateInput) GetReferenceCommentId() *string { return v.ReferenceCommentId }
+
+// GetReleaseIds returns IssueCreateInput.ReleaseIds, and is useful for accessing the field via an interface.
+func (v *IssueCreateInput) GetReleaseIds() []string { return v.ReleaseIds }
 
 // GetSlaBreachesAt returns IssueCreateInput.SlaBreachesAt, and is useful for accessing the field via an interface.
 func (v *IssueCreateInput) GetSlaBreachesAt() *time.Time { return v.SlaBreachesAt }
@@ -3729,17 +4426,20 @@ type IssueDetailFields struct {
 	Id string `json:"id"`
 	// Issue's human readable identifier (e.g. ENG-123).
 	Identifier string `json:"identifier"`
-	// The issue's unique number.
+	// The issue's unique number, scoped to the issue's team. Together with the team
+	// key, this forms the issue's human-readable identifier (e.g., ENG-123).
 	Number float64 `json:"number"`
-	// The issue's title.
+	// The issue's title. This is the primary human-readable summary of the work item.
 	Title string `json:"title"`
 	// The issue's description in markdown format.
 	Description *string `json:"description"`
-	// The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+	// The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
 	Priority float64 `json:"priority"`
 	// Label for the priority.
 	PriorityLabel string `json:"priorityLabel"`
-	// The estimate of the complexity of the issue..
+	// The estimate of the complexity of the issue. The specific scale used depends
+	// on the team's estimation configuration (e.g., points, T-shirt sizes). Null if
+	// no estimate has been set.
 	Estimate *float64 `json:"estimate"`
 	// The order of the item in its column on the board.
 	BoardOrder float64 `json:"boardOrder"`
@@ -3772,13 +4472,18 @@ type IssueDetailFields struct {
 	PreviousIdentifiers []string `json:"previousIdentifiers"`
 	// Integration type that created this issue, if applicable.
 	IntegrationSourceType *IntegrationService `json:"integrationSourceType"`
-	// The workflow state that the issue is associated with.
+	// The workflow state (issue status) that the issue is currently in. Workflow
+	// states represent the issue's progress through the team's workflow, such as
+	// Triage, Todo, In Progress, Done, or Canceled.
 	State *IssueDetailFieldsStateWorkflowState `json:"state"`
-	// The user to whom the issue is assigned to.
+	// The user to whom the issue is assigned. Null if the issue is unassigned.
 	Assignee *IssueDetailFieldsAssigneeUser `json:"assignee"`
-	// The user who created the issue.
+	// The user who created the issue. Null if the creator's account has been deleted
+	// or if the issue was created by an integration or system process.
 	Creator *IssueDetailFieldsCreatorUser `json:"creator"`
-	// The team that the issue is associated with.
+	// The team that the issue belongs to. Every issue must belong to exactly one
+	// team, which determines the available workflow states, labels, and other
+	// team-specific configuration.
 	Team *IssueDetailFieldsTeam `json:"team"`
 	// Labels associated with this issue.
 	Labels *IssueDetailFieldsLabelsIssueLabelConnection `json:"labels"`
@@ -3786,9 +4491,9 @@ type IssueDetailFields struct {
 	Parent *IssueDetailFieldsParentIssue `json:"parent"`
 	// Children of the issue.
 	Children *IssueDetailFieldsChildrenIssueConnection `json:"children"`
-	// The cycle that the issue is associated with.
+	// The cycle that the issue is associated with. Null if the issue is not part of any cycle.
 	Cycle *IssueDetailFieldsCycle `json:"cycle"`
-	// The project that the issue is associated with.
+	// The project that the issue is associated with. Null if the issue is not part of any project.
 	Project *IssueDetailFieldsProject `json:"project"`
 	// Attachments associated with the issue.
 	Attachments *IssueDetailFieldsAttachmentsAttachmentConnection `json:"attachments"`
@@ -3802,7 +4507,9 @@ type IssueDetailFields struct {
 	History *IssueDetailFieldsHistoryIssueHistoryConnection `json:"history"`
 	// Reactions associated with the issue.
 	Reactions []*IssueDetailFieldsReactionsReaction `json:"reactions"`
-	// The external user who created the issue.
+	// The external user who created the issue. Set when the issue was created via an
+	// integration (e.g., Slack, Intercom) on behalf of a non-Linear user. Null if
+	// the issue was created by a Linear user.
 	ExternalUserCreator *IssueDetailFieldsExternalUserCreatorExternalUser `json:"externalUserCreator"`
 }
 
@@ -3942,7 +4649,10 @@ func (v *IssueDetailFields) GetExternalUserCreator() *IssueDetailFieldsExternalU
 // IssueDetailFieldsAssigneeUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type IssueDetailFieldsAssigneeUser struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
@@ -3952,11 +4662,11 @@ type IssueDetailFieldsAssigneeUser struct {
 	Email string `json:"email"`
 	// An URL to the user's avatar image.
 	AvatarUrl *string `json:"avatarUrl"`
-	// The user's display (nick) name. Unique within each organization.
+	// The user's display (nick) name. Must be unique within the workspace.
 	DisplayName string `json:"displayName"`
 	// Whether the user account is active or disabled (suspended).
 	Active bool `json:"active"`
-	// Whether the user is an organization administrator.
+	// Whether the user is a workspace administrator. On Free plans, all members are treated as admins.
 	Admin bool `json:"admin"`
 	// The time at which the entity was created.
 	CreatedAt time.Time `json:"createdAt"`
@@ -3999,7 +4709,12 @@ func (v *IssueDetailFieldsAttachmentsAttachmentConnection) GetNodes() []*IssueDe
 // IssueDetailFieldsAttachmentsAttachmentConnectionNodesAttachment includes the requested fields of the GraphQL type Attachment.
 // The GraphQL type's documentation follows.
 //
-// Issue attachment (e.g. support ticket, pull request).
+// An attachment linking external content to an issue. Attachments represent
+// connections to external resources such as GitHub pull requests, Slack messages,
+// Zendesk tickets, Figma files, Sentry issues, Intercom conversations, and plain
+// URLs. Each attachment has a title and subtitle displayed in the Linear UI, a URL
+// serving as both the link destination and unique identifier per issue, and
+// optional metadata specific to the source integration.
 type IssueDetailFieldsAttachmentsAttachmentConnectionNodesAttachment struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
@@ -4007,9 +4722,13 @@ type IssueDetailFieldsAttachmentsAttachmentConnectionNodesAttachment struct {
 	Title string `json:"title"`
 	// Content for the subtitle line in the Linear attachment widget.
 	Subtitle *string `json:"subtitle"`
-	// Location of the attachment which is also used as an identifier.
+	// The URL of the external resource this attachment links to. Also serves as a
+	// unique identifier for the attachment within an issue; no two attachments on
+	// the same issue can share the same URL.
 	Url string `json:"url"`
-	// Custom metadata related to the attachment.
+	// Integration-specific metadata for this attachment. The schema varies by source
+	// type and may include fields such as pull request status, review counts, commit
+	// information, ticket status, or other data from the external system.
 	Metadata map[string]interface{} `json:"metadata"`
 	// The time at which the entity was created.
 	CreatedAt time.Time `json:"createdAt"`
@@ -4053,7 +4772,10 @@ func (v *IssueDetailFieldsAttachmentsAttachmentConnectionNodesAttachment) GetCre
 // IssueDetailFieldsAttachmentsAttachmentConnectionNodesAttachmentCreatorUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type IssueDetailFieldsAttachmentsAttachmentConnectionNodesAttachmentCreatorUser struct {
 	// The user's full name.
 	Name string `json:"name"`
@@ -4084,21 +4806,28 @@ func (v *IssueDetailFieldsChildrenIssueConnection) GetNodes() []*IssueDetailFiel
 // IssueDetailFieldsChildrenIssueConnectionNodesIssue includes the requested fields of the GraphQL type Issue.
 // The GraphQL type's documentation follows.
 //
-// An issue.
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
 type IssueDetailFieldsChildrenIssueConnectionNodesIssue struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
 	// Issue's human readable identifier (e.g. ENG-123).
 	Identifier string `json:"identifier"`
-	// The issue's title.
+	// The issue's title. This is the primary human-readable summary of the work item.
 	Title string `json:"title"`
-	// The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+	// The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
 	Priority float64 `json:"priority"`
 	// The time at which the entity was created.
 	CreatedAt time.Time `json:"createdAt"`
-	// The workflow state that the issue is associated with.
+	// The workflow state (issue status) that the issue is currently in. Workflow
+	// states represent the issue's progress through the team's workflow, such as
+	// Triage, Todo, In Progress, Done, or Canceled.
 	State *IssueDetailFieldsChildrenIssueConnectionNodesIssueStateWorkflowState `json:"state"`
-	// The user to whom the issue is assigned to.
+	// The user to whom the issue is assigned. Null if the issue is unassigned.
 	Assignee *IssueDetailFieldsChildrenIssueConnectionNodesIssueAssigneeUser `json:"assignee"`
 }
 
@@ -4134,7 +4863,10 @@ func (v *IssueDetailFieldsChildrenIssueConnectionNodesIssue) GetAssignee() *Issu
 // IssueDetailFieldsChildrenIssueConnectionNodesIssueAssigneeUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type IssueDetailFieldsChildrenIssueConnectionNodesIssueAssigneeUser struct {
 	// The user's full name.
 	Name string `json:"name"`
@@ -4155,11 +4887,17 @@ func (v *IssueDetailFieldsChildrenIssueConnectionNodesIssueAssigneeUser) GetEmai
 // IssueDetailFieldsChildrenIssueConnectionNodesIssueStateWorkflowState includes the requested fields of the GraphQL type WorkflowState.
 // The GraphQL type's documentation follows.
 //
-// A state in a team workflow.
+// A state in a team's workflow, representing an issue status such as Triage,
+// Backlog, Todo, In Progress, In Review, Done, or Canceled. Each team has its own
+// set of workflow states that define the progression of issues through the team's
+// process. Workflow states have a type that categorizes them (triage, backlog,
+// unstarted, started, completed, canceled), a position that determines their
+// display order, and a color for visual identification. States can be inherited
+// from parent teams to sub-teams.
 type IssueDetailFieldsChildrenIssueConnectionNodesIssueStateWorkflowState struct {
-	// The state's name.
+	// The state's human-readable name (e.g., 'In Progress', 'Done', 'Backlog').
 	Name string `json:"name"`
-	// The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled".
+	// The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled", "duplicate".
 	Type string `json:"type"`
 	// The state's UI color as a HEX string.
 	Color string `json:"color"`
@@ -4193,22 +4931,26 @@ func (v *IssueDetailFieldsCommentsCommentConnection) GetNodes() []*IssueDetailFi
 // IssueDetailFieldsCommentsCommentConnectionNodesComment includes the requested fields of the GraphQL type Comment.
 // The GraphQL type's documentation follows.
 //
-// A comment associated with an issue.
+// A comment associated with an issue, project update, initiative update, document
+// content, post, project, or initiative. Comments support rich text (ProseMirror),
+// emoji reactions, and threaded replies via parentId. Comments can be created by
+// workspace users or by external users through integrations (e.g., Slack,
+// Intercom). Each comment belongs to exactly one parent entity.
 type IssueDetailFieldsCommentsCommentConnectionNodesComment struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The comment content in markdown format.
+	// The comment content in markdown format. This is a derived representation of the canonical bodyData ProseMirror content.
 	Body string `json:"body"`
 	// The time at which the entity was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
 	// been updated after creation.
 	UpdatedAt time.Time `json:"updatedAt"`
-	// The time user edited the comment.
+	// The time the comment was last edited by its author. Null if the comment has not been edited since creation.
 	EditedAt *time.Time `json:"editedAt"`
-	// The user who wrote the comment.
+	// The user who wrote the comment. Null for comments created by integrations or bots without a user association.
 	User *IssueDetailFieldsCommentsCommentConnectionNodesCommentUser `json:"user"`
-	// The parent comment under which the current comment is nested.
+	// The parent comment under which the current comment is nested. Null for top-level comments that are not replies.
 	Parent *IssueDetailFieldsCommentsCommentConnectionNodesCommentParentComment `json:"parent"`
 	// The children of the comment.
 	Children *IssueDetailFieldsCommentsCommentConnectionNodesCommentChildrenCommentConnection `json:"children"`
@@ -4263,13 +5005,17 @@ func (v *IssueDetailFieldsCommentsCommentConnectionNodesCommentChildrenCommentCo
 // IssueDetailFieldsCommentsCommentConnectionNodesCommentChildrenCommentConnectionNodesComment includes the requested fields of the GraphQL type Comment.
 // The GraphQL type's documentation follows.
 //
-// A comment associated with an issue.
+// A comment associated with an issue, project update, initiative update, document
+// content, post, project, or initiative. Comments support rich text (ProseMirror),
+// emoji reactions, and threaded replies via parentId. Comments can be created by
+// workspace users or by external users through integrations (e.g., Slack,
+// Intercom). Each comment belongs to exactly one parent entity.
 type IssueDetailFieldsCommentsCommentConnectionNodesCommentChildrenCommentConnectionNodesComment struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The comment content in markdown format.
+	// The comment content in markdown format. This is a derived representation of the canonical bodyData ProseMirror content.
 	Body string `json:"body"`
-	// The user who wrote the comment.
+	// The user who wrote the comment. Null for comments created by integrations or bots without a user association.
 	User *IssueDetailFieldsCommentsCommentConnectionNodesCommentChildrenCommentConnectionNodesCommentUser `json:"user"`
 }
 
@@ -4291,7 +5037,10 @@ func (v *IssueDetailFieldsCommentsCommentConnectionNodesCommentChildrenCommentCo
 // IssueDetailFieldsCommentsCommentConnectionNodesCommentChildrenCommentConnectionNodesCommentUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type IssueDetailFieldsCommentsCommentConnectionNodesCommentChildrenCommentConnectionNodesCommentUser struct {
 	// The user's full name.
 	Name string `json:"name"`
@@ -4305,7 +5054,11 @@ func (v *IssueDetailFieldsCommentsCommentConnectionNodesCommentChildrenCommentCo
 // IssueDetailFieldsCommentsCommentConnectionNodesCommentParentComment includes the requested fields of the GraphQL type Comment.
 // The GraphQL type's documentation follows.
 //
-// A comment associated with an issue.
+// A comment associated with an issue, project update, initiative update, document
+// content, post, project, or initiative. Comments support rich text (ProseMirror),
+// emoji reactions, and threaded replies via parentId. Comments can be created by
+// workspace users or by external users through integrations (e.g., Slack,
+// Intercom). Each comment belongs to exactly one parent entity.
 type IssueDetailFieldsCommentsCommentConnectionNodesCommentParentComment struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
@@ -4319,7 +5072,10 @@ func (v *IssueDetailFieldsCommentsCommentConnectionNodesCommentParentComment) Ge
 // IssueDetailFieldsCommentsCommentConnectionNodesCommentUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type IssueDetailFieldsCommentsCommentConnectionNodesCommentUser struct {
 	// The user's full name.
 	Name string `json:"name"`
@@ -4345,7 +5101,10 @@ func (v *IssueDetailFieldsCommentsCommentConnectionNodesCommentUser) GetAvatarUr
 // IssueDetailFieldsCreatorUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type IssueDetailFieldsCreatorUser struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
@@ -4355,7 +5114,7 @@ type IssueDetailFieldsCreatorUser struct {
 	Email string `json:"email"`
 	// An URL to the user's avatar image.
 	AvatarUrl *string `json:"avatarUrl"`
-	// The user's display (nick) name. Unique within each organization.
+	// The user's display (nick) name. Must be unique within the workspace.
 	DisplayName string `json:"displayName"`
 	// Whether the user account is active or disabled (suspended).
 	Active bool `json:"active"`
@@ -4382,26 +5141,36 @@ func (v *IssueDetailFieldsCreatorUser) GetActive() bool { return v.Active }
 // IssueDetailFieldsCycle includes the requested fields of the GraphQL type Cycle.
 // The GraphQL type's documentation follows.
 //
-// A set of issues to be resolved in a specified amount of time.
+// A time-boxed iteration (similar to a sprint) used for planning and tracking
+// work. Cycles belong to a team and have defined start and end dates. Issues are
+// assigned to cycles for time-based planning, and progress is tracked via
+// completed, in-progress, and total scope. Cycles are automatically completed when
+// their end date passes, and uncompleted issues can be carried over to the next cycle.
 type IssueDetailFieldsCycle struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The number of the cycle.
+	// The auto-incrementing number of the cycle, unique within its team. This value
+	// is assigned automatically by the database and cannot be set on creation.
 	Number float64 `json:"number"`
-	// The custom name of the cycle.
+	// The custom name of the cycle. If not set, the cycle is displayed using its number (e.g., "Cycle 5").
 	Name *string `json:"name"`
-	// The cycle's description.
+	// The description of the cycle.
 	Description *string `json:"description"`
-	// The start time of the cycle.
+	// The start date and time of the cycle.
 	StartsAt time.Time `json:"startsAt"`
-	// The end time of the cycle.
+	// The end date and time of the cycle. When a cycle is completed prematurely,
+	// this is updated to match the completion time. When cycles are disabled, both
+	// endsAt and completedAt are set to the current time.
 	EndsAt time.Time `json:"endsAt"`
-	// The overall progress of the cycle. This is the (completed estimate points +
-	// 0.25 * in progress estimate points) / total estimate points.
+	// The overall progress of the cycle as a number between 0 and 1. Calculated as
+	// (completed estimate points + 0.25 * in-progress estimate points) / total
+	// estimate points. Returns 0 if no estimate points exist.
 	Progress float64 `json:"progress"`
-	// The completion time of the cycle. If null, the cycle hasn't been completed.
+	// The completion time of the cycle. If null, the cycle has not been completed
+	// yet. A cycle is completed either when its end date passes or when it is
+	// manually completed early.
 	CompletedAt *time.Time `json:"completedAt"`
-	// The total number of estimation points after each day.
+	// The total number of estimation points (scope) in the cycle after each day. Used for scope-based burndown charts.
 	ScopeHistory []float64 `json:"scopeHistory"`
 }
 
@@ -4435,9 +5204,12 @@ func (v *IssueDetailFieldsCycle) GetScopeHistory() []float64 { return v.ScopeHis
 // IssueDetailFieldsExternalUserCreatorExternalUser includes the requested fields of the GraphQL type ExternalUser.
 // The GraphQL type's documentation follows.
 //
-// An external authenticated (e.g., through Slack) user which doesn't have a Linear
-// account, but can create and update entities in Linear from the external system
-// that authenticated them.
+// An external user who interacts with Linear through an integrated external
+// service (such as Slack, Jira, GitHub, GitLab, Salesforce, or Microsoft Teams)
+// but does not have a Linear account. External users can create issues, post
+// comments, and add reactions from their respective platforms. They are identified
+// by service-specific user IDs and may optionally have an email address. External
+// users are scoped to a single workspace.
 type IssueDetailFieldsExternalUserCreatorExternalUser struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
@@ -4445,7 +5217,7 @@ type IssueDetailFieldsExternalUserCreatorExternalUser struct {
 	Name string `json:"name"`
 	// The external user's email address.
 	Email *string `json:"email"`
-	// An URL to the external user's avatar image.
+	// A URL to the external user's avatar image. Null if no avatar is available from the external service.
 	AvatarUrl *string `json:"avatarUrl"`
 }
 
@@ -4474,7 +5246,12 @@ func (v *IssueDetailFieldsHistoryIssueHistoryConnection) GetNodes() []*IssueDeta
 // IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistory includes the requested fields of the GraphQL type IssueHistory.
 // The GraphQL type's documentation follows.
 //
-// A record of changes to an issue.
+// A record of changes to an issue. Each history entry captures one or more
+// property changes made to an issue within a short grouping window by the same
+// actor. History entries track changes to fields such as title, assignee, status,
+// priority, project, cycle, labels, due date, estimate, parent issue, and more.
+// They also record metadata about what triggered the change (e.g., a user action,
+// workflow automation, triage rule, or integration).
 type IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistory struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
@@ -4606,7 +5383,10 @@ func (v *IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistory) GetRem
 // IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryActorUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryActorUser struct {
 	// The user's full name.
 	Name string `json:"name"`
@@ -4627,7 +5407,10 @@ func (v *IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryActorUse
 // IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryFromAssigneeUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryFromAssigneeUser struct {
 	// The user's full name.
 	Name string `json:"name"`
@@ -4641,9 +5424,13 @@ func (v *IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryFromAssi
 // IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryFromCycle includes the requested fields of the GraphQL type Cycle.
 // The GraphQL type's documentation follows.
 //
-// A set of issues to be resolved in a specified amount of time.
+// A time-boxed iteration (similar to a sprint) used for planning and tracking
+// work. Cycles belong to a team and have defined start and end dates. Issues are
+// assigned to cycles for time-based planning, and progress is tracked via
+// completed, in-progress, and total scope. Cycles are automatically completed when
+// their end date passes, and uncompleted issues can be carried over to the next cycle.
 type IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryFromCycle struct {
-	// The custom name of the cycle.
+	// The custom name of the cycle. If not set, the cycle is displayed using its number (e.g., "Cycle 5").
 	Name *string `json:"name"`
 }
 
@@ -4655,9 +5442,11 @@ func (v *IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryFromCycl
 // IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryFromProject includes the requested fields of the GraphQL type Project.
 // The GraphQL type's documentation follows.
 //
-// A project.
+// A project is a collection of issues working toward a shared goal. Projects have
+// start and target dates, milestones, status tracking, and progress metrics. They
+// can span multiple teams and be grouped under initiatives.
 type IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryFromProject struct {
-	// The project's name.
+	// The name of the project.
 	Name string `json:"name"`
 }
 
@@ -4669,9 +5458,15 @@ func (v *IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryFromProj
 // IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryFromStateWorkflowState includes the requested fields of the GraphQL type WorkflowState.
 // The GraphQL type's documentation follows.
 //
-// A state in a team workflow.
+// A state in a team's workflow, representing an issue status such as Triage,
+// Backlog, Todo, In Progress, In Review, Done, or Canceled. Each team has its own
+// set of workflow states that define the progression of issues through the team's
+// process. Workflow states have a type that categorizes them (triage, backlog,
+// unstarted, started, completed, canceled), a position that determines their
+// display order, and a color for visual identification. States can be inherited
+// from parent teams to sub-teams.
 type IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryFromStateWorkflowState struct {
-	// The state's name.
+	// The state's human-readable name (e.g., 'In Progress', 'Done', 'Backlog').
 	Name string `json:"name"`
 }
 
@@ -4683,7 +5478,10 @@ func (v *IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryFromStat
 // IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryToAssigneeUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryToAssigneeUser struct {
 	// The user's full name.
 	Name string `json:"name"`
@@ -4697,9 +5495,13 @@ func (v *IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryToAssign
 // IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryToCycle includes the requested fields of the GraphQL type Cycle.
 // The GraphQL type's documentation follows.
 //
-// A set of issues to be resolved in a specified amount of time.
+// A time-boxed iteration (similar to a sprint) used for planning and tracking
+// work. Cycles belong to a team and have defined start and end dates. Issues are
+// assigned to cycles for time-based planning, and progress is tracked via
+// completed, in-progress, and total scope. Cycles are automatically completed when
+// their end date passes, and uncompleted issues can be carried over to the next cycle.
 type IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryToCycle struct {
-	// The custom name of the cycle.
+	// The custom name of the cycle. If not set, the cycle is displayed using its number (e.g., "Cycle 5").
 	Name *string `json:"name"`
 }
 
@@ -4711,9 +5513,11 @@ func (v *IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryToCycle)
 // IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryToProject includes the requested fields of the GraphQL type Project.
 // The GraphQL type's documentation follows.
 //
-// A project.
+// A project is a collection of issues working toward a shared goal. Projects have
+// start and target dates, milestones, status tracking, and progress metrics. They
+// can span multiple teams and be grouped under initiatives.
 type IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryToProject struct {
-	// The project's name.
+	// The name of the project.
 	Name string `json:"name"`
 }
 
@@ -4725,9 +5529,15 @@ func (v *IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryToProjec
 // IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryToStateWorkflowState includes the requested fields of the GraphQL type WorkflowState.
 // The GraphQL type's documentation follows.
 //
-// A state in a team workflow.
+// A state in a team's workflow, representing an issue status such as Triage,
+// Backlog, Todo, In Progress, In Review, Done, or Canceled. Each team has its own
+// set of workflow states that define the progression of issues through the team's
+// process. Workflow states have a type that categorizes them (triage, backlog,
+// unstarted, started, completed, canceled), a position that determines their
+// display order, and a color for visual identification. States can be inherited
+// from parent teams to sub-teams.
 type IssueDetailFieldsHistoryIssueHistoryConnectionNodesIssueHistoryToStateWorkflowState struct {
-	// The state's name.
+	// The state's human-readable name (e.g., 'In Progress', 'Done', 'Backlog').
 	Name string `json:"name"`
 }
 
@@ -4749,13 +5559,17 @@ func (v *IssueDetailFieldsLabelsIssueLabelConnection) GetNodes() []*IssueDetailF
 // IssueDetailFieldsLabelsIssueLabelConnectionNodesIssueLabel includes the requested fields of the GraphQL type IssueLabel.
 // The GraphQL type's documentation follows.
 //
-// Labels that can be associated with issues.
+// Labels that can be associated with issues. Labels help categorize and filter
+// issues across a workspace. They can be workspace-level (shared across all teams)
+// or team-scoped. Labels have a color for visual identification and can be
+// organized hierarchically into groups, where a parent label acts as a group
+// containing child labels. Labels may also be inherited from parent teams to sub-teams.
 type IssueDetailFieldsLabelsIssueLabelConnectionNodesIssueLabel struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
 	// The label's name.
 	Name string `json:"name"`
-	// The label's color as a HEX string.
+	// The label's color as a HEX string (e.g., '#EB5757'). Used for visual identification of the label in the UI.
 	Color string `json:"color"`
 	// The label's description.
 	Description *string `json:"description"`
@@ -4787,7 +5601,11 @@ func (v *IssueDetailFieldsLabelsIssueLabelConnectionNodesIssueLabel) GetParent()
 // IssueDetailFieldsLabelsIssueLabelConnectionNodesIssueLabelParentIssueLabel includes the requested fields of the GraphQL type IssueLabel.
 // The GraphQL type's documentation follows.
 //
-// Labels that can be associated with issues.
+// Labels that can be associated with issues. Labels help categorize and filter
+// issues across a workspace. They can be workspace-level (shared across all teams)
+// or team-scoped. Labels have a color for visual identification and can be
+// organized hierarchically into groups, where a parent label acts as a group
+// containing child labels. Labels may also be inherited from parent teams to sub-teams.
 type IssueDetailFieldsLabelsIssueLabelConnectionNodesIssueLabelParentIssueLabel struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
@@ -4808,15 +5626,22 @@ func (v *IssueDetailFieldsLabelsIssueLabelConnectionNodesIssueLabelParentIssueLa
 // IssueDetailFieldsParentIssue includes the requested fields of the GraphQL type Issue.
 // The GraphQL type's documentation follows.
 //
-// An issue.
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
 type IssueDetailFieldsParentIssue struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
 	// Issue's human readable identifier (e.g. ENG-123).
 	Identifier string `json:"identifier"`
-	// The issue's title.
+	// The issue's title. This is the primary human-readable summary of the work item.
 	Title string `json:"title"`
-	// The workflow state that the issue is associated with.
+	// The workflow state (issue status) that the issue is currently in. Workflow
+	// states represent the issue's progress through the team's workflow, such as
+	// Triage, Todo, In Progress, Done, or Canceled.
 	State *IssueDetailFieldsParentIssueStateWorkflowState `json:"state"`
 }
 
@@ -4837,11 +5662,17 @@ func (v *IssueDetailFieldsParentIssue) GetState() *IssueDetailFieldsParentIssueS
 // IssueDetailFieldsParentIssueStateWorkflowState includes the requested fields of the GraphQL type WorkflowState.
 // The GraphQL type's documentation follows.
 //
-// A state in a team workflow.
+// A state in a team's workflow, representing an issue status such as Triage,
+// Backlog, Todo, In Progress, In Review, Done, or Canceled. Each team has its own
+// set of workflow states that define the progression of issues through the team's
+// process. Workflow states have a type that categorizes them (triage, backlog,
+// unstarted, started, completed, canceled), a position that determines their
+// display order, and a color for visual identification. States can be inherited
+// from parent teams to sub-teams.
 type IssueDetailFieldsParentIssueStateWorkflowState struct {
-	// The state's name.
+	// The state's human-readable name (e.g., 'In Progress', 'Done', 'Backlog').
 	Name string `json:"name"`
-	// The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled".
+	// The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled", "duplicate".
 	Type string `json:"type"`
 }
 
@@ -4854,26 +5685,31 @@ func (v *IssueDetailFieldsParentIssueStateWorkflowState) GetType() string { retu
 // IssueDetailFieldsProject includes the requested fields of the GraphQL type Project.
 // The GraphQL type's documentation follows.
 //
-// A project.
+// A project is a collection of issues working toward a shared goal. Projects have
+// start and target dates, milestones, status tracking, and progress metrics. They
+// can span multiple teams and be grouped under initiatives.
 type IssueDetailFieldsProject struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The project's name.
+	// The name of the project.
 	Name string `json:"name"`
-	// The project's description.
+	// The short description of the project.
 	Description string `json:"description"`
 	// [DEPRECATED] The type of the state.
 	State string `json:"state"`
 	// The overall progress of the project. This is the (completed estimate points +
 	// 0.25 * in progress estimate points) / total estimate points.
 	Progress float64 `json:"progress"`
-	// The estimated start date of the project.
+	// The estimated start date of the project. Null if no start date is set.
 	StartDate *string `json:"startDate"`
-	// The estimated completion date of the project.
+	// The estimated completion date of the project. Null if no target date is set.
 	TargetDate *string `json:"targetDate"`
-	// The health of the project.
+	// The overall health of the project, derived from the most recent project
+	// update. Possible values are onTrack, atRisk, or offTrack. Null if no health
+	// has been reported.
 	Health *ProjectUpdateHealthType `json:"health"`
-	// The project lead.
+	// The user who leads the project. The project lead is typically responsible for
+	// posting status updates and driving the project to completion. Null if no lead is assigned.
 	Lead *IssueDetailFieldsProjectLeadUser `json:"lead"`
 }
 
@@ -4907,7 +5743,10 @@ func (v *IssueDetailFieldsProject) GetLead() *IssueDetailFieldsProjectLeadUser {
 // IssueDetailFieldsProjectLeadUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type IssueDetailFieldsProjectLeadUser struct {
 	// The user's full name.
 	Name string `json:"name"`
@@ -4924,13 +5763,18 @@ func (v *IssueDetailFieldsProjectLeadUser) GetEmail() string { return v.Email }
 // IssueDetailFieldsReactionsReaction includes the requested fields of the GraphQL type Reaction.
 // The GraphQL type's documentation follows.
 //
-// A reaction associated with a comment or a project update.
+// An emoji reaction on a comment, issue, project update, initiative update, post,
+// pull request, or pull request comment. Each reaction is associated with exactly
+// one parent entity and is created by either a workspace user or an external user.
+// Reactions are persisted individually but surfaced on their parent entities as
+// aggregated reactionData.
 type IssueDetailFieldsReactionsReaction struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// Name of the reaction's emoji.
+	// The name of the emoji used for this reaction. For custom workspace emojis,
+	// this is the custom emoji name; for standard emojis, this is the normalized emoji name.
 	Emoji string `json:"emoji"`
-	// The user that created the reaction.
+	// The workspace user that created the reaction. Null if the reaction was created by an external user through an integration.
 	User *IssueDetailFieldsReactionsReactionUser `json:"user"`
 	// The time at which the entity was created.
 	CreatedAt time.Time `json:"createdAt"`
@@ -4953,7 +5797,10 @@ func (v *IssueDetailFieldsReactionsReaction) GetCreatedAt() time.Time { return v
 // IssueDetailFieldsReactionsReactionUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type IssueDetailFieldsReactionsReactionUser struct {
 	// The user's full name.
 	Name string `json:"name"`
@@ -4980,13 +5827,18 @@ func (v *IssueDetailFieldsRelationsIssueRelationConnection) GetNodes() []*IssueD
 // IssueDetailFieldsRelationsIssueRelationConnectionNodesIssueRelation includes the requested fields of the GraphQL type IssueRelation.
 // The GraphQL type's documentation follows.
 //
-// A relation between two issues.
+// A relation between two issues. Issue relations represent directional
+// relationships such as blocking, being blocked by, relating to, or duplicating
+// another issue. Each relation connects a source issue to a related issue with a
+// specific type describing the nature of the relationship.
 type IssueDetailFieldsRelationsIssueRelationConnectionNodesIssueRelation struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The relationship of the issue with the related issue.
+	// The type of relationship between the source issue and the related issue.
+	// Possible values include blocks, duplicate, and related.
 	Type string `json:"type"`
-	// The related issue.
+	// The target issue that the source issue is related to. The relation type
+	// describes how the source issue relates to this issue.
 	RelatedIssue *IssueDetailFieldsRelationsIssueRelationConnectionNodesIssueRelationRelatedIssue `json:"relatedIssue"`
 }
 
@@ -5008,15 +5860,22 @@ func (v *IssueDetailFieldsRelationsIssueRelationConnectionNodesIssueRelation) Ge
 // IssueDetailFieldsRelationsIssueRelationConnectionNodesIssueRelationRelatedIssue includes the requested fields of the GraphQL type Issue.
 // The GraphQL type's documentation follows.
 //
-// An issue.
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
 type IssueDetailFieldsRelationsIssueRelationConnectionNodesIssueRelationRelatedIssue struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
 	// Issue's human readable identifier (e.g. ENG-123).
 	Identifier string `json:"identifier"`
-	// The issue's title.
+	// The issue's title. This is the primary human-readable summary of the work item.
 	Title string `json:"title"`
-	// The workflow state that the issue is associated with.
+	// The workflow state (issue status) that the issue is currently in. Workflow
+	// states represent the issue's progress through the team's workflow, such as
+	// Triage, Todo, In Progress, Done, or Canceled.
 	State *IssueDetailFieldsRelationsIssueRelationConnectionNodesIssueRelationRelatedIssueStateWorkflowState `json:"state"`
 }
 
@@ -5043,11 +5902,17 @@ func (v *IssueDetailFieldsRelationsIssueRelationConnectionNodesIssueRelationRela
 // IssueDetailFieldsRelationsIssueRelationConnectionNodesIssueRelationRelatedIssueStateWorkflowState includes the requested fields of the GraphQL type WorkflowState.
 // The GraphQL type's documentation follows.
 //
-// A state in a team workflow.
+// A state in a team's workflow, representing an issue status such as Triage,
+// Backlog, Todo, In Progress, In Review, Done, or Canceled. Each team has its own
+// set of workflow states that define the progression of issues through the team's
+// process. Workflow states have a type that categorizes them (triage, backlog,
+// unstarted, started, completed, canceled), a position that determines their
+// display order, and a color for visual identification. States can be inherited
+// from parent teams to sub-teams.
 type IssueDetailFieldsRelationsIssueRelationConnectionNodesIssueRelationRelatedIssueStateWorkflowState struct {
-	// The state's name.
+	// The state's human-readable name (e.g., 'In Progress', 'Done', 'Backlog').
 	Name string `json:"name"`
-	// The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled".
+	// The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled", "duplicate".
 	Type string `json:"type"`
 }
 
@@ -5064,19 +5929,26 @@ func (v *IssueDetailFieldsRelationsIssueRelationConnectionNodesIssueRelationRela
 // IssueDetailFieldsStateWorkflowState includes the requested fields of the GraphQL type WorkflowState.
 // The GraphQL type's documentation follows.
 //
-// A state in a team workflow.
+// A state in a team's workflow, representing an issue status such as Triage,
+// Backlog, Todo, In Progress, In Review, Done, or Canceled. Each team has its own
+// set of workflow states that define the progression of issues through the team's
+// process. Workflow states have a type that categorizes them (triage, backlog,
+// unstarted, started, completed, canceled), a position that determines their
+// display order, and a color for visual identification. States can be inherited
+// from parent teams to sub-teams.
 type IssueDetailFieldsStateWorkflowState struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The state's name.
+	// The state's human-readable name (e.g., 'In Progress', 'Done', 'Backlog').
 	Name string `json:"name"`
-	// The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled".
+	// The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled", "duplicate".
 	Type string `json:"type"`
 	// The state's UI color as a HEX string.
 	Color string `json:"color"`
 	// Description of the state.
 	Description *string `json:"description"`
-	// The position of the state in the team flow.
+	// The position of the state in the team's workflow. States are displayed in
+	// ascending order of position within their type group.
 	Position float64 `json:"position"`
 }
 
@@ -5111,7 +5983,10 @@ func (v *IssueDetailFieldsSubscribersUserConnection) GetNodes() []*IssueDetailFi
 // IssueDetailFieldsSubscribersUserConnectionNodesUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type IssueDetailFieldsSubscribersUserConnectionNodesUser struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
@@ -5140,11 +6015,15 @@ func (v *IssueDetailFieldsSubscribersUserConnectionNodesUser) GetAvatarUrl() *st
 // IssueDetailFieldsTeam includes the requested fields of the GraphQL type Team.
 // The GraphQL type's documentation follows.
 //
-// An organizational unit that contains issues.
+// A team is the primary organizational unit in Linear. Issues belong to teams, and
+// each team has its own workflow states, cycles, labels, and settings. Teams can
+// be public (visible to all workspace members), private (visible only to team
+// members), or restricted (visible only within an enclosing private-team
+// boundary). Teams can also have sub-teams that inherit settings from their parent.
 type IssueDetailFieldsTeam struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The team's unique key. The key is used in URLs.
+	// The team's unique key, used as a prefix in issue identifiers (e.g., 'ENG' in 'ENG-123') and in URLs.
 	Key string `json:"key"`
 	// The team's name.
 	Name string `json:"name"`
@@ -5154,11 +6033,11 @@ type IssueDetailFieldsTeam struct {
 	Icon *string `json:"icon"`
 	// The team's color.
 	Color *string `json:"color"`
-	// Whether the team uses cycles.
+	// Whether the team uses cycles for sprint-style issue management.
 	CyclesEnabled bool `json:"cyclesEnabled"`
-	// The day of the week that a new cycle starts.
+	// The day of the week that a new cycle starts (0 = Sunday, 1 = Monday, ..., 6 = Saturday).
 	CycleStartDay float64 `json:"cycleStartDay"`
-	// The duration of a cycle in weeks.
+	// The duration of each cycle in weeks.
 	CycleDuration float64 `json:"cycleDuration"`
 	// How many upcoming cycles to create.
 	UpcomingCycleCount float64 `json:"upcomingCycleCount"`
@@ -5214,19 +6093,26 @@ func (v *IssueDetailFieldsTeamStatesWorkflowStateConnection) GetNodes() []*Issue
 // IssueDetailFieldsTeamStatesWorkflowStateConnectionNodesWorkflowState includes the requested fields of the GraphQL type WorkflowState.
 // The GraphQL type's documentation follows.
 //
-// A state in a team workflow.
+// A state in a team's workflow, representing an issue status such as Triage,
+// Backlog, Todo, In Progress, In Review, Done, or Canceled. Each team has its own
+// set of workflow states that define the progression of issues through the team's
+// process. Workflow states have a type that categorizes them (triage, backlog,
+// unstarted, started, completed, canceled), a position that determines their
+// display order, and a color for visual identification. States can be inherited
+// from parent teams to sub-teams.
 type IssueDetailFieldsTeamStatesWorkflowStateConnectionNodesWorkflowState struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The state's name.
+	// The state's human-readable name (e.g., 'In Progress', 'Done', 'Backlog').
 	Name string `json:"name"`
-	// The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled".
+	// The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled", "duplicate".
 	Type string `json:"type"`
 	// The state's UI color as a HEX string.
 	Color string `json:"color"`
 	// Description of the state.
 	Description *string `json:"description"`
-	// The position of the state in the team flow.
+	// The position of the state in the team's workflow. States are displayed in
+	// ascending order of position within their type group.
 	Position float64 `json:"position"`
 }
 
@@ -5264,6 +6150,8 @@ func (v *IssueDetailFieldsTeamStatesWorkflowStateConnectionNodesWorkflowState) G
 type IssueFilter struct {
 	// [Internal] Comparator for the issue's accumulatedStateUpdatedAt date.
 	AccumulatedStateUpdatedAt *NullableDateComparator `json:"accumulatedStateUpdatedAt,omitempty"`
+	// Filters that the issue's activities must satisfy.
+	Activity *ActivityCollectionFilter `json:"activity,omitempty"`
 	// Comparator for the issues added to cycle at date.
 	AddedToCycleAt *NullableDateComparator `json:"addedToCycleAt,omitempty"`
 	// Comparator for the period when issue was added to a cycle.
@@ -5310,14 +6198,27 @@ type IssueFilter struct {
 	DueDate *NullableTimelessDateComparator `json:"dueDate,omitempty"`
 	// Comparator for the issues estimate.
 	Estimate *EstimateComparator `json:"estimate,omitempty"`
+	// [Internal] Comparator for filtering issues bucketed as having active agent
+	// sessions, no closed agent pull requests, and no merged agent pull requests.
+	HasActiveAgentSessions *RelationExistsComparator `json:"hasActiveAgentSessions,omitempty"`
 	// Comparator for filtering issues which are blocked.
 	HasBlockedByRelations *RelationExistsComparator `json:"hasBlockedByRelations,omitempty"`
 	// Comparator for filtering issues which are blocking.
 	HasBlockingRelations *RelationExistsComparator `json:"hasBlockingRelations,omitempty"`
+	// [Internal] Comparator for filtering issues bucketed as having all agent
+	// sessions dismissed or closed, and no merged agent pull requests.
+	HasDismissedAgentSessions *RelationExistsComparator `json:"hasDismissedAgentSessions,omitempty"`
 	// Comparator for filtering issues which are duplicates.
 	HasDuplicateRelations *RelationExistsComparator `json:"hasDuplicateRelations,omitempty"`
+	// [Internal] Comparator for filtering issues bucketed as having an errored agent
+	// session, no active sessions, and no merged agent pull requests.
+	HasErroredAgentSessions *RelationExistsComparator `json:"hasErroredAgentSessions,omitempty"`
+	// [Internal] Comparator for filtering issues which have agent-session-linked pull requests that were merged.
+	HasMergedAgentPullRequests *RelationExistsComparator `json:"hasMergedAgentPullRequests,omitempty"`
 	// Comparator for filtering issues with relations.
 	HasRelatedRelations *RelationExistsComparator `json:"hasRelatedRelations,omitempty"`
+	// Comparator for filtering issues which have been shared with users outside of the team.
+	HasSharedUsers *RelationExistsComparator `json:"hasSharedUsers,omitempty"`
 	// [Internal] Comparator for filtering issues which have suggested assignees.
 	HasSuggestedAssignees *RelationExistsComparator `json:"hasSuggestedAssignees,omitempty"`
 	// [Internal] Comparator for filtering issues which have suggested labels.
@@ -5331,7 +6232,7 @@ type IssueFilter struct {
 	// [Internal] Comparator for filtering issues which have suggested teams.
 	HasSuggestedTeams *RelationExistsComparator `json:"hasSuggestedTeams,omitempty"`
 	// Comparator for the identifier.
-	Id *IDComparator `json:"id,omitempty"`
+	Id *IssueIDComparator `json:"id,omitempty"`
 	// Filters that issue labels must satisfy.
 	Labels *IssueLabelCollectionFilter `json:"labels,omitempty"`
 	// Filters that the last applied template must satisfy.
@@ -5346,7 +6247,7 @@ type IssueFilter struct {
 	Or []*IssueFilter `json:"or,omitempty"`
 	// Filters that the issue parent must satisfy.
 	Parent *NullableIssueFilter `json:"parent,omitempty"`
-	// Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+	// Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
 	Priority *NullableNumberComparator `json:"priority,omitempty"`
 	// Filters that the issues project must satisfy.
 	Project *NullableProjectFilter `json:"project,omitempty"`
@@ -5356,8 +6257,14 @@ type IssueFilter struct {
 	Reactions *ReactionCollectionFilter `json:"reactions,omitempty"`
 	// [ALPHA] Filters that the recurring issue template must satisfy.
 	RecurringIssueTemplate *NullableTemplateFilter `json:"recurringIssueTemplate,omitempty"`
+	// Filters that the issue's releases must satisfy.
+	Releases *ReleaseCollectionFilter `json:"releases,omitempty"`
 	// [Internal] Comparator for the issues content.
 	SearchableContent *ContentComparator `json:"searchableContent,omitempty"`
+	// Filters that users the issue has been shared with must satisfy.
+	SharedWith *UserCollectionFilter `json:"sharedWith,omitempty"`
+	// Comparator for the issue's SLA breach date.
+	SlaBreachesAt *NullableDateComparator `json:"slaBreachesAt,omitempty"`
 	// Comparator for the issues sla status.
 	SlaStatus *SlaStatusComparator `json:"slaStatus,omitempty"`
 	// Filters that the issues snoozer must satisfy.
@@ -5390,6 +6297,9 @@ type IssueFilter struct {
 func (v *IssueFilter) GetAccumulatedStateUpdatedAt() *NullableDateComparator {
 	return v.AccumulatedStateUpdatedAt
 }
+
+// GetActivity returns IssueFilter.Activity, and is useful for accessing the field via an interface.
+func (v *IssueFilter) GetActivity() *ActivityCollectionFilter { return v.Activity }
 
 // GetAddedToCycleAt returns IssueFilter.AddedToCycleAt, and is useful for accessing the field via an interface.
 func (v *IssueFilter) GetAddedToCycleAt() *NullableDateComparator { return v.AddedToCycleAt }
@@ -5460,6 +6370,11 @@ func (v *IssueFilter) GetDueDate() *NullableTimelessDateComparator { return v.Du
 // GetEstimate returns IssueFilter.Estimate, and is useful for accessing the field via an interface.
 func (v *IssueFilter) GetEstimate() *EstimateComparator { return v.Estimate }
 
+// GetHasActiveAgentSessions returns IssueFilter.HasActiveAgentSessions, and is useful for accessing the field via an interface.
+func (v *IssueFilter) GetHasActiveAgentSessions() *RelationExistsComparator {
+	return v.HasActiveAgentSessions
+}
+
 // GetHasBlockedByRelations returns IssueFilter.HasBlockedByRelations, and is useful for accessing the field via an interface.
 func (v *IssueFilter) GetHasBlockedByRelations() *RelationExistsComparator {
 	return v.HasBlockedByRelations
@@ -5470,15 +6385,33 @@ func (v *IssueFilter) GetHasBlockingRelations() *RelationExistsComparator {
 	return v.HasBlockingRelations
 }
 
+// GetHasDismissedAgentSessions returns IssueFilter.HasDismissedAgentSessions, and is useful for accessing the field via an interface.
+func (v *IssueFilter) GetHasDismissedAgentSessions() *RelationExistsComparator {
+	return v.HasDismissedAgentSessions
+}
+
 // GetHasDuplicateRelations returns IssueFilter.HasDuplicateRelations, and is useful for accessing the field via an interface.
 func (v *IssueFilter) GetHasDuplicateRelations() *RelationExistsComparator {
 	return v.HasDuplicateRelations
+}
+
+// GetHasErroredAgentSessions returns IssueFilter.HasErroredAgentSessions, and is useful for accessing the field via an interface.
+func (v *IssueFilter) GetHasErroredAgentSessions() *RelationExistsComparator {
+	return v.HasErroredAgentSessions
+}
+
+// GetHasMergedAgentPullRequests returns IssueFilter.HasMergedAgentPullRequests, and is useful for accessing the field via an interface.
+func (v *IssueFilter) GetHasMergedAgentPullRequests() *RelationExistsComparator {
+	return v.HasMergedAgentPullRequests
 }
 
 // GetHasRelatedRelations returns IssueFilter.HasRelatedRelations, and is useful for accessing the field via an interface.
 func (v *IssueFilter) GetHasRelatedRelations() *RelationExistsComparator {
 	return v.HasRelatedRelations
 }
+
+// GetHasSharedUsers returns IssueFilter.HasSharedUsers, and is useful for accessing the field via an interface.
+func (v *IssueFilter) GetHasSharedUsers() *RelationExistsComparator { return v.HasSharedUsers }
 
 // GetHasSuggestedAssignees returns IssueFilter.HasSuggestedAssignees, and is useful for accessing the field via an interface.
 func (v *IssueFilter) GetHasSuggestedAssignees() *RelationExistsComparator {
@@ -5507,7 +6440,7 @@ func (v *IssueFilter) GetHasSuggestedSimilarIssues() *RelationExistsComparator {
 func (v *IssueFilter) GetHasSuggestedTeams() *RelationExistsComparator { return v.HasSuggestedTeams }
 
 // GetId returns IssueFilter.Id, and is useful for accessing the field via an interface.
-func (v *IssueFilter) GetId() *IDComparator { return v.Id }
+func (v *IssueFilter) GetId() *IssueIDComparator { return v.Id }
 
 // GetLabels returns IssueFilter.Labels, and is useful for accessing the field via an interface.
 func (v *IssueFilter) GetLabels() *IssueLabelCollectionFilter { return v.Labels }
@@ -5549,8 +6482,17 @@ func (v *IssueFilter) GetRecurringIssueTemplate() *NullableTemplateFilter {
 	return v.RecurringIssueTemplate
 }
 
+// GetReleases returns IssueFilter.Releases, and is useful for accessing the field via an interface.
+func (v *IssueFilter) GetReleases() *ReleaseCollectionFilter { return v.Releases }
+
 // GetSearchableContent returns IssueFilter.SearchableContent, and is useful for accessing the field via an interface.
 func (v *IssueFilter) GetSearchableContent() *ContentComparator { return v.SearchableContent }
+
+// GetSharedWith returns IssueFilter.SharedWith, and is useful for accessing the field via an interface.
+func (v *IssueFilter) GetSharedWith() *UserCollectionFilter { return v.SharedWith }
+
+// GetSlaBreachesAt returns IssueFilter.SlaBreachesAt, and is useful for accessing the field via an interface.
+func (v *IssueFilter) GetSlaBreachesAt() *NullableDateComparator { return v.SlaBreachesAt }
 
 // GetSlaStatus returns IssueFilter.SlaStatus, and is useful for accessing the field via an interface.
 func (v *IssueFilter) GetSlaStatus() *SlaStatusComparator { return v.SlaStatus }
@@ -5590,6 +6532,30 @@ func (v *IssueFilter) GetTriageTime() *NullableDurationComparator { return v.Tri
 
 // GetUpdatedAt returns IssueFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *IssueFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
+// Comparator for issue identifiers.
+type IssueIDComparator struct {
+	// Equals constraint.
+	Eq *string `json:"eq"`
+	// In-array constraint.
+	In []string `json:"in"`
+	// Not-equals constraint.
+	Neq *string `json:"neq"`
+	// Not-in-array constraint.
+	Nin []string `json:"nin"`
+}
+
+// GetEq returns IssueIDComparator.Eq, and is useful for accessing the field via an interface.
+func (v *IssueIDComparator) GetEq() *string { return v.Eq }
+
+// GetIn returns IssueIDComparator.In, and is useful for accessing the field via an interface.
+func (v *IssueIDComparator) GetIn() []string { return v.In }
+
+// GetNeq returns IssueIDComparator.Neq, and is useful for accessing the field via an interface.
+func (v *IssueIDComparator) GetNeq() *string { return v.Neq }
+
+// GetNin returns IssueIDComparator.Nin, and is useful for accessing the field via an interface.
+func (v *IssueIDComparator) GetNin() []string { return v.Nin }
 
 // Issue label filtering options.
 type IssueLabelCollectionFilter struct {
@@ -5725,13 +6691,15 @@ type IssueListFields struct {
 	Id string `json:"id"`
 	// Issue's human readable identifier (e.g. ENG-123).
 	Identifier string `json:"identifier"`
-	// The issue's title.
+	// The issue's title. This is the primary human-readable summary of the work item.
 	Title string `json:"title"`
 	// The issue's description in markdown format.
 	Description *string `json:"description"`
-	// The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+	// The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
 	Priority float64 `json:"priority"`
-	// The estimate of the complexity of the issue..
+	// The estimate of the complexity of the issue. The specific scale used depends
+	// on the team's estimation configuration (e.g., points, T-shirt sizes). Null if
+	// no estimate has been set.
 	Estimate *float64 `json:"estimate"`
 	// The time at which the entity was created.
 	CreatedAt time.Time `json:"createdAt"`
@@ -5742,11 +6710,15 @@ type IssueListFields struct {
 	DueDate *string `json:"dueDate"`
 	// Issue URL.
 	Url string `json:"url"`
-	// The workflow state that the issue is associated with.
+	// The workflow state (issue status) that the issue is currently in. Workflow
+	// states represent the issue's progress through the team's workflow, such as
+	// Triage, Todo, In Progress, Done, or Canceled.
 	State *IssueListFieldsStateWorkflowState `json:"state"`
-	// The user to whom the issue is assigned to.
+	// The user to whom the issue is assigned. Null if the issue is unassigned.
 	Assignee *IssueListFieldsAssigneeUser `json:"assignee"`
-	// The team that the issue is associated with.
+	// The team that the issue belongs to. Every issue must belong to exactly one
+	// team, which determines the available workflow states, labels, and other
+	// team-specific configuration.
 	Team *IssueListFieldsTeam `json:"team"`
 	// Labels associated with this issue.
 	Labels *IssueListFieldsLabelsIssueLabelConnection `json:"labels"`
@@ -5797,7 +6769,10 @@ func (v *IssueListFields) GetLabels() *IssueListFieldsLabelsIssueLabelConnection
 // IssueListFieldsAssigneeUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type IssueListFieldsAssigneeUser struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
@@ -5829,13 +6804,17 @@ func (v *IssueListFieldsLabelsIssueLabelConnection) GetNodes() []*IssueListField
 // IssueListFieldsLabelsIssueLabelConnectionNodesIssueLabel includes the requested fields of the GraphQL type IssueLabel.
 // The GraphQL type's documentation follows.
 //
-// Labels that can be associated with issues.
+// Labels that can be associated with issues. Labels help categorize and filter
+// issues across a workspace. They can be workspace-level (shared across all teams)
+// or team-scoped. Labels have a color for visual identification and can be
+// organized hierarchically into groups, where a parent label acts as a group
+// containing child labels. Labels may also be inherited from parent teams to sub-teams.
 type IssueListFieldsLabelsIssueLabelConnectionNodesIssueLabel struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
 	// The label's name.
 	Name string `json:"name"`
-	// The label's color as a HEX string.
+	// The label's color as a HEX string (e.g., '#EB5757'). Used for visual identification of the label in the UI.
 	Color string `json:"color"`
 }
 
@@ -5851,13 +6830,19 @@ func (v *IssueListFieldsLabelsIssueLabelConnectionNodesIssueLabel) GetColor() st
 // IssueListFieldsStateWorkflowState includes the requested fields of the GraphQL type WorkflowState.
 // The GraphQL type's documentation follows.
 //
-// A state in a team workflow.
+// A state in a team's workflow, representing an issue status such as Triage,
+// Backlog, Todo, In Progress, In Review, Done, or Canceled. Each team has its own
+// set of workflow states that define the progression of issues through the team's
+// process. Workflow states have a type that categorizes them (triage, backlog,
+// unstarted, started, completed, canceled), a position that determines their
+// display order, and a color for visual identification. States can be inherited
+// from parent teams to sub-teams.
 type IssueListFieldsStateWorkflowState struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The state's name.
+	// The state's human-readable name (e.g., 'In Progress', 'Done', 'Backlog').
 	Name string `json:"name"`
-	// The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled".
+	// The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled", "duplicate".
 	Type string `json:"type"`
 	// The state's UI color as a HEX string.
 	Color string `json:"color"`
@@ -5878,11 +6863,15 @@ func (v *IssueListFieldsStateWorkflowState) GetColor() string { return v.Color }
 // IssueListFieldsTeam includes the requested fields of the GraphQL type Team.
 // The GraphQL type's documentation follows.
 //
-// An organizational unit that contains issues.
+// A team is the primary organizational unit in Linear. Issues belong to teams, and
+// each team has its own workflow states, cycles, labels, and settings. Teams can
+// be public (visible to all workspace members), private (visible only to team
+// members), or restricted (visible only within an enclosing private-team
+// boundary). Teams can also have sub-teams that inherit settings from their parent.
 type IssueListFieldsTeam struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The team's unique key. The key is used in URLs.
+	// The team's unique key, used as a prefix in issue identifiers (e.g., 'ENG' in 'ENG-123') and in URLs.
 	Key string `json:"key"`
 	// The team's name.
 	Name string `json:"name"`
@@ -5897,12 +6886,14 @@ func (v *IssueListFieldsTeam) GetKey() string { return v.Key }
 // GetName returns IssueListFieldsTeam.Name, and is useful for accessing the field via an interface.
 func (v *IssueListFieldsTeam) GetName() string { return v.Name }
 
+// Input for creating a new issue relation between two issues. Both the source
+// issue and related issue must be specified along with the relationship type.
 type IssueRelationCreateInput struct {
 	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
 	Id *string `json:"id"`
-	// The identifier of the issue that is related to another issue.
+	// The identifier of the issue that is related to another issue. Can be a UUID or issue identifier (e.g., 'LIN-123').
 	IssueId string `json:"issueId"`
-	// The identifier of the related issue.
+	// The identifier of the related issue. Can be a UUID or issue identifier (e.g., 'LIN-123').
 	RelatedIssueId string `json:"relatedIssueId"`
 	// The type of relation of the issue to the related issue.
 	Type IssueRelationType `json:"type"`
@@ -6080,9 +7071,13 @@ func (v *IssueSuggestionFilter) GetType() *StringComparator { return v.Type }
 // GetUpdatedAt returns IssueSuggestionFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *IssueSuggestionFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
 
+// Input for updating an existing issue. All fields are optional; only provided
+// fields will be updated. Setting a field to null (where supported) will clear the value.
 type IssueUpdateInput struct {
 	// The identifiers of the issue labels to be added to this issue.
 	AddedLabelIds []string `json:"addedLabelIds"`
+	// The identifiers of the releases to be added to this issue.
+	AddedReleaseIds []string `json:"addedReleaseIds"`
 	// The identifier of the user to assign the issue to.
 	AssigneeId *string `json:"assigneeId"`
 	// Whether the issue was automatically closed because its parent issue was closed.
@@ -6099,13 +7094,15 @@ type IssueUpdateInput struct {
 	DueDate *string `json:"dueDate"`
 	// The estimated complexity of the issue.
 	Estimate *int `json:"estimate"`
+	// Whether this issue should inherit shared access from its parent issue.
+	InheritsSharedAccess *bool `json:"inheritsSharedAccess"`
 	// The identifiers of the issue labels associated with this ticket.
 	LabelIds []string `json:"labelIds"`
 	// The ID of the last template applied to the issue.
 	LastAppliedTemplateId *string `json:"lastAppliedTemplateId"`
-	// The identifier of the parent issue.
+	// The identifier of the parent issue. Can be a UUID or issue identifier (e.g., 'LIN-123').
 	ParentId *string `json:"parentId"`
-	// The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+	// The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
 	Priority *int `json:"priority"`
 	// The position of the issue related to other issues, when ordered by priority.
 	PrioritySortOrder *float64 `json:"prioritySortOrder"`
@@ -6113,17 +7110,21 @@ type IssueUpdateInput struct {
 	ProjectId *string `json:"projectId"`
 	// The project milestone associated with the issue.
 	ProjectMilestoneId *string `json:"projectMilestoneId"`
+	// The identifiers of the releases associated with this issue.
+	ReleaseIds []string `json:"releaseIds"`
 	// The identifiers of the issue labels to be removed from this issue.
 	RemovedLabelIds []string `json:"removedLabelIds"`
-	// [Internal] The timestamp at which an issue will be considered in breach of SLA.
+	// The identifiers of the releases to be removed from this issue.
+	RemovedReleaseIds []string `json:"removedReleaseIds"`
+	// [Internal] The time at which an issue will be considered in breach of SLA.
 	SlaBreachesAt *time.Time `json:"slaBreachesAt"`
-	// [Internal] The timestamp at which the issue's SLA was started.
+	// [Internal] The time at which the issue's SLA was started.
 	SlaStartedAt *time.Time `json:"slaStartedAt"`
 	// The SLA day count type for the issue. Whether SLA should be business days only or calendar days (default).
 	SlaType *SLADayCountType `json:"slaType"`
 	// The identifier of the user who snoozed the issue.
 	SnoozedById *string `json:"snoozedById"`
-	// The time until an issue will be snoozed in Triage view.
+	// The time until which the issue will be snoozed in Triage view.
 	SnoozedUntilAt *time.Time `json:"snoozedUntilAt"`
 	// The position of the issue related to other issues.
 	SortOrder *float64 `json:"sortOrder"`
@@ -6139,10 +7140,15 @@ type IssueUpdateInput struct {
 	Title *string `json:"title"`
 	// Whether the issue has been trashed.
 	Trashed *bool `json:"trashed"`
+	// [Internal] Whether this issue has been explicitly marked as trusted.
+	Trusted *bool `json:"trusted"`
 }
 
 // GetAddedLabelIds returns IssueUpdateInput.AddedLabelIds, and is useful for accessing the field via an interface.
 func (v *IssueUpdateInput) GetAddedLabelIds() []string { return v.AddedLabelIds }
+
+// GetAddedReleaseIds returns IssueUpdateInput.AddedReleaseIds, and is useful for accessing the field via an interface.
+func (v *IssueUpdateInput) GetAddedReleaseIds() []string { return v.AddedReleaseIds }
 
 // GetAssigneeId returns IssueUpdateInput.AssigneeId, and is useful for accessing the field via an interface.
 func (v *IssueUpdateInput) GetAssigneeId() *string { return v.AssigneeId }
@@ -6168,6 +7174,9 @@ func (v *IssueUpdateInput) GetDueDate() *string { return v.DueDate }
 // GetEstimate returns IssueUpdateInput.Estimate, and is useful for accessing the field via an interface.
 func (v *IssueUpdateInput) GetEstimate() *int { return v.Estimate }
 
+// GetInheritsSharedAccess returns IssueUpdateInput.InheritsSharedAccess, and is useful for accessing the field via an interface.
+func (v *IssueUpdateInput) GetInheritsSharedAccess() *bool { return v.InheritsSharedAccess }
+
 // GetLabelIds returns IssueUpdateInput.LabelIds, and is useful for accessing the field via an interface.
 func (v *IssueUpdateInput) GetLabelIds() []string { return v.LabelIds }
 
@@ -6189,8 +7198,14 @@ func (v *IssueUpdateInput) GetProjectId() *string { return v.ProjectId }
 // GetProjectMilestoneId returns IssueUpdateInput.ProjectMilestoneId, and is useful for accessing the field via an interface.
 func (v *IssueUpdateInput) GetProjectMilestoneId() *string { return v.ProjectMilestoneId }
 
+// GetReleaseIds returns IssueUpdateInput.ReleaseIds, and is useful for accessing the field via an interface.
+func (v *IssueUpdateInput) GetReleaseIds() []string { return v.ReleaseIds }
+
 // GetRemovedLabelIds returns IssueUpdateInput.RemovedLabelIds, and is useful for accessing the field via an interface.
 func (v *IssueUpdateInput) GetRemovedLabelIds() []string { return v.RemovedLabelIds }
+
+// GetRemovedReleaseIds returns IssueUpdateInput.RemovedReleaseIds, and is useful for accessing the field via an interface.
+func (v *IssueUpdateInput) GetRemovedReleaseIds() []string { return v.RemovedReleaseIds }
 
 // GetSlaBreachesAt returns IssueUpdateInput.SlaBreachesAt, and is useful for accessing the field via an interface.
 func (v *IssueUpdateInput) GetSlaBreachesAt() *time.Time { return v.SlaBreachesAt }
@@ -6228,10 +7243,18 @@ func (v *IssueUpdateInput) GetTitle() *string { return v.Title }
 // GetTrashed returns IssueUpdateInput.Trashed, and is useful for accessing the field via an interface.
 func (v *IssueUpdateInput) GetTrashed() *bool { return v.Trashed }
 
+// GetTrusted returns IssueUpdateInput.Trusted, and is useful for accessing the field via an interface.
+func (v *IssueUpdateInput) GetTrusted() *bool { return v.Trusted }
+
 // ListAttachmentsIssue includes the requested fields of the GraphQL type Issue.
 // The GraphQL type's documentation follows.
 //
-// An issue.
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
 type ListAttachmentsIssue struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
@@ -6266,7 +7289,12 @@ func (v *ListAttachmentsIssueAttachmentsAttachmentConnection) GetPageInfo() *Lis
 // ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment includes the requested fields of the GraphQL type Attachment.
 // The GraphQL type's documentation follows.
 //
-// Issue attachment (e.g. support ticket, pull request).
+// An attachment linking external content to an issue. Attachments represent
+// connections to external resources such as GitHub pull requests, Slack messages,
+// Zendesk tickets, Figma files, Sentry issues, Intercom conversations, and plain
+// URLs. Each attachment has a title and subtitle displayed in the Linear UI, a URL
+// serving as both the link destination and unique identifier per issue, and
+// optional metadata specific to the source integration.
 type ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
@@ -6274,9 +7302,13 @@ type ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment struct {
 	Title string `json:"title"`
 	// Content for the subtitle line in the Linear attachment widget.
 	Subtitle *string `json:"subtitle"`
-	// Location of the attachment which is also used as an identifier.
+	// The URL of the external resource this attachment links to. Also serves as a
+	// unique identifier for the attachment within an issue; no two attachments on
+	// the same issue can share the same URL.
 	Url string `json:"url"`
-	// Custom metadata related to the attachment.
+	// Integration-specific metadata for this attachment. The schema varies by source
+	// type and may include fields such as pull request status, review counts, commit
+	// information, ticket status, or other data from the external system.
 	Metadata map[string]interface{} `json:"metadata"`
 	// The time at which the entity was created.
 	CreatedAt time.Time `json:"createdAt"`
@@ -6330,7 +7362,10 @@ func (v *ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachment) Get
 // ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachmentCreatorUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type ListAttachmentsIssueAttachmentsAttachmentConnectionNodesAttachmentCreatorUser struct {
 	// The user's email address.
 	Email string `json:"email"`
@@ -6368,7 +7403,7 @@ func (v *ListAttachmentsIssueAttachmentsAttachmentConnectionPageInfo) GetEndCurs
 
 // ListAttachmentsResponse is returned by ListAttachments on success.
 type ListAttachmentsResponse struct {
-	// One specific issue.
+	// One specific issue, looked up by its unique identifier.
 	Issue *ListAttachmentsIssue `json:"issue"`
 }
 
@@ -6378,7 +7413,12 @@ func (v *ListAttachmentsResponse) GetIssue() *ListAttachmentsIssue { return v.Is
 // ListCommentsIssue includes the requested fields of the GraphQL type Issue.
 // The GraphQL type's documentation follows.
 //
-// An issue.
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
 type ListCommentsIssue struct {
 	// Comments associated with the issue.
 	Comments *ListCommentsIssueCommentsCommentConnection `json:"comments"`
@@ -6408,18 +7448,22 @@ func (v *ListCommentsIssueCommentsCommentConnection) GetPageInfo() *ListComments
 // ListCommentsIssueCommentsCommentConnectionNodesComment includes the requested fields of the GraphQL type Comment.
 // The GraphQL type's documentation follows.
 //
-// A comment associated with an issue.
+// A comment associated with an issue, project update, initiative update, document
+// content, post, project, or initiative. Comments support rich text (ProseMirror),
+// emoji reactions, and threaded replies via parentId. Comments can be created by
+// workspace users or by external users through integrations (e.g., Slack,
+// Intercom). Each comment belongs to exactly one parent entity.
 type ListCommentsIssueCommentsCommentConnectionNodesComment struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The comment content in markdown format.
+	// The comment content in markdown format. This is a derived representation of the canonical bodyData ProseMirror content.
 	Body string `json:"body"`
 	// The time at which the entity was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
 	// been updated after creation.
 	UpdatedAt time.Time `json:"updatedAt"`
-	// The user who wrote the comment.
+	// The user who wrote the comment. Null for comments created by integrations or bots without a user association.
 	User *ListCommentsIssueCommentsCommentConnectionNodesCommentUser `json:"user"`
 }
 
@@ -6447,7 +7491,10 @@ func (v *ListCommentsIssueCommentsCommentConnectionNodesComment) GetUser() *List
 // ListCommentsIssueCommentsCommentConnectionNodesCommentUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type ListCommentsIssueCommentsCommentConnectionNodesCommentUser struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
@@ -6488,7 +7535,7 @@ func (v *ListCommentsIssueCommentsCommentConnectionPageInfo) GetEndCursor() *str
 
 // ListCommentsResponse is returned by ListComments on success.
 type ListCommentsResponse struct {
-	// One specific issue.
+	// One specific issue, looked up by its unique identifier.
 	Issue *ListCommentsIssue `json:"issue"`
 }
 
@@ -6514,7 +7561,12 @@ func (v *ListIssuesIssuesIssueConnection) GetPageInfo() *ListIssuesIssuesIssueCo
 // ListIssuesIssuesIssueConnectionNodesIssue includes the requested fields of the GraphQL type Issue.
 // The GraphQL type's documentation follows.
 //
-// An issue.
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
 type ListIssuesIssuesIssueConnectionNodesIssue struct {
 	IssueListFields `json:"-"`
 }
@@ -6682,7 +7734,9 @@ func (v *ListIssuesIssuesIssueConnectionPageInfo) GetEndCursor() *string { retur
 
 // ListIssuesResponse is returned by ListIssues on success.
 type ListIssuesResponse struct {
-	// All issues.
+	// All issues. Returns a paginated list of issues visible to the authenticated
+	// user. Can be filtered by various criteria including team, assignee, state,
+	// labels, project, and cycle.
 	Issues *ListIssuesIssuesIssueConnection `json:"issues"`
 }
 
@@ -6708,7 +7762,9 @@ func (v *ListProjectsProjectsProjectConnection) GetPageInfo() *ListProjectsProje
 // ListProjectsProjectsProjectConnectionNodesProject includes the requested fields of the GraphQL type Project.
 // The GraphQL type's documentation follows.
 //
-// A project.
+// A project is a collection of issues working toward a shared goal. Projects have
+// start and target dates, milestones, status tracking, and progress metrics. They
+// can span multiple teams and be grouped under initiatives.
 type ListProjectsProjectsProjectConnectionNodesProject struct {
 	ProjectListFields `json:"-"`
 }
@@ -6866,7 +7922,7 @@ func (v *ListProjectsProjectsProjectConnectionPageInfo) GetEndCursor() *string {
 
 // ListProjectsResponse is returned by ListProjects on success.
 type ListProjectsResponse struct {
-	// All projects.
+	// Returns all projects in the workspace, with optional filtering and sorting.
 	Projects *ListProjectsProjectsProjectConnection `json:"projects"`
 }
 
@@ -6877,9 +7933,10 @@ func (v *ListProjectsResponse) GetProjects() *ListProjectsProjectsProjectConnect
 
 // ListTeamsResponse is returned by ListTeams on success.
 type ListTeamsResponse struct {
-	// All teams whose issues can be accessed by the user. This might be different
-	// from `administrableTeams`, which also includes teams whose settings can be
-	// changed by the user.
+	// All teams whose issues the user can access. This includes public teams and
+	// private teams the user is a member of. This may differ from
+	// `administrableTeams`, which returns teams whose settings the user can change
+	// but whose issues they don't necessarily have access to.
 	Teams *ListTeamsTeamsTeamConnection `json:"teams"`
 }
 
@@ -6905,7 +7962,11 @@ func (v *ListTeamsTeamsTeamConnection) GetPageInfo() *ListTeamsTeamsTeamConnecti
 // ListTeamsTeamsTeamConnectionNodesTeam includes the requested fields of the GraphQL type Team.
 // The GraphQL type's documentation follows.
 //
-// An organizational unit that contains issues.
+// A team is the primary organizational unit in Linear. Issues belong to teams, and
+// each team has its own workflow states, cycles, labels, and settings. Teams can
+// be public (visible to all workspace members), private (visible only to team
+// members), or restricted (visible only within an enclosing private-team
+// boundary). Teams can also have sub-teams that inherit settings from their parent.
 type ListTeamsTeamsTeamConnectionNodesTeam struct {
 	TeamListFields `json:"-"`
 }
@@ -7007,7 +8068,7 @@ func (v *ListTeamsTeamsTeamConnectionPageInfo) GetEndCursor() *string { return v
 
 // ListUsersResponse is returned by ListUsers on success.
 type ListUsersResponse struct {
-	// All users for the organization.
+	// All users in the workspace. Supports filtering, sorting, and pagination.
 	Users *ListUsersUsersUserConnection `json:"users"`
 }
 
@@ -7033,7 +8094,10 @@ func (v *ListUsersUsersUserConnection) GetPageInfo() *ListUsersUsersUserConnecti
 // ListUsersUsersUserConnectionNodesUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type ListUsersUsersUserConnectionNodesUser struct {
 	UserListFields `json:"-"`
 }
@@ -7149,6 +8213,8 @@ type NullableCommentFilter struct {
 	DocumentContent *NullableDocumentContentFilter `json:"documentContent,omitempty"`
 	// Comparator for the identifier.
 	Id *IDComparator `json:"id,omitempty"`
+	// [Internal] Filters that the comment's initiative must satisfy.
+	Initiative *NullableInitiativeFilter `json:"initiative,omitempty"`
 	// Filters that the comment's issue must satisfy.
 	Issue *NullableIssueFilter `json:"issue,omitempty"`
 	// Filters that the comment's customer needs must satisfy.
@@ -7159,6 +8225,8 @@ type NullableCommentFilter struct {
 	Or []*NullableCommentFilter `json:"or,omitempty"`
 	// Filters that the comment parent must satisfy.
 	Parent *NullableCommentFilter `json:"parent,omitempty"`
+	// [Internal] Filters that the comment's project must satisfy.
+	Project *NullableProjectFilter `json:"project,omitempty"`
 	// Filters that the comment's project update must satisfy.
 	ProjectUpdate *NullableProjectUpdateFilter `json:"projectUpdate,omitempty"`
 	// Filters that the comment's reactions must satisfy.
@@ -7186,6 +8254,9 @@ func (v *NullableCommentFilter) GetDocumentContent() *NullableDocumentContentFil
 // GetId returns NullableCommentFilter.Id, and is useful for accessing the field via an interface.
 func (v *NullableCommentFilter) GetId() *IDComparator { return v.Id }
 
+// GetInitiative returns NullableCommentFilter.Initiative, and is useful for accessing the field via an interface.
+func (v *NullableCommentFilter) GetInitiative() *NullableInitiativeFilter { return v.Initiative }
+
 // GetIssue returns NullableCommentFilter.Issue, and is useful for accessing the field via an interface.
 func (v *NullableCommentFilter) GetIssue() *NullableIssueFilter { return v.Issue }
 
@@ -7200,6 +8271,9 @@ func (v *NullableCommentFilter) GetOr() []*NullableCommentFilter { return v.Or }
 
 // GetParent returns NullableCommentFilter.Parent, and is useful for accessing the field via an interface.
 func (v *NullableCommentFilter) GetParent() *NullableCommentFilter { return v.Parent }
+
+// GetProject returns NullableCommentFilter.Project, and is useful for accessing the field via an interface.
+func (v *NullableCommentFilter) GetProject() *NullableProjectFilter { return v.Project }
 
 // GetProjectUpdate returns NullableCommentFilter.ProjectUpdate, and is useful for accessing the field via an interface.
 func (v *NullableCommentFilter) GetProjectUpdate() *NullableProjectUpdateFilter {
@@ -7464,12 +8538,18 @@ type NullableDocumentContentFilter struct {
 	Document *DocumentFilter `json:"document,omitempty"`
 	// Comparator for the identifier.
 	Id *IDComparator `json:"id,omitempty"`
+	// Filters that the document content initiative must satisfy.
+	Initiative *InitiativeFilter `json:"initiative,omitempty"`
+	// Filters that the document content issue must satisfy.
+	Issue *IssueFilter `json:"issue,omitempty"`
 	// Filter based on the existence of the relation.
 	Null *bool `json:"null"`
 	// Compound filters, one of which need to be matched by the user.
 	Or []*NullableDocumentContentFilter `json:"or,omitempty"`
 	// Filters that the document content project must satisfy.
 	Project *ProjectFilter `json:"project,omitempty"`
+	// Filters that the document content project milestone must satisfy.
+	ProjectMilestone *ProjectMilestoneFilter `json:"projectMilestone,omitempty"`
 	// Comparator for the updated at date.
 	UpdatedAt *DateComparator `json:"updatedAt,omitempty"`
 }
@@ -7489,6 +8569,12 @@ func (v *NullableDocumentContentFilter) GetDocument() *DocumentFilter { return v
 // GetId returns NullableDocumentContentFilter.Id, and is useful for accessing the field via an interface.
 func (v *NullableDocumentContentFilter) GetId() *IDComparator { return v.Id }
 
+// GetInitiative returns NullableDocumentContentFilter.Initiative, and is useful for accessing the field via an interface.
+func (v *NullableDocumentContentFilter) GetInitiative() *InitiativeFilter { return v.Initiative }
+
+// GetIssue returns NullableDocumentContentFilter.Issue, and is useful for accessing the field via an interface.
+func (v *NullableDocumentContentFilter) GetIssue() *IssueFilter { return v.Issue }
+
 // GetNull returns NullableDocumentContentFilter.Null, and is useful for accessing the field via an interface.
 func (v *NullableDocumentContentFilter) GetNull() *bool { return v.Null }
 
@@ -7497,6 +8583,11 @@ func (v *NullableDocumentContentFilter) GetOr() []*NullableDocumentContentFilter
 
 // GetProject returns NullableDocumentContentFilter.Project, and is useful for accessing the field via an interface.
 func (v *NullableDocumentContentFilter) GetProject() *ProjectFilter { return v.Project }
+
+// GetProjectMilestone returns NullableDocumentContentFilter.ProjectMilestone, and is useful for accessing the field via an interface.
+func (v *NullableDocumentContentFilter) GetProjectMilestone() *ProjectMilestoneFilter {
+	return v.ProjectMilestone
+}
 
 // GetUpdatedAt returns NullableDocumentContentFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *NullableDocumentContentFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
@@ -7550,10 +8641,138 @@ func (v *NullableDurationComparator) GetNin() []string { return v.Nin }
 // GetNull returns NullableDurationComparator.Null, and is useful for accessing the field via an interface.
 func (v *NullableDurationComparator) GetNull() *bool { return v.Null }
 
+// Initiative filtering options.
+type NullableInitiativeFilter struct {
+	// Comparator for the initiative activity type.
+	ActivityType *StringComparator `json:"activityType,omitempty"`
+	// Filters that the initiative must be an ancestor of.
+	Ancestors *InitiativeCollectionFilter `json:"ancestors,omitempty"`
+	// Compound filters, all of which need to be matched by the initiative.
+	And []*NullableInitiativeFilter `json:"and,omitempty"`
+	// [Internal] Comparator for the initiative canceled at date.
+	CanceledAt *NullableDateComparator `json:"canceledAt,omitempty"`
+	// Comparator for the initiative completed at date.
+	CompletedAt *NullableDateComparator `json:"completedAt,omitempty"`
+	// Comparator for the created at date.
+	CreatedAt *DateComparator `json:"createdAt,omitempty"`
+	// Filters that the initiative creator must satisfy.
+	Creator *NullableUserFilter `json:"creator,omitempty"`
+	// Comparator for the initiative health: onTrack, atRisk, offTrack
+	Health *StringComparator `json:"health,omitempty"`
+	// Comparator for the initiative health (with age): onTrack, atRisk, offTrack, outdated, noUpdate
+	HealthWithAge *StringComparator `json:"healthWithAge,omitempty"`
+	// Comparator for the identifier.
+	Id *IDComparator `json:"id,omitempty"`
+	// Filters that the initiative updates must satisfy.
+	InitiativeUpdates *InitiativeUpdatesCollectionFilter `json:"initiativeUpdates,omitempty"`
+	// [Internal] Filters that the initiative labels must satisfy.
+	Labels *InitiativeLabelCollectionFilter `json:"labels,omitempty"`
+	// [ALPHA] Filters that the initiative lead team must satisfy.
+	LeadTeam *NullableTeamFilter `json:"leadTeam,omitempty"`
+	// Comparator for the initiative name.
+	Name *StringComparator `json:"name,omitempty"`
+	// Filter based on the existence of the relation.
+	Null *bool `json:"null"`
+	// Compound filters, one of which need to be matched by the initiative.
+	Or []*NullableInitiativeFilter `json:"or,omitempty"`
+	// Filters that the initiative owner must satisfy.
+	Owner *NullableUserFilter `json:"owner,omitempty"`
+	// [Internal] Comparator for the initiative priority.
+	Priority *NullableNumberComparator `json:"priority,omitempty"`
+	// Comparator for the initiative slug ID.
+	SlugId *StringComparator `json:"slugId,omitempty"`
+	// Comparator for the initiative started at date.
+	StartedAt *NullableDateComparator `json:"startedAt,omitempty"`
+	// Comparator for the initiative status: Proposed, Planned, Active, Completed, Canceled
+	Status *StringComparator `json:"status,omitempty"`
+	// Comparator for the initiative target date.
+	TargetDate *NullableDateComparator `json:"targetDate,omitempty"`
+	// Filters that the initiative teams must satisfy.
+	Teams *TeamCollectionFilter `json:"teams,omitempty"`
+	// Comparator for the updated at date.
+	UpdatedAt *DateComparator `json:"updatedAt,omitempty"`
+}
+
+// GetActivityType returns NullableInitiativeFilter.ActivityType, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetActivityType() *StringComparator { return v.ActivityType }
+
+// GetAncestors returns NullableInitiativeFilter.Ancestors, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetAncestors() *InitiativeCollectionFilter { return v.Ancestors }
+
+// GetAnd returns NullableInitiativeFilter.And, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetAnd() []*NullableInitiativeFilter { return v.And }
+
+// GetCanceledAt returns NullableInitiativeFilter.CanceledAt, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetCanceledAt() *NullableDateComparator { return v.CanceledAt }
+
+// GetCompletedAt returns NullableInitiativeFilter.CompletedAt, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetCompletedAt() *NullableDateComparator { return v.CompletedAt }
+
+// GetCreatedAt returns NullableInitiativeFilter.CreatedAt, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetCreatedAt() *DateComparator { return v.CreatedAt }
+
+// GetCreator returns NullableInitiativeFilter.Creator, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetCreator() *NullableUserFilter { return v.Creator }
+
+// GetHealth returns NullableInitiativeFilter.Health, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetHealth() *StringComparator { return v.Health }
+
+// GetHealthWithAge returns NullableInitiativeFilter.HealthWithAge, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetHealthWithAge() *StringComparator { return v.HealthWithAge }
+
+// GetId returns NullableInitiativeFilter.Id, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetId() *IDComparator { return v.Id }
+
+// GetInitiativeUpdates returns NullableInitiativeFilter.InitiativeUpdates, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetInitiativeUpdates() *InitiativeUpdatesCollectionFilter {
+	return v.InitiativeUpdates
+}
+
+// GetLabels returns NullableInitiativeFilter.Labels, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetLabels() *InitiativeLabelCollectionFilter { return v.Labels }
+
+// GetLeadTeam returns NullableInitiativeFilter.LeadTeam, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetLeadTeam() *NullableTeamFilter { return v.LeadTeam }
+
+// GetName returns NullableInitiativeFilter.Name, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetName() *StringComparator { return v.Name }
+
+// GetNull returns NullableInitiativeFilter.Null, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetNull() *bool { return v.Null }
+
+// GetOr returns NullableInitiativeFilter.Or, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetOr() []*NullableInitiativeFilter { return v.Or }
+
+// GetOwner returns NullableInitiativeFilter.Owner, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetOwner() *NullableUserFilter { return v.Owner }
+
+// GetPriority returns NullableInitiativeFilter.Priority, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetPriority() *NullableNumberComparator { return v.Priority }
+
+// GetSlugId returns NullableInitiativeFilter.SlugId, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetSlugId() *StringComparator { return v.SlugId }
+
+// GetStartedAt returns NullableInitiativeFilter.StartedAt, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetStartedAt() *NullableDateComparator { return v.StartedAt }
+
+// GetStatus returns NullableInitiativeFilter.Status, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetStatus() *StringComparator { return v.Status }
+
+// GetTargetDate returns NullableInitiativeFilter.TargetDate, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetTargetDate() *NullableDateComparator { return v.TargetDate }
+
+// GetTeams returns NullableInitiativeFilter.Teams, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetTeams() *TeamCollectionFilter { return v.Teams }
+
+// GetUpdatedAt returns NullableInitiativeFilter.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *NullableInitiativeFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
 // Issue filtering options.
 type NullableIssueFilter struct {
 	// [Internal] Comparator for the issue's accumulatedStateUpdatedAt date.
 	AccumulatedStateUpdatedAt *NullableDateComparator `json:"accumulatedStateUpdatedAt,omitempty"`
+	// Filters that the issue's activities must satisfy.
+	Activity *ActivityCollectionFilter `json:"activity,omitempty"`
 	// Comparator for the issues added to cycle at date.
 	AddedToCycleAt *NullableDateComparator `json:"addedToCycleAt,omitempty"`
 	// Comparator for the period when issue was added to a cycle.
@@ -7600,14 +8819,27 @@ type NullableIssueFilter struct {
 	DueDate *NullableTimelessDateComparator `json:"dueDate,omitempty"`
 	// Comparator for the issues estimate.
 	Estimate *EstimateComparator `json:"estimate,omitempty"`
+	// [Internal] Comparator for filtering issues bucketed as having active agent
+	// sessions, no closed agent pull requests, and no merged agent pull requests.
+	HasActiveAgentSessions *RelationExistsComparator `json:"hasActiveAgentSessions,omitempty"`
 	// Comparator for filtering issues which are blocked.
 	HasBlockedByRelations *RelationExistsComparator `json:"hasBlockedByRelations,omitempty"`
 	// Comparator for filtering issues which are blocking.
 	HasBlockingRelations *RelationExistsComparator `json:"hasBlockingRelations,omitempty"`
+	// [Internal] Comparator for filtering issues bucketed as having all agent
+	// sessions dismissed or closed, and no merged agent pull requests.
+	HasDismissedAgentSessions *RelationExistsComparator `json:"hasDismissedAgentSessions,omitempty"`
 	// Comparator for filtering issues which are duplicates.
 	HasDuplicateRelations *RelationExistsComparator `json:"hasDuplicateRelations,omitempty"`
+	// [Internal] Comparator for filtering issues bucketed as having an errored agent
+	// session, no active sessions, and no merged agent pull requests.
+	HasErroredAgentSessions *RelationExistsComparator `json:"hasErroredAgentSessions,omitempty"`
+	// [Internal] Comparator for filtering issues which have agent-session-linked pull requests that were merged.
+	HasMergedAgentPullRequests *RelationExistsComparator `json:"hasMergedAgentPullRequests,omitempty"`
 	// Comparator for filtering issues with relations.
 	HasRelatedRelations *RelationExistsComparator `json:"hasRelatedRelations,omitempty"`
+	// Comparator for filtering issues which have been shared with users outside of the team.
+	HasSharedUsers *RelationExistsComparator `json:"hasSharedUsers,omitempty"`
 	// [Internal] Comparator for filtering issues which have suggested assignees.
 	HasSuggestedAssignees *RelationExistsComparator `json:"hasSuggestedAssignees,omitempty"`
 	// [Internal] Comparator for filtering issues which have suggested labels.
@@ -7621,7 +8853,7 @@ type NullableIssueFilter struct {
 	// [Internal] Comparator for filtering issues which have suggested teams.
 	HasSuggestedTeams *RelationExistsComparator `json:"hasSuggestedTeams,omitempty"`
 	// Comparator for the identifier.
-	Id *IDComparator `json:"id,omitempty"`
+	Id *IssueIDComparator `json:"id,omitempty"`
 	// Filters that issue labels must satisfy.
 	Labels *IssueLabelCollectionFilter `json:"labels,omitempty"`
 	// Filters that the last applied template must satisfy.
@@ -7638,7 +8870,7 @@ type NullableIssueFilter struct {
 	Or []*NullableIssueFilter `json:"or,omitempty"`
 	// Filters that the issue parent must satisfy.
 	Parent *NullableIssueFilter `json:"parent,omitempty"`
-	// Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+	// Comparator for the issues priority. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
 	Priority *NullableNumberComparator `json:"priority,omitempty"`
 	// Filters that the issues project must satisfy.
 	Project *NullableProjectFilter `json:"project,omitempty"`
@@ -7648,8 +8880,14 @@ type NullableIssueFilter struct {
 	Reactions *ReactionCollectionFilter `json:"reactions,omitempty"`
 	// [ALPHA] Filters that the recurring issue template must satisfy.
 	RecurringIssueTemplate *NullableTemplateFilter `json:"recurringIssueTemplate,omitempty"`
+	// Filters that the issue's releases must satisfy.
+	Releases *ReleaseCollectionFilter `json:"releases,omitempty"`
 	// [Internal] Comparator for the issues content.
 	SearchableContent *ContentComparator `json:"searchableContent,omitempty"`
+	// Filters that users the issue has been shared with must satisfy.
+	SharedWith *UserCollectionFilter `json:"sharedWith,omitempty"`
+	// Comparator for the issue's SLA breach date.
+	SlaBreachesAt *NullableDateComparator `json:"slaBreachesAt,omitempty"`
 	// Comparator for the issues sla status.
 	SlaStatus *SlaStatusComparator `json:"slaStatus,omitempty"`
 	// Filters that the issues snoozer must satisfy.
@@ -7682,6 +8920,9 @@ type NullableIssueFilter struct {
 func (v *NullableIssueFilter) GetAccumulatedStateUpdatedAt() *NullableDateComparator {
 	return v.AccumulatedStateUpdatedAt
 }
+
+// GetActivity returns NullableIssueFilter.Activity, and is useful for accessing the field via an interface.
+func (v *NullableIssueFilter) GetActivity() *ActivityCollectionFilter { return v.Activity }
 
 // GetAddedToCycleAt returns NullableIssueFilter.AddedToCycleAt, and is useful for accessing the field via an interface.
 func (v *NullableIssueFilter) GetAddedToCycleAt() *NullableDateComparator { return v.AddedToCycleAt }
@@ -7756,6 +8997,11 @@ func (v *NullableIssueFilter) GetDueDate() *NullableTimelessDateComparator { ret
 // GetEstimate returns NullableIssueFilter.Estimate, and is useful for accessing the field via an interface.
 func (v *NullableIssueFilter) GetEstimate() *EstimateComparator { return v.Estimate }
 
+// GetHasActiveAgentSessions returns NullableIssueFilter.HasActiveAgentSessions, and is useful for accessing the field via an interface.
+func (v *NullableIssueFilter) GetHasActiveAgentSessions() *RelationExistsComparator {
+	return v.HasActiveAgentSessions
+}
+
 // GetHasBlockedByRelations returns NullableIssueFilter.HasBlockedByRelations, and is useful for accessing the field via an interface.
 func (v *NullableIssueFilter) GetHasBlockedByRelations() *RelationExistsComparator {
 	return v.HasBlockedByRelations
@@ -7766,15 +9012,33 @@ func (v *NullableIssueFilter) GetHasBlockingRelations() *RelationExistsComparato
 	return v.HasBlockingRelations
 }
 
+// GetHasDismissedAgentSessions returns NullableIssueFilter.HasDismissedAgentSessions, and is useful for accessing the field via an interface.
+func (v *NullableIssueFilter) GetHasDismissedAgentSessions() *RelationExistsComparator {
+	return v.HasDismissedAgentSessions
+}
+
 // GetHasDuplicateRelations returns NullableIssueFilter.HasDuplicateRelations, and is useful for accessing the field via an interface.
 func (v *NullableIssueFilter) GetHasDuplicateRelations() *RelationExistsComparator {
 	return v.HasDuplicateRelations
+}
+
+// GetHasErroredAgentSessions returns NullableIssueFilter.HasErroredAgentSessions, and is useful for accessing the field via an interface.
+func (v *NullableIssueFilter) GetHasErroredAgentSessions() *RelationExistsComparator {
+	return v.HasErroredAgentSessions
+}
+
+// GetHasMergedAgentPullRequests returns NullableIssueFilter.HasMergedAgentPullRequests, and is useful for accessing the field via an interface.
+func (v *NullableIssueFilter) GetHasMergedAgentPullRequests() *RelationExistsComparator {
+	return v.HasMergedAgentPullRequests
 }
 
 // GetHasRelatedRelations returns NullableIssueFilter.HasRelatedRelations, and is useful for accessing the field via an interface.
 func (v *NullableIssueFilter) GetHasRelatedRelations() *RelationExistsComparator {
 	return v.HasRelatedRelations
 }
+
+// GetHasSharedUsers returns NullableIssueFilter.HasSharedUsers, and is useful for accessing the field via an interface.
+func (v *NullableIssueFilter) GetHasSharedUsers() *RelationExistsComparator { return v.HasSharedUsers }
 
 // GetHasSuggestedAssignees returns NullableIssueFilter.HasSuggestedAssignees, and is useful for accessing the field via an interface.
 func (v *NullableIssueFilter) GetHasSuggestedAssignees() *RelationExistsComparator {
@@ -7807,7 +9071,7 @@ func (v *NullableIssueFilter) GetHasSuggestedTeams() *RelationExistsComparator {
 }
 
 // GetId returns NullableIssueFilter.Id, and is useful for accessing the field via an interface.
-func (v *NullableIssueFilter) GetId() *IDComparator { return v.Id }
+func (v *NullableIssueFilter) GetId() *IssueIDComparator { return v.Id }
 
 // GetLabels returns NullableIssueFilter.Labels, and is useful for accessing the field via an interface.
 func (v *NullableIssueFilter) GetLabels() *IssueLabelCollectionFilter { return v.Labels }
@@ -7854,8 +9118,17 @@ func (v *NullableIssueFilter) GetRecurringIssueTemplate() *NullableTemplateFilte
 	return v.RecurringIssueTemplate
 }
 
+// GetReleases returns NullableIssueFilter.Releases, and is useful for accessing the field via an interface.
+func (v *NullableIssueFilter) GetReleases() *ReleaseCollectionFilter { return v.Releases }
+
 // GetSearchableContent returns NullableIssueFilter.SearchableContent, and is useful for accessing the field via an interface.
 func (v *NullableIssueFilter) GetSearchableContent() *ContentComparator { return v.SearchableContent }
+
+// GetSharedWith returns NullableIssueFilter.SharedWith, and is useful for accessing the field via an interface.
+func (v *NullableIssueFilter) GetSharedWith() *UserCollectionFilter { return v.SharedWith }
+
+// GetSlaBreachesAt returns NullableIssueFilter.SlaBreachesAt, and is useful for accessing the field via an interface.
+func (v *NullableIssueFilter) GetSlaBreachesAt() *NullableDateComparator { return v.SlaBreachesAt }
 
 // GetSlaStatus returns NullableIssueFilter.SlaStatus, and is useful for accessing the field via an interface.
 func (v *NullableIssueFilter) GetSlaStatus() *SlaStatusComparator { return v.SlaStatus }
@@ -8007,7 +9280,7 @@ type NullableProjectFilter struct {
 	Null *bool `json:"null"`
 	// Compound filters, one of which need to be matched by the project.
 	Or []*NullableProjectFilter `json:"or,omitempty"`
-	// Comparator for the projects priority.
+	// Comparator for the project priority.
 	Priority *NullableNumberComparator `json:"priority,omitempty"`
 	// Filters that the project's milestones must satisfy.
 	ProjectMilestones *ProjectMilestoneCollectionFilter `json:"projectMilestones,omitempty"`
@@ -8025,7 +9298,7 @@ type NullableProjectFilter struct {
 	StartedAt *NullableDateComparator `json:"startedAt,omitempty"`
 	// [DEPRECATED] Comparator for the project state.
 	State *StringComparator `json:"state,omitempty"`
-	// Filters that the project's status must satisfy.
+	// Filters that the project status must satisfy.
 	Status *ProjectStatusFilter `json:"status,omitempty"`
 	// Comparator for the project target date.
 	TargetDate *NullableDateComparator `json:"targetDate,omitempty"`
@@ -8197,6 +9470,8 @@ type NullableProjectMilestoneFilter struct {
 	Null *bool `json:"null"`
 	// Compound filters, one of which need to be matched by the project milestone.
 	Or []*NullableProjectMilestoneFilter `json:"or,omitempty"`
+	// Filters that the project milestone's project must satisfy.
+	Project *NullableProjectFilter `json:"project,omitempty"`
 	// Comparator for the project milestone target date.
 	TargetDate *NullableDateComparator `json:"targetDate,omitempty"`
 	// Comparator for the updated at date.
@@ -8220,6 +9495,9 @@ func (v *NullableProjectMilestoneFilter) GetNull() *bool { return v.Null }
 
 // GetOr returns NullableProjectMilestoneFilter.Or, and is useful for accessing the field via an interface.
 func (v *NullableProjectMilestoneFilter) GetOr() []*NullableProjectMilestoneFilter { return v.Or }
+
+// GetProject returns NullableProjectMilestoneFilter.Project, and is useful for accessing the field via an interface.
+func (v *NullableProjectMilestoneFilter) GetProject() *NullableProjectFilter { return v.Project }
 
 // GetTargetDate returns NullableProjectMilestoneFilter.TargetDate, and is useful for accessing the field via an interface.
 func (v *NullableProjectMilestoneFilter) GetTargetDate() *NullableDateComparator { return v.TargetDate }
@@ -8370,6 +9648,8 @@ func (v *NullableStringComparator) GetStartsWithIgnoreCase() *string { return v.
 
 // Team filtering options.
 type NullableTeamFilter struct {
+	// Filters that the team's ancestors must satisfy.
+	Ancestors *TeamCollectionFilter `json:"ancestors,omitempty"`
 	// Compound filters, all of which need to be matched by the team.
 	And []*NullableTeamFilter `json:"and,omitempty"`
 	// Comparator for the created at date.
@@ -8378,23 +9658,37 @@ type NullableTeamFilter struct {
 	Description *NullableStringComparator `json:"description,omitempty"`
 	// Comparator for the identifier.
 	Id *IDComparator `json:"id,omitempty"`
-	// Filters that the teams issues must satisfy.
+	// Filters that the team's issues must satisfy.
 	Issues *IssueCollectionFilter `json:"issues,omitempty"`
 	// Comparator for the team key.
 	Key *StringComparator `json:"key,omitempty"`
+	// Filters that the team's members must satisfy.
+	Members *UserCollectionFilter `json:"members,omitempty"`
 	// Comparator for the team name.
 	Name *StringComparator `json:"name,omitempty"`
 	// Filter based on the existence of the relation.
 	Null *bool `json:"null"`
 	// Compound filters, one of which need to be matched by the team.
 	Or []*NullableTeamFilter `json:"or,omitempty"`
-	// Filters that the teams parent must satisfy.
+	// Filters that the team's parent must satisfy.
 	Parent *NullableTeamFilter `json:"parent,omitempty"`
-	// Comparator for the team privacy.
+	// [DEPRECATED] Comparator for the team privacy.
 	Private *BooleanComparator `json:"private,omitempty"`
+	// Filters that the team's release pipelines must satisfy.
+	ReleasePipelines *ReleasePipelineCollectionFilter `json:"releasePipelines,omitempty"`
+	// [Internal] Filters that the private team forming this team's visibility
+	// boundary must satisfy. Only relevant for non-public teams.
+	RestrictedBy *NullableTeamFilter `json:"restrictedBy,omitempty"`
+	// Comparator for the time at which the team was retired.
+	RetiredAt *NullableDateComparator `json:"retiredAt,omitempty"`
 	// Comparator for the updated at date.
 	UpdatedAt *DateComparator `json:"updatedAt,omitempty"`
+	// Comparator for the team visibility.
+	Visibility *TeamVisibilityComparator `json:"visibility,omitempty"`
 }
+
+// GetAncestors returns NullableTeamFilter.Ancestors, and is useful for accessing the field via an interface.
+func (v *NullableTeamFilter) GetAncestors() *TeamCollectionFilter { return v.Ancestors }
 
 // GetAnd returns NullableTeamFilter.And, and is useful for accessing the field via an interface.
 func (v *NullableTeamFilter) GetAnd() []*NullableTeamFilter { return v.And }
@@ -8414,6 +9708,9 @@ func (v *NullableTeamFilter) GetIssues() *IssueCollectionFilter { return v.Issue
 // GetKey returns NullableTeamFilter.Key, and is useful for accessing the field via an interface.
 func (v *NullableTeamFilter) GetKey() *StringComparator { return v.Key }
 
+// GetMembers returns NullableTeamFilter.Members, and is useful for accessing the field via an interface.
+func (v *NullableTeamFilter) GetMembers() *UserCollectionFilter { return v.Members }
+
 // GetName returns NullableTeamFilter.Name, and is useful for accessing the field via an interface.
 func (v *NullableTeamFilter) GetName() *StringComparator { return v.Name }
 
@@ -8429,8 +9726,22 @@ func (v *NullableTeamFilter) GetParent() *NullableTeamFilter { return v.Parent }
 // GetPrivate returns NullableTeamFilter.Private, and is useful for accessing the field via an interface.
 func (v *NullableTeamFilter) GetPrivate() *BooleanComparator { return v.Private }
 
+// GetReleasePipelines returns NullableTeamFilter.ReleasePipelines, and is useful for accessing the field via an interface.
+func (v *NullableTeamFilter) GetReleasePipelines() *ReleasePipelineCollectionFilter {
+	return v.ReleasePipelines
+}
+
+// GetRestrictedBy returns NullableTeamFilter.RestrictedBy, and is useful for accessing the field via an interface.
+func (v *NullableTeamFilter) GetRestrictedBy() *NullableTeamFilter { return v.RestrictedBy }
+
+// GetRetiredAt returns NullableTeamFilter.RetiredAt, and is useful for accessing the field via an interface.
+func (v *NullableTeamFilter) GetRetiredAt() *NullableDateComparator { return v.RetiredAt }
+
 // GetUpdatedAt returns NullableTeamFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *NullableTeamFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
+// GetVisibility returns NullableTeamFilter.Visibility, and is useful for accessing the field via an interface.
+func (v *NullableTeamFilter) GetVisibility() *TeamVisibilityComparator { return v.Visibility }
 
 // Template filtering options.
 type NullableTemplateFilter struct {
@@ -8563,7 +9874,7 @@ type NullableUserFilter struct {
 	Null *bool `json:"null"`
 	// Compound filters, one of which need to be matched by the user.
 	Or []*NullableUserFilter `json:"or,omitempty"`
-	// [Internal] Comparator for the user's owner status.
+	// Comparator for the user's owner status.
 	Owner *BooleanComparator `json:"owner,omitempty"`
 	// Comparator for the updated at date.
 	UpdatedAt *DateComparator `json:"updatedAt,omitempty"`
@@ -8741,7 +10052,7 @@ type ProjectCollectionFilter struct {
 	NextProjectMilestone *ProjectMilestoneFilter `json:"nextProjectMilestone,omitempty"`
 	// Compound filters, one of which need to be matched by the project.
 	Or []*ProjectCollectionFilter `json:"or,omitempty"`
-	// Comparator for the projects priority.
+	// Comparator for the project priority.
 	Priority *NullableNumberComparator `json:"priority,omitempty"`
 	// Filters that the project's milestones must satisfy.
 	ProjectMilestones *ProjectMilestoneCollectionFilter `json:"projectMilestones,omitempty"`
@@ -8761,7 +10072,7 @@ type ProjectCollectionFilter struct {
 	StartedAt *NullableDateComparator `json:"startedAt,omitempty"`
 	// [DEPRECATED] Comparator for the project state.
 	State *StringComparator `json:"state,omitempty"`
-	// Filters that the project's status must satisfy.
+	// Filters that the project status must satisfy.
 	Status *ProjectStatusFilter `json:"status,omitempty"`
 	// Comparator for the project target date.
 	TargetDate *NullableDateComparator `json:"targetDate,omitempty"`
@@ -8933,11 +10244,11 @@ func (v *ProjectCollectionFilter) GetUpdatedAt() *DateComparator { return v.Upda
 type ProjectDetailFields struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The project's unique URL slug.
+	// The project's unique URL slug, used to construct human-readable URLs.
 	SlugId string `json:"slugId"`
-	// The project's name.
+	// The name of the project.
 	Name string `json:"name"`
-	// The project's description.
+	// The short description of the project.
 	Description string `json:"description"`
 	// The project's content in markdown format.
 	Content *string `json:"content"`
@@ -8946,28 +10257,30 @@ type ProjectDetailFields struct {
 	// The overall progress of the project. This is the (completed estimate points +
 	// 0.25 * in progress estimate points) / total estimate points.
 	Progress float64 `json:"progress"`
-	// The health of the project.
+	// The overall health of the project, derived from the most recent project
+	// update. Possible values are onTrack, atRisk, or offTrack. Null if no health
+	// has been reported.
 	Health *ProjectUpdateHealthType `json:"health"`
 	// The overall scope (total estimate points) of the project.
 	Scope float64 `json:"scope"`
-	// The estimated start date of the project.
+	// The estimated start date of the project. Null if no start date is set.
 	StartDate *string `json:"startDate"`
-	// The estimated completion date of the project.
+	// The estimated completion date of the project. Null if no target date is set.
 	TargetDate *string `json:"targetDate"`
 	// Project URL.
 	Url string `json:"url"`
-	// The icon of the project.
+	// The icon of the project. Can be an emoji or a decorative icon type.
 	Icon *string `json:"icon"`
-	// The project's color.
+	// The project's color as a HEX string. Used in the UI to visually identify the project.
 	Color string `json:"color"`
 	// The time at which the entity was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
 	// been updated after creation.
 	UpdatedAt time.Time `json:"updatedAt"`
-	// The time at which the project was moved into completed state.
+	// The time at which the project was moved into a completed status. Null if the project has not been completed.
 	CompletedAt *time.Time `json:"completedAt"`
-	// The time at which the project was moved into canceled state.
+	// The time at which the project was moved into a canceled status. Null if the project has not been canceled.
 	CanceledAt *time.Time `json:"canceledAt"`
 	// The time at which the entity was archived. Null if the entity has not been archived.
 	ArchivedAt *time.Time `json:"archivedAt"`
@@ -8977,11 +10290,12 @@ type ProjectDetailFields struct {
 	SlackIssueComments bool `json:"slackIssueComments"`
 	// Whether to send new issue status updates to Slack.
 	SlackIssueStatuses bool `json:"slackIssueStatuses"`
-	// The project lead.
+	// The user who leads the project. The project lead is typically responsible for
+	// posting status updates and driving the project to completion. Null if no lead is assigned.
 	Lead *ProjectDetailFieldsLeadUser `json:"lead"`
 	// The user who created the project.
 	Creator *ProjectDetailFieldsCreatorUser `json:"creator"`
-	// The project was created based on this issue.
+	// The issue that was converted into this project. Null if the project was not created from an issue.
 	ConvertedFromIssue *ProjectDetailFieldsConvertedFromIssue `json:"convertedFromIssue"`
 	// The last template that was applied to this project.
 	LastAppliedTemplate *ProjectDetailFieldsLastAppliedTemplate `json:"lastAppliedTemplate"`
@@ -9103,13 +10417,18 @@ func (v *ProjectDetailFields) GetDocuments() *ProjectDetailFieldsDocumentsDocume
 // ProjectDetailFieldsConvertedFromIssue includes the requested fields of the GraphQL type Issue.
 // The GraphQL type's documentation follows.
 //
-// An issue.
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
 type ProjectDetailFieldsConvertedFromIssue struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
 	// Issue's human readable identifier (e.g. ENG-123).
 	Identifier string `json:"identifier"`
-	// The issue's title.
+	// The issue's title. This is the primary human-readable summary of the work item.
 	Title string `json:"title"`
 }
 
@@ -9125,7 +10444,10 @@ func (v *ProjectDetailFieldsConvertedFromIssue) GetTitle() string { return v.Tit
 // ProjectDetailFieldsCreatorUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type ProjectDetailFieldsCreatorUser struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
@@ -9167,26 +10489,29 @@ func (v *ProjectDetailFieldsDocumentsDocumentConnection) GetNodes() []*ProjectDe
 // ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument includes the requested fields of the GraphQL type Document.
 // The GraphQL type's documentation follows.
 //
-// A document that can be attached to different entities.
+// A rich-text document that lives within a project, initiative, team, issue,
+// release, or cycle. Documents support collaborative editing via ProseMirror/Yjs
+// and store their content in a separate DocumentContent entity. Each document is
+// associated with exactly one parent entity.
 type ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The document title.
+	// The title of the document. An empty string indicates an untitled document.
 	Title string `json:"title"`
-	// The documents content in markdown format.
+	// The document's content in markdown format.
 	Content *string `json:"content"`
-	// The icon of the document.
+	// The icon of the document, either a decorative icon type or an emoji string. Null if no icon has been set.
 	Icon *string `json:"icon"`
-	// The color of the icon.
+	// The hex color of the document icon. Null if no custom color has been set.
 	Color *string `json:"color"`
 	// The time at which the entity was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
 	// been updated after creation.
 	UpdatedAt time.Time `json:"updatedAt"`
-	// The user who created the document.
+	// The user who created the document. Null if the creator's account has been deleted.
 	Creator *ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentCreatorUser `json:"creator"`
-	// The user who last updated the document.
+	// The user who last updated the document. Null if the user's account has been deleted.
 	UpdatedBy *ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentUpdatedByUser `json:"updatedBy"`
 }
 
@@ -9236,7 +10561,10 @@ func (v *ProjectDetailFieldsDocumentsDocumentConnectionNodesDocument) GetUpdated
 // ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentCreatorUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentCreatorUser struct {
 	// The user's full name.
 	Name string `json:"name"`
@@ -9257,7 +10585,10 @@ func (v *ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentCreatorUser)
 // ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentUpdatedByUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type ProjectDetailFieldsDocumentsDocumentConnectionNodesDocumentUpdatedByUser struct {
 	// The user's full name.
 	Name string `json:"name"`
@@ -9288,21 +10619,29 @@ func (v *ProjectDetailFieldsIssuesIssueConnection) GetNodes() []*ProjectDetailFi
 // ProjectDetailFieldsIssuesIssueConnectionNodesIssue includes the requested fields of the GraphQL type Issue.
 // The GraphQL type's documentation follows.
 //
-// An issue.
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
 type ProjectDetailFieldsIssuesIssueConnectionNodesIssue struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
 	// Issue's human readable identifier (e.g. ENG-123).
 	Identifier string `json:"identifier"`
-	// The issue's unique number.
+	// The issue's unique number, scoped to the issue's team. Together with the team
+	// key, this forms the issue's human-readable identifier (e.g., ENG-123).
 	Number float64 `json:"number"`
-	// The issue's title.
+	// The issue's title. This is the primary human-readable summary of the work item.
 	Title string `json:"title"`
 	// The issue's description in markdown format.
 	Description *string `json:"description"`
-	// The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+	// The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
 	Priority float64 `json:"priority"`
-	// The estimate of the complexity of the issue..
+	// The estimate of the complexity of the issue. The specific scale used depends
+	// on the team's estimation configuration (e.g., points, T-shirt sizes). Null if
+	// no estimate has been set.
 	Estimate *float64 `json:"estimate"`
 	// The time at which the entity was created.
 	CreatedAt time.Time `json:"createdAt"`
@@ -9311,9 +10650,11 @@ type ProjectDetailFieldsIssuesIssueConnectionNodesIssue struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 	// The time at which the issue was moved into completed state.
 	CompletedAt *time.Time `json:"completedAt"`
-	// The workflow state that the issue is associated with.
+	// The workflow state (issue status) that the issue is currently in. Workflow
+	// states represent the issue's progress through the team's workflow, such as
+	// Triage, Todo, In Progress, Done, or Canceled.
 	State *ProjectDetailFieldsIssuesIssueConnectionNodesIssueStateWorkflowState `json:"state"`
-	// The user to whom the issue is assigned to.
+	// The user to whom the issue is assigned. Null if the issue is unassigned.
 	Assignee *ProjectDetailFieldsIssuesIssueConnectionNodesIssueAssigneeUser `json:"assignee"`
 	// Labels associated with this issue.
 	Labels *ProjectDetailFieldsIssuesIssueConnectionNodesIssueLabelsIssueLabelConnection `json:"labels"`
@@ -9379,7 +10720,10 @@ func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssue) GetLabels() *Projec
 // ProjectDetailFieldsIssuesIssueConnectionNodesIssueAssigneeUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type ProjectDetailFieldsIssuesIssueConnectionNodesIssueAssigneeUser struct {
 	// The user's full name.
 	Name string `json:"name"`
@@ -9410,11 +10754,15 @@ func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssueLabelsIssueLabelConne
 // ProjectDetailFieldsIssuesIssueConnectionNodesIssueLabelsIssueLabelConnectionNodesIssueLabel includes the requested fields of the GraphQL type IssueLabel.
 // The GraphQL type's documentation follows.
 //
-// Labels that can be associated with issues.
+// Labels that can be associated with issues. Labels help categorize and filter
+// issues across a workspace. They can be workspace-level (shared across all teams)
+// or team-scoped. Labels have a color for visual identification and can be
+// organized hierarchically into groups, where a parent label acts as a group
+// containing child labels. Labels may also be inherited from parent teams to sub-teams.
 type ProjectDetailFieldsIssuesIssueConnectionNodesIssueLabelsIssueLabelConnectionNodesIssueLabel struct {
 	// The label's name.
 	Name string `json:"name"`
-	// The label's color as a HEX string.
+	// The label's color as a HEX string (e.g., '#EB5757'). Used for visual identification of the label in the UI.
 	Color string `json:"color"`
 }
 
@@ -9431,11 +10779,17 @@ func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssueLabelsIssueLabelConne
 // ProjectDetailFieldsIssuesIssueConnectionNodesIssueStateWorkflowState includes the requested fields of the GraphQL type WorkflowState.
 // The GraphQL type's documentation follows.
 //
-// A state in a team workflow.
+// A state in a team's workflow, representing an issue status such as Triage,
+// Backlog, Todo, In Progress, In Review, Done, or Canceled. Each team has its own
+// set of workflow states that define the progression of issues through the team's
+// process. Workflow states have a type that categorizes them (triage, backlog,
+// unstarted, started, completed, canceled), a position that determines their
+// display order, and a color for visual identification. States can be inherited
+// from parent teams to sub-teams.
 type ProjectDetailFieldsIssuesIssueConnectionNodesIssueStateWorkflowState struct {
-	// The state's name.
+	// The state's human-readable name (e.g., 'In Progress', 'Done', 'Backlog').
 	Name string `json:"name"`
-	// The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled".
+	// The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled", "duplicate".
 	Type string `json:"type"`
 	// The state's UI color as a HEX string.
 	Color string `json:"color"`
@@ -9459,13 +10813,16 @@ func (v *ProjectDetailFieldsIssuesIssueConnectionNodesIssueStateWorkflowState) G
 // ProjectDetailFieldsLastAppliedTemplate includes the requested fields of the GraphQL type Template.
 // The GraphQL type's documentation follows.
 //
-// A template object used for creating entities faster.
+// A reusable template for creating issues, projects, or documents. Templates store
+// pre-filled field values and content as JSON data. They can be scoped to a
+// specific team or shared across the entire workspace. Team-scoped templates may
+// be inherited from parent teams.
 type ProjectDetailFieldsLastAppliedTemplate struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
 	// The name of the template.
 	Name string `json:"name"`
-	// Template description.
+	// A description of what the template is used for.
 	Description *string `json:"description"`
 }
 
@@ -9481,7 +10838,10 @@ func (v *ProjectDetailFieldsLastAppliedTemplate) GetDescription() *string { retu
 // ProjectDetailFieldsLeadUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type ProjectDetailFieldsLeadUser struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
@@ -9491,7 +10851,7 @@ type ProjectDetailFieldsLeadUser struct {
 	Email string `json:"email"`
 	// An URL to the user's avatar image.
 	AvatarUrl *string `json:"avatarUrl"`
-	// The user's display (nick) name. Unique within each organization.
+	// The user's display (nick) name. Must be unique within the workspace.
 	DisplayName string `json:"displayName"`
 	// Whether the user account is active or disabled (suspended).
 	Active bool `json:"active"`
@@ -9528,7 +10888,10 @@ func (v *ProjectDetailFieldsMembersUserConnection) GetNodes() []*ProjectDetailFi
 // ProjectDetailFieldsMembersUserConnectionNodesUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type ProjectDetailFieldsMembersUserConnectionNodesUser struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
@@ -9538,11 +10901,11 @@ type ProjectDetailFieldsMembersUserConnectionNodesUser struct {
 	Email string `json:"email"`
 	// An URL to the user's avatar image.
 	AvatarUrl *string `json:"avatarUrl"`
-	// The user's display (nick) name. Unique within each organization.
+	// The user's display (nick) name. Must be unique within the workspace.
 	DisplayName string `json:"displayName"`
 	// Whether the user account is active or disabled (suspended).
 	Active bool `json:"active"`
-	// Whether the user is an organization administrator.
+	// Whether the user is a workspace administrator. On Free plans, all members are treated as admins.
 	Admin bool `json:"admin"`
 }
 
@@ -9584,13 +10947,15 @@ func (v *ProjectDetailFieldsProjectUpdatesProjectUpdateConnection) GetNodes() []
 // ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdate includes the requested fields of the GraphQL type ProjectUpdate.
 // The GraphQL type's documentation follows.
 //
-// An update associated with a project.
+// A status update posted to a project. Project updates communicate progress,
+// health, and blockers to stakeholders. Each update captures the project's health
+// at the time of writing and includes a rich-text body with the update content.
 type ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdate struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
 	// The update content in markdown format.
 	Body string `json:"body"`
-	// The health of the project at the time of the update.
+	// The health of the project at the time this update was posted. Possible values are onTrack, atRisk, or offTrack.
 	Health ProjectUpdateHealthType `json:"health"`
 	// The time at which the entity was created.
 	CreatedAt time.Time `json:"createdAt"`
@@ -9641,7 +11006,10 @@ func (v *ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpd
 // ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdateUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type ProjectDetailFieldsProjectUpdatesProjectUpdateConnectionNodesProjectUpdateUser struct {
 	// The user's full name.
 	Name string `json:"name"`
@@ -9679,11 +11047,15 @@ func (v *ProjectDetailFieldsTeamsTeamConnection) GetNodes() []*ProjectDetailFiel
 // ProjectDetailFieldsTeamsTeamConnectionNodesTeam includes the requested fields of the GraphQL type Team.
 // The GraphQL type's documentation follows.
 //
-// An organizational unit that contains issues.
+// A team is the primary organizational unit in Linear. Issues belong to teams, and
+// each team has its own workflow states, cycles, labels, and settings. Teams can
+// be public (visible to all workspace members), private (visible only to team
+// members), or restricted (visible only within an enclosing private-team
+// boundary). Teams can also have sub-teams that inherit settings from their parent.
 type ProjectDetailFieldsTeamsTeamConnectionNodesTeam struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The team's unique key. The key is used in URLs.
+	// The team's unique key, used as a prefix in issue identifiers (e.g., 'ENG' in 'ENG-123') and in URLs.
 	Key string `json:"key"`
 	// The team's name.
 	Name string `json:"name"`
@@ -9693,7 +11065,7 @@ type ProjectDetailFieldsTeamsTeamConnectionNodesTeam struct {
 	Icon *string `json:"icon"`
 	// The team's color.
 	Color *string `json:"color"`
-	// Whether the team uses cycles.
+	// Whether the team uses cycles for sprint-style issue management.
 	CyclesEnabled bool `json:"cyclesEnabled"`
 }
 
@@ -9782,7 +11154,7 @@ type ProjectFilter struct {
 	NextProjectMilestone *ProjectMilestoneFilter `json:"nextProjectMilestone,omitempty"`
 	// Compound filters, one of which need to be matched by the project.
 	Or []*ProjectFilter `json:"or,omitempty"`
-	// Comparator for the projects priority.
+	// Comparator for the project priority.
 	Priority *NullableNumberComparator `json:"priority,omitempty"`
 	// Filters that the project's milestones must satisfy.
 	ProjectMilestones *ProjectMilestoneCollectionFilter `json:"projectMilestones,omitempty"`
@@ -9800,7 +11172,7 @@ type ProjectFilter struct {
 	StartedAt *NullableDateComparator `json:"startedAt,omitempty"`
 	// [DEPRECATED] Comparator for the project state.
 	State *StringComparator `json:"state,omitempty"`
-	// Filters that the project's status must satisfy.
+	// Filters that the project status must satisfy.
 	Status *ProjectStatusFilter `json:"status,omitempty"`
 	// Comparator for the project target date.
 	TargetDate *NullableDateComparator `json:"targetDate,omitempty"`
@@ -10075,18 +11447,18 @@ func (v *ProjectLabelFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt
 type ProjectListFields struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The project's name.
+	// The name of the project.
 	Name string `json:"name"`
-	// The project's description.
+	// The short description of the project.
 	Description string `json:"description"`
 	// [DEPRECATED] The type of the state.
 	State string `json:"state"`
 	// The overall progress of the project. This is the (completed estimate points +
 	// 0.25 * in progress estimate points) / total estimate points.
 	Progress float64 `json:"progress"`
-	// The estimated start date of the project.
+	// The estimated start date of the project. Null if no start date is set.
 	StartDate *string `json:"startDate"`
-	// The estimated completion date of the project.
+	// The estimated completion date of the project. Null if no target date is set.
 	TargetDate *string `json:"targetDate"`
 	// Project URL.
 	Url string `json:"url"`
@@ -10095,7 +11467,8 @@ type ProjectListFields struct {
 	// The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
 	// been updated after creation.
 	UpdatedAt time.Time `json:"updatedAt"`
-	// The project lead.
+	// The user who leads the project. The project lead is typically responsible for
+	// posting status updates and driving the project to completion. Null if no lead is assigned.
 	Lead *ProjectListFieldsLeadUser `json:"lead"`
 	// Teams associated with this project.
 	Teams *ProjectListFieldsTeamsTeamConnection `json:"teams"`
@@ -10140,7 +11513,10 @@ func (v *ProjectListFields) GetTeams() *ProjectListFieldsTeamsTeamConnection { r
 // ProjectListFieldsLeadUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type ProjectListFieldsLeadUser struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
@@ -10172,11 +11548,15 @@ func (v *ProjectListFieldsTeamsTeamConnection) GetNodes() []*ProjectListFieldsTe
 // ProjectListFieldsTeamsTeamConnectionNodesTeam includes the requested fields of the GraphQL type Team.
 // The GraphQL type's documentation follows.
 //
-// An organizational unit that contains issues.
+// A team is the primary organizational unit in Linear. Issues belong to teams, and
+// each team has its own workflow states, cycles, labels, and settings. Teams can
+// be public (visible to all workspace members), private (visible only to team
+// members), or restricted (visible only within an enclosing private-team
+// boundary). Teams can also have sub-teams that inherit settings from their parent.
 type ProjectListFieldsTeamsTeamConnectionNodesTeam struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The team's unique key. The key is used in URLs.
+	// The team's unique key, used as a prefix in issue identifiers (e.g., 'ENG' in 'ENG-123') and in URLs.
 	Key string `json:"key"`
 	// The team's name.
 	Name string `json:"name"`
@@ -10207,6 +11587,8 @@ type ProjectMilestoneCollectionFilter struct {
 	Name *NullableStringComparator `json:"name,omitempty"`
 	// Compound filters, one of which need to be matched by the milestone.
 	Or []*ProjectMilestoneCollectionFilter `json:"or,omitempty"`
+	// Filters that the project milestone's project must satisfy.
+	Project *NullableProjectFilter `json:"project,omitempty"`
 	// Filters that needs to be matched by some milestones.
 	Some *ProjectMilestoneFilter `json:"some,omitempty"`
 	// Comparator for the project milestone target date.
@@ -10236,6 +11618,9 @@ func (v *ProjectMilestoneCollectionFilter) GetName() *NullableStringComparator {
 // GetOr returns ProjectMilestoneCollectionFilter.Or, and is useful for accessing the field via an interface.
 func (v *ProjectMilestoneCollectionFilter) GetOr() []*ProjectMilestoneCollectionFilter { return v.Or }
 
+// GetProject returns ProjectMilestoneCollectionFilter.Project, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneCollectionFilter) GetProject() *NullableProjectFilter { return v.Project }
+
 // GetSome returns ProjectMilestoneCollectionFilter.Some, and is useful for accessing the field via an interface.
 func (v *ProjectMilestoneCollectionFilter) GetSome() *ProjectMilestoneFilter { return v.Some }
 
@@ -10259,6 +11644,8 @@ type ProjectMilestoneFilter struct {
 	Name *NullableStringComparator `json:"name,omitempty"`
 	// Compound filters, one of which need to be matched by the project milestone.
 	Or []*ProjectMilestoneFilter `json:"or,omitempty"`
+	// Filters that the project milestone's project must satisfy.
+	Project *NullableProjectFilter `json:"project,omitempty"`
 	// Comparator for the project milestone target date.
 	TargetDate *NullableDateComparator `json:"targetDate,omitempty"`
 	// Comparator for the updated at date.
@@ -10279,6 +11666,9 @@ func (v *ProjectMilestoneFilter) GetName() *NullableStringComparator { return v.
 
 // GetOr returns ProjectMilestoneFilter.Or, and is useful for accessing the field via an interface.
 func (v *ProjectMilestoneFilter) GetOr() []*ProjectMilestoneFilter { return v.Or }
+
+// GetProject returns ProjectMilestoneFilter.Project, and is useful for accessing the field via an interface.
+func (v *ProjectMilestoneFilter) GetProject() *NullableProjectFilter { return v.Project }
 
 // GetTargetDate returns ProjectMilestoneFilter.TargetDate, and is useful for accessing the field via an interface.
 func (v *ProjectMilestoneFilter) GetTargetDate() *NullableDateComparator { return v.TargetDate }
@@ -10545,6 +11935,387 @@ func (v *RelationExistsComparator) GetEq() *bool { return v.Eq }
 // GetNeq returns RelationExistsComparator.Neq, and is useful for accessing the field via an interface.
 func (v *RelationExistsComparator) GetNeq() *bool { return v.Neq }
 
+// Release collection filtering options.
+type ReleaseCollectionFilter struct {
+	// Compound filters, all of which need to be matched by the release.
+	And []*ReleaseCollectionFilter `json:"and,omitempty"`
+	// Comparator for the release completion date.
+	CompletedAt *NullableDateComparator `json:"completedAt,omitempty"`
+	// Comparator for the created at date.
+	CreatedAt *DateComparator `json:"createdAt,omitempty"`
+	// Filters that needs to be matched by all releases.
+	Every *ReleaseFilter `json:"every,omitempty"`
+	// Comparator for whether the release is covered by any (non-archived) release
+	// note. Filter with `{ eq: false }` to retrieve releases that do not yet have
+	// release notes attached.
+	HasReleaseNotes *BooleanComparator `json:"hasReleaseNotes,omitempty"`
+	// Comparator for the identifier.
+	Id *IDComparator `json:"id,omitempty"`
+	// Comparator for the collection length.
+	Length *NumberComparator `json:"length,omitempty"`
+	// Comparator for the release name.
+	Name *StringComparator `json:"name,omitempty"`
+	// Compound filters, one of which need to be matched by the release.
+	Or []*ReleaseCollectionFilter `json:"or,omitempty"`
+	// Filters that the release's pipeline must satisfy.
+	Pipeline *ReleasePipelineFilter `json:"pipeline,omitempty"`
+	// Filters that needs to be matched by some releases.
+	Some *ReleaseFilter `json:"some,omitempty"`
+	// Filters that the release's stage must satisfy.
+	Stage *ReleaseStageFilter `json:"stage,omitempty"`
+	// Comparator for the updated at date.
+	UpdatedAt *DateComparator `json:"updatedAt,omitempty"`
+	// Comparator for the release version.
+	Version *StringComparator `json:"version,omitempty"`
+}
+
+// GetAnd returns ReleaseCollectionFilter.And, and is useful for accessing the field via an interface.
+func (v *ReleaseCollectionFilter) GetAnd() []*ReleaseCollectionFilter { return v.And }
+
+// GetCompletedAt returns ReleaseCollectionFilter.CompletedAt, and is useful for accessing the field via an interface.
+func (v *ReleaseCollectionFilter) GetCompletedAt() *NullableDateComparator { return v.CompletedAt }
+
+// GetCreatedAt returns ReleaseCollectionFilter.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ReleaseCollectionFilter) GetCreatedAt() *DateComparator { return v.CreatedAt }
+
+// GetEvery returns ReleaseCollectionFilter.Every, and is useful for accessing the field via an interface.
+func (v *ReleaseCollectionFilter) GetEvery() *ReleaseFilter { return v.Every }
+
+// GetHasReleaseNotes returns ReleaseCollectionFilter.HasReleaseNotes, and is useful for accessing the field via an interface.
+func (v *ReleaseCollectionFilter) GetHasReleaseNotes() *BooleanComparator { return v.HasReleaseNotes }
+
+// GetId returns ReleaseCollectionFilter.Id, and is useful for accessing the field via an interface.
+func (v *ReleaseCollectionFilter) GetId() *IDComparator { return v.Id }
+
+// GetLength returns ReleaseCollectionFilter.Length, and is useful for accessing the field via an interface.
+func (v *ReleaseCollectionFilter) GetLength() *NumberComparator { return v.Length }
+
+// GetName returns ReleaseCollectionFilter.Name, and is useful for accessing the field via an interface.
+func (v *ReleaseCollectionFilter) GetName() *StringComparator { return v.Name }
+
+// GetOr returns ReleaseCollectionFilter.Or, and is useful for accessing the field via an interface.
+func (v *ReleaseCollectionFilter) GetOr() []*ReleaseCollectionFilter { return v.Or }
+
+// GetPipeline returns ReleaseCollectionFilter.Pipeline, and is useful for accessing the field via an interface.
+func (v *ReleaseCollectionFilter) GetPipeline() *ReleasePipelineFilter { return v.Pipeline }
+
+// GetSome returns ReleaseCollectionFilter.Some, and is useful for accessing the field via an interface.
+func (v *ReleaseCollectionFilter) GetSome() *ReleaseFilter { return v.Some }
+
+// GetStage returns ReleaseCollectionFilter.Stage, and is useful for accessing the field via an interface.
+func (v *ReleaseCollectionFilter) GetStage() *ReleaseStageFilter { return v.Stage }
+
+// GetUpdatedAt returns ReleaseCollectionFilter.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ReleaseCollectionFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
+// GetVersion returns ReleaseCollectionFilter.Version, and is useful for accessing the field via an interface.
+func (v *ReleaseCollectionFilter) GetVersion() *StringComparator { return v.Version }
+
+// Release filtering options.
+type ReleaseFilter struct {
+	// Compound filters, all of which need to be matched by the release.
+	And []*ReleaseFilter `json:"and,omitempty"`
+	// Comparator for the release completion date.
+	CompletedAt *NullableDateComparator `json:"completedAt,omitempty"`
+	// Comparator for the created at date.
+	CreatedAt *DateComparator `json:"createdAt,omitempty"`
+	// Comparator for whether the release is covered by any (non-archived) release
+	// note. Filter with `{ eq: false }` to retrieve releases that do not yet have
+	// release notes attached.
+	HasReleaseNotes *BooleanComparator `json:"hasReleaseNotes,omitempty"`
+	// Comparator for the identifier.
+	Id *IDComparator `json:"id,omitempty"`
+	// Comparator for the release name.
+	Name *StringComparator `json:"name,omitempty"`
+	// Compound filters, one of which need to be matched by the release.
+	Or []*ReleaseFilter `json:"or,omitempty"`
+	// Filters that the release's pipeline must satisfy.
+	Pipeline *ReleasePipelineFilter `json:"pipeline,omitempty"`
+	// Filters that the release's stage must satisfy.
+	Stage *ReleaseStageFilter `json:"stage,omitempty"`
+	// Comparator for the updated at date.
+	UpdatedAt *DateComparator `json:"updatedAt,omitempty"`
+	// Comparator for the release version.
+	Version *StringComparator `json:"version,omitempty"`
+}
+
+// GetAnd returns ReleaseFilter.And, and is useful for accessing the field via an interface.
+func (v *ReleaseFilter) GetAnd() []*ReleaseFilter { return v.And }
+
+// GetCompletedAt returns ReleaseFilter.CompletedAt, and is useful for accessing the field via an interface.
+func (v *ReleaseFilter) GetCompletedAt() *NullableDateComparator { return v.CompletedAt }
+
+// GetCreatedAt returns ReleaseFilter.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ReleaseFilter) GetCreatedAt() *DateComparator { return v.CreatedAt }
+
+// GetHasReleaseNotes returns ReleaseFilter.HasReleaseNotes, and is useful for accessing the field via an interface.
+func (v *ReleaseFilter) GetHasReleaseNotes() *BooleanComparator { return v.HasReleaseNotes }
+
+// GetId returns ReleaseFilter.Id, and is useful for accessing the field via an interface.
+func (v *ReleaseFilter) GetId() *IDComparator { return v.Id }
+
+// GetName returns ReleaseFilter.Name, and is useful for accessing the field via an interface.
+func (v *ReleaseFilter) GetName() *StringComparator { return v.Name }
+
+// GetOr returns ReleaseFilter.Or, and is useful for accessing the field via an interface.
+func (v *ReleaseFilter) GetOr() []*ReleaseFilter { return v.Or }
+
+// GetPipeline returns ReleaseFilter.Pipeline, and is useful for accessing the field via an interface.
+func (v *ReleaseFilter) GetPipeline() *ReleasePipelineFilter { return v.Pipeline }
+
+// GetStage returns ReleaseFilter.Stage, and is useful for accessing the field via an interface.
+func (v *ReleaseFilter) GetStage() *ReleaseStageFilter { return v.Stage }
+
+// GetUpdatedAt returns ReleaseFilter.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ReleaseFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
+// GetVersion returns ReleaseFilter.Version, and is useful for accessing the field via an interface.
+func (v *ReleaseFilter) GetVersion() *StringComparator { return v.Version }
+
+// Release pipeline collection filtering options.
+type ReleasePipelineCollectionFilter struct {
+	// Compound filters, all of which need to be matched by the release pipeline.
+	And []*ReleasePipelineCollectionFilter `json:"and,omitempty"`
+	// Comparator for the created at date.
+	CreatedAt *DateComparator `json:"createdAt,omitempty"`
+	// Filters that needs to be matched by all release pipelines.
+	Every *ReleasePipelineFilter `json:"every,omitempty"`
+	// Comparator for the identifier.
+	Id *IDComparator `json:"id,omitempty"`
+	// Comparator for the pipeline production flag.
+	IsProduction *BooleanComparator `json:"isProduction,omitempty"`
+	// Comparator for the collection length.
+	Length *NumberComparator `json:"length,omitempty"`
+	// Comparator for the pipeline name.
+	Name *StringComparator `json:"name,omitempty"`
+	// Compound filters, one of which need to be matched by the release pipeline.
+	Or []*ReleasePipelineCollectionFilter `json:"or,omitempty"`
+	// Filters that needs to be matched by some release pipelines.
+	Some *ReleasePipelineFilter `json:"some,omitempty"`
+	// Filters that the release pipeline's teams must satisfy.
+	Teams *TeamCollectionFilter `json:"teams,omitempty"`
+	// Comparator for the pipeline type.
+	Type *ReleasePipelineTypeComparator `json:"type,omitempty"`
+	// Comparator for the updated at date.
+	UpdatedAt *DateComparator `json:"updatedAt,omitempty"`
+}
+
+// GetAnd returns ReleasePipelineCollectionFilter.And, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineCollectionFilter) GetAnd() []*ReleasePipelineCollectionFilter { return v.And }
+
+// GetCreatedAt returns ReleasePipelineCollectionFilter.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineCollectionFilter) GetCreatedAt() *DateComparator { return v.CreatedAt }
+
+// GetEvery returns ReleasePipelineCollectionFilter.Every, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineCollectionFilter) GetEvery() *ReleasePipelineFilter { return v.Every }
+
+// GetId returns ReleasePipelineCollectionFilter.Id, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineCollectionFilter) GetId() *IDComparator { return v.Id }
+
+// GetIsProduction returns ReleasePipelineCollectionFilter.IsProduction, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineCollectionFilter) GetIsProduction() *BooleanComparator { return v.IsProduction }
+
+// GetLength returns ReleasePipelineCollectionFilter.Length, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineCollectionFilter) GetLength() *NumberComparator { return v.Length }
+
+// GetName returns ReleasePipelineCollectionFilter.Name, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineCollectionFilter) GetName() *StringComparator { return v.Name }
+
+// GetOr returns ReleasePipelineCollectionFilter.Or, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineCollectionFilter) GetOr() []*ReleasePipelineCollectionFilter { return v.Or }
+
+// GetSome returns ReleasePipelineCollectionFilter.Some, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineCollectionFilter) GetSome() *ReleasePipelineFilter { return v.Some }
+
+// GetTeams returns ReleasePipelineCollectionFilter.Teams, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineCollectionFilter) GetTeams() *TeamCollectionFilter { return v.Teams }
+
+// GetType returns ReleasePipelineCollectionFilter.Type, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineCollectionFilter) GetType() *ReleasePipelineTypeComparator { return v.Type }
+
+// GetUpdatedAt returns ReleasePipelineCollectionFilter.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineCollectionFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
+// Release pipeline filtering options.
+type ReleasePipelineFilter struct {
+	// Compound filters, all of which need to be matched by the pipeline.
+	And []*ReleasePipelineFilter `json:"and,omitempty"`
+	// Comparator for the created at date.
+	CreatedAt *DateComparator `json:"createdAt,omitempty"`
+	// Comparator for the identifier.
+	Id *IDComparator `json:"id,omitempty"`
+	// Comparator for the pipeline production flag.
+	IsProduction *BooleanComparator `json:"isProduction,omitempty"`
+	// Comparator for the pipeline name.
+	Name *StringComparator `json:"name,omitempty"`
+	// Compound filters, one of which need to be matched by the pipeline.
+	Or []*ReleasePipelineFilter `json:"or,omitempty"`
+	// Filters that the release pipeline's teams must satisfy.
+	Teams *TeamCollectionFilter `json:"teams,omitempty"`
+	// Comparator for the pipeline type.
+	Type *ReleasePipelineTypeComparator `json:"type,omitempty"`
+	// Comparator for the updated at date.
+	UpdatedAt *DateComparator `json:"updatedAt,omitempty"`
+}
+
+// GetAnd returns ReleasePipelineFilter.And, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineFilter) GetAnd() []*ReleasePipelineFilter { return v.And }
+
+// GetCreatedAt returns ReleasePipelineFilter.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineFilter) GetCreatedAt() *DateComparator { return v.CreatedAt }
+
+// GetId returns ReleasePipelineFilter.Id, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineFilter) GetId() *IDComparator { return v.Id }
+
+// GetIsProduction returns ReleasePipelineFilter.IsProduction, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineFilter) GetIsProduction() *BooleanComparator { return v.IsProduction }
+
+// GetName returns ReleasePipelineFilter.Name, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineFilter) GetName() *StringComparator { return v.Name }
+
+// GetOr returns ReleasePipelineFilter.Or, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineFilter) GetOr() []*ReleasePipelineFilter { return v.Or }
+
+// GetTeams returns ReleasePipelineFilter.Teams, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineFilter) GetTeams() *TeamCollectionFilter { return v.Teams }
+
+// GetType returns ReleasePipelineFilter.Type, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineFilter) GetType() *ReleasePipelineTypeComparator { return v.Type }
+
+// GetUpdatedAt returns ReleasePipelineFilter.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
+// The type of a release pipeline, which determines how releases are created and
+// managed. Continuous pipelines create a new completed release for each sync.
+// Scheduled pipelines accumulate issues into a started release that is explicitly completed.
+type ReleasePipelineType string
+
+const (
+	ReleasePipelineTypeContinuous ReleasePipelineType = "continuous"
+	ReleasePipelineTypeScheduled  ReleasePipelineType = "scheduled"
+)
+
+var AllReleasePipelineType = []ReleasePipelineType{
+	ReleasePipelineTypeContinuous,
+	ReleasePipelineTypeScheduled,
+}
+
+// Comparator for release pipeline type.
+type ReleasePipelineTypeComparator struct {
+	// Equals constraint.
+	Eq *ReleasePipelineType `json:"eq"`
+	// In-array constraint.
+	In []ReleasePipelineType `json:"in"`
+	// Not-equals constraint.
+	Neq *ReleasePipelineType `json:"neq"`
+	// Not-in-array constraint.
+	Nin []ReleasePipelineType `json:"nin"`
+	// Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
+	Null *bool `json:"null"`
+}
+
+// GetEq returns ReleasePipelineTypeComparator.Eq, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineTypeComparator) GetEq() *ReleasePipelineType { return v.Eq }
+
+// GetIn returns ReleasePipelineTypeComparator.In, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineTypeComparator) GetIn() []ReleasePipelineType { return v.In }
+
+// GetNeq returns ReleasePipelineTypeComparator.Neq, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineTypeComparator) GetNeq() *ReleasePipelineType { return v.Neq }
+
+// GetNin returns ReleasePipelineTypeComparator.Nin, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineTypeComparator) GetNin() []ReleasePipelineType { return v.Nin }
+
+// GetNull returns ReleasePipelineTypeComparator.Null, and is useful for accessing the field via an interface.
+func (v *ReleasePipelineTypeComparator) GetNull() *bool { return v.Null }
+
+// Release stage filtering options.
+type ReleaseStageFilter struct {
+	// Compound filters, all of which need to be matched by the stage.
+	And []*ReleaseStageFilter `json:"and,omitempty"`
+	// Comparator for the created at date.
+	CreatedAt *DateComparator `json:"createdAt,omitempty"`
+	// Comparator for the identifier.
+	Id *IDComparator `json:"id,omitempty"`
+	// Comparator for the stage name.
+	Name *StringComparator `json:"name,omitempty"`
+	// Compound filters, one of which need to be matched by the stage.
+	Or []*ReleaseStageFilter `json:"or,omitempty"`
+	// Comparator for the stage type.
+	Type *ReleaseStageTypeComparator `json:"type,omitempty"`
+	// Comparator for the updated at date.
+	UpdatedAt *DateComparator `json:"updatedAt,omitempty"`
+}
+
+// GetAnd returns ReleaseStageFilter.And, and is useful for accessing the field via an interface.
+func (v *ReleaseStageFilter) GetAnd() []*ReleaseStageFilter { return v.And }
+
+// GetCreatedAt returns ReleaseStageFilter.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ReleaseStageFilter) GetCreatedAt() *DateComparator { return v.CreatedAt }
+
+// GetId returns ReleaseStageFilter.Id, and is useful for accessing the field via an interface.
+func (v *ReleaseStageFilter) GetId() *IDComparator { return v.Id }
+
+// GetName returns ReleaseStageFilter.Name, and is useful for accessing the field via an interface.
+func (v *ReleaseStageFilter) GetName() *StringComparator { return v.Name }
+
+// GetOr returns ReleaseStageFilter.Or, and is useful for accessing the field via an interface.
+func (v *ReleaseStageFilter) GetOr() []*ReleaseStageFilter { return v.Or }
+
+// GetType returns ReleaseStageFilter.Type, and is useful for accessing the field via an interface.
+func (v *ReleaseStageFilter) GetType() *ReleaseStageTypeComparator { return v.Type }
+
+// GetUpdatedAt returns ReleaseStageFilter.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ReleaseStageFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
+// The type of a release stage, which determines the release's lifecycle state.
+// Types include planned, started, completed, and canceled. Each pipeline must have
+// at least one stage of each type, though only started stages may have multiple instances.
+type ReleaseStageType string
+
+const (
+	ReleaseStageTypePlanned   ReleaseStageType = "planned"
+	ReleaseStageTypeStarted   ReleaseStageType = "started"
+	ReleaseStageTypeCompleted ReleaseStageType = "completed"
+	ReleaseStageTypeCanceled  ReleaseStageType = "canceled"
+)
+
+var AllReleaseStageType = []ReleaseStageType{
+	ReleaseStageTypePlanned,
+	ReleaseStageTypeStarted,
+	ReleaseStageTypeCompleted,
+	ReleaseStageTypeCanceled,
+}
+
+// Comparator for release stage type.
+type ReleaseStageTypeComparator struct {
+	// Equals constraint.
+	Eq *ReleaseStageType `json:"eq"`
+	// In-array constraint.
+	In []ReleaseStageType `json:"in"`
+	// Not-equals constraint.
+	Neq *ReleaseStageType `json:"neq"`
+	// Not-in-array constraint.
+	Nin []ReleaseStageType `json:"nin"`
+	// Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
+	Null *bool `json:"null"`
+}
+
+// GetEq returns ReleaseStageTypeComparator.Eq, and is useful for accessing the field via an interface.
+func (v *ReleaseStageTypeComparator) GetEq() *ReleaseStageType { return v.Eq }
+
+// GetIn returns ReleaseStageTypeComparator.In, and is useful for accessing the field via an interface.
+func (v *ReleaseStageTypeComparator) GetIn() []ReleaseStageType { return v.In }
+
+// GetNeq returns ReleaseStageTypeComparator.Neq, and is useful for accessing the field via an interface.
+func (v *ReleaseStageTypeComparator) GetNeq() *ReleaseStageType { return v.Neq }
+
+// GetNin returns ReleaseStageTypeComparator.Nin, and is useful for accessing the field via an interface.
+func (v *ReleaseStageTypeComparator) GetNin() []ReleaseStageType { return v.Nin }
+
+// GetNull returns ReleaseStageTypeComparator.Null, and is useful for accessing the field via an interface.
+func (v *ReleaseStageTypeComparator) GetNull() *bool { return v.Null }
+
 // Roadmap collection filtering options.
 type RoadmapCollectionFilter struct {
 	// Compound filters, all of which need to be matched by the roadmap.
@@ -10648,6 +12419,7 @@ func (v *RoadmapFilter) GetSlugId() *StringComparator { return v.SlugId }
 // GetUpdatedAt returns RoadmapFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *RoadmapFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
 
+// Which day count to use for SLA calculations.
 type SLADayCountType string
 
 const (
@@ -10673,7 +12445,9 @@ func (v *SalesforceMetadataIntegrationComparator) GetCaseMetadata() *map[string]
 
 // SearchIssuesResponse is returned by SearchIssues on success.
 type SearchIssuesResponse struct {
-	// Search issues.
+	// Search issues by text query using full-text and vector search. Results are
+	// ranked by relevance unless an orderBy parameter is specified. Supports
+	// optional issue filters and comment inclusion. Rate-limited to 30 requests per minute.
 	SearchIssues *SearchIssuesSearchIssuesIssueSearchPayload `json:"searchIssues"`
 }
 
@@ -10704,13 +12478,15 @@ type SearchIssuesSearchIssuesIssueSearchPayloadNodesIssueSearchResult struct {
 	Id string `json:"id"`
 	// Issue's human readable identifier (e.g. ENG-123).
 	Identifier string `json:"identifier"`
-	// The issue's title.
+	// The issue's title. This is the primary human-readable summary of the work item.
 	Title string `json:"title"`
 	// The issue's description in markdown format.
 	Description *string `json:"description"`
-	// The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.
+	// The priority of the issue. 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low.
 	Priority float64 `json:"priority"`
-	// The estimate of the complexity of the issue..
+	// The estimate of the complexity of the issue. The specific scale used depends
+	// on the team's estimation configuration (e.g., points, T-shirt sizes). Null if
+	// no estimate has been set.
 	Estimate *float64 `json:"estimate"`
 	// The time at which the entity was created.
 	CreatedAt time.Time `json:"createdAt"`
@@ -10721,11 +12497,15 @@ type SearchIssuesSearchIssuesIssueSearchPayloadNodesIssueSearchResult struct {
 	DueDate *string `json:"dueDate"`
 	// Issue URL.
 	Url string `json:"url"`
-	// The workflow state that the issue is associated with.
+	// The workflow state (issue status) that the issue is currently in. Workflow
+	// states represent the issue's progress through the team's workflow, such as
+	// Triage, Todo, In Progress, Done, or Canceled.
 	State *SearchIssuesSearchIssuesIssueSearchPayloadNodesIssueSearchResultStateWorkflowState `json:"state"`
-	// The user to whom the issue is assigned to.
+	// The user to whom the issue is assigned. Null if the issue is unassigned.
 	Assignee *SearchIssuesSearchIssuesIssueSearchPayloadNodesIssueSearchResultAssigneeUser `json:"assignee"`
-	// The team that the issue is associated with.
+	// The team that the issue belongs to. Every issue must belong to exactly one
+	// team, which determines the available workflow states, labels, and other
+	// team-specific configuration.
 	Team *SearchIssuesSearchIssuesIssueSearchPayloadNodesIssueSearchResultTeam `json:"team"`
 	// Labels associated with this issue.
 	Labels *SearchIssuesSearchIssuesIssueSearchPayloadNodesIssueSearchResultLabelsIssueLabelConnection `json:"labels"`
@@ -10804,7 +12584,10 @@ func (v *SearchIssuesSearchIssuesIssueSearchPayloadNodesIssueSearchResult) GetLa
 // SearchIssuesSearchIssuesIssueSearchPayloadNodesIssueSearchResultAssigneeUser includes the requested fields of the GraphQL type User.
 // The GraphQL type's documentation follows.
 //
-// A user that has access to the the resources of an organization.
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
 type SearchIssuesSearchIssuesIssueSearchPayloadNodesIssueSearchResultAssigneeUser struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
@@ -10842,13 +12625,17 @@ func (v *SearchIssuesSearchIssuesIssueSearchPayloadNodesIssueSearchResultLabelsI
 // SearchIssuesSearchIssuesIssueSearchPayloadNodesIssueSearchResultLabelsIssueLabelConnectionNodesIssueLabel includes the requested fields of the GraphQL type IssueLabel.
 // The GraphQL type's documentation follows.
 //
-// Labels that can be associated with issues.
+// Labels that can be associated with issues. Labels help categorize and filter
+// issues across a workspace. They can be workspace-level (shared across all teams)
+// or team-scoped. Labels have a color for visual identification and can be
+// organized hierarchically into groups, where a parent label acts as a group
+// containing child labels. Labels may also be inherited from parent teams to sub-teams.
 type SearchIssuesSearchIssuesIssueSearchPayloadNodesIssueSearchResultLabelsIssueLabelConnectionNodesIssueLabel struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
 	// The label's name.
 	Name string `json:"name"`
-	// The label's color as a HEX string.
+	// The label's color as a HEX string (e.g., '#EB5757'). Used for visual identification of the label in the UI.
 	Color string `json:"color"`
 }
 
@@ -10870,13 +12657,19 @@ func (v *SearchIssuesSearchIssuesIssueSearchPayloadNodesIssueSearchResultLabelsI
 // SearchIssuesSearchIssuesIssueSearchPayloadNodesIssueSearchResultStateWorkflowState includes the requested fields of the GraphQL type WorkflowState.
 // The GraphQL type's documentation follows.
 //
-// A state in a team workflow.
+// A state in a team's workflow, representing an issue status such as Triage,
+// Backlog, Todo, In Progress, In Review, Done, or Canceled. Each team has its own
+// set of workflow states that define the progression of issues through the team's
+// process. Workflow states have a type that categorizes them (triage, backlog,
+// unstarted, started, completed, canceled), a position that determines their
+// display order, and a color for visual identification. States can be inherited
+// from parent teams to sub-teams.
 type SearchIssuesSearchIssuesIssueSearchPayloadNodesIssueSearchResultStateWorkflowState struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The state's name.
+	// The state's human-readable name (e.g., 'In Progress', 'Done', 'Backlog').
 	Name string `json:"name"`
-	// The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled".
+	// The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled", "duplicate".
 	Type string `json:"type"`
 	// The state's UI color as a HEX string.
 	Color string `json:"color"`
@@ -10905,11 +12698,15 @@ func (v *SearchIssuesSearchIssuesIssueSearchPayloadNodesIssueSearchResultStateWo
 // SearchIssuesSearchIssuesIssueSearchPayloadNodesIssueSearchResultTeam includes the requested fields of the GraphQL type Team.
 // The GraphQL type's documentation follows.
 //
-// An organizational unit that contains issues.
+// A team is the primary organizational unit in Linear. Issues belong to teams, and
+// each team has its own workflow states, cycles, labels, and settings. Teams can
+// be public (visible to all workspace members), private (visible only to team
+// members), or restricted (visible only within an enclosing private-team
+// boundary). Teams can also have sub-teams that inherit settings from their parent.
 type SearchIssuesSearchIssuesIssueSearchPayloadNodesIssueSearchResultTeam struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The team's unique key. The key is used in URLs.
+	// The team's unique key, used as a prefix in issue identifiers (e.g., 'ENG' in 'ENG-123') and in URLs.
 	Key string `json:"key"`
 	// The team's name.
 	Name string `json:"name"`
@@ -10999,14 +12796,6 @@ func (v *SlaStatusComparator) GetNull() *bool { return v.Null }
 
 // Comparator for issue source type.
 type SourceMetadataComparator struct {
-	// Equals constraint.
-	Eq *string `json:"eq"`
-	// In-array constraint.
-	In []string `json:"in"`
-	// Not-equals constraint.
-	Neq *string `json:"neq"`
-	// Not-in-array constraint.
-	Nin []string `json:"nin"`
 	// Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values.
 	Null *bool `json:"null"`
 	// [INTERNAL] Comparator for the salesforce metadata.
@@ -11014,18 +12803,6 @@ type SourceMetadataComparator struct {
 	// Comparator for the sub type.
 	SubType *SubTypeComparator `json:"subType,omitempty"`
 }
-
-// GetEq returns SourceMetadataComparator.Eq, and is useful for accessing the field via an interface.
-func (v *SourceMetadataComparator) GetEq() *string { return v.Eq }
-
-// GetIn returns SourceMetadataComparator.In, and is useful for accessing the field via an interface.
-func (v *SourceMetadataComparator) GetIn() []string { return v.In }
-
-// GetNeq returns SourceMetadataComparator.Neq, and is useful for accessing the field via an interface.
-func (v *SourceMetadataComparator) GetNeq() *string { return v.Neq }
-
-// GetNin returns SourceMetadataComparator.Nin, and is useful for accessing the field via an interface.
-func (v *SourceMetadataComparator) GetNin() []string { return v.Nin }
 
 // GetNull returns SourceMetadataComparator.Null, and is useful for accessing the field via an interface.
 func (v *SourceMetadataComparator) GetNull() *bool { return v.Null }
@@ -11349,6 +13126,8 @@ func (v *SubTypeComparator) GetNull() *bool { return v.Null }
 
 // Team collection filtering options.
 type TeamCollectionFilter struct {
+	// Filters that the team's ancestors must satisfy.
+	Ancestors *TeamCollectionFilter `json:"ancestors,omitempty"`
 	// Compound filters, all of which need to be matched by the team.
 	And []*TeamCollectionFilter `json:"and,omitempty"`
 	// Comparator for the created at date.
@@ -11361,11 +13140,16 @@ type TeamCollectionFilter struct {
 	Length *NumberComparator `json:"length,omitempty"`
 	// Compound filters, one of which need to be matched by the team.
 	Or []*TeamCollectionFilter `json:"or,omitempty"`
+	// Filters that the teams parent must satisfy.
+	Parent *NullableTeamFilter `json:"parent,omitempty"`
 	// Filters that needs to be matched by some teams.
 	Some *TeamFilter `json:"some,omitempty"`
 	// Comparator for the updated at date.
 	UpdatedAt *DateComparator `json:"updatedAt,omitempty"`
 }
+
+// GetAncestors returns TeamCollectionFilter.Ancestors, and is useful for accessing the field via an interface.
+func (v *TeamCollectionFilter) GetAncestors() *TeamCollectionFilter { return v.Ancestors }
 
 // GetAnd returns TeamCollectionFilter.And, and is useful for accessing the field via an interface.
 func (v *TeamCollectionFilter) GetAnd() []*TeamCollectionFilter { return v.And }
@@ -11385,6 +13169,9 @@ func (v *TeamCollectionFilter) GetLength() *NumberComparator { return v.Length }
 // GetOr returns TeamCollectionFilter.Or, and is useful for accessing the field via an interface.
 func (v *TeamCollectionFilter) GetOr() []*TeamCollectionFilter { return v.Or }
 
+// GetParent returns TeamCollectionFilter.Parent, and is useful for accessing the field via an interface.
+func (v *TeamCollectionFilter) GetParent() *NullableTeamFilter { return v.Parent }
+
 // GetSome returns TeamCollectionFilter.Some, and is useful for accessing the field via an interface.
 func (v *TeamCollectionFilter) GetSome() *TeamFilter { return v.Some }
 
@@ -11395,7 +13182,7 @@ func (v *TeamCollectionFilter) GetUpdatedAt() *DateComparator { return v.Updated
 type TeamDetailFields struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The team's unique key. The key is used in URLs.
+	// The team's unique key, used as a prefix in issue identifiers (e.g., 'ENG' in 'ENG-123') and in URLs.
 	Key string `json:"key"`
 	// The team's name.
 	Name string `json:"name"`
@@ -11405,15 +13192,16 @@ type TeamDetailFields struct {
 	Icon *string `json:"icon"`
 	// The team's color.
 	Color *string `json:"color"`
-	// Whether the team is private or not.
+	// Whether the team is private. Private teams are only visible to their members and require an explicit invitation to join.
 	Private bool `json:"private"`
-	// Number of issues in the team.
+	// The total number of issues in the team. By default excludes archived issues;
+	// use the includeArchived argument to include them.
 	IssueCount int `json:"issueCount"`
-	// Whether the team uses cycles.
+	// Whether the team uses cycles for sprint-style issue management.
 	CyclesEnabled bool `json:"cyclesEnabled"`
-	// The day of the week that a new cycle starts.
+	// The day of the week that a new cycle starts (0 = Sunday, 1 = Monday, ..., 6 = Saturday).
 	CycleStartDay float64 `json:"cycleStartDay"`
-	// The duration of a cycle in weeks.
+	// The duration of each cycle in weeks.
 	CycleDuration float64 `json:"cycleDuration"`
 	// How many upcoming cycles to create.
 	UpcomingCycleCount float64 `json:"upcomingCycleCount"`
@@ -11457,6 +13245,8 @@ func (v *TeamDetailFields) GetUpcomingCycleCount() float64 { return v.UpcomingCy
 
 // Team filtering options.
 type TeamFilter struct {
+	// Filters that the team's ancestors must satisfy.
+	Ancestors *TeamCollectionFilter `json:"ancestors,omitempty"`
 	// Compound filters, all of which need to be matched by the team.
 	And []*TeamFilter `json:"and,omitempty"`
 	// Comparator for the created at date.
@@ -11465,21 +13255,35 @@ type TeamFilter struct {
 	Description *NullableStringComparator `json:"description,omitempty"`
 	// Comparator for the identifier.
 	Id *IDComparator `json:"id,omitempty"`
-	// Filters that the teams issues must satisfy.
+	// Filters that the team's issues must satisfy.
 	Issues *IssueCollectionFilter `json:"issues,omitempty"`
 	// Comparator for the team key.
 	Key *StringComparator `json:"key,omitempty"`
+	// Filters that the team's members must satisfy.
+	Members *UserCollectionFilter `json:"members,omitempty"`
 	// Comparator for the team name.
 	Name *StringComparator `json:"name,omitempty"`
 	// Compound filters, one of which need to be matched by the team.
 	Or []*TeamFilter `json:"or,omitempty"`
-	// Filters that the teams parent must satisfy.
+	// Filters that the team's parent must satisfy.
 	Parent *NullableTeamFilter `json:"parent,omitempty"`
-	// Comparator for the team privacy.
+	// [DEPRECATED] Comparator for the team privacy.
 	Private *BooleanComparator `json:"private,omitempty"`
+	// Filters that the team's release pipelines must satisfy.
+	ReleasePipelines *ReleasePipelineCollectionFilter `json:"releasePipelines,omitempty"`
+	// [Internal] Filters that the private team forming this team's visibility
+	// boundary must satisfy. Only relevant for non-public teams.
+	RestrictedBy *NullableTeamFilter `json:"restrictedBy,omitempty"`
+	// Comparator for the time at which the team was retired.
+	RetiredAt *NullableDateComparator `json:"retiredAt,omitempty"`
 	// Comparator for the updated at date.
 	UpdatedAt *DateComparator `json:"updatedAt,omitempty"`
+	// Comparator for the team visibility.
+	Visibility *TeamVisibilityComparator `json:"visibility,omitempty"`
 }
+
+// GetAncestors returns TeamFilter.Ancestors, and is useful for accessing the field via an interface.
+func (v *TeamFilter) GetAncestors() *TeamCollectionFilter { return v.Ancestors }
 
 // GetAnd returns TeamFilter.And, and is useful for accessing the field via an interface.
 func (v *TeamFilter) GetAnd() []*TeamFilter { return v.And }
@@ -11499,6 +13303,9 @@ func (v *TeamFilter) GetIssues() *IssueCollectionFilter { return v.Issues }
 // GetKey returns TeamFilter.Key, and is useful for accessing the field via an interface.
 func (v *TeamFilter) GetKey() *StringComparator { return v.Key }
 
+// GetMembers returns TeamFilter.Members, and is useful for accessing the field via an interface.
+func (v *TeamFilter) GetMembers() *UserCollectionFilter { return v.Members }
+
 // GetName returns TeamFilter.Name, and is useful for accessing the field via an interface.
 func (v *TeamFilter) GetName() *StringComparator { return v.Name }
 
@@ -11511,22 +13318,37 @@ func (v *TeamFilter) GetParent() *NullableTeamFilter { return v.Parent }
 // GetPrivate returns TeamFilter.Private, and is useful for accessing the field via an interface.
 func (v *TeamFilter) GetPrivate() *BooleanComparator { return v.Private }
 
+// GetReleasePipelines returns TeamFilter.ReleasePipelines, and is useful for accessing the field via an interface.
+func (v *TeamFilter) GetReleasePipelines() *ReleasePipelineCollectionFilter {
+	return v.ReleasePipelines
+}
+
+// GetRestrictedBy returns TeamFilter.RestrictedBy, and is useful for accessing the field via an interface.
+func (v *TeamFilter) GetRestrictedBy() *NullableTeamFilter { return v.RestrictedBy }
+
+// GetRetiredAt returns TeamFilter.RetiredAt, and is useful for accessing the field via an interface.
+func (v *TeamFilter) GetRetiredAt() *NullableDateComparator { return v.RetiredAt }
+
 // GetUpdatedAt returns TeamFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *TeamFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
+// GetVisibility returns TeamFilter.Visibility, and is useful for accessing the field via an interface.
+func (v *TeamFilter) GetVisibility() *TeamVisibilityComparator { return v.Visibility }
 
 // Fragment for basic team fields used in list views
 type TeamListFields struct {
 	// The unique identifier of the entity.
 	Id string `json:"id"`
-	// The team's unique key. The key is used in URLs.
+	// The team's unique key, used as a prefix in issue identifiers (e.g., 'ENG' in 'ENG-123') and in URLs.
 	Key string `json:"key"`
 	// The team's name.
 	Name string `json:"name"`
 	// The team's description.
 	Description *string `json:"description"`
-	// Whether the team is private or not.
+	// Whether the team is private. Private teams are only visible to their members and require an explicit invitation to join.
 	Private bool `json:"private"`
-	// Number of issues in the team.
+	// The total number of issues in the team. By default excludes archived issues;
+	// use the includeArchived argument to include them.
 	IssueCount int `json:"issueCount"`
 }
 
@@ -11548,7 +13370,49 @@ func (v *TeamListFields) GetPrivate() bool { return v.Private }
 // GetIssueCount returns TeamListFields.IssueCount, and is useful for accessing the field via an interface.
 func (v *TeamListFields) GetIssueCount() int { return v.IssueCount }
 
+// The visibility of a team. A team can be public, private, or restricted within an enclosing private-team boundary.
+type TeamVisibility string
+
+const (
+	TeamVisibilityPublic     TeamVisibility = "public"
+	TeamVisibilityRestricted TeamVisibility = "restricted"
+	TeamVisibilityPrivate    TeamVisibility = "private"
+)
+
+var AllTeamVisibility = []TeamVisibility{
+	TeamVisibilityPublic,
+	TeamVisibilityRestricted,
+	TeamVisibilityPrivate,
+}
+
+// Comparator for team visibility.
+type TeamVisibilityComparator struct {
+	// Equals constraint.
+	Eq *TeamVisibility `json:"eq"`
+	// In-array constraint.
+	In []TeamVisibility `json:"in"`
+	// Not-equals constraint.
+	Neq *TeamVisibility `json:"neq"`
+	// Not-in-array constraint.
+	Nin []TeamVisibility `json:"nin"`
+}
+
+// GetEq returns TeamVisibilityComparator.Eq, and is useful for accessing the field via an interface.
+func (v *TeamVisibilityComparator) GetEq() *TeamVisibility { return v.Eq }
+
+// GetIn returns TeamVisibilityComparator.In, and is useful for accessing the field via an interface.
+func (v *TeamVisibilityComparator) GetIn() []TeamVisibility { return v.In }
+
+// GetNeq returns TeamVisibilityComparator.Neq, and is useful for accessing the field via an interface.
+func (v *TeamVisibilityComparator) GetNeq() *TeamVisibility { return v.Neq }
+
+// GetNin returns TeamVisibilityComparator.Nin, and is useful for accessing the field via an interface.
+func (v *TeamVisibilityComparator) GetNin() []TeamVisibility { return v.Nin }
+
 // UpdateCommentCommentUpdateCommentPayload includes the requested fields of the GraphQL type CommentPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a comment mutation.
 type UpdateCommentCommentUpdateCommentPayload struct {
 	// The comment that was created or updated.
 	Comment *UpdateCommentCommentUpdateCommentPayloadComment `json:"comment"`
@@ -11562,7 +13426,11 @@ func (v *UpdateCommentCommentUpdateCommentPayload) GetComment() *UpdateCommentCo
 // UpdateCommentCommentUpdateCommentPayloadComment includes the requested fields of the GraphQL type Comment.
 // The GraphQL type's documentation follows.
 //
-// A comment associated with an issue.
+// A comment associated with an issue, project update, initiative update, document
+// content, post, project, or initiative. Comments support rich text (ProseMirror),
+// emoji reactions, and threaded replies via parentId. Comments can be created by
+// workspace users or by external users through integrations (e.g., Slack,
+// Intercom). Each comment belongs to exactly one parent entity.
 type UpdateCommentCommentUpdateCommentPayloadComment struct {
 	CommentFields `json:"-"`
 }
@@ -11682,6 +13550,9 @@ func (v *UpdateCommentResponse) GetCommentUpdate() *UpdateCommentCommentUpdateCo
 }
 
 // UpdateIssueIssueUpdateIssuePayload includes the requested fields of the GraphQL type IssuePayload.
+// The GraphQL type's documentation follows.
+//
+// The result of an issue mutation, containing the created or updated issue and a success indicator.
 type UpdateIssueIssueUpdateIssuePayload struct {
 	// The issue that was created or updated.
 	Issue *UpdateIssueIssueUpdateIssuePayloadIssue `json:"issue"`
@@ -11695,7 +13566,12 @@ func (v *UpdateIssueIssueUpdateIssuePayload) GetIssue() *UpdateIssueIssueUpdateI
 // UpdateIssueIssueUpdateIssuePayloadIssue includes the requested fields of the GraphQL type Issue.
 // The GraphQL type's documentation follows.
 //
-// An issue.
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
 type UpdateIssueIssueUpdateIssuePayloadIssue struct {
 	IssueListFields `json:"-"`
 }
@@ -11893,7 +13769,7 @@ type UserCollectionFilter struct {
 	Name *StringComparator `json:"name,omitempty"`
 	// Compound filters, one of which need to be matched by the user.
 	Or []*UserCollectionFilter `json:"or,omitempty"`
-	// [Internal] Comparator for the user's owner status.
+	// Comparator for the user's owner status.
 	Owner *BooleanComparator `json:"owner,omitempty"`
 	// Filters that needs to be matched by some users.
 	Some *UserFilter `json:"some,omitempty"`
@@ -11968,13 +13844,13 @@ type UserDetailFields struct {
 	Email string `json:"email"`
 	// An URL to the user's avatar image.
 	AvatarUrl *string `json:"avatarUrl"`
-	// The user's display (nick) name. Unique within each organization.
+	// The user's display (nick) name. Must be unique within the workspace.
 	DisplayName string `json:"displayName"`
 	// Whether the user is the currently authenticated user.
 	IsMe bool `json:"isMe"`
 	// Whether the user account is active or disabled (suspended).
 	Active bool `json:"active"`
-	// Whether the user is an organization administrator.
+	// Whether the user is a workspace administrator. On Free plans, all members are treated as admins.
 	Admin bool `json:"admin"`
 	// The time at which the entity was created.
 	CreatedAt time.Time `json:"createdAt"`
@@ -12038,7 +13914,7 @@ type UserFilter struct {
 	Name *StringComparator `json:"name,omitempty"`
 	// Compound filters, one of which need to be matched by the user.
 	Or []*UserFilter `json:"or,omitempty"`
-	// [Internal] Comparator for the user's owner status.
+	// Comparator for the user's owner status.
 	Owner *BooleanComparator `json:"owner,omitempty"`
 	// Comparator for the updated at date.
 	UpdatedAt *DateComparator `json:"updatedAt,omitempty"`
@@ -12106,7 +13982,7 @@ type UserListFields struct {
 	IsMe bool `json:"isMe"`
 	// Whether the user account is active or disabled (suspended).
 	Active bool `json:"active"`
-	// Whether the user is an organization administrator.
+	// Whether the user is a workspace administrator. On Free plans, all members are treated as admins.
 	Admin bool `json:"admin"`
 }
 
@@ -12152,7 +14028,7 @@ type WorkflowStateFilter struct {
 	// Filters that the workflow states team must satisfy.
 	Team *TeamFilter `json:"team,omitempty"`
 	// Comparator for the workflow state type. Possible values are "triage",
-	// "backlog", "unstarted", "started", "completed", "canceled".
+	// "backlog", "unstarted", "started", "completed", "canceled", "duplicate".
 	Type *StringComparator `json:"type,omitempty"`
 	// Comparator for the updated at date.
 	UpdatedAt *DateComparator `json:"updatedAt,omitempty"`
