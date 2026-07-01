@@ -916,6 +916,8 @@ var issueCreateCmd = &cobra.Command{
 		}
 
 		client := api.NewClient(authHeader)
+		ctx := context.Background()
+		cache := newResolverCache()
 
 		// Get flags
 		title, _ := cmd.Flags().GetString("title")
@@ -933,28 +935,26 @@ var issueCreateCmd = &cobra.Command{
 		}
 
 		// Get team ID from key
-		teamResp, err := api.GetTeam(context.Background(), client, teamKey)
+		teamID, err := resolveTeam(ctx, client, cache, teamKey)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to find team '%s': %v", teamKey, err), plaintext, jsonOut)
 			os.Exit(1)
 		}
-		team := teamResp.Team
 
 		// Build input
-		input := buildIssueCreateInput(cmd, team.TeamDetailFields.Id)
+		input := buildIssueCreateInput(cmd, teamID)
 
 		if assignToMe {
-			viewerResp, err := api.GetViewer(context.Background(), client)
+			viewerID, err := resolveUser(ctx, client, cache, "me")
 			if err != nil {
 				output.Error(fmt.Sprintf("Failed to get current user: %v", err), plaintext, jsonOut)
 				os.Exit(1)
 			}
-			viewerID := viewerResp.Viewer.UserDetailFields.Id
 			input.AssigneeId = &viewerID
 		}
 
 		// Create issue
-		createResp, err := api.CreateIssue(context.Background(), client, &input)
+		createResp, err := api.CreateIssue(ctx, client, &input)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to create issue: %v", err), plaintext, jsonOut)
 			os.Exit(1)
@@ -1006,6 +1006,8 @@ Examples:
 		}
 
 		client := api.NewClient(authHeader)
+		ctx := context.Background()
+		cache := newResolverCache()
 
 		// Build update input using builder function
 		input := buildIssueUpdateInput(cmd)
@@ -1014,40 +1016,17 @@ Examples:
 		if cmd.Flags().Changed("assignee") {
 			assignee, _ := cmd.Flags().GetString("assignee")
 			switch assignee {
-			case "me":
-				// Get current user
-				viewerResp, err := api.GetViewer(context.Background(), client)
-				if err != nil {
-					output.Error(fmt.Sprintf("Failed to get current user: %v", err), plaintext, jsonOut)
-					os.Exit(1)
-				}
-				viewerID := viewerResp.Viewer.UserDetailFields.Id
-				input.AssigneeId = &viewerID
 			case "unassigned", "":
 				// Set to nil to unassign
 				var nilID *string
 				input.AssigneeId = nilID
 			default:
-				// Look up user by email or name using generated function
-				filter := &api.UserFilter{
-					Or: []*api.UserFilter{
-						{Email: &api.StringComparator{Eq: &assignee}},
-						{Name: &api.StringComparator{Eq: &assignee}},
-					},
-				}
-
-				userResp, err := api.GetUserByEmail(context.Background(), client, filter)
+				// "me" and email/name lookups are both handled by resolveUser.
+				userID, err := resolveUser(ctx, client, cache, assignee)
 				if err != nil {
-					output.Error(fmt.Sprintf("Failed to find user: %v", err), plaintext, jsonOut)
+					output.Error(err.Error(), plaintext, jsonOut)
 					os.Exit(1)
 				}
-
-				if len(userResp.Users.Nodes) == 0 {
-					output.Error(fmt.Sprintf("User not found: %s", assignee), plaintext, jsonOut)
-					os.Exit(1)
-				}
-
-				userID := userResp.Users.Nodes[0].UserDetailFields.Id
 				input.AssigneeId = &userID
 			}
 		}
@@ -1057,33 +1036,26 @@ Examples:
 			stateName, _ := cmd.Flags().GetString("state")
 
 			// Get the issue to access embedded team workflow states (no extra API call)
-			issueResp, err := api.GetIssue(context.Background(), client, args[0])
+			issueResp, err := api.GetIssue(ctx, client, args[0])
 			if err != nil {
 				output.Error(fmt.Sprintf("Failed to get issue: %v", err), plaintext, jsonOut)
 				os.Exit(1)
 			}
 			issue := issueResp.Issue
+			teamKey := issue.IssueDetailFields.Team.Key
 
-			// States are embedded in issue response (issue.Team.States.Nodes)
-			states := issue.IssueDetailFields.Team.States.Nodes
-
-			// Find the state by name (case-insensitive)
-			var stateID string
-			for _, state := range states {
-				if strings.EqualFold(state.Name, stateName) {
-					stateID = state.Id
-					break
-				}
+			// Seed the resolver cache with the states embedded in the issue
+			// response so resolveWorkflowState matches against them without
+			// making a separate GetTeamStates request.
+			embeddedStates := make([]workflowStateInfo, 0, len(issue.IssueDetailFields.Team.States.Nodes))
+			for _, state := range issue.IssueDetailFields.Team.States.Nodes {
+				embeddedStates = append(embeddedStates, workflowStateInfo{id: state.Id, name: state.Name})
 			}
+			cache.states[teamKey] = embeddedStates
 
-			if stateID == "" {
-				// Show available states
-				var stateNames []string
-				for _, state := range states {
-					stateNames = append(stateNames, state.Name)
-				}
-				teamKey := issue.IssueDetailFields.Team.Key
-				output.Error(fmt.Sprintf("State '%s' not found in team '%s'. Available states: %s", stateName, teamKey, strings.Join(stateNames, ", ")), plaintext, jsonOut)
+			stateID, err := resolveWorkflowState(ctx, client, cache, teamKey, stateName)
+			if err != nil {
+				output.Error(err.Error(), plaintext, jsonOut)
 				os.Exit(1)
 			}
 
@@ -1110,21 +1082,11 @@ Examples:
 				nullVal := api.NullSentinel
 				input.ProjectId = &nullVal
 			default:
-				// Look up project by name (case-insensitive)
-				filter := &api.ProjectFilter{
-					Name: &api.StringComparator{EqIgnoreCase: &projectName},
-				}
-				one := 1
-				projResp, err := api.ListProjects(context.Background(), client, filter, &one, nil, nil)
+				projectID, err := resolveProject(ctx, client, cache, projectName)
 				if err != nil {
-					output.Error(fmt.Sprintf("Failed to find project: %v", err), plaintext, jsonOut)
+					output.Error(err.Error(), plaintext, jsonOut)
 					os.Exit(1)
 				}
-				if len(projResp.Projects.Nodes) == 0 {
-					output.Error(fmt.Sprintf("Project not found: %s", projectName), plaintext, jsonOut)
-					os.Exit(1)
-				}
-				projectID := projResp.Projects.Nodes[0].ProjectListFields.Id
 				input.ProjectId = &projectID
 			}
 		}
@@ -1144,7 +1106,7 @@ Examples:
 		}
 
 		// Update the issue using generated function
-		updateResp, err := api.UpdateIssue(context.Background(), client, args[0], &input)
+		updateResp, err := api.UpdateIssue(ctx, client, args[0], &input)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to update issue: %v", err), plaintext, jsonOut)
 			os.Exit(1)
