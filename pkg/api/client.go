@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
@@ -154,8 +155,21 @@ func stripNulls(m map[string]interface{}) map[string]interface{} {
 				result[k] = stripped
 			}
 		} else if innerSlice, ok := v.([]interface{}); ok {
-			// Keep slices even if they contain nulls (they might be intentional)
-			result[k] = innerSlice
+			// Recurse into map elements so nested filter objects (for
+			// example the "or"/"and" arrays) get their null comparator
+			// fields stripped, the same way top-level filter fields are.
+			// Without this, Linear treats the extra null fields as
+			// constraints and the filter matches nothing. Non-map elements
+			// (for example ID strings in memberIds) are kept as-is.
+			strippedSlice := make([]interface{}, len(innerSlice))
+			for i, item := range innerSlice {
+				if itemMap, ok := item.(map[string]interface{}); ok {
+					strippedSlice[i] = stripNulls(itemMap)
+				} else {
+					strippedSlice[i] = item
+				}
+			}
+			result[k] = strippedSlice
 		} else {
 			result[k] = v
 		}
@@ -197,7 +211,9 @@ func (c *Client) MakeRequest(ctx context.Context, req *graphql.Request, resp *gr
 	}
 
 	// DEBUG: Print the request body for debugging
-	// fmt.Fprintf(os.Stderr, "DEBUG: GraphQL Request: %s\n", string(jsonBody))
+	if os.Getenv("LINCLI_DEBUG_GQL") != "" {
+		fmt.Fprintf(os.Stderr, "DEBUG: GraphQL Request: %s\n", string(jsonBody))
+	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", c.baseURL, bytes.NewBuffer(jsonBody))
 	if err != nil {
