@@ -991,7 +991,9 @@ Examples:
   lincli issue update LIN-123 --state "In Progress"
   lincli issue update LIN-123 --priority 1
   lincli issue update LIN-123 --due-date "2024-12-31"
-  lincli issue update LIN-123 --title "New title" --assignee me --priority 2`,
+  lincli issue update LIN-123 --title "New title" --assignee me --priority 2
+  lincli issue update LIN-123 --project "Q1 Roadmap"
+  lincli issue update LIN-123 --project none`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		plaintext := viper.GetBool("plaintext")
@@ -1099,13 +1101,42 @@ Examples:
 			}
 		}
 
+		// Handle project update
+		if cmd.Flags().Changed("project") {
+			projectName, _ := cmd.Flags().GetString("project")
+			switch strings.ToLower(projectName) {
+			case "none", "":
+				// Remove from project using null sentinel (converted to null by client)
+				nullVal := api.NullSentinel
+				input.ProjectId = &nullVal
+			default:
+				// Look up project by name (case-insensitive)
+				filter := &api.ProjectFilter{
+					Name: &api.StringComparator{EqIgnoreCase: &projectName},
+				}
+				one := 1
+				projResp, err := api.ListProjects(context.Background(), client, filter, &one, nil, nil)
+				if err != nil {
+					output.Error(fmt.Sprintf("Failed to find project: %v", err), plaintext, jsonOut)
+					os.Exit(1)
+				}
+				if len(projResp.Projects.Nodes) == 0 {
+					output.Error(fmt.Sprintf("Project not found: %s", projectName), plaintext, jsonOut)
+					os.Exit(1)
+				}
+				projectID := projResp.Projects.Nodes[0].ProjectListFields.Id
+				input.ProjectId = &projectID
+			}
+		}
+
 		// Check if any updates were specified (check all pointer fields)
 		hasUpdates := input.Title != nil ||
 			input.Description != nil ||
 			input.Priority != nil ||
 			input.AssigneeId != nil ||
 			input.StateId != nil ||
-			input.DueDate != nil
+			input.DueDate != nil ||
+			cmd.Flags().Changed("project")
 
 		if !hasUpdates {
 			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
@@ -1497,6 +1528,7 @@ func init() {
 	issueUpdateCmd.Flags().StringP("state", "s", "", "State name (e.g., 'Todo', 'In Progress', 'Done')")
 	issueUpdateCmd.Flags().Int("priority", -1, "Priority (0=None, 1=Urgent, 2=High, 3=Normal, 4=Low)")
 	issueUpdateCmd.Flags().String("due-date", "", "Due date (YYYY-MM-DD format, or empty to remove)")
+	issueUpdateCmd.Flags().String("project", "", "Project name (or 'none' to remove from project)")
 
 	// Issue link flags
 	issueLinkCmd.Flags().StringP("type", "t", "", "Relation type: blocks, blocked-by, related, duplicate, parent-of, sub-issue-of (required)")

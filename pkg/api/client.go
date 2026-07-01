@@ -132,11 +132,20 @@ type RateLimit struct {
 	Reset     time.Time `json:"reset"`
 }
 
-// stripNulls recursively removes null values from a map
+// NullSentinel is a special value that will be converted to null in the GraphQL request.
+// Use this when you need to explicitly send null to clear a field.
+const NullSentinel = "__LINCLI_NULL__"
+
+// stripNulls recursively removes null values from a map, and converts NullSentinel to null
 func stripNulls(m map[string]interface{}) map[string]interface{} {
 	result := make(map[string]interface{})
 	for k, v := range m {
 		if v == nil {
+			continue
+		}
+		// Convert sentinel value to null
+		if strVal, ok := v.(string); ok && strVal == NullSentinel {
+			result[k] = nil
 			continue
 		}
 		if innerMap, ok := v.(map[string]interface{}); ok {
