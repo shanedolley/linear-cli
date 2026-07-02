@@ -3,11 +3,9 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -34,17 +32,14 @@ var auditListCmd = &cobra.Command{
 	Short:   "List audit log entries",
 	Long: `List recent audit log entries, newest first. Filter by event type with
 --type (see 'lincli audit types' for the catalog).`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		var filter *api.AuditEntryFilter
@@ -61,18 +56,17 @@ var auditListCmd = &cobra.Command{
 
 		resp, err := api.ListAuditEntries(ctx, client, filter, limitPtr, nil)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list audit entries: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list audit entries: %v", err)
 		}
 
 		if resp.AuditEntries == nil || len(resp.AuditEntries.Nodes) == 0 {
 			output.Info("No audit entries found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(resp.AuditEntries.Nodes)
-			return
+			return nil
 		}
 
 		headers := []string{"Time", "Type", "Actor", "IP", "Country"}
@@ -97,6 +91,7 @@ var auditListCmd = &cobra.Command{
 		if !plaintext && !jsonOut {
 			fmt.Printf("\n%s %d entries\n", color.New(color.FgGreen).Sprint("✓"), len(resp.AuditEntries.Nodes))
 		}
+		return nil
 	},
 }
 
@@ -104,31 +99,27 @@ var auditTypesCmd = &cobra.Command{
 	Use:   "types",
 	Short: "List the audit event-type catalog",
 	Long:  `List every audit event type and its description, for use with 'audit list --type'.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		resp, err := api.GetAuditEntryTypes(context.Background(), client)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get audit entry types: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get audit entry types: %v", err)
 		}
 
 		if len(resp.AuditEntryTypes) == 0 {
 			output.Info("No audit entry types found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(resp.AuditEntryTypes)
-			return
+			return nil
 		}
 
 		headers := []string{"Type", "Description"}
@@ -138,6 +129,7 @@ var auditTypesCmd = &cobra.Command{
 		}
 
 		output.Table(output.TableData{Headers: headers, Rows: rows}, plaintext, jsonOut)
+		return nil
 	},
 }
 

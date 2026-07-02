@@ -2,12 +2,11 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"os"
 
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -39,17 +38,14 @@ var labelListCmd = &cobra.Command{
 	Aliases: []string{"ls"},
 	Short:   "List issue labels",
 	Long:    `List issue labels, optionally filtered by team.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
@@ -63,26 +59,24 @@ var labelListCmd = &cobra.Command{
 		if team, _ := cmd.Flags().GetString("team"); team != "" {
 			teamID, err := resolveTeam(ctx, client, cache, team)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			filter.Team = &api.NullableTeamFilter{Id: &api.IDComparator{Eq: &teamID}}
 		}
 
 		resp, err := api.ListIssueLabels(ctx, client, filter, limitPtr)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list labels: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list labels: %v", err)
 		}
 
 		if len(resp.IssueLabels.Nodes) == 0 {
 			output.Info("No labels found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(resp.IssueLabels.Nodes)
-			return
+			return nil
 		}
 
 		if plaintext {
@@ -99,7 +93,7 @@ var labelListCmd = &cobra.Command{
 				fmt.Println()
 			}
 			fmt.Printf("\nTotal: %d labels\n", len(resp.IssueLabels.Nodes))
-			return
+			return nil
 		}
 
 		headers := []string{"ID", "Name", "Color", "Scope", "Parent"}
@@ -124,6 +118,7 @@ var labelListCmd = &cobra.Command{
 		if !plaintext && !jsonOut {
 			fmt.Printf("\n%s %d labels\n", color.New(color.FgGreen).Sprint("✓"), len(resp.IssueLabels.Nodes))
 		}
+		return nil
 	},
 }
 
@@ -133,33 +128,28 @@ var labelGetCmd = &cobra.Command{
 	Short:   "Get label details",
 	Long:    `Get detailed information about an issue label.`,
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		resp, err := api.GetIssueLabel(ctx, client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get label: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get label: %v", err)
 		}
 		if resp.IssueLabel == nil {
-			output.Error(fmt.Sprintf("Label not found: %s", args[0]), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Label not found: %s", args[0])
 		}
 		f := resp.IssueLabel.LabelListFields
 
 		if jsonOut {
 			output.JSON(resp.IssueLabel)
-			return
+			return nil
 		}
 
 		if plaintext {
@@ -173,7 +163,7 @@ var labelGetCmd = &cobra.Command{
 			if f.Description != nil && *f.Description != "" {
 				fmt.Printf("- **Description**: %s\n", *f.Description)
 			}
-			return
+			return nil
 		}
 
 		fmt.Printf("%s %s\n", color.New(color.FgCyan, color.Bold).Sprint("Label:"), f.Name)
@@ -186,6 +176,7 @@ var labelGetCmd = &cobra.Command{
 		if f.Description != nil && *f.Description != "" {
 			fmt.Printf("  Description: %s\n", *f.Description)
 		}
+		return nil
 	},
 }
 
@@ -194,24 +185,20 @@ var labelCreateCmd = &cobra.Command{
 	Aliases: []string{"new"},
 	Short:   "Create a new label",
 	Long:    `Create a new issue label. Without --team the label is workspace-wide.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		name, _ := cmd.Flags().GetString("name")
 		if name == "" {
-			output.Error("Name is required (--name)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Name is required (--name)")
 		}
 
 		input := api.IssueLabelCreateInput{Name: name}
@@ -228,28 +215,24 @@ var labelCreateCmd = &cobra.Command{
 		if team, _ := cmd.Flags().GetString("team"); team != "" {
 			teamID, err := resolveTeam(ctx, client, cache, team)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.TeamId = &teamID
 		}
 		if parent, _ := cmd.Flags().GetString("parent"); parent != "" {
 			parentID, err := resolveLabel(ctx, client, cache, parent)
 			if err != nil {
-				output.Error(fmt.Sprintf("Failed to find parent label '%s': %v", parent, err), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Failed to find parent label '%s': %v", parent, err)
 			}
 			input.ParentId = &parentID
 		}
 
 		resp, err := api.IssueLabelCreate(ctx, client, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create label: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create label: %v", err)
 		}
 		if !resp.IssueLabelCreate.Success {
-			output.Error("Failed to create label", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create label")
 		}
 
 		if jsonOut {
@@ -257,6 +240,7 @@ var labelCreateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Created label %s", resp.IssueLabelCreate.IssueLabel.LabelListFields.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -265,17 +249,14 @@ var labelUpdateCmd = &cobra.Command{
 	Short: "Update a label",
 	Long:  `Update an issue label's name, color, description, or parent.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
@@ -301,26 +282,22 @@ var labelUpdateCmd = &cobra.Command{
 			parent, _ := cmd.Flags().GetString("parent")
 			parentID, err := resolveLabel(ctx, client, cache, parent)
 			if err != nil {
-				output.Error(fmt.Sprintf("Failed to find parent label '%s': %v", parent, err), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Failed to find parent label '%s': %v", parent, err)
 			}
 			input.ParentId = &parentID
 			hasUpdates = true
 		}
 
 		if !hasUpdates {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		resp, err := api.IssueLabelUpdate(ctx, client, args[0], &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update label: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update label: %v", err)
 		}
 		if !resp.IssueLabelUpdate.Success {
-			output.Error("Failed to update label", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update label")
 		}
 
 		if jsonOut {
@@ -328,6 +305,7 @@ var labelUpdateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Updated label %s", resp.IssueLabelUpdate.IssueLabel.LabelListFields.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -336,27 +314,22 @@ var labelDeleteCmd = &cobra.Command{
 	Short: "Delete a label",
 	Long:  `Delete an issue label. This action executes immediately with no confirmation prompt.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		resp, err := api.IssueLabelDelete(ctx, client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete label: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete label: %v", err)
 		}
 		if !resp.IssueLabelDelete.Success {
-			output.Error("Failed to delete label", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to delete label")
 		}
 
 		if jsonOut {
@@ -364,6 +337,7 @@ var labelDeleteCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Deleted label %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -372,8 +346,8 @@ var labelRetireCmd = &cobra.Command{
 	Short: "Retire a label",
 	Long:  `Retire a label. It stays visible but cannot be applied to new issues. Reversible with 'label restore'.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		runLabelStateChange(cmd, args[0], "retire")
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runLabelStateChange(cmd, args[0], "retire")
 	},
 }
 
@@ -382,46 +356,40 @@ var labelRestoreCmd = &cobra.Command{
 	Short: "Restore a retired label",
 	Long:  `Restore a previously retired label, making it available for use again.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		runLabelStateChange(cmd, args[0], "restore")
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runLabelStateChange(cmd, args[0], "restore")
 	},
 }
 
 // runLabelStateChange handles the retire/restore commands, which share the
 // same shape: resolve nothing, call the mutation, report success.
-func runLabelStateChange(cmd *cobra.Command, id, action string) {
+func runLabelStateChange(cmd *cobra.Command, id, action string) error {
 	plaintext := viper.GetBool("plaintext")
 	jsonOut := viper.GetBool("json")
 
-	authHeader, err := auth.GetAuthHeader()
+	client, err := newGraphQLClient()
 	if err != nil {
-		output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return err
 	}
-
-	client := api.NewClient(authHeader)
 	ctx := context.Background()
 
 	var success bool
 	if action == "retire" {
 		resp, err := api.IssueLabelRetire(ctx, client, id)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to retire label: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to retire label: %v", err)
 		}
 		success = resp.IssueLabelRetire.Success
 	} else {
 		resp, err := api.IssueLabelRestore(ctx, client, id)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to restore label: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to restore label: %v", err)
 		}
 		success = resp.IssueLabelRestore.Success
 	}
 
 	if !success {
-		output.Error(fmt.Sprintf("Failed to %s label", action), plaintext, jsonOut)
-		os.Exit(1)
+		return fmt.Errorf("Failed to %s label", action)
 	}
 
 	if jsonOut {
@@ -429,6 +397,7 @@ func runLabelStateChange(cmd *cobra.Command, id, action string) {
 	} else {
 		output.Success(fmt.Sprintf("%sd label %s", capitalizeFirst(action), id), plaintext, jsonOut)
 	}
+	return nil
 }
 
 // labelScope reports whether a label is team-scoped or workspace-wide.

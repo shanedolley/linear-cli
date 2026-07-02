@@ -2,14 +2,13 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -30,11 +29,14 @@ var emojiListCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
 	Short:   "List custom emoji",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := emojiClient(plaintext, jsonOut)
+		client, ctx, err := emojiClient()
+		if err != nil {
+			return err
+		}
 
 		limit, _ := cmd.Flags().GetInt("limit")
 		var limitPtr *int
@@ -44,18 +46,17 @@ var emojiListCmd = &cobra.Command{
 
 		resp, err := api.ListEmojis(ctx, client, limitPtr, nil, nil)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list emoji: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list emoji: %v", err)
 		}
 
 		if resp.Emojis == nil || len(resp.Emojis.Nodes) == 0 {
 			output.Info("No custom emoji found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(resp.Emojis.Nodes)
-			return
+			return nil
 		}
 
 		headers := []string{"Name", "Source", "Creator", "ID"}
@@ -74,6 +75,7 @@ var emojiListCmd = &cobra.Command{
 		if !plaintext && !jsonOut {
 			fmt.Printf("\n%s %d emoji\n", color.New(color.FgGreen).Sprint("✓"), len(resp.Emojis.Nodes))
 		}
+		return nil
 	},
 }
 
@@ -88,29 +90,29 @@ var emojiCreateCmd = &cobra.Command{
 
 Linear rejects arbitrary external URLs, so --file uploads the image first and
 uses the resulting asset URL.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		name, _ := cmd.Flags().GetString("name")
 		if name == "" {
-			output.Error("Name is required (--name)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Name is required (--name)")
 		}
 		url, _ := cmd.Flags().GetString("url")
 		file, _ := cmd.Flags().GetString("file")
 		if (url == "") == (file == "") {
-			output.Error("Provide exactly one image source: --file or --url", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Provide exactly one image source: --file or --url")
 		}
 
-		client, ctx := emojiClient(plaintext, jsonOut)
+		client, ctx, err := emojiClient()
+		if err != nil {
+			return err
+		}
 
 		if file != "" {
 			uploaded, err := uploadEmojiImage(ctx, client, file, !jsonOut && !plaintext)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			url = uploaded
 		}
@@ -119,12 +121,10 @@ uses the resulting asset URL.`,
 
 		resp, err := api.EmojiCreate(ctx, client, input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create emoji: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create emoji: %v", err)
 		}
 		if resp.EmojiCreate == nil || !resp.EmojiCreate.Success {
-			output.Error("Failed to create emoji", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create emoji")
 		}
 
 		if jsonOut {
@@ -132,6 +132,7 @@ uses the resulting asset URL.`,
 		} else {
 			output.Success(fmt.Sprintf("Created emoji :%s:", resp.EmojiCreate.Emoji.EmojiFields.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -141,26 +142,26 @@ var emojiDeleteCmd = &cobra.Command{
 	Short:   "Delete a custom emoji",
 	Long:    `Delete a custom emoji by name or ID.`,
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := emojiClient(plaintext, jsonOut)
+		client, ctx, err := emojiClient()
+		if err != nil {
+			return err
+		}
 
 		id, err := resolveEmoji(ctx, client, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.EmojiDelete(ctx, client, id)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete emoji: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete emoji: %v", err)
 		}
 		if resp.EmojiDelete == nil || !resp.EmojiDelete.Success {
-			output.Error("Failed to delete emoji", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to delete emoji")
 		}
 
 		if jsonOut {
@@ -168,13 +169,14 @@ var emojiDeleteCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Deleted emoji %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
 // resolveEmoji resolves a custom emoji name or UUID to its ID. The single
 // `emoji(id)` query accepts a name or an id, so a non-UUID reference is looked
 // up through it to obtain the canonical id that emojiDelete requires.
-func resolveEmoji(ctx context.Context, client *api.Client, nameOrID string) (string, error) {
+func resolveEmoji(ctx context.Context, client graphql.Client, nameOrID string) (string, error) {
 	if isUUID(nameOrID) {
 		return nameOrID, nil
 	}
@@ -211,14 +213,13 @@ func uploadEmojiImage(ctx context.Context, client graphql.Client, path string, s
 }
 
 // emojiClient builds the authenticated client and context shared by the emoji
-// subcommands, exiting on an auth failure.
-func emojiClient(plaintext, jsonOut bool) (*api.Client, context.Context) {
-	authHeader, err := auth.GetAuthHeader()
+// subcommands.
+func emojiClient() (graphql.Client, context.Context, error) {
+	client, err := newGraphQLClient()
 	if err != nil {
-		output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return nil, nil, err
 	}
-	return api.NewClient(authHeader), context.Background()
+	return client, context.Background(), nil
 }
 
 func init() {

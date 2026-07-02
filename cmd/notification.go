@@ -2,13 +2,13 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"os"
 	"time"
 
+	"github.com/Khan/genqlient/graphql"
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -34,11 +34,14 @@ var notificationListCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
 	Short:   "List notifications (shows unread count)",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := notificationClient(plaintext, jsonOut)
+		client, ctx, err := notificationClient()
+		if err != nil {
+			return err
+		}
 
 		limit, _ := cmd.Flags().GetInt("limit")
 		var limitPtr *int
@@ -48,15 +51,13 @@ var notificationListCmd = &cobra.Command{
 
 		unreadResp, err := api.NotificationsUnreadCount(ctx, client)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get unread count: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get unread count: %v", err)
 		}
 		unread := unreadResp.NotificationsUnreadCount
 
 		resp, err := api.ListNotifications(ctx, client, nil, limitPtr, nil, nil)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list notifications: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list notifications: %v", err)
 		}
 
 		nodes := []api.ListNotificationsNotificationsNotificationConnectionNodesNotification{}
@@ -66,12 +67,12 @@ var notificationListCmd = &cobra.Command{
 
 		if jsonOut {
 			output.JSON(map[string]interface{}{"unreadCount": unread, "notifications": nodes})
-			return
+			return nil
 		}
 
 		if len(nodes) == 0 {
 			output.Info(fmt.Sprintf("No notifications found (%d unread)", unread), plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		headers := []string{"ID", "Type", "Title", "Read", "Created"}
@@ -98,6 +99,7 @@ var notificationListCmd = &cobra.Command{
 				len(nodes),
 				color.New(color.FgYellow).Sprintf("%d", unread))
 		}
+		return nil
 	},
 }
 
@@ -106,23 +108,25 @@ var notificationReadAllCmd = &cobra.Command{
 	Short: "Mark notifications as read",
 	Long: `Mark notifications as read. With no flags this targets the whole inbox;
 --issue scopes the action to a single issue's notifications.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := notificationClient(plaintext, jsonOut)
+		client, ctx, err := notificationClient()
+		if err != nil {
+			return err
+		}
 		input := notificationEntityInput(cmd)
 
 		resp, err := api.NotificationMarkReadAll(ctx, client, input, time.Now())
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to mark notifications read: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to mark notifications read: %v", err)
 		}
 		if resp.NotificationMarkReadAll == nil || !resp.NotificationMarkReadAll.Success {
-			output.Error("Failed to mark notifications read", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to mark notifications read")
 		}
 		output.Success("Marked notifications as read", plaintext, jsonOut)
+		return nil
 	},
 }
 
@@ -131,23 +135,25 @@ var notificationUnreadAllCmd = &cobra.Command{
 	Short: "Mark notifications as unread",
 	Long: `Mark notifications as unread. With no flags this targets the whole inbox;
 --issue scopes the action to a single issue's notifications.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := notificationClient(plaintext, jsonOut)
+		client, ctx, err := notificationClient()
+		if err != nil {
+			return err
+		}
 		input := notificationEntityInput(cmd)
 
 		resp, err := api.NotificationMarkUnreadAll(ctx, client, input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to mark notifications unread: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to mark notifications unread: %v", err)
 		}
 		if resp.NotificationMarkUnreadAll == nil || !resp.NotificationMarkUnreadAll.Success {
-			output.Error("Failed to mark notifications unread", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to mark notifications unread")
 		}
 		output.Success("Marked notifications as unread", plaintext, jsonOut)
+		return nil
 	},
 }
 
@@ -155,20 +161,21 @@ var notificationArchiveCmd = &cobra.Command{
 	Use:   "archive <notification-id>",
 	Short: "Archive a notification",
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := notificationClient(plaintext, jsonOut)
+		client, ctx, err := notificationClient()
+		if err != nil {
+			return err
+		}
 
 		resp, err := api.NotificationArchive(ctx, client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to archive notification: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to archive notification: %v", err)
 		}
 		if resp.NotificationArchive == nil || !resp.NotificationArchive.Success {
-			output.Error("Failed to archive notification", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to archive notification")
 		}
 
 		if jsonOut {
@@ -176,6 +183,7 @@ var notificationArchiveCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Archived notification %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -184,32 +192,31 @@ var notificationSnoozeCmd = &cobra.Command{
 	Short: "Snooze a notification until a given time",
 	Long:  `Snooze a notification until --until (a YYYY-MM-DD date or an RFC3339 timestamp).`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		until, _ := cmd.Flags().GetString("until")
 		if until == "" {
-			output.Error("Snooze time is required (--until)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Snooze time is required (--until)")
 		}
 		snoozeUntil, err := parseSnoozeTime(until)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
-		client, ctx := notificationClient(plaintext, jsonOut)
+		client, ctx, err := notificationClient()
+		if err != nil {
+			return err
+		}
 
 		input := &api.NotificationUpdateInput{SnoozedUntilAt: &snoozeUntil}
 		resp, err := api.NotificationUpdate(ctx, client, args[0], input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to snooze notification: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to snooze notification: %v", err)
 		}
 		if resp.NotificationUpdate == nil || !resp.NotificationUpdate.Success {
-			output.Error("Failed to snooze notification", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to snooze notification")
 		}
 
 		if jsonOut {
@@ -217,6 +224,7 @@ var notificationSnoozeCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Snoozed notification %s until %s", args[0], snoozeUntil.Format("2006-01-02 15:04")), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -225,23 +233,25 @@ var notificationArchiveAllCmd = &cobra.Command{
 	Short: "Archive notifications",
 	Long: `Archive notifications. With no flags this targets the whole inbox;
 --issue scopes the action to a single issue's notifications.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := notificationClient(plaintext, jsonOut)
+		client, ctx, err := notificationClient()
+		if err != nil {
+			return err
+		}
 		input := notificationEntityInput(cmd)
 
 		resp, err := api.NotificationArchiveAll(ctx, client, input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to archive notifications: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to archive notifications: %v", err)
 		}
 		if resp.NotificationArchiveAll == nil || !resp.NotificationArchiveAll.Success {
-			output.Error("Failed to archive notifications", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to archive notifications")
 		}
 		output.Success("Archived notifications", plaintext, jsonOut)
+		return nil
 	},
 }
 
@@ -251,34 +261,34 @@ var notificationSnoozeAllCmd = &cobra.Command{
 	Long: `Snooze notifications until --until (a YYYY-MM-DD date or RFC3339 timestamp).
 With no other flags this targets the whole inbox; --issue scopes the action to
 a single issue's notifications.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		until, _ := cmd.Flags().GetString("until")
 		if until == "" {
-			output.Error("Snooze time is required (--until)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Snooze time is required (--until)")
 		}
 		snoozeUntil, err := parseSnoozeTime(until)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
-		client, ctx := notificationClient(plaintext, jsonOut)
+		client, ctx, err := notificationClient()
+		if err != nil {
+			return err
+		}
 		input := notificationEntityInput(cmd)
 
 		resp, err := api.NotificationSnoozeAll(ctx, client, input, snoozeUntil)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to snooze notifications: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to snooze notifications: %v", err)
 		}
 		if resp.NotificationSnoozeAll == nil || !resp.NotificationSnoozeAll.Success {
-			output.Error("Failed to snooze notifications", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to snooze notifications")
 		}
 		output.Success(fmt.Sprintf("Snoozed notifications until %s", snoozeUntil.Format("2006-01-02 15:04")), plaintext, jsonOut)
+		return nil
 	},
 }
 
@@ -287,27 +297,27 @@ var notificationSubscribeCmd = &cobra.Command{
 	Short: "Subscribe to notifications for an entity",
 	Long: `Subscribe to notifications for exactly one entity, selected by a target flag:
 --project, --team, --cycle, --label, --user, --initiative, or --view.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := notificationClient(plaintext, jsonOut)
+		client, ctx, err := notificationClient()
+		if err != nil {
+			return err
+		}
 		cache := newResolverCache()
 
 		input, err := buildSubscriptionInput(ctx, client, cache, cmd)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.NotificationSubscriptionCreate(ctx, client, input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to subscribe: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to subscribe: %v", err)
 		}
 		if resp.NotificationSubscriptionCreate == nil || !resp.NotificationSubscriptionCreate.Success {
-			output.Error("Failed to subscribe", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to subscribe")
 		}
 
 		if jsonOut {
@@ -315,6 +325,7 @@ var notificationSubscribeCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Subscribed (subscription %s)", resp.NotificationSubscriptionCreate.NotificationSubscription.GetId()), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -324,22 +335,23 @@ var notificationUnsubscribeCmd = &cobra.Command{
 	Long: `Deactivate a notification subscription by ID (sets active=false, avoiding the
 deprecated delete). Get the ID from the subscription created by 'subscribe'.`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := notificationClient(plaintext, jsonOut)
+		client, ctx, err := notificationClient()
+		if err != nil {
+			return err
+		}
 
 		active := false
 		input := &api.NotificationSubscriptionUpdateInput{Active: &active}
 		resp, err := api.NotificationSubscriptionUpdate(ctx, client, args[0], input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to unsubscribe: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to unsubscribe: %v", err)
 		}
 		if resp.NotificationSubscriptionUpdate == nil || !resp.NotificationSubscriptionUpdate.Success {
-			output.Error("Failed to unsubscribe", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to unsubscribe")
 		}
 
 		if jsonOut {
@@ -347,18 +359,18 @@ deprecated delete). Get the ID from the subscription created by 'subscribe'.`,
 		} else {
 			output.Success(fmt.Sprintf("Unsubscribed (subscription %s)", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
 // notificationClient builds the authenticated client and context shared by the
-// notification subcommands, exiting on an auth failure.
-func notificationClient(plaintext, jsonOut bool) (*api.Client, context.Context) {
-	authHeader, err := auth.GetAuthHeader()
+// notification subcommands.
+func notificationClient() (graphql.Client, context.Context, error) {
+	client, err := newGraphQLClient()
 	if err != nil {
-		output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return nil, nil, err
 	}
-	return api.NewClient(authHeader), context.Background()
+	return client, context.Background(), nil
 }
 
 // notificationEntityInput builds the NotificationEntityInput for the batch
@@ -375,7 +387,7 @@ func notificationEntityInput(cmd *cobra.Command) *api.NotificationEntityInput {
 // buildSubscriptionInput resolves exactly one target flag into a
 // NotificationSubscriptionCreateInput. Zero or multiple targets is an error,
 // matching Linear's "exactly one target entity" rule.
-func buildSubscriptionInput(ctx context.Context, client *api.Client, cache *ResolverCache, cmd *cobra.Command) (*api.NotificationSubscriptionCreateInput, error) {
+func buildSubscriptionInput(ctx context.Context, client graphql.Client, cache *ResolverCache, cmd *cobra.Command) (*api.NotificationSubscriptionCreateInput, error) {
 	input := &api.NotificationSubscriptionCreateInput{}
 	targets := 0
 

@@ -3,13 +3,12 @@ package cmd
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -36,17 +35,14 @@ var viewListCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
 	Short:   "List custom views",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		limit, _ := cmd.Flags().GetInt("limit")
@@ -57,18 +53,17 @@ var viewListCmd = &cobra.Command{
 
 		resp, err := api.ListCustomViews(ctx, client, nil, limitPtr, nil, nil)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list views: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list views: %v", err)
 		}
 
 		if resp.CustomViews == nil || len(resp.CustomViews.Nodes) == 0 {
 			output.Info("No custom views found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(resp.CustomViews.Nodes)
-			return
+			return nil
 		}
 
 		headers := []string{"ID", "Name", "Model", "Shared", "Owner"}
@@ -93,6 +88,7 @@ var viewListCmd = &cobra.Command{
 		if !plaintext && !jsonOut {
 			fmt.Printf("\n%s %d views\n", color.New(color.FgGreen).Sprint("✓"), len(resp.CustomViews.Nodes))
 		}
+		return nil
 	},
 }
 
@@ -101,32 +97,27 @@ var viewGetCmd = &cobra.Command{
 	Aliases: []string{"show"},
 	Short:   "Get a custom view",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 
 		resp, err := api.GetCustomView(context.Background(), client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get view: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get view: %v", err)
 		}
 		if resp.CustomView == nil {
-			output.Error(fmt.Sprintf("View not found: %s", args[0]), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("View not found: %s", args[0])
 		}
 		f := resp.CustomView.CustomViewFields
 
 		if jsonOut {
 			output.JSON(resp.CustomView)
-			return
+			return nil
 		}
 
 		description := ""
@@ -142,7 +133,7 @@ var viewGetCmd = &cobra.Command{
 			if description != "" {
 				fmt.Printf("- **Description**: %s\n", description)
 			}
-			return
+			return nil
 		}
 
 		fmt.Printf("%s %s\n", color.New(color.FgCyan, color.Bold).Sprint("View:"), f.Name)
@@ -155,6 +146,7 @@ var viewGetCmd = &cobra.Command{
 		if description != "" {
 			fmt.Printf("  Description: %s\n", description)
 		}
+		return nil
 	},
 }
 
@@ -163,23 +155,19 @@ var viewCreateCmd = &cobra.Command{
 	Aliases: []string{"new"},
 	Short:   "Create a custom view",
 	Long:    `Create a custom view. --name is required. Filters are edited in the web app.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		name, _ := cmd.Flags().GetString("name")
 		if name == "" {
-			output.Error("Name is required (--name)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Name is required (--name)")
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
@@ -204,20 +192,17 @@ var viewCreateCmd = &cobra.Command{
 		if team, _ := cmd.Flags().GetString("team"); team != "" {
 			teamID, err := resolveTeam(ctx, client, cache, team)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.TeamId = &teamID
 		}
 
 		resp, err := api.CustomViewCreate(ctx, client, input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create view: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create view: %v", err)
 		}
 		if resp.CustomViewCreate == nil || !resp.CustomViewCreate.Success {
-			output.Error("Failed to create view", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create view")
 		}
 
 		if jsonOut {
@@ -225,6 +210,7 @@ var viewCreateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Created view %s", resp.CustomViewCreate.CustomView.CustomViewFields.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -233,17 +219,14 @@ var viewUpdateCmd = &cobra.Command{
 	Short: "Update a custom view",
 	Long:  `Update a view's name, description, icon, color, or sharing.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 
 		input := &api.CustomViewUpdateInput{}
 		changed := false
@@ -275,18 +258,15 @@ var viewUpdateCmd = &cobra.Command{
 		}
 
 		if !changed {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		resp, err := api.CustomViewUpdate(context.Background(), client, args[0], input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update view: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update view: %v", err)
 		}
 		if resp.CustomViewUpdate == nil || !resp.CustomViewUpdate.Success {
-			output.Error("Failed to update view", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update view")
 		}
 
 		if jsonOut {
@@ -294,6 +274,7 @@ var viewUpdateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Updated view %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -302,26 +283,21 @@ var viewDeleteCmd = &cobra.Command{
 	Aliases: []string{"rm"},
 	Short:   "Delete a custom view",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 
 		resp, err := api.CustomViewDelete(context.Background(), client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete view: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete view: %v", err)
 		}
 		if resp.CustomViewDelete == nil || !resp.CustomViewDelete.Success {
-			output.Error("Failed to delete view", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to delete view")
 		}
 
 		if jsonOut {
@@ -329,6 +305,7 @@ var viewDeleteCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Deleted view %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -361,41 +338,34 @@ association: --team, --project, --custom-view, or --label.
 
 --preferences must be a non-empty JSON object; the CLI cannot send an empty
 {} (the client drops empty objects before the request).`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		scopeRaw, _ := cmd.Flags().GetString("scope")
 		scope, err := parseViewPreferencesType(scopeRaw)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		viewType, _ := cmd.Flags().GetString("view-type")
 		if viewType == "" {
-			output.Error("View type is required (--view-type)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("View type is required (--view-type)")
 		}
 
 		prefsRaw, _ := cmd.Flags().GetString("preferences")
 		prefs, err := parseJSONObject(prefsRaw)
 		if err != nil {
-			output.Error(fmt.Sprintf("Invalid --preferences JSON: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Invalid --preferences JSON: %v", err)
 		}
 		if len(prefs) == 0 {
-			output.Error(`--preferences must be a non-empty JSON object, e.g. '{"grouping":"assignee"}'`, plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New(`--preferences must be a non-empty JSON object, e.g. '{"grouping":"assignee"}'`)
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
@@ -408,16 +378,14 @@ association: --team, --project, --custom-view, or --label.
 		if team, _ := cmd.Flags().GetString("team"); team != "" {
 			id, err := resolveTeam(ctx, client, cache, team)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.TeamId = &id
 		}
 		if project, _ := cmd.Flags().GetString("project"); project != "" {
 			id, err := resolveProject(ctx, client, cache, project)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.ProjectId = &id
 		}
@@ -427,25 +395,21 @@ association: --team, --project, --custom-view, or --label.
 		if label, _ := cmd.Flags().GetString("label"); label != "" {
 			id, err := resolveLabel(ctx, client, cache, label)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.LabelId = &id
 		}
 
 		if input.TeamId == nil && input.ProjectId == nil && input.CustomViewId == nil && input.LabelId == nil {
-			output.Error("A parent is required: pass --team, --project, --custom-view, or --label", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("A parent is required: pass --team, --project, --custom-view, or --label")
 		}
 
 		resp, err := api.ViewPreferencesCreate(ctx, client, input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create view preferences: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create view preferences: %v", err)
 		}
 		if resp.ViewPreferencesCreate == nil || !resp.ViewPreferencesCreate.Success {
-			output.Error("Failed to create view preferences", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create view preferences")
 		}
 
 		if jsonOut {
@@ -453,6 +417,7 @@ association: --team, --project, --custom-view, or --label.
 		} else {
 			output.Success(fmt.Sprintf("Created view preferences %s", resp.ViewPreferencesCreate.ViewPreferences.Id), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -461,42 +426,34 @@ var viewPrefsUpdateCmd = &cobra.Command{
 	Short: "Update a view preferences object",
 	Long:  `Update a view preferences object's --preferences JSON.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		if !cmd.Flags().Changed("preferences") {
-			output.Error("No updates specified. Use --preferences.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use --preferences.")
 		}
 		prefsRaw, _ := cmd.Flags().GetString("preferences")
 		prefs, err := parseJSONObject(prefsRaw)
 		if err != nil {
-			output.Error(fmt.Sprintf("Invalid --preferences JSON: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Invalid --preferences JSON: %v", err)
 		}
 		if len(prefs) == 0 {
-			output.Error(`--preferences must be a non-empty JSON object, e.g. '{"grouping":"assignee"}'`, plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New(`--preferences must be a non-empty JSON object, e.g. '{"grouping":"assignee"}'`)
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		input := &api.ViewPreferencesUpdateInput{Preferences: &prefs}
 
 		resp, err := api.ViewPreferencesUpdate(context.Background(), client, args[0], input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update view preferences: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update view preferences: %v", err)
 		}
 		if resp.ViewPreferencesUpdate == nil || !resp.ViewPreferencesUpdate.Success {
-			output.Error("Failed to update view preferences", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update view preferences")
 		}
 
 		if jsonOut {
@@ -504,6 +461,7 @@ var viewPrefsUpdateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Updated view preferences %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -512,25 +470,20 @@ var viewPrefsDeleteCmd = &cobra.Command{
 	Aliases: []string{"rm"},
 	Short:   "Delete a view preferences object",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		resp, err := api.ViewPreferencesDelete(context.Background(), client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete view preferences: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete view preferences: %v", err)
 		}
 		if resp.ViewPreferencesDelete == nil || !resp.ViewPreferencesDelete.Success {
-			output.Error("Failed to delete view preferences", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to delete view preferences")
 		}
 
 		if jsonOut {
@@ -538,6 +491,7 @@ var viewPrefsDeleteCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Deleted view preferences %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 

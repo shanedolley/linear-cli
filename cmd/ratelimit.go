@@ -3,12 +3,10 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -25,27 +23,23 @@ resets, for every limit type (requests and query complexity).
 Examples:
   lincli rate-limit
   lincli rate-limit --json`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		resp, err := api.RateLimitStatus(context.Background(), client)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get rate-limit status: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get rate-limit status: %v", err)
 		}
 
 		status := resp.RateLimitStatus
 		if jsonOut {
 			output.JSON(status)
-			return
+			return nil
 		}
 
 		headers := []string{"Type", "Remaining", "Allowed", "Resets in"}
@@ -64,6 +58,7 @@ Examples:
 		if !plaintext && !jsonOut {
 			fmt.Printf("\n%s %s (%s)\n", color.New(color.FgGreen).Sprint("✓"), status.Kind, derefStr(status.Identifier))
 		}
+		return nil
 	},
 }
 

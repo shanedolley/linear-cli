@@ -2,7 +2,7 @@
 #
 # Templates are reusable issue/project skeletons (Template.type is "issue" or
 # "project"). `templates` returns the whole workspace list (no filter/paging in
-# the schema), so `template list --type` filters client-side. templateData is a
+# the schema), so `template list --template-type` filters client-side. templateData is a
 # JSON blob; create/update accept it raw so the CLI stays a thin pass-through.
 
 fragment TemplateFields on Template {

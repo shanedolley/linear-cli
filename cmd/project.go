@@ -2,14 +2,13 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/shanedolley/lincli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -120,25 +119,23 @@ var projectListCmd = &cobra.Command{
 	Aliases: []string{"ls"},
 	Short:   "List projects",
 	Long:    `List all projects in your Linear workspace.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		// Get auth header
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		// Create API client
-		client := api.NewClient(authHeader)
 
 		// Get filters
 		limit, _ := cmd.Flags().GetInt("limit")
 
 		// Build typed filter
-		filterTyped := buildProjectFilterTyped(cmd)
+		filterTyped, err := buildProjectFilterTyped(cmd)
+		if err != nil {
+			return err
+		}
 
 		// Get sort option
 		sortBy, _ := cmd.Flags().GetString("sort")
@@ -155,8 +152,7 @@ var projectListCmd = &cobra.Command{
 				// Use nil for Linear's default sort
 				orderByEnum = nil
 			default:
-				output.Error(fmt.Sprintf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy)
 			}
 		}
 
@@ -169,14 +165,13 @@ var projectListCmd = &cobra.Command{
 		// Get projects
 		resp, err := api.ListProjects(context.Background(), client, &filterTyped, limitPtr, nil, orderByEnum)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list projects: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list projects: %v", err)
 		}
 
 		// Handle output
 		if jsonOut {
 			output.JSON(resp.Projects.Nodes)
-			return
+			return nil
 		} else if plaintext {
 			fmt.Println("# Projects")
 			for _, node := range resp.Projects.Nodes {
@@ -215,7 +210,7 @@ var projectListCmd = &cobra.Command{
 				fmt.Println()
 			}
 			fmt.Printf("\nTotal: %d projects\n", len(resp.Projects.Nodes))
-			return
+			return nil
 		} else {
 			// Table output
 			headers := []string{"Name", "State", "Lead", "Teams", "Created", "Updated", "URL"}
@@ -275,6 +270,7 @@ var projectListCmd = &cobra.Command{
 					len(resp.Projects.Nodes))
 			}
 		}
+		return nil
 	},
 }
 
@@ -284,26 +280,20 @@ var projectGetCmd = &cobra.Command{
 	Short:   "Get project details",
 	Long:    `Get detailed information about a specific project.`,
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 		projectID := args[0]
 
-		// Get auth header
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		// Create API client
-		client := api.NewClient(authHeader)
 
 		// Get project details
 		resp, err := api.GetProject(context.Background(), client, projectID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get project: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get project: %v", err)
 		}
 		project := resp.Project
 
@@ -698,6 +688,7 @@ var projectGetCmd = &cobra.Command{
 
 			fmt.Println()
 		}
+		return nil
 	},
 }
 
@@ -706,36 +697,30 @@ var projectCreateCmd = &cobra.Command{
 	Aliases: []string{"new"},
 	Short:   "Create a new project",
 	Long:    `Create a new project in Linear.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		name, _ := cmd.Flags().GetString("name")
 		if name == "" {
-			output.Error("Name is required (--name)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Name is required (--name)")
 		}
 
 		team, _ := cmd.Flags().GetString("team")
 		if team == "" {
-			output.Error("Team is required (--team)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Team is required (--team)")
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		teamID, err := resolveTeam(ctx, client, cache, team)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to find team '%s': %v", team, err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to find team '%s': %v", team, err)
 		}
 
 		input := api.ProjectCreateInput{
@@ -750,8 +735,7 @@ var projectCreateCmd = &cobra.Command{
 		if lead, _ := cmd.Flags().GetString("lead"); lead != "" {
 			leadID, err := resolveUser(ctx, client, cache, lead)
 			if err != nil {
-				output.Error(fmt.Sprintf("Failed to find lead '%s': %v", lead, err), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Failed to find lead '%s': %v", lead, err)
 			}
 			input.LeadId = &leadID
 		}
@@ -767,8 +751,7 @@ var projectCreateCmd = &cobra.Command{
 		if status, _ := cmd.Flags().GetString("status"); status != "" {
 			statusID, err := resolveProjectStatus(ctx, client, cache, status)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.StatusId = &statusID
 		}
@@ -779,20 +762,17 @@ var projectCreateCmd = &cobra.Command{
 			template, _ := cmd.Flags().GetString("template")
 			templateID, err := resolveTemplate(ctx, client, cache, "project", template)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.TemplateId = &templateID
 		}
 
 		createResp, err := api.CreateProject(ctx, client, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create project: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create project: %v", err)
 		}
 		if !createResp.ProjectCreate.Success || createResp.ProjectCreate.Project == nil {
-			output.Error("Failed to create project", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create project")
 		}
 
 		project := createResp.ProjectCreate.Project
@@ -806,6 +786,7 @@ var projectCreateCmd = &cobra.Command{
 				color.New(color.FgGreen).Sprint("✓"),
 				color.New(color.FgCyan, color.Bold).Sprint(project.ProjectListFields.Name))
 		}
+		return nil
 	},
 }
 
@@ -824,24 +805,20 @@ Examples:
   lincli project update ID --target-date 2025-12-31
   lincli project update ID --lead unassigned`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		projectID, err := resolveProject(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := api.ProjectUpdateInput{}
@@ -869,8 +846,7 @@ Examples:
 			default:
 				leadID, err := resolveUser(ctx, client, cache, lead)
 				if err != nil {
-					output.Error(fmt.Sprintf("Failed to find lead '%s': %v", lead, err), plaintext, jsonOut)
-					os.Exit(1)
+					return fmt.Errorf("Failed to find lead '%s': %v", lead, err)
 				}
 				input.LeadId = &leadID
 			}
@@ -900,8 +876,7 @@ Examples:
 			status, _ := cmd.Flags().GetString("status")
 			statusID, err := resolveProjectStatus(ctx, client, cache, status)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.StatusId = &statusID
 		}
@@ -914,18 +889,15 @@ Examples:
 			input.StatusId != nil
 
 		if !hasUpdates {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		updateResp, err := api.UpdateProject(ctx, client, projectID, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update project: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update project: %v", err)
 		}
 		if !updateResp.ProjectUpdate.Success || updateResp.ProjectUpdate.Project == nil {
-			output.Error("Failed to update project", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update project")
 		}
 
 		updated := updateResp.ProjectUpdate.Project
@@ -937,6 +909,7 @@ Examples:
 		} else {
 			output.Success(fmt.Sprintf("Updated project %s", updated.ProjectListFields.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -945,34 +918,28 @@ var projectDeleteCmd = &cobra.Command{
 	Short: "Delete a project",
 	Long:  `Delete (trash) a project. This action executes immediately with no confirmation prompt. The project can be restored later with 'project unarchive'.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		projectID, err := resolveProject(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.ProjectDelete(ctx, client, projectID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete project: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete project: %v", err)
 		}
 		if !resp.ProjectDelete.Success {
-			output.Error("Failed to delete project", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to delete project")
 		}
 
 		name := projectID
@@ -987,6 +954,7 @@ var projectDeleteCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Deleted project %s", name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -995,34 +963,28 @@ var projectUnarchiveCmd = &cobra.Command{
 	Short: "Unarchive a project",
 	Long:  `Unarchive (restore) a previously deleted/archived project. This action executes immediately with no confirmation prompt.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		projectID, err := resolveProject(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.ProjectUnarchive(ctx, client, projectID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to unarchive project: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to unarchive project: %v", err)
 		}
 		if !resp.ProjectUnarchive.Success {
-			output.Error("Failed to unarchive project", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to unarchive project")
 		}
 
 		name := projectID
@@ -1037,6 +999,7 @@ var projectUnarchiveCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Unarchived project %s", name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1070,34 +1033,28 @@ var projectMembersCmd = &cobra.Command{
 	Short: "List a project's members",
 	Long:  `List the members associated with a project.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		projectID, err := resolveProject(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.GetProject(ctx, client, projectID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get project: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get project: %v", err)
 		}
 		if resp.Project == nil {
-			output.Error("Project not found", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Project not found")
 		}
 
 		f := resp.Project.ProjectDetailFields
@@ -1108,12 +1065,12 @@ var projectMembersCmd = &cobra.Command{
 
 		if len(members) == 0 {
 			output.Info(fmt.Sprintf("No members found for project %s", f.Name), plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(members)
-			return
+			return nil
 		}
 
 		if plaintext {
@@ -1128,7 +1085,7 @@ var projectMembersCmd = &cobra.Command{
 				}
 				fmt.Println()
 			}
-			return
+			return nil
 		}
 
 		headers := []string{"Name", "Email", "Admin", "Active"}
@@ -1137,6 +1094,7 @@ var projectMembersCmd = &cobra.Command{
 			rows[i] = []string{m.Name, m.Email, fmt.Sprintf("%v", m.Admin), fmt.Sprintf("%v", m.Active)}
 		}
 		output.Table(output.TableData{Headers: headers, Rows: rows}, plaintext, jsonOut)
+		return nil
 	},
 }
 
@@ -1159,41 +1117,34 @@ var projectMemberAddCmd = &cobra.Command{
 	Use:   "add <project-id-or-name> <user>",
 	Short: "Add a member to a project",
 	Args:  cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		projectID, err := resolveProject(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 		userID, err := resolveUser(ctx, client, cache, args[1])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to find user '%s': %v", args[1], err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to find user '%s': %v", args[1], err)
 		}
 
 		memberIDs, projectName, err := getProjectMemberIDs(ctx, client, projectID)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		for _, id := range memberIDs {
 			if id == userID {
-				output.Error("User is already a member of this project", plaintext, jsonOut)
-				os.Exit(1)
+				return errors.New("User is already a member of this project")
 			}
 		}
 		memberIDs = append(memberIDs, userID)
@@ -1201,12 +1152,10 @@ var projectMemberAddCmd = &cobra.Command{
 		input := api.ProjectUpdateInput{MemberIds: memberIDs}
 		resp, err := api.UpdateProject(ctx, client, projectID, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to add member to project: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to add member to project: %v", err)
 		}
 		if !resp.ProjectUpdate.Success {
-			output.Error("Failed to add member to project", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to add member to project")
 		}
 
 		if jsonOut {
@@ -1216,6 +1165,7 @@ var projectMemberAddCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Added member to project %s", projectName), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1225,35 +1175,29 @@ var projectMemberRemoveCmd = &cobra.Command{
 	Short:   "Remove a member from a project",
 	Long:    `Remove a member from a project. This action executes immediately with no confirmation prompt.`,
 	Args:    cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		projectID, err := resolveProject(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 		userID, err := resolveUser(ctx, client, cache, args[1])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to find user '%s': %v", args[1], err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to find user '%s': %v", args[1], err)
 		}
 
 		memberIDs, projectName, err := getProjectMemberIDs(ctx, client, projectID)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		found := false
@@ -1266,19 +1210,16 @@ var projectMemberRemoveCmd = &cobra.Command{
 			filtered = append(filtered, id)
 		}
 		if !found {
-			output.Error("User is not a member of this project", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("User is not a member of this project")
 		}
 
 		input := api.ProjectUpdateInput{MemberIds: filtered}
 		resp, err := api.UpdateProject(ctx, client, projectID, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to remove member from project: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to remove member from project: %v", err)
 		}
 		if !resp.ProjectUpdate.Success {
-			output.Error("Failed to remove member from project", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to remove member from project")
 		}
 
 		if jsonOut {
@@ -1288,6 +1229,7 @@ var projectMemberRemoveCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Removed member from project %s", projectName), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1336,24 +1278,20 @@ var projectMilestoneListCmd = &cobra.Command{
 	Aliases: []string{"ls"},
 	Short:   "List a project's milestones",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		projectID, err := resolveProject(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		limit, _ := cmd.Flags().GetInt("limit")
@@ -1364,24 +1302,22 @@ var projectMilestoneListCmd = &cobra.Command{
 
 		resp, err := api.ListProjectMilestones(ctx, client, projectID, limitPtr)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list milestones: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list milestones: %v", err)
 		}
 		if resp.Project == nil || resp.Project.ProjectMilestones == nil {
-			output.Error("Project not found", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Project not found")
 		}
 
 		milestones := resp.Project.ProjectMilestones.Nodes
 
 		if len(milestones) == 0 {
 			output.Info("No milestones found for this project", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(milestones)
-			return
+			return nil
 		}
 
 		if plaintext {
@@ -1400,7 +1336,7 @@ var projectMilestoneListCmd = &cobra.Command{
 				}
 				fmt.Println()
 			}
-			return
+			return nil
 		}
 
 		headers := []string{"Name", "Status", "Progress", "Target Date"}
@@ -1419,6 +1355,7 @@ var projectMilestoneListCmd = &cobra.Command{
 			}
 		}
 		output.Table(output.TableData{Headers: headers, Rows: rows}, plaintext, jsonOut)
+		return nil
 	},
 }
 
@@ -1428,40 +1365,34 @@ var projectMilestoneGetCmd = &cobra.Command{
 	Short:   "Get milestone details",
 	Long:    `Get detailed information about a project milestone. Accepts a milestone ID directly, or a name scoped with --project.`,
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		milestoneID, err := resolveMilestoneArg(ctx, client, cache, cmd, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.GetProjectMilestone(ctx, client, milestoneID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get milestone: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get milestone: %v", err)
 		}
 		if resp.ProjectMilestone == nil {
-			output.Error("Milestone not found", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Milestone not found")
 		}
 		f := resp.ProjectMilestone.ProjectMilestoneFields
 
 		if jsonOut {
 			output.JSON(resp.ProjectMilestone)
-			return
+			return nil
 		}
 
 		if plaintext {
@@ -1478,7 +1409,7 @@ var projectMilestoneGetCmd = &cobra.Command{
 			if f.Description != nil && *f.Description != "" {
 				fmt.Printf("\n## Description\n%s\n", *f.Description)
 			}
-			return
+			return nil
 		}
 
 		fmt.Println()
@@ -1497,6 +1428,7 @@ var projectMilestoneGetCmd = &cobra.Command{
 			fmt.Printf("\n%s\n%s\n", color.New(color.Bold).Sprint("Description:"), *f.Description)
 		}
 		fmt.Println()
+		return nil
 	},
 }
 
@@ -1505,30 +1437,25 @@ var projectMilestoneCreateCmd = &cobra.Command{
 	Aliases: []string{"new"},
 	Short:   "Create a new milestone within a project",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		name, _ := cmd.Flags().GetString("name")
 		if name == "" {
-			output.Error("Name is required (--name)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Name is required (--name)")
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		projectID, err := resolveProject(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := api.ProjectMilestoneCreateInput{
@@ -1549,12 +1476,10 @@ var projectMilestoneCreateCmd = &cobra.Command{
 
 		resp, err := api.ProjectMilestoneCreate(ctx, client, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create milestone: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create milestone: %v", err)
 		}
 		if !resp.ProjectMilestoneCreate.Success || resp.ProjectMilestoneCreate.ProjectMilestone == nil {
-			output.Error("Failed to create milestone", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create milestone")
 		}
 
 		milestone := resp.ProjectMilestoneCreate.ProjectMilestone
@@ -1566,6 +1491,7 @@ var projectMilestoneCreateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Created milestone %s", milestone.ProjectMilestoneFields.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1574,24 +1500,20 @@ var projectMilestoneUpdateCmd = &cobra.Command{
 	Short: "Update a project milestone",
 	Long:  `Update a milestone's name, description, target date, or sort order. Accepts a milestone ID directly, or a name scoped with --project.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		milestoneID, err := resolveMilestoneArg(ctx, client, cache, cmd, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := api.ProjectMilestoneUpdateInput{}
@@ -1620,18 +1542,15 @@ var projectMilestoneUpdateCmd = &cobra.Command{
 
 		hasUpdates := input.Name != nil || input.Description != nil || cmd.Flags().Changed("target-date") || input.SortOrder != nil
 		if !hasUpdates {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		resp, err := api.ProjectMilestoneUpdate(ctx, client, milestoneID, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update milestone: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update milestone: %v", err)
 		}
 		if !resp.ProjectMilestoneUpdate.Success || resp.ProjectMilestoneUpdate.ProjectMilestone == nil {
-			output.Error("Failed to update milestone", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update milestone")
 		}
 
 		updated := resp.ProjectMilestoneUpdate.ProjectMilestone
@@ -1643,6 +1562,7 @@ var projectMilestoneUpdateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Updated milestone %s", updated.ProjectMilestoneFields.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1660,46 +1580,38 @@ ProjectMilestoneMoveInput has no sortOrder field (verified against
 schema.graphql); when --sort-order is given, this runs the move followed by
 a separate update call to set the sort order.`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		project, _ := cmd.Flags().GetString("project")
 		if project == "" {
-			output.Error("Destination project is required (--project)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Destination project is required (--project)")
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		milestoneID, err := resolveMilestone(ctx, client, cache, "", args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 		projectID, err := resolveProject(ctx, client, cache, project)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := api.ProjectMilestoneMoveInput{ProjectId: projectID}
 		resp, err := api.ProjectMilestoneMove(ctx, client, milestoneID, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to move milestone: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to move milestone: %v", err)
 		}
 		if !resp.ProjectMilestoneMove.Success || resp.ProjectMilestoneMove.ProjectMilestone == nil {
-			output.Error("Failed to move milestone", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to move milestone")
 		}
 
 		moved := resp.ProjectMilestoneMove.ProjectMilestone
@@ -1713,12 +1625,10 @@ a separate update call to set the sort order.`,
 			updateInput := api.ProjectMilestoneUpdateInput{SortOrder: &sortOrder}
 			updateResp, err := api.ProjectMilestoneUpdate(ctx, client, milestoneID, &updateInput)
 			if err != nil {
-				output.Error(fmt.Sprintf("Milestone moved to %s, but failed to set sort order: %v", projectName, err), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Milestone moved to %s, but failed to set sort order: %v", projectName, err)
 			}
 			if !updateResp.ProjectMilestoneUpdate.Success || updateResp.ProjectMilestoneUpdate.ProjectMilestone == nil {
-				output.Error(fmt.Sprintf("Milestone moved to %s, but failed to set sort order", projectName), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Milestone moved to %s, but failed to set sort order", projectName)
 			}
 
 			updated := updateResp.ProjectMilestoneUpdate.ProjectMilestone
@@ -1729,7 +1639,7 @@ a separate update call to set the sort order.`,
 			} else {
 				output.Success(fmt.Sprintf("Moved milestone %s to project %s and updated sort order", updated.ProjectMilestoneFields.Name, projectName), plaintext, jsonOut)
 			}
-			return
+			return nil
 		}
 
 		if jsonOut {
@@ -1739,6 +1649,7 @@ a separate update call to set the sort order.`,
 		} else {
 			output.Success(fmt.Sprintf("Moved milestone %s to project %s", moved.ProjectMilestoneFields.Name, projectName), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1747,34 +1658,28 @@ var projectMilestoneDeleteCmd = &cobra.Command{
 	Short: "Delete a project milestone",
 	Long:  `Delete a project milestone. This action executes immediately with no confirmation prompt. Accepts a milestone ID directly, or a name scoped with --project.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		milestoneID, err := resolveMilestoneArg(ctx, client, cache, cmd, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.ProjectMilestoneDelete(ctx, client, milestoneID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete milestone: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete milestone: %v", err)
 		}
 		if !resp.ProjectMilestoneDelete.Success {
-			output.Error("Failed to delete milestone", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to delete milestone")
 		}
 
 		if jsonOut {
@@ -1784,6 +1689,7 @@ var projectMilestoneDeleteCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Deleted milestone %s", resp.ProjectMilestoneDelete.EntityId), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1812,24 +1718,20 @@ var projectUpdatePostListCmd = &cobra.Command{
 	Aliases: []string{"ls"},
 	Short:   "List status updates posted to a project",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		projectID, err := resolveProject(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		limit, _ := cmd.Flags().GetInt("limit")
@@ -1846,20 +1748,19 @@ var projectUpdatePostListCmd = &cobra.Command{
 
 		resp, err := api.ListProjectUpdates(ctx, client, filter, limitPtr, nil, nil)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list project updates: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list project updates: %v", err)
 		}
 
 		updates := resp.ProjectUpdates.Nodes
 
 		if len(updates) == 0 {
 			output.Info("No status updates found for this project", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(updates)
-			return
+			return nil
 		}
 
 		if plaintext {
@@ -1876,7 +1777,7 @@ var projectUpdatePostListCmd = &cobra.Command{
 				}
 				fmt.Printf("\n%s\n\n", u.Body)
 			}
-			return
+			return nil
 		}
 
 		headers := []string{"ID", "Date", "Health", "Author", "Body"}
@@ -1895,6 +1796,7 @@ var projectUpdatePostListCmd = &cobra.Command{
 			}
 		}
 		output.Table(output.TableData{Headers: headers, Rows: rows}, plaintext, jsonOut)
+		return nil
 	},
 }
 
@@ -1903,40 +1805,34 @@ var projectUpdatePostCreateCmd = &cobra.Command{
 	Aliases: []string{"add", "new"},
 	Short:   "Post a new status update to a project",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		body, _ := cmd.Flags().GetString("body")
 		if body == "" {
-			output.Error("Body is required (--body)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Body is required (--body)")
 		}
 
 		var health *api.ProjectUpdateHealthType
 		if healthStr, _ := cmd.Flags().GetString("health"); healthStr != "" {
 			h, err := parseProjectUpdateHealth(healthStr)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			health = &h
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		projectID, err := resolveProject(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := api.ProjectUpdateCreateInput{
@@ -1947,12 +1843,10 @@ var projectUpdatePostCreateCmd = &cobra.Command{
 
 		resp, err := api.ProjectUpdateCreate(ctx, client, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to post project update: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to post project update: %v", err)
 		}
 		if !resp.ProjectUpdateCreate.Success {
-			output.Error("Failed to post project update", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to post project update")
 		}
 
 		update := resp.ProjectUpdateCreate.ProjectUpdate
@@ -1964,6 +1858,7 @@ var projectUpdatePostCreateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Posted status update %s", update.Id), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1971,7 +1866,7 @@ var projectUpdatePostEditCmd = &cobra.Command{
 	Use:   "edit <update-id>",
 	Short: "Edit a status update's body or health",
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 		updateID := args[0]
@@ -1985,33 +1880,26 @@ var projectUpdatePostEditCmd = &cobra.Command{
 			healthStr, _ := cmd.Flags().GetString("health")
 			h, err := parseProjectUpdateHealth(healthStr)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.Health = &h
 		}
 		if input.Body == nil && input.Health == nil {
-			output.Error("No updates specified. Use --body and/or --health.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use --body and/or --health.")
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		resp, err := api.ProjectUpdateUpdate(ctx, client, updateID, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to edit status update: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to edit status update: %v", err)
 		}
 		if !resp.ProjectUpdateUpdate.Success {
-			output.Error("Failed to edit status update", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to edit status update")
 		}
 
 		update := resp.ProjectUpdateUpdate.ProjectUpdate
@@ -2023,6 +1911,7 @@ var projectUpdatePostEditCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Updated status update %s", update.Id), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -2031,28 +1920,23 @@ var projectUpdatePostArchiveCmd = &cobra.Command{
 	Short: "Archive a status update",
 	Long:  `Archive a status update. This action executes immediately with no confirmation prompt.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 		updateID := args[0]
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		resp, err := api.ProjectUpdateArchive(ctx, client, updateID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to archive status update: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to archive status update: %v", err)
 		}
 		if !resp.ProjectUpdateArchive.Success {
-			output.Error("Failed to archive status update", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to archive status update")
 		}
 
 		if jsonOut {
@@ -2062,6 +1946,7 @@ var projectUpdatePostArchiveCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Archived status update %s", updateID), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -2070,28 +1955,23 @@ var projectUpdatePostUnarchiveCmd = &cobra.Command{
 	Short: "Unarchive a status update",
 	Long:  `Unarchive a previously archived status update. This action executes immediately with no confirmation prompt.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 		updateID := args[0]
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		resp, err := api.ProjectUpdateUnarchive(ctx, client, updateID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to unarchive status update: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to unarchive status update: %v", err)
 		}
 		if !resp.ProjectUpdateUnarchive.Success {
-			output.Error("Failed to unarchive status update", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to unarchive status update")
 		}
 
 		if jsonOut {
@@ -2101,6 +1981,7 @@ var projectUpdatePostUnarchiveCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Unarchived status update %s", updateID), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -2114,44 +1995,37 @@ Examples:
   lincli project update-reminder "My Project"
   lincli project update-reminder "My Project" --user jane@example.com`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		projectID, err := resolveProject(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		var userID *string
 		if user, _ := cmd.Flags().GetString("user"); user != "" {
 			id, err := resolveUser(ctx, client, cache, user)
 			if err != nil {
-				output.Error(fmt.Sprintf("Failed to find user '%s': %v", user, err), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Failed to find user '%s': %v", user, err)
 			}
 			userID = &id
 		}
 
 		resp, err := api.CreateProjectUpdateReminder(ctx, client, projectID, userID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to send update reminder: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to send update reminder: %v", err)
 		}
 		if !resp.CreateProjectUpdateReminder.Success {
-			output.Error("Failed to send update reminder", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to send update reminder")
 		}
 
 		if jsonOut {
@@ -2161,6 +2035,7 @@ Examples:
 		} else {
 			output.Success("Sent update reminder", plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -2188,17 +2063,14 @@ var projectLabelListCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
 	Short:   "List the workspace's project labels",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		limit, _ := cmd.Flags().GetInt("limit")
@@ -2209,8 +2081,7 @@ var projectLabelListCmd = &cobra.Command{
 
 		resp, err := api.ListProjectLabels(ctx, client, nil, limitPtr)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list project labels: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list project labels: %v", err)
 		}
 
 		labels := []*api.ListProjectLabelsProjectLabelsProjectLabelConnectionNodesProjectLabel{}
@@ -2220,12 +2091,12 @@ var projectLabelListCmd = &cobra.Command{
 
 		if len(labels) == 0 {
 			output.Info("No project labels found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(labels)
-			return
+			return nil
 		}
 
 		if plaintext {
@@ -2242,7 +2113,7 @@ var projectLabelListCmd = &cobra.Command{
 				}
 				fmt.Println()
 			}
-			return
+			return nil
 		}
 
 		headers := []string{"Name", "ID", "Color", "Description", "Retired"}
@@ -2259,6 +2130,7 @@ var projectLabelListCmd = &cobra.Command{
 			rows[i] = []string{l.Name, l.Id, l.Color, description, retired}
 		}
 		output.Table(output.TableData{Headers: headers, Rows: rows}, plaintext, jsonOut)
+		return nil
 	},
 }
 
@@ -2267,19 +2139,17 @@ var projectLabelCreateCmd = &cobra.Command{
 	Aliases: []string{"new"},
 	Short:   "Create a new project label",
 	Args:    cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		name, _ := cmd.Flags().GetString("name")
 		if name == "" {
-			output.Error("Name is required (--name)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Name is required (--name)")
 		}
 		color, _ := cmd.Flags().GetString("color")
 		if color == "" {
-			output.Error("Color is required (--color)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Color is required (--color)")
 		}
 
 		input := api.ProjectLabelCreateInput{Name: name, Color: &color}
@@ -2287,23 +2157,18 @@ var projectLabelCreateCmd = &cobra.Command{
 			input.Description = &description
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		resp, err := api.ProjectLabelCreate(ctx, client, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create project label: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create project label: %v", err)
 		}
 		if !resp.ProjectLabelCreate.Success || resp.ProjectLabelCreate.ProjectLabel == nil {
-			output.Error("Failed to create project label", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create project label")
 		}
 
 		label := resp.ProjectLabelCreate.ProjectLabel
@@ -2315,6 +2180,7 @@ var projectLabelCreateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Created project label: %s", label.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -2322,24 +2188,20 @@ var projectLabelUpdateCmd = &cobra.Command{
 	Use:   "update <label-id-or-name>",
 	Short: "Update a project label",
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		labelID, err := resolveProjectLabel(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := api.ProjectLabelUpdateInput{}
@@ -2357,18 +2219,15 @@ var projectLabelUpdateCmd = &cobra.Command{
 		}
 
 		if input.Name == nil && input.Color == nil && input.Description == nil {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		resp, err := api.ProjectLabelUpdate(ctx, client, labelID, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update project label: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update project label: %v", err)
 		}
 		if !resp.ProjectLabelUpdate.Success || resp.ProjectLabelUpdate.ProjectLabel == nil {
-			output.Error("Failed to update project label", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update project label")
 		}
 
 		label := resp.ProjectLabelUpdate.ProjectLabel
@@ -2380,6 +2239,7 @@ var projectLabelUpdateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Updated project label: %s", label.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -2388,34 +2248,28 @@ var projectLabelDeleteCmd = &cobra.Command{
 	Short: "Delete a project label",
 	Long:  `Delete a project label. This action executes immediately with no confirmation prompt.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		labelID, err := resolveProjectLabel(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.ProjectLabelDelete(ctx, client, labelID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete project label: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete project label: %v", err)
 		}
 		if !resp.ProjectLabelDelete.Success {
-			output.Error("Failed to delete project label", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to delete project label")
 		}
 
 		if jsonOut {
@@ -2425,6 +2279,7 @@ var projectLabelDeleteCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Deleted project label %s", resp.ProjectLabelDelete.EntityId), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -2433,34 +2288,28 @@ var projectLabelRetireCmd = &cobra.Command{
 	Short: "Retire a project label",
 	Long:  `Retire a project label. Retired labels remain on projects that already use them but can't be applied to new ones. This action executes immediately with no confirmation prompt.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		labelID, err := resolveProjectLabel(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.ProjectLabelRetire(ctx, client, labelID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to retire project label: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to retire project label: %v", err)
 		}
 		if !resp.ProjectLabelRetire.Success {
-			output.Error("Failed to retire project label", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to retire project label")
 		}
 
 		name := labelID
@@ -2475,6 +2324,7 @@ var projectLabelRetireCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Retired project label %s", name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -2483,34 +2333,28 @@ var projectLabelRestoreCmd = &cobra.Command{
 	Short: "Restore a previously retired project label",
 	Long:  `Restore a previously retired project label, making it available for use on new projects. This action executes immediately with no confirmation prompt.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		labelID, err := resolveProjectLabel(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.ProjectLabelRestore(ctx, client, labelID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to restore project label: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to restore project label: %v", err)
 		}
 		if !resp.ProjectLabelRestore.Success {
-			output.Error("Failed to restore project label", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to restore project label")
 		}
 
 		name := labelID
@@ -2525,6 +2369,7 @@ var projectLabelRestoreCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Restored project label %s", name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -2532,39 +2377,32 @@ var projectLabelAddCmd = &cobra.Command{
 	Use:   "add <project-id-or-name> <label-id-or-name>",
 	Short: "Add a label to a project",
 	Args:  cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		projectID, err := resolveProject(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 		labelID, err := resolveProjectLabel(ctx, client, cache, args[1])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.ProjectAddLabel(ctx, client, projectID, labelID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to add label to project: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to add label to project: %v", err)
 		}
 		if !resp.ProjectAddLabel.Success {
-			output.Error("Failed to add label to project", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to add label to project")
 		}
 
 		// ProjectPayload.project is nullable in the schema, and confirmed
@@ -2580,7 +2418,7 @@ var projectLabelAddCmd = &cobra.Command{
 			} else {
 				output.Success("Added label to project", plaintext, jsonOut)
 			}
-			return
+			return nil
 		}
 
 		project := resp.ProjectAddLabel.Project
@@ -2592,6 +2430,7 @@ var projectLabelAddCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Added label to project %s", project.ProjectListFields.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -2601,39 +2440,32 @@ var projectLabelRemoveCmd = &cobra.Command{
 	Short:   "Remove a label from a project",
 	Long:    `Remove a label from a project. This action executes immediately with no confirmation prompt.`,
 	Args:    cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		projectID, err := resolveProject(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 		labelID, err := resolveProjectLabel(ctx, client, cache, args[1])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.ProjectRemoveLabel(ctx, client, projectID, labelID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to remove label from project: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to remove label from project: %v", err)
 		}
 		if !resp.ProjectRemoveLabel.Success {
-			output.Error("Failed to remove label from project", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to remove label from project")
 		}
 
 		// See the matching comment in 'project label add': ProjectPayload.project
@@ -2648,7 +2480,7 @@ var projectLabelRemoveCmd = &cobra.Command{
 			} else {
 				output.Success("Removed label from project", plaintext, jsonOut)
 			}
-			return
+			return nil
 		}
 
 		project := resp.ProjectRemoveLabel.Project
@@ -2660,6 +2492,7 @@ var projectLabelRemoveCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Removed label from project %s", project.ProjectListFields.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -2717,7 +2550,7 @@ exposed here.
 Examples:
   lincli project relate "API" "Mobile App"`,
 	Args: cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
@@ -2727,29 +2560,23 @@ Examples:
 		}
 		relType, err := parseProjectRelationType(relTypeFlag)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		projectID, err := resolveProject(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 		otherID, err := resolveProject(ctx, client, cache, args[1])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := api.ProjectRelationCreateInput{
@@ -2762,12 +2589,10 @@ Examples:
 
 		resp, err := api.ProjectRelationCreate(ctx, client, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create project relation: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create project relation: %v", err)
 		}
 		if !resp.ProjectRelationCreate.Success {
-			output.Error("Failed to create project relation", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create project relation")
 		}
 
 		rel := resp.ProjectRelationCreate.ProjectRelation
@@ -2779,6 +2604,7 @@ Examples:
 		} else {
 			output.Success(fmt.Sprintf("Related %s %s %s", rel.Project.Name, rel.Type, rel.RelatedProject.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -2787,45 +2613,37 @@ var projectUnrelateCmd = &cobra.Command{
 	Short: "Remove a dependency relation between two projects",
 	Long:  `Remove a dependency relation between two projects. This action executes immediately with no confirmation prompt.`,
 	Args:  cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		projectID, err := resolveProject(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 		otherID, err := resolveProject(ctx, client, cache, args[1])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		relID, err := findProjectRelation(ctx, client, projectID, otherID)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.ProjectRelationDelete(ctx, client, relID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to remove project relation: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to remove project relation: %v", err)
 		}
 		if !resp.ProjectRelationDelete.Success {
-			output.Error("Failed to remove project relation", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to remove project relation")
 		}
 
 		if jsonOut {
@@ -2835,6 +2653,7 @@ var projectUnrelateCmd = &cobra.Command{
 		} else {
 			output.Success("Removed project relation", plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -2858,24 +2677,20 @@ var projectStatusListCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
 	Short:   "List the workspace's project statuses",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		limit := 250
 		resp, err := api.ListProjectStatuses(ctx, client, &limit)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list project statuses: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list project statuses: %v", err)
 		}
 
 		statuses := []*api.ListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus{}
@@ -2885,12 +2700,12 @@ var projectStatusListCmd = &cobra.Command{
 
 		if len(statuses) == 0 {
 			output.Info("No project statuses found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(statuses)
-			return
+			return nil
 		}
 
 		if plaintext {
@@ -2906,7 +2721,7 @@ var projectStatusListCmd = &cobra.Command{
 				}
 				fmt.Println()
 			}
-			return
+			return nil
 		}
 
 		headers := []string{"Name", "ID", "Type", "Color", "Position"}
@@ -2915,6 +2730,7 @@ var projectStatusListCmd = &cobra.Command{
 			rows[i] = []string{s.Name, s.Id, string(s.Type), s.Color, fmt.Sprintf("%.0f", s.Position)}
 		}
 		output.Table(output.TableData{Headers: headers, Rows: rows}, plaintext, jsonOut)
+		return nil
 	},
 }
 
@@ -2923,24 +2739,21 @@ var projectStatusCreateCmd = &cobra.Command{
 	Aliases: []string{"new"},
 	Short:   "Create a new project status",
 	Args:    cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		name, _ := cmd.Flags().GetString("name")
 		if name == "" {
-			output.Error("Name is required (--name)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Name is required (--name)")
 		}
 		typeStr := preferFlag(cmd, "status-type", "type")
 		if typeStr == "" {
-			output.Error(fmt.Sprintf("Type is required (--status-type). Valid values: %s", strings.Join(projectStatusTypeValues, ", ")), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Type is required (--status-type). Valid values: %s", strings.Join(projectStatusTypeValues, ", "))
 		}
 		statusType, err := parseProjectStatusType(typeStr)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		color, _ := cmd.Flags().GetString("color")
@@ -2956,23 +2769,18 @@ var projectStatusCreateCmd = &cobra.Command{
 			input.Description = &description
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		resp, err := api.ProjectStatusCreate(ctx, client, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create project status: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create project status: %v", err)
 		}
 		if !resp.ProjectStatusCreate.Success || resp.ProjectStatusCreate.Status == nil {
-			output.Error("Failed to create project status", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create project status")
 		}
 
 		status := resp.ProjectStatusCreate.Status
@@ -2984,6 +2792,7 @@ var projectStatusCreateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Created project status: %s", status.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -2991,24 +2800,20 @@ var projectStatusUpdateCmd = &cobra.Command{
 	Use:   "update <status-id-or-name>",
 	Short: "Update a project status",
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		statusID, err := resolveProjectStatus(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := api.ProjectStatusUpdateInput{}
@@ -3020,8 +2825,7 @@ var projectStatusUpdateCmd = &cobra.Command{
 			typeStr := preferFlag(cmd, "status-type", "type")
 			statusType, err := parseProjectStatusType(typeStr)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.Type = &statusType
 		}
@@ -3039,18 +2843,15 @@ var projectStatusUpdateCmd = &cobra.Command{
 		}
 
 		if input.Name == nil && input.Type == nil && input.Color == nil && input.Position == nil && input.Description == nil {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		resp, err := api.ProjectStatusUpdate(ctx, client, statusID, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update project status: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update project status: %v", err)
 		}
 		if !resp.ProjectStatusUpdate.Success || resp.ProjectStatusUpdate.Status == nil {
-			output.Error("Failed to update project status", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update project status")
 		}
 
 		status := resp.ProjectStatusUpdate.Status
@@ -3062,6 +2863,7 @@ var projectStatusUpdateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Updated project status: %s", status.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -3070,34 +2872,28 @@ var projectStatusArchiveCmd = &cobra.Command{
 	Short: "Archive a project status",
 	Long:  `Archive a project status. The status must not have any active projects assigned to it and must not be the last status of its type. This action executes immediately with no confirmation prompt.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		statusID, err := resolveProjectStatus(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.ProjectStatusArchive(ctx, client, statusID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to archive project status: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to archive project status: %v", err)
 		}
 		if !resp.ProjectStatusArchive.Success {
-			output.Error("Failed to archive project status", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to archive project status")
 		}
 
 		name := statusID
@@ -3112,6 +2908,7 @@ var projectStatusArchiveCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Archived project status %s", name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -3120,34 +2917,28 @@ var projectStatusUnarchiveCmd = &cobra.Command{
 	Short: "Unarchive a project status",
 	Long:  `Unarchive a previously archived project status. This action executes immediately with no confirmation prompt.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		statusID, err := resolveProjectStatus(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.ProjectStatusUnarchive(ctx, client, statusID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to unarchive project status: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to unarchive project status: %v", err)
 		}
 		if !resp.ProjectStatusUnarchive.Success {
-			output.Error("Failed to unarchive project status", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to unarchive project status")
 		}
 
 		name := statusID
@@ -3162,6 +2953,7 @@ var projectStatusUnarchiveCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Unarchived project status %s", name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -3175,46 +2967,38 @@ still has projects assigned to it.
 Examples:
   lincli project reassign-status --from "In Review" --to "In Progress"`,
 	Args: cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		from, _ := cmd.Flags().GetString("from")
 		to, _ := cmd.Flags().GetString("to")
 		if from == "" || to == "" {
-			output.Error("Both --from and --to are required", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Both --from and --to are required")
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		fromID, err := resolveProjectStatus(ctx, client, cache, from)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 		toID, err := resolveProjectStatus(ctx, client, cache, to)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.ProjectReassignStatus(ctx, client, fromID, toID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to reassign project status: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to reassign project status: %v", err)
 		}
 		if !resp.ProjectReassignStatus.Success {
-			output.Error("Failed to reassign project status", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to reassign project status")
 		}
 
 		if jsonOut {
@@ -3224,6 +3008,7 @@ Examples:
 		} else {
 			output.Success(fmt.Sprintf("Reassigned projects from %s to %s", from, to), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -3399,7 +3184,7 @@ func init() {
 }
 
 // buildProjectFilterTyped builds a typed ProjectFilter from command flags
-func buildProjectFilterTyped(cmd *cobra.Command) api.ProjectFilter {
+func buildProjectFilterTyped(cmd *cobra.Command) (api.ProjectFilter, error) {
 	filter := api.ProjectFilter{}
 
 	// State filter
@@ -3420,10 +3205,7 @@ func buildProjectFilterTyped(cmd *cobra.Command) api.ProjectFilter {
 	newerThan, _ := cmd.Flags().GetString("newer-than")
 	createdAt, err := utils.ParseTimeExpression(newerThan)
 	if err != nil {
-		plaintext := viper.GetBool("plaintext")
-		jsonOut := viper.GetBool("json")
-		output.Error(fmt.Sprintf("Invalid newer-than value: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return filter, fmt.Errorf("Invalid newer-than value: %v", err)
 	}
 	if createdAt != "" {
 		filter.CreatedAt = &api.DateComparator{
@@ -3431,5 +3213,5 @@ func buildProjectFilterTyped(cmd *cobra.Command) api.ProjectFilter {
 		}
 	}
 
-	return filter
+	return filter, nil
 }

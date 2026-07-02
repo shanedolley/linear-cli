@@ -3,12 +3,10 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -34,17 +32,14 @@ var searchProjectsCmd = &cobra.Command{
 	Short: "Search projects by text",
 	Long:  `Full-text search across projects, ranked by relevance.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		limit, _ := cmd.Flags().GetInt("limit")
@@ -56,18 +51,17 @@ var searchProjectsCmd = &cobra.Command{
 
 		resp, err := api.SearchProjects(ctx, client, args[0], limitPtr, &includeComments)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to search projects: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to search projects: %v", err)
 		}
 
 		if len(resp.SearchProjects.Nodes) == 0 {
 			output.Info("No matching projects found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(resp.SearchProjects.Nodes)
-			return
+			return nil
 		}
 
 		headers := []string{"Name", "Description", "URL"}
@@ -85,6 +79,7 @@ var searchProjectsCmd = &cobra.Command{
 		if !plaintext && !jsonOut {
 			fmt.Printf("\n%s %d of %.0f matches\n", color.New(color.FgGreen).Sprint("✓"), len(resp.SearchProjects.Nodes), resp.SearchProjects.TotalCount)
 		}
+		return nil
 	},
 }
 
@@ -98,24 +93,20 @@ Examples:
   lincli search semantic "onboarding regressions"
   lincli search semantic "q3 goals" --types project,initiative`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		typesRaw, _ := cmd.Flags().GetString("types")
 		types, err := parseSemanticTypes(typesRaw)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		maxResults, _ := cmd.Flags().GetInt("limit")
@@ -126,18 +117,17 @@ Examples:
 
 		resp, err := api.SemanticSearch(ctx, client, args[0], maxPtr, types)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to run semantic search: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to run semantic search: %v", err)
 		}
 
 		if len(resp.SemanticSearch.Results) == 0 {
 			output.Info("No matching results found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(resp.SemanticSearch.Results)
-			return
+			return nil
 		}
 
 		headers := []string{"Type", "Match", "URL"}
@@ -166,6 +156,7 @@ Examples:
 		if !plaintext && !jsonOut {
 			fmt.Printf("\n%s %d results\n", color.New(color.FgGreen).Sprint("✓"), len(resp.SemanticSearch.Results))
 		}
+		return nil
 	},
 }
 

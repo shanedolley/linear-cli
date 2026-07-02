@@ -2,12 +2,12 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"os"
 
+	"github.com/Khan/genqlient/graphql"
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/shanedolley/lincli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -42,11 +42,14 @@ var customerListCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
 	Short:   "List customers",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 
 		limit, _ := cmd.Flags().GetInt("limit")
 		var limitPtr *int
@@ -58,8 +61,7 @@ var customerListCmd = &cobra.Command{
 		newerThan, _ := cmd.Flags().GetString("newer-than")
 		createdAt, err := utils.ParseTimeExpression(newerThan)
 		if err != nil {
-			output.Error(fmt.Sprintf("Invalid newer-than value: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Invalid newer-than value: %v", err)
 		}
 		if createdAt != "" {
 			filter.CreatedAt = &api.DateComparator{Gte: &createdAt}
@@ -67,18 +69,17 @@ var customerListCmd = &cobra.Command{
 
 		resp, err := api.ListCustomers(ctx, client, filter, limitPtr, nil, nil)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list customers: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list customers: %v", err)
 		}
 
 		if resp.Customers == nil || len(resp.Customers.Nodes) == 0 {
 			output.Info("No customers found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(resp.Customers.Nodes)
-			return
+			return nil
 		}
 
 		headers := []string{"ID", "Name", "Status", "Tier", "Needs"}
@@ -107,6 +108,7 @@ var customerListCmd = &cobra.Command{
 		if !plaintext && !jsonOut {
 			fmt.Printf("\n%s %d customers\n", color.New(color.FgGreen).Sprint("✓"), len(resp.Customers.Nodes))
 		}
+		return nil
 	},
 }
 
@@ -115,36 +117,37 @@ var customerGetCmd = &cobra.Command{
 	Aliases: []string{"show"},
 	Short:   "Get a customer by name or ID",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 		cache := newResolverCache()
 
 		id, err := resolveCustomer(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.GetCustomer(ctx, client, id)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get customer: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get customer: %v", err)
 		}
 		f := resp.Customer.CustomerFields
 
 		if jsonOut {
 			output.JSON(resp.Customer)
-			return
+			return nil
 		}
 
 		if plaintext {
 			fmt.Printf("# %s\n", f.Name)
 			fmt.Printf("- **ID**: %s\n", f.Id)
 			fmt.Printf("- **Needs**: %.0f\n", f.ApproximateNeedCount)
-			return
+			return nil
 		}
 
 		fmt.Printf("%s %s\n", color.New(color.FgCyan, color.Bold).Sprint("Customer:"), f.Name)
@@ -162,6 +165,7 @@ var customerGetCmd = &cobra.Command{
 		if len(f.Domains) > 0 {
 			fmt.Printf("  Domains: %v\n", f.Domains)
 		}
+		return nil
 	},
 }
 
@@ -170,17 +174,19 @@ var customerCreateCmd = &cobra.Command{
 	Aliases: []string{"new"},
 	Short:   "Create a customer",
 	Long:    `Create a customer. --name is required.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		name, _ := cmd.Flags().GetString("name")
 		if name == "" {
-			output.Error("Name is required (--name)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Name is required (--name)")
 		}
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 		cache := newResolverCache()
 
 		input := &api.CustomerCreateInput{Name: name}
@@ -189,8 +195,7 @@ var customerCreateCmd = &cobra.Command{
 			owner, _ := cmd.Flags().GetString("owner")
 			ownerID, err := resolveUser(ctx, client, cache, owner)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.OwnerId = &ownerID
 		}
@@ -198,8 +203,7 @@ var customerCreateCmd = &cobra.Command{
 			status, _ := cmd.Flags().GetString("status")
 			statusID, err := resolveCustomerStatus(ctx, client, cache, status)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.StatusId = &statusID
 		}
@@ -207,8 +211,7 @@ var customerCreateCmd = &cobra.Command{
 			tier, _ := cmd.Flags().GetString("tier")
 			tierID, err := resolveCustomerTier(ctx, client, cache, tier)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.TierId = &tierID
 		}
@@ -223,12 +226,10 @@ var customerCreateCmd = &cobra.Command{
 
 		resp, err := api.CustomerCreate(ctx, client, input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create customer: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create customer: %v", err)
 		}
 		if resp.CustomerCreate == nil || !resp.CustomerCreate.Success {
-			output.Error("Failed to create customer", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create customer")
 		}
 
 		if jsonOut {
@@ -236,6 +237,7 @@ var customerCreateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Created customer %s", resp.CustomerCreate.Customer.CustomerFields.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -243,17 +245,19 @@ var customerUpdateCmd = &cobra.Command{
 	Use:   "update <customer>",
 	Short: "Update a customer",
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 		cache := newResolverCache()
 
 		id, err := resolveCustomer(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := &api.CustomerUpdateInput{}
@@ -268,8 +272,7 @@ var customerUpdateCmd = &cobra.Command{
 			owner, _ := cmd.Flags().GetString("owner")
 			ownerID, err := resolveUser(ctx, client, cache, owner)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.OwnerId = &ownerID
 			changed = true
@@ -278,8 +281,7 @@ var customerUpdateCmd = &cobra.Command{
 			status, _ := cmd.Flags().GetString("status")
 			statusID, err := resolveCustomerStatus(ctx, client, cache, status)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.StatusId = &statusID
 			changed = true
@@ -288,8 +290,7 @@ var customerUpdateCmd = &cobra.Command{
 			tier, _ := cmd.Flags().GetString("tier")
 			tierID, err := resolveCustomerTier(ctx, client, cache, tier)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.TierId = &tierID
 			changed = true
@@ -301,18 +302,15 @@ var customerUpdateCmd = &cobra.Command{
 		}
 
 		if !changed {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		resp, err := api.CustomerUpdate(ctx, client, id, input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update customer: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update customer: %v", err)
 		}
 		if resp.CustomerUpdate == nil || !resp.CustomerUpdate.Success {
-			output.Error("Failed to update customer", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update customer")
 		}
 
 		if jsonOut {
@@ -320,6 +318,7 @@ var customerUpdateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Updated customer %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -328,27 +327,27 @@ var customerDeleteCmd = &cobra.Command{
 	Aliases: []string{"rm"},
 	Short:   "Delete a customer",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 		cache := newResolverCache()
 
 		id, err := resolveCustomer(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.CustomerDelete(ctx, client, id)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete customer: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete customer: %v", err)
 		}
 		if resp.CustomerDelete == nil || !resp.CustomerDelete.Success {
-			output.Error("Failed to delete customer", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to delete customer")
 		}
 
 		if jsonOut {
@@ -356,6 +355,7 @@ var customerDeleteCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Deleted customer %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -365,32 +365,31 @@ var customerMergeCmd = &cobra.Command{
 	Long: `Merge the source customer into the target. The source's needs move to the
 target and the source is archived. Executes immediately with no prompt.`,
 	Args: cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 		cache := newResolverCache()
 
 		sourceID, err := resolveCustomer(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 		targetID, err := resolveCustomer(ctx, client, cache, args[1])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.CustomerMerge(ctx, client, sourceID, targetID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to merge customers: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to merge customers: %v", err)
 		}
 		if resp.CustomerMerge == nil || !resp.CustomerMerge.Success {
-			output.Error("Failed to merge customers", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to merge customers")
 		}
 
 		survivor := resp.CustomerMerge.Customer.CustomerFields
@@ -399,6 +398,7 @@ target and the source is archived. Executes immediately with no prompt.`,
 		} else {
 			output.Success(fmt.Sprintf("Merged %s into %s (survivor: %s)", args[0], args[1], survivor.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -408,22 +408,23 @@ var customerUpsertCmd = &cobra.Command{
 	Long: `Create or update a customer, keyed on --external-id. If a customer with that
 external identifier exists it is updated, otherwise a new one is created.
 --external-id and --name are required.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		externalID, _ := cmd.Flags().GetString("external-id")
 		if externalID == "" {
-			output.Error("External ID is required (--external-id)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("External ID is required (--external-id)")
 		}
 		name, _ := cmd.Flags().GetString("name")
 		if name == "" {
-			output.Error("Name is required (--name)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Name is required (--name)")
 		}
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 
 		input := &api.CustomerUpsertInput{
 			ExternalId: &externalID,
@@ -440,12 +441,10 @@ external identifier exists it is updated, otherwise a new one is created.
 
 		resp, err := api.CustomerUpsert(ctx, client, input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to upsert customer: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to upsert customer: %v", err)
 		}
 		if resp.CustomerUpsert == nil || !resp.CustomerUpsert.Success {
-			output.Error("Failed to upsert customer", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to upsert customer")
 		}
 
 		if jsonOut {
@@ -453,6 +452,7 @@ external identifier exists it is updated, otherwise a new one is created.
 		} else {
 			output.Success(fmt.Sprintf("Upserted customer %s", resp.CustomerUpsert.Customer.CustomerFields.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -460,27 +460,27 @@ var customerUnsyncCmd = &cobra.Command{
 	Use:   "unsync <customer>",
 	Short: "Disconnect a customer from its external source",
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 		cache := newResolverCache()
 
 		id, err := resolveCustomer(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.CustomerUnsync(ctx, client, id)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to unsync customer: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to unsync customer: %v", err)
 		}
 		if resp.CustomerUnsync == nil || !resp.CustomerUnsync.Success {
-			output.Error("Failed to unsync customer", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to unsync customer")
 		}
 
 		if jsonOut {
@@ -488,6 +488,7 @@ var customerUnsyncCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Unsynced customer %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -503,11 +504,14 @@ var customerNeedListCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
 	Short:   "List customer needs",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 		cache := newResolverCache()
 
 		limit, _ := cmd.Flags().GetInt("limit")
@@ -520,26 +524,24 @@ var customerNeedListCmd = &cobra.Command{
 		if customer, _ := cmd.Flags().GetString("customer"); customer != "" {
 			customerID, err := resolveCustomer(ctx, client, cache, customer)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			filter.Customer = &api.NullableCustomerFilter{Id: &api.IDComparator{Eq: &customerID}}
 		}
 
 		resp, err := api.ListCustomerNeeds(ctx, client, filter, limitPtr, nil, nil)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list customer needs: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list customer needs: %v", err)
 		}
 
 		if resp.CustomerNeeds == nil || len(resp.CustomerNeeds.Nodes) == 0 {
 			output.Info("No customer needs found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(resp.CustomerNeeds.Nodes)
-			return
+			return nil
 		}
 
 		headers := []string{"ID", "Customer", "Summary", "Issue", "Priority"}
@@ -568,6 +570,7 @@ var customerNeedListCmd = &cobra.Command{
 		if !plaintext && !jsonOut {
 			fmt.Printf("\n%s %d needs\n", color.New(color.FgGreen).Sprint("✓"), len(resp.CustomerNeeds.Nodes))
 		}
+		return nil
 	},
 }
 
@@ -576,22 +579,23 @@ var customerNeedGetCmd = &cobra.Command{
 	Aliases: []string{"show"},
 	Short:   "Get a customer need",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		plaintext := viper.GetBool("plaintext")
+	RunE: func(cmd *cobra.Command, args []string) error {
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 
 		resp, err := api.GetCustomerNeed(ctx, client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get customer need: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get customer need: %v", err)
 		}
 		f := resp.CustomerNeed.CustomerNeedFields
 
 		if jsonOut {
 			output.JSON(resp.CustomerNeed)
-			return
+			return nil
 		}
 
 		fmt.Printf("%s %s\n", color.New(color.FgCyan, color.Bold).Sprint("Need:"), f.Id)
@@ -605,6 +609,7 @@ var customerNeedGetCmd = &cobra.Command{
 		if summary := customerNeedSummary(f); summary != "-" {
 			fmt.Printf("\n%s\n", summary)
 		}
+		return nil
 	},
 }
 
@@ -613,36 +618,39 @@ var customerNeedCreateCmd = &cobra.Command{
 	Aliases: []string{"new"},
 	Short:   "Create a customer need",
 	Long: `Create a customer need tied to a customer and linked to an issue or project.
---customer, --body, and one of --issue/--project are required.`,
-	Run: func(cmd *cobra.Command, args []string) {
+--customer, --body, and one of --issue/--project are required.
+
+The need is created with a Markdown body. Sourcing a need from an existing
+attachment, comment, or attachment URL (the API's attachmentId, commentId, and
+attachmentUrl inputs) is not yet wired; pass the content with --body instead.`,
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		customer, _ := cmd.Flags().GetString("customer")
 		if customer == "" {
-			output.Error("Customer is required (--customer)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Customer is required (--customer)")
 		}
 		body, _ := cmd.Flags().GetString("body")
 		if body == "" {
-			output.Error("Body is required (--body)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Body is required (--body)")
 		}
 
 		issue, _ := cmd.Flags().GetString("issue")
 		project, _ := cmd.Flags().GetString("project")
 		if err := validateCustomerNeedTarget(issue, project); err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 		cache := newResolverCache()
 
 		customerID, err := resolveCustomer(ctx, client, cache, customer)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := &api.CustomerNeedCreateInput{
@@ -662,20 +670,17 @@ var customerNeedCreateCmd = &cobra.Command{
 			project, _ := cmd.Flags().GetString("project")
 			projectID, err := resolveProject(ctx, client, cache, project)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.ProjectId = &projectID
 		}
 
 		resp, err := api.CustomerNeedCreate(ctx, client, input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create customer need: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create customer need: %v", err)
 		}
 		if resp.CustomerNeedCreate == nil || !resp.CustomerNeedCreate.Success {
-			output.Error("Failed to create customer need", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create customer need")
 		}
 
 		if jsonOut {
@@ -683,6 +688,7 @@ var customerNeedCreateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Created customer need %s", resp.CustomerNeedCreate.Need.CustomerNeedFields.Id), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -690,11 +696,14 @@ var customerNeedUpdateCmd = &cobra.Command{
 	Use:   "update <need-id>",
 	Short: "Update a customer need",
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 		cache := newResolverCache()
 
 		input := &api.CustomerNeedUpdateInput{}
@@ -720,26 +729,22 @@ var customerNeedUpdateCmd = &cobra.Command{
 			project, _ := cmd.Flags().GetString("project")
 			projectID, err := resolveProject(ctx, client, cache, project)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.ProjectId = &projectID
 			changed = true
 		}
 
 		if !changed {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		resp, err := api.CustomerNeedUpdate(ctx, client, args[0], input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update customer need: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update customer need: %v", err)
 		}
 		if resp.CustomerNeedUpdate == nil || !resp.CustomerNeedUpdate.Success {
-			output.Error("Failed to update customer need", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update customer need")
 		}
 
 		if jsonOut {
@@ -747,6 +752,7 @@ var customerNeedUpdateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Updated customer need %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -755,20 +761,21 @@ var customerNeedDeleteCmd = &cobra.Command{
 	Aliases: []string{"rm"},
 	Short:   "Delete a customer need",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 
 		resp, err := api.CustomerNeedDelete(ctx, client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete customer need: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete customer need: %v", err)
 		}
 		if resp.CustomerNeedDelete == nil || !resp.CustomerNeedDelete.Success {
-			output.Error("Failed to delete customer need", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to delete customer need")
 		}
 
 		if jsonOut {
@@ -776,6 +783,7 @@ var customerNeedDeleteCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Deleted customer need %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -783,20 +791,21 @@ var customerNeedArchiveCmd = &cobra.Command{
 	Use:   "archive <need-id>",
 	Short: "Archive a customer need",
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 
 		resp, err := api.CustomerNeedArchive(ctx, client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to archive customer need: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to archive customer need: %v", err)
 		}
 		if resp.CustomerNeedArchive == nil || !resp.CustomerNeedArchive.Success {
-			output.Error("Failed to archive customer need", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to archive customer need")
 		}
 
 		if jsonOut {
@@ -804,6 +813,7 @@ var customerNeedArchiveCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Archived customer need %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -812,20 +822,21 @@ var customerNeedUnarchiveCmd = &cobra.Command{
 	Aliases: []string{"restore"},
 	Short:   "Restore an archived customer need",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 
 		resp, err := api.CustomerNeedUnarchive(ctx, client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to unarchive customer need: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to unarchive customer need: %v", err)
 		}
 		if resp.CustomerNeedUnarchive == nil || !resp.CustomerNeedUnarchive.Success {
-			output.Error("Failed to unarchive customer need", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to unarchive customer need")
 		}
 
 		if jsonOut {
@@ -833,6 +844,7 @@ var customerNeedUnarchiveCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Unarchived customer need %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -847,27 +859,29 @@ var customerStatusListCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
 	Short:   "List customer statuses",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 
 		limit := 250
 		resp, err := api.ListCustomerStatuses(ctx, client, &limit, nil, nil)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list customer statuses: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list customer statuses: %v", err)
 		}
 
 		if resp.CustomerStatuses == nil || len(resp.CustomerStatuses.Nodes) == 0 {
 			output.Info("No customer statuses found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(resp.CustomerStatuses.Nodes)
-			return
+			return nil
 		}
 
 		headers := []string{"ID", "Name", "Color"}
@@ -878,6 +892,7 @@ var customerStatusListCmd = &cobra.Command{
 		}
 
 		output.Table(output.TableData{Headers: headers, Rows: rows}, plaintext, jsonOut)
+		return nil
 	},
 }
 
@@ -886,18 +901,20 @@ var customerStatusCreateCmd = &cobra.Command{
 	Aliases: []string{"new"},
 	Short:   "Create a customer status",
 	Long:    `Create a customer status. --name and --color are required.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		name, _ := cmd.Flags().GetString("name")
 		color, _ := cmd.Flags().GetString("color")
 		if name == "" || color == "" {
-			output.Error("Name and color are required (--name, --color)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Name and color are required (--name, --color)")
 		}
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 
 		input := &api.CustomerStatusCreateInput{Name: &name, Color: color}
 		if cmd.Flags().Changed("description") {
@@ -907,12 +924,10 @@ var customerStatusCreateCmd = &cobra.Command{
 
 		resp, err := api.CustomerStatusCreate(ctx, client, input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create customer status: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create customer status: %v", err)
 		}
 		if resp.CustomerStatusCreate == nil || !resp.CustomerStatusCreate.Success {
-			output.Error("Failed to create customer status", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create customer status")
 		}
 
 		if jsonOut {
@@ -920,6 +935,7 @@ var customerStatusCreateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Created customer status %s", resp.CustomerStatusCreate.Status.CustomerStatusFields.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -927,11 +943,14 @@ var customerStatusUpdateCmd = &cobra.Command{
 	Use:   "update <status-id>",
 	Short: "Update a customer status",
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 
 		input := &api.CustomerStatusUpdateInput{}
 		changed := false
@@ -952,18 +971,15 @@ var customerStatusUpdateCmd = &cobra.Command{
 		}
 
 		if !changed {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		resp, err := api.CustomerStatusUpdate(ctx, client, args[0], input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update customer status: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update customer status: %v", err)
 		}
 		if resp.CustomerStatusUpdate == nil || !resp.CustomerStatusUpdate.Success {
-			output.Error("Failed to update customer status", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update customer status")
 		}
 
 		if jsonOut {
@@ -971,6 +987,7 @@ var customerStatusUpdateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Updated customer status %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -979,20 +996,21 @@ var customerStatusDeleteCmd = &cobra.Command{
 	Aliases: []string{"rm"},
 	Short:   "Delete a customer status",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 
 		resp, err := api.CustomerStatusDelete(ctx, client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete customer status: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete customer status: %v", err)
 		}
 		if resp.CustomerStatusDelete == nil || !resp.CustomerStatusDelete.Success {
-			output.Error("Failed to delete customer status", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to delete customer status")
 		}
 
 		if jsonOut {
@@ -1000,6 +1018,7 @@ var customerStatusDeleteCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Deleted customer status %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1014,27 +1033,29 @@ var customerTierListCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
 	Short:   "List customer tiers",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 
 		limit := 250
 		resp, err := api.ListCustomerTiers(ctx, client, &limit, nil, nil)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list customer tiers: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list customer tiers: %v", err)
 		}
 
 		if resp.CustomerTiers == nil || len(resp.CustomerTiers.Nodes) == 0 {
 			output.Info("No customer tiers found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(resp.CustomerTiers.Nodes)
-			return
+			return nil
 		}
 
 		headers := []string{"ID", "Name", "Color"}
@@ -1045,6 +1066,7 @@ var customerTierListCmd = &cobra.Command{
 		}
 
 		output.Table(output.TableData{Headers: headers, Rows: rows}, plaintext, jsonOut)
+		return nil
 	},
 }
 
@@ -1053,18 +1075,20 @@ var customerTierCreateCmd = &cobra.Command{
 	Aliases: []string{"new"},
 	Short:   "Create a customer tier",
 	Long:    `Create a customer tier. --name and --color are required.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		name, _ := cmd.Flags().GetString("name")
 		color, _ := cmd.Flags().GetString("color")
 		if name == "" || color == "" {
-			output.Error("Name and color are required (--name, --color)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Name and color are required (--name, --color)")
 		}
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 
 		input := &api.CustomerTierCreateInput{Name: &name, Color: color}
 		if cmd.Flags().Changed("description") {
@@ -1074,12 +1098,10 @@ var customerTierCreateCmd = &cobra.Command{
 
 		resp, err := api.CustomerTierCreate(ctx, client, input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create customer tier: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create customer tier: %v", err)
 		}
 		if resp.CustomerTierCreate == nil || !resp.CustomerTierCreate.Success {
-			output.Error("Failed to create customer tier", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create customer tier")
 		}
 
 		if jsonOut {
@@ -1087,6 +1109,7 @@ var customerTierCreateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Created customer tier %s", resp.CustomerTierCreate.Tier.CustomerTierFields.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1094,11 +1117,14 @@ var customerTierUpdateCmd = &cobra.Command{
 	Use:   "update <tier-id>",
 	Short: "Update a customer tier",
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 
 		input := &api.CustomerTierUpdateInput{}
 		changed := false
@@ -1119,18 +1145,15 @@ var customerTierUpdateCmd = &cobra.Command{
 		}
 
 		if !changed {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		resp, err := api.CustomerTierUpdate(ctx, client, args[0], input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update customer tier: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update customer tier: %v", err)
 		}
 		if resp.CustomerTierUpdate == nil || !resp.CustomerTierUpdate.Success {
-			output.Error("Failed to update customer tier", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update customer tier")
 		}
 
 		if jsonOut {
@@ -1138,6 +1161,7 @@ var customerTierUpdateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Updated customer tier %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1146,20 +1170,21 @@ var customerTierDeleteCmd = &cobra.Command{
 	Aliases: []string{"rm"},
 	Short:   "Delete a customer tier",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := customerClient(plaintext, jsonOut)
+		client, ctx, err := customerClient()
+		if err != nil {
+			return err
+		}
 
 		resp, err := api.CustomerTierDelete(ctx, client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete customer tier: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete customer tier: %v", err)
 		}
 		if resp.CustomerTierDelete == nil || !resp.CustomerTierDelete.Success {
-			output.Error("Failed to delete customer tier", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to delete customer tier")
 		}
 
 		if jsonOut {
@@ -1167,18 +1192,18 @@ var customerTierDeleteCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Deleted customer tier %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
 // customerClient builds the authenticated client and context shared by the
-// customer subcommands, exiting on an auth failure.
-func customerClient(plaintext, jsonOut bool) (*api.Client, context.Context) {
-	authHeader, err := auth.GetAuthHeader()
+// customer subcommands.
+func customerClient() (graphql.Client, context.Context, error) {
+	client, err := newGraphQLClient()
 	if err != nil {
-		output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return nil, nil, err
 	}
-	return api.NewClient(authHeader), context.Background()
+	return client, context.Background(), nil
 }
 
 // validateCustomerNeedTarget enforces Linear's rule that a customer need must

@@ -1,12 +1,14 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -92,12 +94,23 @@ var rootCmd = &cobra.Command{
 	Short:   "A comprehensive Linear CLI tool",
 	Long:    color.New(color.FgCyan).Sprintf("%s\nA comprehensive CLI tool for Linear's API featuring:\n• Issue management (create, list, update, archive)\n• Project tracking and collaboration  \n• Team and user management\n• Comments and attachments\n• Webhook configuration\n• Table/plaintext/JSON output formats\n", generateHeader()),
 	Version: version,
+	// Handlers are RunE and return their errors; Execute renders them once, in
+	// the active output mode. Silencing cobra's own error/usage printing keeps
+	// that the single error path (matching the previous os.Exit behavior).
+	SilenceErrors: true,
+	SilenceUsage:  true,
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
+// Execute runs the root command and renders any handler error in the active
+// output mode before exiting non-zero. Centralizing this lets handlers return
+// errors (RunE) instead of calling os.Exit, which is what makes them testable.
+// A handler that already rendered its own error output returns errSilent, which
+// Execute treats as "exit non-zero, print nothing more".
 func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
+	if err := rootCmd.Execute(); err != nil {
+		if !errors.Is(err, errSilent) {
+			output.Error(err.Error(), viper.GetBool("plaintext"), viper.GetBool("json"))
+		}
 		os.Exit(1)
 	}
 }

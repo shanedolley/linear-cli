@@ -2,12 +2,11 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"os"
 
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/shanedolley/lincli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -36,17 +35,14 @@ var documentListCmd = &cobra.Command{
 	Aliases: []string{"ls"},
 	Short:   "List documents",
 	Long:    `List documents, optionally filtered by project, initiative, or creation time.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
@@ -61,16 +57,14 @@ var documentListCmd = &cobra.Command{
 		if project, _ := cmd.Flags().GetString("project"); project != "" {
 			projectID, err := resolveProject(ctx, client, cache, project)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			filter.Project = &api.ProjectFilter{Id: &api.IDComparator{Eq: &projectID}}
 		}
 		if initiative, _ := cmd.Flags().GetString("initiative"); initiative != "" {
 			initiativeID, err := resolveInitiative(ctx, client, cache, initiative)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			filter.Initiative = &api.InitiativeFilter{Id: &api.IDComparator{Eq: &initiativeID}}
 		}
@@ -78,8 +72,7 @@ var documentListCmd = &cobra.Command{
 		newerThan, _ := cmd.Flags().GetString("newer-than")
 		createdAt, err := utils.ParseTimeExpression(newerThan)
 		if err != nil {
-			output.Error(fmt.Sprintf("Invalid newer-than value: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Invalid newer-than value: %v", err)
 		}
 		if createdAt != "" {
 			filter.CreatedAt = &api.DateComparator{Gte: &createdAt}
@@ -95,24 +88,22 @@ var documentListCmd = &cobra.Command{
 			v := api.PaginationOrderByUpdatedat
 			orderBy = &v
 		default:
-			output.Error(fmt.Sprintf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy)
 		}
 
 		resp, err := api.ListDocuments(ctx, client, filter, limitPtr, nil, orderBy)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list documents: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list documents: %v", err)
 		}
 
 		if resp.Documents == nil || len(resp.Documents.Nodes) == 0 {
 			output.Info("No documents found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(resp.Documents.Nodes)
-			return
+			return nil
 		}
 
 		if plaintext {
@@ -126,7 +117,7 @@ var documentListCmd = &cobra.Command{
 				fmt.Println()
 			}
 			fmt.Printf("\nTotal: %d documents\n", len(resp.Documents.Nodes))
-			return
+			return nil
 		}
 
 		headers := []string{"ID", "Title", "Parent", "Creator", "Updated"}
@@ -151,6 +142,7 @@ var documentListCmd = &cobra.Command{
 		if !plaintext && !jsonOut {
 			fmt.Printf("\n%s %d documents\n", color.New(color.FgGreen).Sprint("✓"), len(resp.Documents.Nodes))
 		}
+		return nil
 	},
 }
 
@@ -159,17 +151,14 @@ var documentSearchCmd = &cobra.Command{
 	Short: "Search documents by text",
 	Long:  `Full-text search across documents. Results are ranked by relevance.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		limit, _ := cmd.Flags().GetInt("limit")
@@ -180,18 +169,17 @@ var documentSearchCmd = &cobra.Command{
 
 		resp, err := api.SearchDocuments(ctx, client, args[0], limitPtr)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to search documents: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to search documents: %v", err)
 		}
 
 		if resp.SearchDocuments == nil || len(resp.SearchDocuments.Nodes) == 0 {
 			output.Info(fmt.Sprintf("No documents matching %q", args[0]), plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(resp.SearchDocuments.Nodes)
-			return
+			return nil
 		}
 
 		headers := []string{"ID", "Title", "URL"}
@@ -209,6 +197,7 @@ var documentSearchCmd = &cobra.Command{
 		if !plaintext && !jsonOut {
 			fmt.Printf("\n%s %d of %.0f matches\n", color.New(color.FgGreen).Sprint("✓"), len(resp.SearchDocuments.Nodes), resp.SearchDocuments.TotalCount)
 		}
+		return nil
 	},
 }
 
@@ -221,27 +210,22 @@ var documentGetCmd = &cobra.Command{
 Use --history to also show the document's content revision history
 (version count and timestamps).`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		resp, err := api.GetDocument(ctx, client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get document: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get document: %v", err)
 		}
 		if resp.Document == nil {
-			output.Error(fmt.Sprintf("Document not found: %s", args[0]), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Document not found: %s", args[0])
 		}
 		d := resp.Document.DocumentDetailFields
 		f := d.DocumentListFields
@@ -254,8 +238,7 @@ Use --history to also show the document's content revision history
 		if showHistory && d.DocumentContentId != nil {
 			history, err = api.DocumentContentHistory(ctx, client, *d.DocumentContentId)
 			if err != nil {
-				output.Error(fmt.Sprintf("Failed to load content history: %v", err), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Failed to load content history: %v", err)
 			}
 		}
 
@@ -265,7 +248,7 @@ Use --history to also show the document's content revision history
 			} else {
 				output.JSON(resp.Document)
 			}
-			return
+			return nil
 		}
 
 		content := ""
@@ -285,7 +268,7 @@ Use --history to also show the document's content revision history
 			if showHistory {
 				printDocumentHistory(history)
 			}
-			return
+			return nil
 		}
 
 		fmt.Printf("%s %s\n", color.New(color.FgCyan, color.Bold).Sprint("Document:"), documentTitle(f.Title))
@@ -301,6 +284,7 @@ Use --history to also show the document's content revision history
 		if showHistory {
 			printDocumentHistory(history)
 		}
+		return nil
 	},
 }
 
@@ -309,31 +293,26 @@ var documentCreateCmd = &cobra.Command{
 	Aliases: []string{"new"},
 	Short:   "Create a document",
 	Long:    `Create a document under exactly one parent: a project or an initiative.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		title, _ := cmd.Flags().GetString("title")
 		if title == "" {
-			output.Error("Title is required (--title)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Title is required (--title)")
 		}
 
 		project, _ := cmd.Flags().GetString("project")
 		initiative, _ := cmd.Flags().GetString("initiative")
 		if err := validateDocumentParent(project, initiative); err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := &api.DocumentCreateInput{Title: title}
@@ -341,16 +320,14 @@ var documentCreateCmd = &cobra.Command{
 		if project != "" {
 			projectID, err := resolveProject(ctx, client, cache, project)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.ProjectId = &projectID
 		}
 		if initiative != "" {
 			initiativeID, err := resolveInitiative(ctx, client, cache, initiative)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.InitiativeId = &initiativeID
 		}
@@ -366,12 +343,10 @@ var documentCreateCmd = &cobra.Command{
 
 		resp, err := api.DocumentCreate(ctx, client, input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create document: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create document: %v", err)
 		}
 		if resp.DocumentCreate == nil || !resp.DocumentCreate.Success {
-			output.Error("Failed to create document", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create document")
 		}
 
 		if jsonOut {
@@ -379,6 +354,7 @@ var documentCreateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Created document %s", documentTitle(resp.DocumentCreate.Document.DocumentDetailFields.DocumentListFields.Title)), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -387,17 +363,14 @@ var documentUpdateCmd = &cobra.Command{
 	Short: "Update a document",
 	Long:  `Update a document's title, content, icon, or color.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 
 		input := &api.DocumentUpdateInput{}
 
@@ -419,18 +392,15 @@ var documentUpdateCmd = &cobra.Command{
 		}
 
 		if input.Title == nil && input.Content == nil && input.Icon == nil && input.Color == nil {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		resp, err := api.DocumentUpdate(context.Background(), client, args[0], input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update document: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update document: %v", err)
 		}
 		if resp.DocumentUpdate == nil || !resp.DocumentUpdate.Success {
-			output.Error("Failed to update document", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update document")
 		}
 
 		if jsonOut {
@@ -438,6 +408,7 @@ var documentUpdateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Updated document %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -447,26 +418,21 @@ var documentDeleteCmd = &cobra.Command{
 	Short:   "Delete a document",
 	Long:    `Delete (trash) a document. Reversible with 'document unarchive'.`,
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 
 		resp, err := api.DocumentDelete(context.Background(), client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete document: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete document: %v", err)
 		}
 		if resp.DocumentDelete == nil || !resp.DocumentDelete.Success {
-			output.Error("Failed to delete document", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to delete document")
 		}
 
 		if jsonOut {
@@ -474,6 +440,7 @@ var documentDeleteCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Deleted document %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -483,26 +450,21 @@ var documentUnarchiveCmd = &cobra.Command{
 	Short:   "Restore a deleted document",
 	Long:    `Restore a previously deleted (trashed) document.`,
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 
 		resp, err := api.DocumentUnarchive(context.Background(), client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to unarchive document: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to unarchive document: %v", err)
 		}
 		if resp.DocumentUnarchive == nil || !resp.DocumentUnarchive.Success {
-			output.Error("Failed to unarchive document", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to unarchive document")
 		}
 
 		if jsonOut {
@@ -510,6 +472,7 @@ var documentUnarchiveCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Unarchived document %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 

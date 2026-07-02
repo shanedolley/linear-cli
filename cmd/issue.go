@@ -2,11 +2,14 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
+	"github.com/Khan/genqlient/graphql"
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
 	"github.com/shanedolley/lincli/pkg/auth"
@@ -46,17 +49,14 @@ var issueListCmd = &cobra.Command{
 	Aliases: []string{"ls"},
 	Short:   "List issues",
 	Long:    `List Linear issues with optional filtering.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 
 		// Build typed filter from flags
 		filterTyped := buildIssueFilterTyped(cmd)
@@ -81,8 +81,7 @@ var issueListCmd = &cobra.Command{
 				// Use nil for Linear's default sort
 				orderByEnum = nil
 			default:
-				output.Error(fmt.Sprintf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy)
 			}
 		}
 
@@ -94,20 +93,19 @@ var issueListCmd = &cobra.Command{
 
 		resp, err := api.ListIssues(context.Background(), client, filterTyped, limitPtr, nil, orderByEnum)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to fetch issues: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to fetch issues: %v", err)
 		}
 
 		// Check if empty
 		if len(resp.Issues.Nodes) == 0 {
 			output.Info("No issues found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		// JSON output
 		if jsonOut {
 			output.JSON(resp.Issues.Nodes)
-			return
+			return nil
 		}
 
 		// Plaintext output
@@ -136,7 +134,7 @@ var issueListCmd = &cobra.Command{
 				fmt.Println()
 			}
 			fmt.Printf("\nTotal: %d issues\n", len(resp.Issues.Nodes))
-			return
+			return nil
 		}
 
 		// Table output
@@ -178,6 +176,7 @@ var issueListCmd = &cobra.Command{
 
 		output.Table(tableData, false, false)
 		fmt.Printf("\nTotal: %d issues\n", len(resp.Issues.Nodes))
+		return nil
 	},
 }
 
@@ -192,23 +191,19 @@ Examples:
   lincli issue search "auth token" --team ENG --include-completed
   lincli issue search "customer:" --json`,
 	Args: cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		query := strings.TrimSpace(strings.Join(args, " "))
 		if query == "" {
-			output.Error("Search query is required", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Search query is required")
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 
 		// Build typed filter from flags
 		filterTyped := buildIssueFilterTyped(cmd)
@@ -233,8 +228,7 @@ Examples:
 				// Use nil for Linear's default sort
 				orderByEnum = nil
 			default:
-				output.Error(fmt.Sprintf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy)
 			}
 		}
 
@@ -249,20 +243,19 @@ Examples:
 
 		resp, err := api.SearchIssues(context.Background(), client, query, filterTyped, limitPtr, nil, orderByEnum, includeArchivedPtr)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to search issues: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to search issues: %v", err)
 		}
 
 		// Check if empty
 		if len(resp.SearchIssues.Nodes) == 0 {
 			output.Info(fmt.Sprintf("No matches found for %q", query), plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		// JSON output
 		if jsonOut {
 			output.JSON(resp.SearchIssues.Nodes)
-			return
+			return nil
 		}
 
 		// Plaintext output
@@ -290,7 +283,7 @@ Examples:
 				fmt.Println()
 			}
 			fmt.Printf("\nTotal: %d search results\n", len(resp.SearchIssues.Nodes))
-			return
+			return nil
 		}
 
 		// Table output
@@ -330,6 +323,7 @@ Examples:
 
 		output.Table(tableData, false, false)
 		fmt.Printf("\nTotal: %d search results\n", len(resp.SearchIssues.Nodes))
+		return nil
 	},
 }
 
@@ -339,27 +333,23 @@ var issueGetCmd = &cobra.Command{
 	Short:   "Get issue details",
 	Long:    `Get detailed information about a specific issue.`,
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		resp, err := api.GetIssue(context.Background(), client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to fetch issue: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to fetch issue: %v", err)
 		}
 		issue := resp.Issue
 
 		if jsonOut {
 			output.JSON(issue.IssueDetailFields)
-			return
+			return nil
 		}
 
 		if plaintext {
@@ -526,8 +516,15 @@ var issueGetCmd = &cobra.Command{
 				for _, reaction := range issue.IssueDetailFields.Reactions {
 					reactionMap[reaction.Emoji] = append(reactionMap[reaction.Emoji], reaction.User.Name)
 				}
-				for emoji, users := range reactionMap {
-					fmt.Printf("- %s: %s\n", emoji, strings.Join(users, ", "))
+				// Sort emoji keys so the output is stable across runs (Go map
+				// iteration order is randomized).
+				emojis := make([]string, 0, len(reactionMap))
+				for emoji := range reactionMap {
+					emojis = append(emojis, emoji)
+				}
+				sort.Strings(emojis)
+				for _, emoji := range emojis {
+					fmt.Printf("- %s: %s\n", emoji, strings.Join(reactionMap[emoji], ", "))
 				}
 			}
 
@@ -643,7 +640,7 @@ var issueGetCmd = &cobra.Command{
 				}
 			}
 
-			return
+			return nil
 		}
 
 		// Rich display
@@ -790,6 +787,7 @@ var issueGetCmd = &cobra.Command{
 				color.New(color.FgWhite, color.Faint).Sprint("→"),
 				issue.IssueDetailFields.Identifier)
 		}
+		return nil
 	},
 }
 
@@ -872,7 +870,7 @@ func buildIssueUpdateInput(cmd *cobra.Command) api.IssueUpdateInput {
 // resolveIssueLabels resolves each --label value to a label ID, returning the
 // ID slice for use as IssueCreateInput.LabelIds / IssueUpdateInput.LabelIds.
 // A resolution failure aborts the command (matching the other flag handlers).
-func resolveIssueLabels(ctx context.Context, client *api.Client, cache *ResolverCache, cmd *cobra.Command, plaintext, jsonOut bool) []string {
+func resolveIssueLabels(ctx context.Context, client graphql.Client, cache *ResolverCache, cmd *cobra.Command, plaintext, jsonOut bool) []string {
 	labels, _ := cmd.Flags().GetStringSlice("label")
 	ids := make([]string, 0, len(labels))
 	for _, label := range labels {
@@ -888,13 +886,13 @@ func resolveIssueLabels(ctx context.Context, client *api.Client, cache *Resolver
 
 // resolveParentIssueID resolves a parent issue reference (identifier or UUID)
 // to its UUID via GetIssue, matching how `issue link` resolves parents.
-func resolveParentIssueID(ctx context.Context, client *api.Client, ref string, plaintext, jsonOut bool) string {
-	resp, err := api.GetIssue(ctx, client, ref)
+func resolveParentIssueID(ctx context.Context, client graphql.Client, ref string, plaintext, jsonOut bool) string {
+	id, err := resolveIssueID(ctx, client, ref)
 	if err != nil {
-		output.Error(fmt.Sprintf("Failed to find parent issue '%s': %v", ref, err), plaintext, jsonOut)
+		output.Error(fmt.Sprintf("Failed to find parent %v", err), plaintext, jsonOut)
 		os.Exit(1)
 	}
-	return resp.Issue.IssueDetailFields.Id
+	return id
 }
 
 var issueAssignCmd = &cobra.Command{
@@ -902,23 +900,19 @@ var issueAssignCmd = &cobra.Command{
 	Short: "Assign issue to yourself",
 	Long:  `Assign an issue to yourself.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 
 		// Get current user
 		viewerResp, err := api.GetViewer(context.Background(), client)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get current user: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get current user: %v", err)
 		}
 		viewerID := viewerResp.Viewer.UserDetailFields.Id
 
@@ -929,8 +923,7 @@ var issueAssignCmd = &cobra.Command{
 
 		updateResp, err := api.UpdateIssue(context.Background(), client, args[0], &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to assign issue: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to assign issue: %v", err)
 		}
 		issue := updateResp.IssueUpdate.Issue
 
@@ -945,6 +938,7 @@ var issueAssignCmd = &cobra.Command{
 				color.New(color.FgGreen).Sprint("✓"),
 				color.New(color.FgCyan, color.Bold).Sprint(issue.IssueListFields.Identifier))
 		}
+		return nil
 	},
 }
 
@@ -965,17 +959,14 @@ Examples:
   lincli issue create --title "Fix login" --team ENG --label Bug --label Backend --estimate 3
   lincli issue create --title "Sub-task" --team ENG --parent ENG-100
   lincli issue create --title "Roadmap item" --team ENG --project "Q3" --milestone "Beta"`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
@@ -985,20 +976,17 @@ Examples:
 		assignToMe, _ := cmd.Flags().GetBool("assign-me")
 
 		if title == "" {
-			output.Error("Title is required (--title)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Title is required (--title)")
 		}
 
 		if teamKey == "" {
-			output.Error("Team is required (--team)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Team is required (--team)")
 		}
 
 		// Get team ID from key
 		teamID, err := resolveTeam(ctx, client, cache, teamKey)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to find team '%s': %v", teamKey, err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to find team '%s': %v", teamKey, err)
 		}
 
 		// Build input
@@ -1007,8 +995,7 @@ Examples:
 		if assignToMe {
 			viewerID, err := resolveUser(ctx, client, cache, "me")
 			if err != nil {
-				output.Error(fmt.Sprintf("Failed to get current user: %v", err), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Failed to get current user: %v", err)
 			}
 			input.AssigneeId = &viewerID
 		}
@@ -1018,8 +1005,7 @@ Examples:
 			assignee, _ := cmd.Flags().GetString("assignee")
 			userID, err := resolveUser(ctx, client, cache, assignee)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.AssigneeId = &userID
 		}
@@ -1028,8 +1014,7 @@ Examples:
 			stateName, _ := cmd.Flags().GetString("state")
 			stateID, err := resolveWorkflowState(ctx, client, cache, teamID, stateName)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.StateId = &stateID
 		}
@@ -1046,8 +1031,7 @@ Examples:
 			cycle, _ := cmd.Flags().GetString("cycle")
 			cycleID, err := resolveCycle(ctx, client, cache, teamID, cycle)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.CycleId = &cycleID
 		}
@@ -1064,22 +1048,19 @@ Examples:
 			projectName, _ := cmd.Flags().GetString("project")
 			projectID, err := resolveProject(ctx, client, cache, projectName)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.ProjectId = &projectID
 		}
 
 		if cmd.Flags().Changed("milestone") {
 			if input.ProjectId == nil {
-				output.Error("--milestone requires --project (a milestone belongs to a project)", plaintext, jsonOut)
-				os.Exit(1)
+				return errors.New("--milestone requires --project (a milestone belongs to a project)")
 			}
 			milestone, _ := cmd.Flags().GetString("milestone")
 			milestoneID, err := resolveMilestone(ctx, client, cache, *input.ProjectId, milestone)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.ProjectMilestoneId = &milestoneID
 		}
@@ -1090,8 +1071,7 @@ Examples:
 			template, _ := cmd.Flags().GetString("template")
 			templateID, err := resolveTemplate(ctx, client, cache, "issue", template)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.TemplateId = &templateID
 		}
@@ -1099,8 +1079,7 @@ Examples:
 		// Create issue
 		createResp, err := api.CreateIssue(ctx, client, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create issue: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create issue: %v", err)
 		}
 		issue := createResp.IssueCreate.Issue
 
@@ -1119,6 +1098,7 @@ Examples:
 				fmt.Printf("  Assigned to: %s\n", color.New(color.FgCyan).Sprint(issue.IssueListFields.Assignee.Name))
 			}
 		}
+		return nil
 	},
 }
 
@@ -1142,17 +1122,14 @@ Examples:
   lincli issue update LIN-123 --parent ENG-100
   lincli issue update LIN-123 --parent none`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
@@ -1173,8 +1150,7 @@ Examples:
 				// "me" and email/name lookups are both handled by resolveUser.
 				userID, err := resolveUser(ctx, client, cache, assignee)
 				if err != nil {
-					output.Error(err.Error(), plaintext, jsonOut)
-					os.Exit(1)
+					return err
 				}
 				input.AssigneeId = &userID
 			}
@@ -1184,23 +1160,25 @@ Examples:
 		// resolve --state, --cycle by number/name, and --milestone by name.
 		// Fetch it at most once and reuse it across those handlers.
 		var issueDetail *api.IssueDetailFields
-		getIssueDetail := func() *api.IssueDetailFields {
+		getIssueDetail := func() (*api.IssueDetailFields, error) {
 			if issueDetail == nil {
 				issueResp, err := api.GetIssue(ctx, client, args[0])
 				if err != nil {
-					output.Error(fmt.Sprintf("Failed to get issue: %v", err), plaintext, jsonOut)
-					os.Exit(1)
+					return nil, fmt.Errorf("Failed to get issue: %v", err)
 				}
 				issueDetail = &issueResp.Issue.IssueDetailFields
 			}
-			return issueDetail
+			return issueDetail, nil
 		}
 
 		// Handle state update - uses workflow states embedded in the issue.
 		if cmd.Flags().Changed("state") {
 			stateName, _ := cmd.Flags().GetString("state")
 
-			detail := getIssueDetail()
+			detail, err := getIssueDetail()
+			if err != nil {
+				return err
+			}
 			teamKey := detail.Team.Key
 
 			// Seed the resolver cache with the states embedded in the issue
@@ -1214,8 +1192,7 @@ Examples:
 
 			stateID, err := resolveWorkflowState(ctx, client, cache, teamKey, stateName)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 
 			input.StateId = &stateID
@@ -1243,8 +1220,7 @@ Examples:
 			default:
 				projectID, err := resolveProject(ctx, client, cache, projectName)
 				if err != nil {
-					output.Error(err.Error(), plaintext, jsonOut)
-					os.Exit(1)
+					return err
 				}
 				input.ProjectId = &projectID
 			}
@@ -1260,12 +1236,15 @@ Examples:
 			cycle, _ := cmd.Flags().GetString("cycle")
 			teamID := ""
 			if !isUUID(cycle) {
-				teamID = getIssueDetail().Team.Id
+				detail, err := getIssueDetail()
+				if err != nil {
+					return err
+				}
+				teamID = detail.Team.Id
 			}
 			cycleID, err := resolveCycle(ctx, client, cache, teamID, cycle)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.CycleId = &cycleID
 		}
@@ -1277,15 +1256,16 @@ Examples:
 			if isUUID(milestone) {
 				input.ProjectMilestoneId = &milestone
 			} else {
-				detail := getIssueDetail()
+				detail, err := getIssueDetail()
+				if err != nil {
+					return err
+				}
 				if detail.Project == nil {
-					output.Error("Cannot resolve --milestone by name: the issue is not in a project. Pass a milestone UUID instead.", plaintext, jsonOut)
-					os.Exit(1)
+					return errors.New("Cannot resolve --milestone by name: the issue is not in a project. Pass a milestone UUID instead.")
 				}
 				milestoneID, err := resolveMilestone(ctx, client, cache, detail.Project.Id, milestone)
 				if err != nil {
-					output.Error(err.Error(), plaintext, jsonOut)
-					os.Exit(1)
+					return err
 				}
 				input.ProjectMilestoneId = &milestoneID
 			}
@@ -1320,15 +1300,13 @@ Examples:
 			cmd.Flags().Changed("parent")
 
 		if !hasUpdates {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		// Update the issue using generated function
 		updateResp, err := api.UpdateIssue(ctx, client, args[0], &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update issue: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update issue: %v", err)
 		}
 		updatedIssue := updateResp.IssueUpdate.Issue
 
@@ -1339,6 +1317,7 @@ Examples:
 		} else {
 			output.Success(fmt.Sprintf("Updated issue %s", updatedIssue.IssueListFields.Identifier), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1348,17 +1327,14 @@ var issueArchiveCmd = &cobra.Command{
 	Long: `Archive an issue. Use --trash to move it to trash (a soft delete with a
 30-day grace period) instead of a plain archive.`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		var trashPtr *bool
@@ -1368,12 +1344,10 @@ var issueArchiveCmd = &cobra.Command{
 
 		resp, err := api.IssueArchive(ctx, client, args[0], trashPtr)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to archive issue: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to archive issue: %v", err)
 		}
 		if !resp.IssueArchive.Success {
-			output.Error("Failed to archive issue", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to archive issue")
 		}
 
 		if jsonOut {
@@ -1381,6 +1355,7 @@ var issueArchiveCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Archived issue %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1389,27 +1364,22 @@ var issueUnarchiveCmd = &cobra.Command{
 	Short: "Unarchive an issue",
 	Long:  `Restore a previously archived issue.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		resp, err := api.IssueUnarchive(ctx, client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to unarchive issue: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to unarchive issue: %v", err)
 		}
 		if !resp.IssueUnarchive.Success {
-			output.Error("Failed to unarchive issue", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to unarchive issue")
 		}
 
 		if jsonOut {
@@ -1417,6 +1387,7 @@ var issueUnarchiveCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Unarchived issue %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1427,17 +1398,14 @@ var issueDeleteCmd = &cobra.Command{
 confirmation prompt. Use --permanent to skip the 30-day grace period (admin
 only).`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		var permanentPtr *bool
@@ -1447,12 +1415,10 @@ only).`,
 
 		resp, err := api.IssueDelete(ctx, client, args[0], permanentPtr)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete issue: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete issue: %v", err)
 		}
 		if !resp.IssueDelete.Success {
-			output.Error("Failed to delete issue", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to delete issue")
 		}
 
 		if jsonOut {
@@ -1460,6 +1426,7 @@ only).`,
 		} else {
 			output.Success(fmt.Sprintf("Deleted issue %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1468,8 +1435,9 @@ var issueSubscribeCmd = &cobra.Command{
 	Short: "Subscribe a user to an issue",
 	Long:  `Subscribe a user to an issue. Defaults to yourself; use --user to subscribe someone else.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		runIssueSubscription(cmd, args[0], true)
+		return nil
 	},
 }
 
@@ -1478,8 +1446,9 @@ var issueUnsubscribeCmd = &cobra.Command{
 	Short: "Unsubscribe a user from an issue",
 	Long:  `Unsubscribe a user from an issue. Defaults to yourself; use --user to unsubscribe someone else.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		runIssueSubscription(cmd, args[0], false)
+		return nil
 	},
 }
 
@@ -1551,38 +1520,31 @@ Examples:
   lincli issue reminder LIN-123 --at 2026-08-01
   lincli issue reminder LIN-123 --at 2026-08-01T09:00:00Z`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		at, _ := cmd.Flags().GetString("at")
 		if at == "" {
-			output.Error("Reminder time is required (--at)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Reminder time is required (--at)")
 		}
 		reminderAt, err := parseDateTimeFlag(at)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.IssueReminder(ctx, client, args[0], reminderAt)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to set reminder: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to set reminder: %v", err)
 		}
 		if !resp.IssueReminder.Success {
-			output.Error("Failed to set reminder", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to set reminder")
 		}
 
 		if jsonOut {
@@ -1590,6 +1552,7 @@ Examples:
 		} else {
 			output.Success(fmt.Sprintf("Set reminder on issue %s for %s", args[0], reminderAt.Format("2006-01-02 15:04")), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1598,8 +1561,9 @@ var issueShareCmd = &cobra.Command{
 	Short: "Share an issue with a user",
 	Long:  `Share an issue with a specific user. --user is required.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		runIssueShare(cmd, args[0], true)
+		return nil
 	},
 }
 
@@ -1608,8 +1572,9 @@ var issueUnshareCmd = &cobra.Command{
 	Short: "Stop sharing an issue with a user",
 	Long:  `Stop sharing an issue with a specific user. --user is required.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		runIssueShare(cmd, args[0], false)
+		return nil
 	},
 }
 
@@ -1622,8 +1587,9 @@ Examples:
   lincli issue react LIN-123 --emoji 👍
   lincli issue react LIN-123 --emoji 👍 --remove`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		runReaction(cmd, "issue", args[0])
+		return nil
 	},
 }
 
@@ -1720,7 +1686,7 @@ Examples:
   lincli issue link TEAM-123 TEAM-456 --type sub-issue-of
   lincli issue link TEAM-123 TEAM-456 --type blocks --remove`,
 	Args: cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
@@ -1729,8 +1695,7 @@ Examples:
 
 		// Validate not self-referential
 		if strings.EqualFold(sourceIssue, targetIssue) {
-			output.Error("Cannot link an issue to itself", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Cannot link an issue to itself")
 		}
 
 		linkType, _ := cmd.Flags().GetString("type")
@@ -1746,31 +1711,28 @@ Examples:
 			}
 		}
 		if !isValidType {
-			output.Error(fmt.Sprintf("Invalid type '%s'. Valid types: %s", linkType, strings.Join(validTypes, ", ")), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Invalid type '%s'. Valid types: %s", linkType, strings.Join(validTypes, ", "))
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		// Handle parent/child types differently - they use IssueUpdateInput.parentId
 		if linkType == "parent-of" || linkType == "sub-issue-of" {
 			handleParentChildLink(ctx, client, sourceIssue, targetIssue, linkType, remove, plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		// Handle relation types (blocks, blocked-by, related, duplicate)
 		handleRelationLink(ctx, client, sourceIssue, targetIssue, linkType, remove, plaintext, jsonOut)
+		return nil
 	},
 }
 
-func handleParentChildLink(ctx context.Context, client *api.Client, sourceIssue, targetIssue, linkType string, remove bool, plaintext, jsonOut bool) {
+func handleParentChildLink(ctx context.Context, client graphql.Client, sourceIssue, targetIssue, linkType string, remove bool, plaintext, jsonOut bool) {
 	// For parent-of: target's parentId = source's id
 	// For sub-issue-of: source's parentId = target's id
 
@@ -1861,7 +1823,7 @@ func handleParentChildLink(ctx context.Context, client *api.Client, sourceIssue,
 	}
 }
 
-func handleRelationLink(ctx context.Context, client *api.Client, sourceIssue, targetIssue, linkType string, remove bool, plaintext, jsonOut bool) {
+func handleRelationLink(ctx context.Context, client graphql.Client, sourceIssue, targetIssue, linkType string, remove bool, plaintext, jsonOut bool) {
 	// Get issue IDs first
 	sourceResp, err := api.GetIssue(ctx, client, sourceIssue)
 	if err != nil {
@@ -2112,10 +2074,6 @@ func init() {
 // Filter helper functions for type-safe filter building
 func stringEq(val string) *api.StringComparator {
 	return &api.StringComparator{Eq: &val}
-}
-
-func stringIn(vals []string) *api.StringComparator {
-	return &api.StringComparator{In: vals}
 }
 
 func stringNin(vals []string) *api.StringComparator {

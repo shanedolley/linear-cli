@@ -2,12 +2,11 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"os"
 
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -33,32 +32,28 @@ var orgGetCmd = &cobra.Command{
 	Aliases: []string{"show"},
 	Short:   "Show organization details",
 	Long:    `Show details about the current workspace organization.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
+		ctx := context.Background()
 
-		client := api.NewClient(authHeader)
-
-		resp, err := api.GetOrganization(context.Background(), client)
+		resp, err := api.GetOrganization(ctx, client)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get organization: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get organization: %v", err)
 		}
 		if resp.Organization == nil {
-			output.Error("Organization not found", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Organization not found")
 		}
 		o := resp.Organization.OrganizationFields
 
 		if jsonOut {
 			output.JSON(resp.Organization)
-			return
+			return nil
 		}
 
 		if plaintext {
@@ -66,13 +61,14 @@ var orgGetCmd = &cobra.Command{
 			fmt.Printf("- **ID**: %s\n", o.Id)
 			fmt.Printf("- **URL key**: %s\n", o.UrlKey)
 			fmt.Printf("- **Users**: %d\n", o.UserCount)
-			return
+			return nil
 		}
 
 		fmt.Printf("%s %s\n", color.New(color.FgCyan, color.Bold).Sprint("Organization:"), o.Name)
 		fmt.Printf("  ID:      %s\n", o.Id)
 		fmt.Printf("  URL key: %s\n", o.UrlKey)
 		fmt.Printf("  Users:   %d\n", o.UserCount)
+		return nil
 	},
 }
 
@@ -80,17 +76,15 @@ var orgUpdateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Update organization settings",
 	Long:  `Update the organization's name or URL key.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
+		ctx := context.Background()
 
 		input := api.OrganizationUpdateInput{}
 		if cmd.Flags().Changed("name") {
@@ -103,18 +97,15 @@ var orgUpdateCmd = &cobra.Command{
 		}
 
 		if input.Name == nil && input.UrlKey == nil {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
-		resp, err := api.OrganizationUpdate(context.Background(), client, &input)
+		resp, err := api.OrganizationUpdate(ctx, client, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update organization: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update organization: %v", err)
 		}
 		if resp.OrganizationUpdate == nil || !resp.OrganizationUpdate.Success {
-			output.Error("Failed to update organization", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update organization")
 		}
 
 		if jsonOut {
@@ -122,6 +113,7 @@ var orgUpdateCmd = &cobra.Command{
 		} else {
 			output.Success("Updated organization", plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -136,17 +128,15 @@ var orgInviteListCmd = &cobra.Command{
 	Aliases: []string{"ls"},
 	Short:   "List organization invites",
 	Long:    `List pending and accepted invites for the workspace.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
+		ctx := context.Background()
 
 		limit, _ := cmd.Flags().GetInt("limit")
 		var limitPtr *int
@@ -154,19 +144,18 @@ var orgInviteListCmd = &cobra.Command{
 			limitPtr = &limit
 		}
 
-		resp, err := api.ListOrganizationInvites(context.Background(), client, limitPtr, nil)
+		resp, err := api.ListOrganizationInvites(ctx, client, limitPtr, nil)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list invites: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list invites: %v", err)
 		}
 		if resp.OrganizationInvites == nil || len(resp.OrganizationInvites.Nodes) == 0 {
 			output.Info("No invites found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(resp.OrganizationInvites.Nodes)
-			return
+			return nil
 		}
 
 		headers := []string{"ID", "Email", "Role", "Status"}
@@ -186,6 +175,7 @@ var orgInviteListCmd = &cobra.Command{
 		if !plaintext && !jsonOut {
 			fmt.Printf("\n%s %d invites\n", color.New(color.FgGreen).Sprint("✓"), len(resp.OrganizationInvites.Nodes))
 		}
+		return nil
 	},
 }
 
@@ -194,14 +184,13 @@ var orgInviteCreateCmd = &cobra.Command{
 	Aliases: []string{"new"},
 	Short:   "Create an organization invite",
 	Long:    `Invite a user to the workspace by email. --role defaults to 'user'.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		email, _ := cmd.Flags().GetString("email")
 		if email == "" {
-			output.Error("Email is required (--email)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Email is required (--email)")
 		}
 
 		input := api.OrganizationInviteCreateInput{Email: email}
@@ -209,28 +198,23 @@ var orgInviteCreateCmd = &cobra.Command{
 			roleStr, _ := cmd.Flags().GetString("role")
 			role, err := validateUserRole(roleStr)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.Role = &role
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
+		ctx := context.Background()
 
-		client := api.NewClient(authHeader)
-
-		resp, err := api.OrganizationInviteCreate(context.Background(), client, &input)
+		resp, err := api.OrganizationInviteCreate(ctx, client, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create invite: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create invite: %v", err)
 		}
 		if resp.OrganizationInviteCreate == nil || !resp.OrganizationInviteCreate.Success {
-			output.Error("Failed to create invite", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create invite")
 		}
 
 		if jsonOut {
@@ -238,6 +222,7 @@ var orgInviteCreateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Invited %s", email), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -247,26 +232,22 @@ var orgInviteDeleteCmd = &cobra.Command{
 	Short:   "Delete an organization invite",
 	Long:    `Delete (revoke) a pending organization invite.`,
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
+		ctx := context.Background()
 
-		client := api.NewClient(authHeader)
-
-		resp, err := api.OrganizationInviteDelete(context.Background(), client, args[0])
+		resp, err := api.OrganizationInviteDelete(ctx, client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete invite: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete invite: %v", err)
 		}
 		if resp.OrganizationInviteDelete == nil || !resp.OrganizationInviteDelete.Success {
-			output.Error("Failed to delete invite", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to delete invite")
 		}
 
 		if jsonOut {
@@ -274,6 +255,7 @@ var orgInviteDeleteCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Deleted invite %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -282,26 +264,22 @@ var orgInviteResendCmd = &cobra.Command{
 	Short: "Resend an organization invite",
 	Long:  `Resend a pending organization invite email.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
+		ctx := context.Background()
 
-		client := api.NewClient(authHeader)
-
-		resp, err := api.ResendOrganizationInvite(context.Background(), client, args[0])
+		resp, err := api.ResendOrganizationInvite(ctx, client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to resend invite: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to resend invite: %v", err)
 		}
 		if resp.ResendOrganizationInvite == nil || !resp.ResendOrganizationInvite.Success {
-			output.Error("Failed to resend invite", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to resend invite")
 		}
 
 		if jsonOut {
@@ -309,6 +287,7 @@ var orgInviteResendCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Resent invite %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 

@@ -2,13 +2,14 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"time"
 
+	"github.com/Khan/genqlient/graphql"
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/shanedolley/lincli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -52,17 +53,14 @@ var cycleListCmd = &cobra.Command{
 	Aliases: []string{"ls"},
 	Short:   "List cycles",
 	Long:    `List cycles, optionally filtered by team.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
@@ -84,26 +82,24 @@ var cycleListCmd = &cobra.Command{
 			val := api.PaginationOrderByUpdatedat
 			orderByEnum = &val
 		default:
-			output.Error(fmt.Sprintf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy)
 		}
 
 		filter := buildCycleFilterTyped(ctx, client, cache, cmd, plaintext, jsonOut)
 
 		resp, err := api.ListCycles(ctx, client, &filter, limitPtr, nil, orderByEnum)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list cycles: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list cycles: %v", err)
 		}
 
 		if len(resp.Cycles.Nodes) == 0 {
 			output.Info("No cycles found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(resp.Cycles.Nodes)
-			return
+			return nil
 		}
 
 		if plaintext {
@@ -119,7 +115,7 @@ var cycleListCmd = &cobra.Command{
 				fmt.Println()
 			}
 			fmt.Printf("\nTotal: %d cycles\n", len(resp.Cycles.Nodes))
-			return
+			return nil
 		}
 
 		headers := []string{"ID", "Number", "Name", "Team", "Starts", "Ends", "Progress"}
@@ -146,6 +142,7 @@ var cycleListCmd = &cobra.Command{
 		if !plaintext && !jsonOut {
 			fmt.Printf("\n%s %d cycles\n", color.New(color.FgGreen).Sprint("✓"), len(resp.Cycles.Nodes))
 		}
+		return nil
 	},
 }
 
@@ -155,36 +152,31 @@ var cycleGetCmd = &cobra.Command{
 	Short:   "Get cycle details",
 	Long:    `Get detailed information about a cycle, including its scope and progress history.`,
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		cycleID := resolveCycleArg(ctx, client, cache, cmd, args[0], plaintext, jsonOut)
 		resp, err := api.GetCycle(ctx, client, cycleID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get cycle: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get cycle: %v", err)
 		}
 		if resp.Cycle == nil {
-			output.Error(fmt.Sprintf("Cycle not found: %s", args[0]), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Cycle not found: %s", args[0])
 		}
 		d := resp.Cycle.CycleDetailFields
 		f := d.CycleListFields
 
 		if jsonOut {
 			output.JSON(resp.Cycle)
-			return
+			return nil
 		}
 
 		label := cycleLabel(f)
@@ -201,7 +193,7 @@ var cycleGetCmd = &cobra.Command{
 			if f.CompletedAt != nil {
 				fmt.Printf("- **Completed**: %s\n", f.CompletedAt.Format("2006-01-02"))
 			}
-			return
+			return nil
 		}
 
 		fmt.Printf("%s %s\n", color.New(color.FgCyan, color.Bold).Sprint("Cycle:"), label)
@@ -213,6 +205,7 @@ var cycleGetCmd = &cobra.Command{
 		if f.CompletedAt != nil {
 			fmt.Printf("  Completed: %s\n", f.CompletedAt.Format("2006-01-02"))
 		}
+		return nil
 	},
 }
 
@@ -221,47 +214,36 @@ var cycleCreateCmd = &cobra.Command{
 	Aliases: []string{"new"},
 	Short:   "Create a new cycle",
 	Long:    `Create a new cycle for a team. --starts-at and --ends-at are required.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		plaintext := viper.GetBool("plaintext")
-		jsonOut := viper.GetBool("json")
-
-		authHeader, err := auth.GetAuthHeader()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		team, _ := cmd.Flags().GetString("team")
 		if team == "" {
-			output.Error("Team is required (--team)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Team is required (--team)")
 		}
 		startsAt, _ := cmd.Flags().GetString("starts-at")
 		endsAt, _ := cmd.Flags().GetString("ends-at")
 		if startsAt == "" || endsAt == "" {
-			output.Error("Both --starts-at and --ends-at are required", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Both --starts-at and --ends-at are required")
 		}
 
 		start, err := parseDateTimeFlag(startsAt)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 		end, err := parseDateTimeFlag(endsAt)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		teamID, err := resolveTeam(ctx, client, cache, team)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := api.CycleCreateInput{
@@ -278,14 +260,14 @@ var cycleCreateCmd = &cobra.Command{
 
 		resp, err := api.CycleCreate(ctx, client, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create cycle: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create cycle: %v", err)
 		}
 		if !resp.CycleCreate.Success {
-			output.Error("Failed to create cycle", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create cycle")
 		}
 
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
 		if jsonOut {
 			output.JSON(resp.CycleCreate.Cycle)
 		} else if resp.CycleCreate.Cycle != nil {
@@ -293,6 +275,7 @@ var cycleCreateCmd = &cobra.Command{
 		} else {
 			output.Success("Created cycle", plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -301,17 +284,14 @@ var cycleUpdateCmd = &cobra.Command{
 	Short: "Update a cycle",
 	Long:  `Update a cycle's name, description, start date, or end date.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
@@ -334,8 +314,7 @@ var cycleUpdateCmd = &cobra.Command{
 			startsAt, _ := cmd.Flags().GetString("starts-at")
 			start, err := parseDateTimeFlag(startsAt)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.StartsAt = &start
 			hasUpdates = true
@@ -344,26 +323,22 @@ var cycleUpdateCmd = &cobra.Command{
 			endsAt, _ := cmd.Flags().GetString("ends-at")
 			end, err := parseDateTimeFlag(endsAt)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.EndsAt = &end
 			hasUpdates = true
 		}
 
 		if !hasUpdates {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		resp, err := api.CycleUpdate(ctx, client, cycleID, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update cycle: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update cycle: %v", err)
 		}
 		if !resp.CycleUpdate.Success {
-			output.Error("Failed to update cycle", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update cycle")
 		}
 
 		if jsonOut {
@@ -371,6 +346,7 @@ var cycleUpdateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Updated cycle %s", cycleID), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -379,17 +355,14 @@ var cycleArchiveCmd = &cobra.Command{
 	Short: "Archive a cycle",
 	Long:  `Archive a cycle. This action executes immediately with no confirmation prompt.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
@@ -397,12 +370,10 @@ var cycleArchiveCmd = &cobra.Command{
 
 		resp, err := api.CycleArchive(ctx, client, cycleID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to archive cycle: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to archive cycle: %v", err)
 		}
 		if !resp.CycleArchive.Success {
-			output.Error("Failed to archive cycle", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to archive cycle")
 		}
 
 		if jsonOut {
@@ -410,6 +381,7 @@ var cycleArchiveCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Archived cycle %s", cycleID), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -421,24 +393,20 @@ var cycleShiftCmd = &cobra.Command{
 Takes the id of the cycle to start shifting from. Use --by with a positive
 number to move later, or a negative number to move earlier.`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		days, _ := cmd.Flags().GetFloat64("by")
 		if days == 0 {
-			output.Error("Specify a non-zero number of days with --by", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Specify a non-zero number of days with --by")
 		}
 
 		cycleID := resolveCycleArg(ctx, client, cache, cmd, args[0], plaintext, jsonOut)
@@ -446,12 +414,10 @@ number to move later, or a negative number to move earlier.`,
 		input := api.CycleShiftAllInput{Id: cycleID, DaysToShift: days}
 		resp, err := api.CycleShiftAll(ctx, client, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to shift cycles: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to shift cycles: %v", err)
 		}
 		if !resp.CycleShiftAll.Success {
-			output.Error("Failed to shift cycles", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to shift cycles")
 		}
 
 		if jsonOut {
@@ -459,6 +425,7 @@ number to move later, or a negative number to move earlier.`,
 		} else {
 			output.Success(fmt.Sprintf("Shifted cycles from %s by %.0f days", cycleID, days), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -470,17 +437,14 @@ var cycleStartNowCmd = &cobra.Command{
 Takes the id of that upcoming cycle. Completes the previous cycle if it has
 not yet ended.`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
@@ -488,12 +452,10 @@ not yet ended.`,
 
 		resp, err := api.CycleStartUpcomingCycleToday(ctx, client, cycleID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to start cycle: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to start cycle: %v", err)
 		}
 		if !resp.CycleStartUpcomingCycleToday.Success {
-			output.Error("Failed to start cycle", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to start cycle")
 		}
 
 		if jsonOut {
@@ -501,13 +463,14 @@ not yet ended.`,
 		} else {
 			output.Success(fmt.Sprintf("Started cycle %s today", cycleID), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
 // buildCycleFilterTyped builds a CycleFilter from the list flags: an optional
 // team filter (by resolved team ID) and a created-after bound from
 // --newer-than (which defaults to all_time for cycles).
-func buildCycleFilterTyped(ctx context.Context, client *api.Client, cache *ResolverCache, cmd *cobra.Command, plaintext, jsonOut bool) api.CycleFilter {
+func buildCycleFilterTyped(ctx context.Context, client graphql.Client, cache *ResolverCache, cmd *cobra.Command, plaintext, jsonOut bool) api.CycleFilter {
 	filter := api.CycleFilter{}
 
 	if team, _ := cmd.Flags().GetString("team"); team != "" {
@@ -535,7 +498,7 @@ func buildCycleFilterTyped(ctx context.Context, client *api.Client, cache *Resol
 // resolveCycleArg resolves a cycle argument that may be a UUID (returned as-is)
 // or a cycle number/name. Number/name resolution needs a team, taken from the
 // --team flag; without it, a non-UUID reference is an error.
-func resolveCycleArg(ctx context.Context, client *api.Client, cache *ResolverCache, cmd *cobra.Command, ref string, plaintext, jsonOut bool) string {
+func resolveCycleArg(ctx context.Context, client graphql.Client, cache *ResolverCache, cmd *cobra.Command, ref string, plaintext, jsonOut bool) string {
 	if isUUID(ref) {
 		return ref
 	}

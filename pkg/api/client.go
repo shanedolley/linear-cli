@@ -5,11 +5,14 @@ package api
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
@@ -62,11 +65,32 @@ func NewClientWithURL(baseURL, authHeader string) *Client {
 	}
 }
 
-// NullSentinel is a special value that will be converted to null in the GraphQL request.
-// Use this when you need to explicitly send null to clear a field.
-const NullSentinel = "__LINCLI_NULL__"
+// NullSentinel is an unguessable, per-process marker. Assigning it to an
+// optional field asks stripNulls to send an explicit JSON null (to clear the
+// field) rather than omitting the field. genqlient generates mutation-input
+// fields as pointers without `omitempty`, so a nil pointer would serialize as
+// `null`; stripNulls drops those to distinguish "absent" from "clear", and this
+// sentinel is the way a command opts back in to sending an explicit null.
+//
+// The marker carries random bytes so that no user-supplied field value (an
+// issue title, a comment body) can ever equal it and be silently turned into
+// null. See docs/adr/0001-explicit-null-handling.md.
+var NullSentinel = newNullSentinel()
 
-// stripNulls recursively removes null values from a map, and converts NullSentinel to null
+func newNullSentinel() string {
+	buf := make([]byte, 16)
+	if _, err := rand.Read(buf); err != nil {
+		// crypto/rand should never fail; if it somehow does, fall back to a
+		// fixed marker. A collision with real Linear data remains unlikely.
+		return "__LINCLI_NULL__"
+	}
+	return "__LINCLI_NULL__" + hex.EncodeToString(buf)
+}
+
+// stripNulls recursively removes null values from a map and converts
+// NullSentinel to null. Empty nested objects are preserved (not dropped), so a
+// caller can send an intentionally empty object; only Go nil values, which
+// genqlient emits for unset optional fields, are removed.
 func stripNulls(m map[string]interface{}) map[string]interface{} {
 	result := make(map[string]interface{})
 	for k, v := range m {
@@ -79,10 +103,7 @@ func stripNulls(m map[string]interface{}) map[string]interface{} {
 			continue
 		}
 		if innerMap, ok := v.(map[string]interface{}); ok {
-			stripped := stripNulls(innerMap)
-			if len(stripped) > 0 {
-				result[k] = stripped
-			}
+			result[k] = stripNulls(innerMap)
 		} else if innerSlice, ok := v.([]interface{}); ok {
 			// Recurse into map elements so nested filter objects (for
 			// example the "or"/"and" arrays) get their null comparator
@@ -104,6 +125,42 @@ func stripNulls(m map[string]interface{}) map[string]interface{} {
 		}
 	}
 	return result
+}
+
+// sensitiveVarKeys names request variables whose values may carry a secret
+// (for example a webhook signing secret). LINCLI_DEBUG_GQL redacts them so the
+// debug dump can be shared without leaking credentials.
+var sensitiveVarKeys = map[string]bool{
+	"secret":   true,
+	"token":    true,
+	"password": true,
+	"apikey":   true,
+}
+
+// redactSensitive returns a deep copy of v with the values of any
+// sensitive-named keys replaced by "[REDACTED]". It walks nested maps and
+// slices so secrets inside input objects are covered too.
+func redactSensitive(v interface{}) interface{} {
+	switch val := v.(type) {
+	case map[string]interface{}:
+		out := make(map[string]interface{}, len(val))
+		for k, child := range val {
+			if sensitiveVarKeys[strings.ToLower(k)] {
+				out[k] = "[REDACTED]"
+				continue
+			}
+			out[k] = redactSensitive(child)
+		}
+		return out
+	case []interface{}:
+		out := make([]interface{}, len(val))
+		for i, child := range val {
+			out[i] = redactSensitive(child)
+		}
+		return out
+	default:
+		return v
+	}
 }
 
 // MakeRequest implements the graphql.Client interface required by genqlient
@@ -135,9 +192,18 @@ func (c *Client) MakeRequest(ctx context.Context, req *graphql.Request, resp *gr
 		return fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	// DEBUG: Print the request body for debugging
+	// DEBUG: Print the request body for debugging, with any secret-bearing
+	// variables redacted so the dump is safe to share.
 	if os.Getenv("LINCLI_DEBUG_GQL") != "" {
-		fmt.Fprintf(os.Stderr, "DEBUG: GraphQL Request: %s\n", string(jsonBody))
+		debugBody := GraphQLRequest{Query: req.Query}
+		if variables != nil {
+			if redacted, ok := redactSensitive(variables).(map[string]interface{}); ok {
+				debugBody.Variables = redacted
+			}
+		}
+		if debugJSON, err := json.Marshal(debugBody); err == nil {
+			fmt.Fprintf(os.Stderr, "DEBUG: GraphQL Request: %s\n", string(debugJSON))
+		}
 	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", c.baseURL, bytes.NewBuffer(jsonBody))

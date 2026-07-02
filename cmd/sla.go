@@ -2,12 +2,11 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"os"
 
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -28,46 +27,40 @@ var slaListCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
 	Short:   "List a team's SLA rules",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		team, _ := cmd.Flags().GetString("team")
 		if team == "" {
-			output.Error("Team is required (--team)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Team is required (--team)")
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		teamID, err := resolveTeam(ctx, client, cache, team)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.ListSlaConfigurations(ctx, client, teamID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list SLA rules: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list SLA rules: %v", err)
 		}
 
 		if len(resp.SlaConfigurations) == 0 {
 			output.Info("No SLA rules configured for this team", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(resp.SlaConfigurations)
-			return
+			return nil
 		}
 
 		headers := []string{"ID", "Name", "SLA", "Day count", "Removes"}
@@ -95,6 +88,7 @@ var slaListCmd = &cobra.Command{
 		if !plaintext && !jsonOut {
 			fmt.Printf("\n%s %d rules\n", color.New(color.FgGreen).Sprint("✓"), len(resp.SlaConfigurations))
 		}
+		return nil
 	},
 }
 

@@ -228,7 +228,7 @@ run_test "webhook list (json)" "go run main.go webhook list --limit 5 -j"
 echo -e "\n${YELLOW}Testing template commands...${NC}"
 run_test "template list" "go run main.go template list"
 run_test "template list (json)" "go run main.go template list -j"
-run_test "template list (type filter)" "go run main.go template list --type issue"
+run_test "template list (type filter)" "go run main.go template list --template-type issue"
 
 # Test customer/CRM commands (Tier 4a - PR 5a). Releases deferred (Business plan).
 echo -e "\n${YELLOW}Testing customer commands...${NC}"

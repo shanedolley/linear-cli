@@ -4,14 +4,15 @@ import (
 	"context"
 	"encoding/csv"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/Khan/genqlient/graphql"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -83,37 +84,30 @@ cycle, milestone, estimate, due-date, parent.
 
 All rows are resolved before anything is created; if any row fails to resolve,
 nothing is created.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		file, _ := cmd.Flags().GetString("file")
 		if file == "" {
-			output.Error("A file is required (--file)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("A file is required (--file)")
 		}
 
 		rows, err := parseBatchFile(file, cmd)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 		if len(rows) == 0 {
-			output.Error("No issues found in file", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No issues found in file")
 		}
 		if len(rows) > 50 {
-			output.Error(fmt.Sprintf("batch-create accepts at most 50 issues at a time (file has %d)", len(rows)), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("batch-create accepts at most 50 issues at a time (file has %d)", len(rows))
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
@@ -123,8 +117,7 @@ nothing is created.`,
 		for i, row := range rows {
 			input, err := buildBatchCreateInput(ctx, client, cache, row)
 			if err != nil {
-				output.Error(fmt.Sprintf("Row %d: %v", i+1, err), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Row %d: %v", i+1, err)
 			}
 			inputs = append(inputs, input)
 		}
@@ -136,23 +129,22 @@ nothing is created.`,
 			return e
 		})
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create issues: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create issues: %v", err)
 		}
 		if !resp.IssueBatchCreate.Success {
-			output.Error("Failed to create issues", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create issues")
 		}
 
 		created := resp.IssueBatchCreate.Issues
 		if jsonOut {
 			output.JSON(created)
-			return
+			return nil
 		}
 		for _, issue := range created {
 			fmt.Printf("Created %s: %s\n", issue.IssueListFields.Identifier, issue.IssueListFields.Title)
 		}
 		output.Success(fmt.Sprintf("Created %d issues", len(created)), plaintext, jsonOut)
+		return nil
 	},
 }
 
@@ -171,22 +163,18 @@ Examples:
   lincli issue batch-update ENG-1 ENG-2 ENG-3 --state Done
   lincli issue batch-update ENG-1 ENG-2 --assignee me --priority 1`,
 	Args: cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		if len(args) > 50 {
-			output.Error("batch-update accepts at most 50 issues at a time", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("batch-update accepts at most 50 issues at a time")
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
@@ -200,15 +188,13 @@ Examples:
 				ids = append(ids, ref)
 				continue
 			}
-			resp, err := api.GetIssue(ctx, client, ref)
+			detail, err := resolveIssueDetail(ctx, client, ref)
 			if err != nil {
-				output.Error(fmt.Sprintf("Failed to find issue '%s': %v", ref, err), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Failed to find %v", err)
 			}
-			ids = append(ids, resp.Issue.IssueDetailFields.Id)
+			ids = append(ids, detail.Id)
 			if firstDetail == nil {
-				d := resp.Issue.IssueDetailFields
-				firstDetail = &d
+				firstDetail = detail
 			}
 		}
 
@@ -224,8 +210,7 @@ Examples:
 			} else {
 				userID, err := resolveUser(ctx, client, cache, assignee)
 				if err != nil {
-					output.Error(err.Error(), plaintext, jsonOut)
-					os.Exit(1)
+					return err
 				}
 				input.AssigneeId = &userID
 			}
@@ -241,8 +226,7 @@ Examples:
 			} else {
 				projectID, err := resolveProject(ctx, client, cache, projectName)
 				if err != nil {
-					output.Error(err.Error(), plaintext, jsonOut)
-					os.Exit(1)
+					return err
 				}
 				input.ProjectId = &projectID
 			}
@@ -250,13 +234,11 @@ Examples:
 		if cmd.Flags().Changed("state") {
 			stateName, _ := cmd.Flags().GetString("state")
 			if firstDetail == nil {
-				output.Error("Cannot resolve --state by name from a UUID-only batch. Pass a state UUID instead.", plaintext, jsonOut)
-				os.Exit(1)
+				return errors.New("Cannot resolve --state by name from a UUID-only batch. Pass a state UUID instead.")
 			}
 			stateID, err := resolveWorkflowState(ctx, client, cache, firstDetail.Team.Key, stateName)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.StateId = &stateID
 		}
@@ -265,15 +247,13 @@ Examples:
 			teamID := ""
 			if !isUUID(cycle) {
 				if firstDetail == nil {
-					output.Error("Cannot resolve --cycle by name from a UUID-only batch. Pass a cycle UUID instead.", plaintext, jsonOut)
-					os.Exit(1)
+					return errors.New("Cannot resolve --cycle by name from a UUID-only batch. Pass a cycle UUID instead.")
 				}
 				teamID = firstDetail.Team.Id
 			}
 			cycleID, err := resolveCycle(ctx, client, cache, teamID, cycle)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.CycleId = &cycleID
 		}
@@ -283,13 +263,11 @@ Examples:
 				input.ProjectMilestoneId = &milestone
 			} else {
 				if firstDetail == nil || firstDetail.Project == nil {
-					output.Error("Cannot resolve --milestone by name: pass a milestone UUID, or ensure the first issue is in a project.", plaintext, jsonOut)
-					os.Exit(1)
+					return errors.New("Cannot resolve --milestone by name: pass a milestone UUID, or ensure the first issue is in a project.")
 				}
 				milestoneID, err := resolveMilestone(ctx, client, cache, firstDetail.Project.Id, milestone)
 				if err != nil {
-					output.Error(err.Error(), plaintext, jsonOut)
-					os.Exit(1)
+					return err
 				}
 				input.ProjectMilestoneId = &milestoneID
 			}
@@ -306,8 +284,7 @@ Examples:
 		}
 
 		if !batchUpdateHasChanges(cmd, input) {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		var resp *api.IssueBatchUpdateResponse
@@ -317,19 +294,18 @@ Examples:
 			return e
 		})
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update issues: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update issues: %v", err)
 		}
 		if !resp.IssueBatchUpdate.Success {
-			output.Error("Failed to update issues", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update issues")
 		}
 
 		if jsonOut {
 			output.JSON(resp.IssueBatchUpdate.Issues)
-			return
+			return nil
 		}
 		output.Success(fmt.Sprintf("Updated %d issues", len(resp.IssueBatchUpdate.Issues)), plaintext, jsonOut)
+		return nil
 	},
 }
 
@@ -351,7 +327,7 @@ func batchUpdateHasChanges(cmd *cobra.Command, input api.IssueUpdateInput) bool 
 
 // buildBatchCreateInput resolves one row into an IssueCreateInput, reusing the
 // shared cache. Team and title are required.
-func buildBatchCreateInput(ctx context.Context, client *api.Client, cache *ResolverCache, row batchIssueRow) (*api.IssueCreateInput, error) {
+func buildBatchCreateInput(ctx context.Context, client graphql.Client, cache *ResolverCache, row batchIssueRow) (*api.IssueCreateInput, error) {
 	if strings.TrimSpace(row.Title) == "" {
 		return nil, fmt.Errorf("title is required")
 	}
@@ -412,11 +388,10 @@ func buildBatchCreateInput(ctx context.Context, client *api.Client, cache *Resol
 		input.CycleId = &cycleID
 	}
 	if row.Parent != "" {
-		resp, err := api.GetIssue(ctx, client, row.Parent)
+		parentID, err := resolveIssueID(ctx, client, row.Parent)
 		if err != nil {
-			return nil, fmt.Errorf("parent issue '%s': %w", row.Parent, err)
+			return nil, fmt.Errorf("parent %w", err)
 		}
-		parentID := resp.Issue.IssueDetailFields.Id
 		input.ParentId = &parentID
 	}
 	// Project must be resolved before milestone (a milestone belongs to it).

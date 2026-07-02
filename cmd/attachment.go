@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"mime"
@@ -15,7 +16,6 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/schollz/progressbar/v3"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -40,7 +40,7 @@ var attachmentListCmd = &cobra.Command{
 	Short: "List attachments on an issue",
 	Long:  `List all attachments (both files and URLs) on a Linear issue.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		issueID := args[0]
 
 		// Get output flags
@@ -65,19 +65,15 @@ var attachmentListCmd = &cobra.Command{
 				val := api.PaginationOrderByUpdatedat
 				orderByEnum = &val
 			default:
-				output.Error(fmt.Sprintf("Invalid sort option: %s. Valid options are: linear, created, updated", sortFlag), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Invalid sort option: %s. Valid options are: linear, created, updated", sortFlag)
 			}
 		}
 
 		// Get auth and create client
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		// Convert limit to pointer
@@ -89,14 +85,12 @@ var attachmentListCmd = &cobra.Command{
 		// Call API
 		resp, err := api.ListAttachments(ctx, client, issueID, limitPtr, nil, orderByEnum)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list attachments: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list attachments: %v", err)
 		}
 
 		// Check if issue exists
 		if resp.Issue == nil {
-			output.Error(fmt.Sprintf("Issue %s not found", issueID), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Issue %s not found", issueID)
 		}
 
 		attachments := resp.Issue.Attachments.Nodes
@@ -104,12 +98,12 @@ var attachmentListCmd = &cobra.Command{
 		// Render output
 		if jsonOut {
 			output.JSON(attachments)
-			return
+			return nil
 		}
 
 		if len(attachments) == 0 {
 			fmt.Println("No attachments found")
-			return
+			return nil
 		}
 
 		if plaintext {
@@ -153,6 +147,7 @@ var attachmentListCmd = &cobra.Command{
 			}
 			table.Render()
 		}
+		return nil
 	},
 }
 
@@ -167,11 +162,10 @@ var attachmentCreateCmd = &cobra.Command{
 	Short: "Create a URL attachment on an issue",
 	Long:  `Create an attachment linking to an external URL (e.g., GitHub PR, documentation).`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		issueID := args[0]
 
 		// Get output flags
-		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		// Get flags
@@ -183,12 +177,10 @@ var attachmentCreateCmd = &cobra.Command{
 
 		// Validate required flags
 		if url == "" {
-			output.Error("--url is required", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("--url is required")
 		}
 		if title == "" {
-			output.Error("--title is required", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("--title is required")
 		}
 
 		// Parse metadata
@@ -197,8 +189,7 @@ var attachmentCreateCmd = &cobra.Command{
 			var err error
 			metadataMap, err := parseMetadata(metadataStr)
 			if err != nil {
-				output.Error(fmt.Sprintf("Invalid metadata: %v", err), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Invalid metadata: %v", err)
 			}
 			metadata = &metadataMap
 		}
@@ -220,36 +211,32 @@ var attachmentCreateCmd = &cobra.Command{
 		}
 
 		// Get auth and create client
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		// Call API
 		resp, err := api.AttachmentCreate(ctx, client, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create attachment: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create attachment: %v", err)
 		}
 
 		if !resp.AttachmentCreate.Success {
-			output.Error("Failed to create attachment", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create attachment")
 		}
 
 		// Render output
 		if jsonOut {
 			output.JSON(resp.AttachmentCreate.Attachment)
-			return
+			return nil
 		}
 
 		fmt.Printf("✓ Created attachment: %s\n", resp.AttachmentCreate.Attachment.Title)
 		fmt.Printf("  ID: %s\n", resp.AttachmentCreate.Attachment.Id)
 		fmt.Printf("  URL: %s\n", resp.AttachmentCreate.Attachment.Url)
+		return nil
 	},
 }
 
@@ -523,23 +510,20 @@ Example:
     --file report.pdf --title "Q4 Report" --subtitle "Draft" \
     --file screenshot.png --title "Bug Screenshot"`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		issueID := args[0]
 
 		// Get output flags
-		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		// Parse file attachments from flags
 		files, err := parseFileFlags(cmd)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		if len(files) == 0 {
-			output.Error("At least one --file and --title pair is required", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("At least one --file and --title pair is required")
 		}
 
 		// Validate all files first
@@ -595,17 +579,14 @@ Example:
 					fmt.Printf("  - %s: %s\n", ve.filename, ve.error)
 				}
 			}
-			os.Exit(1)
+			return errSilent
 		}
 
 		// Get auth and create client
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		// Upload files and collect results
@@ -648,7 +629,7 @@ Example:
 				"results":   results,
 			})
 			if failed > 0 {
-				os.Exit(1)
+				return errSilent
 			}
 		} else {
 			// Summary
@@ -660,9 +641,10 @@ Example:
 						fmt.Printf("  - %s: %s\n", r.Filename, r.Error)
 					}
 				}
-				os.Exit(1)
+				return errSilent
 			}
 		}
+		return nil
 	},
 }
 
@@ -730,11 +712,10 @@ var attachmentUpdateCmd = &cobra.Command{
 Note: Linear's API does not support changing an attachment's URL after creation.
 To change a file or URL, delete the old attachment and create a new one.`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		attachmentID := args[0]
 
 		// Get output flags
-		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		// Get flags
@@ -747,18 +728,14 @@ To change a file or URL, delete the old attachment and create a new one.`,
 		// (title alone is valid, but we require at least one field to change)
 		if !cmd.Flags().Changed("title") && !cmd.Flags().Changed("subtitle") &&
 			!cmd.Flags().Changed("icon-url") && !cmd.Flags().Changed("metadata") {
-			output.Error("No fields to update (specify --title, --subtitle, --icon-url, or --metadata)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No fields to update (specify --title, --subtitle, --icon-url, or --metadata)")
 		}
 
 		// Get auth and create client
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		// Build update input
@@ -774,8 +751,7 @@ To change a file or URL, delete the old attachment and create a new one.`,
 		if cmd.Flags().Changed("metadata") {
 			metadata, err := parseMetadata(metadataStr)
 			if err != nil {
-				output.Error(fmt.Sprintf("Invalid metadata: %v", err), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Invalid metadata: %v", err)
 			}
 			input.Metadata = &metadata
 		}
@@ -783,22 +759,21 @@ To change a file or URL, delete the old attachment and create a new one.`,
 		// Call API
 		resp, err := api.AttachmentUpdate(ctx, client, attachmentID, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update attachment: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update attachment: %v", err)
 		}
 
 		if !resp.AttachmentUpdate.Success {
-			output.Error("Failed to update attachment", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update attachment")
 		}
 
 		// Render output
 		if jsonOut {
 			output.JSON(resp.AttachmentUpdate.Attachment)
-			return
+			return nil
 		}
 
 		fmt.Printf("✓ Updated attachment: %s\n", resp.AttachmentUpdate.Attachment.Title)
+		return nil
 	},
 }
 
@@ -816,42 +791,37 @@ var attachmentDeleteCmd = &cobra.Command{
 	Short: "Delete an attachment",
 	Long:  `Delete an attachment from an issue. This action cannot be undone.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		attachmentID := args[0]
 
 		// Get output flags
-		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		// Get auth and create client
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		// Call API
 		resp, err := api.AttachmentDelete(ctx, client, attachmentID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete attachment: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete attachment: %v", err)
 		}
 
 		if !resp.AttachmentDelete.Success {
-			output.Error("Failed to delete attachment", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to delete attachment")
 		}
 
 		// Render output
 		if jsonOut {
 			output.JSON(map[string]bool{"success": true})
-			return
+			return nil
 		}
 
 		fmt.Printf("✓ Deleted attachment %s\n", attachmentID)
+		return nil
 	},
 }
 
@@ -907,7 +877,7 @@ Examples:
   lincli attachment link ENG-123 https://github.com/org/repo/pull/42 --provider github-pr
   lincli attachment link ENG-123 https://acme.slack.com/archives/C0/p1 --provider slack --sync-to-comment-thread`,
 	Args: cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		issueID := args[0]
 		url := args[1]
 
@@ -917,8 +887,7 @@ Examples:
 		providerRaw, _ := cmd.Flags().GetString("provider")
 		provider, err := normalizeAttachmentProvider(providerRaw)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		var titlePtr *string
@@ -927,12 +896,10 @@ Examples:
 			titlePtr = &title
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		// Each provider maps to a typed mutation returning an AttachmentPayload.
@@ -949,8 +916,7 @@ Examples:
 		case "url":
 			resp, err := api.AttachmentLinkURL(ctx, client, issueID, url, titlePtr)
 			if err != nil {
-				output.Error(fmt.Sprintf("Failed to link attachment: %v", err), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Failed to link attachment: %v", err)
 			}
 			if resp.AttachmentLinkURL != nil && resp.AttachmentLinkURL.Success {
 				if a := resp.AttachmentLinkURL.Attachment; a != nil {
@@ -966,8 +932,7 @@ Examples:
 			}
 			resp, err := api.AttachmentLinkSlack(ctx, client, issueID, url, titlePtr, syncPtr)
 			if err != nil {
-				output.Error(fmt.Sprintf("Failed to link attachment: %v", err), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Failed to link attachment: %v", err)
 			}
 			if resp.AttachmentLinkSlack != nil && resp.AttachmentLinkSlack.Success {
 				if a := resp.AttachmentLinkSlack.Attachment; a != nil {
@@ -978,8 +943,7 @@ Examples:
 		case "github-issue":
 			resp, err := api.AttachmentLinkGitHubIssue(ctx, client, issueID, url, titlePtr)
 			if err != nil {
-				output.Error(fmt.Sprintf("Failed to link attachment: %v", err), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Failed to link attachment: %v", err)
 			}
 			if resp.AttachmentLinkGitHubIssue != nil && resp.AttachmentLinkGitHubIssue.Success {
 				if a := resp.AttachmentLinkGitHubIssue.Attachment; a != nil {
@@ -990,8 +954,7 @@ Examples:
 		case "github-pr":
 			resp, err := api.AttachmentLinkGitHubPR(ctx, client, issueID, url, titlePtr)
 			if err != nil {
-				output.Error(fmt.Sprintf("Failed to link attachment: %v", err), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Failed to link attachment: %v", err)
 			}
 			if resp.AttachmentLinkGitHubPR != nil && resp.AttachmentLinkGitHubPR.Success {
 				if a := resp.AttachmentLinkGitHubPR.Attachment; a != nil {
@@ -1002,8 +965,7 @@ Examples:
 		case "salesforce":
 			resp, err := api.AttachmentLinkSalesforce(ctx, client, issueID, url, titlePtr)
 			if err != nil {
-				output.Error(fmt.Sprintf("Failed to link attachment: %v", err), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Failed to link attachment: %v", err)
 			}
 			if resp.AttachmentLinkSalesforce != nil && resp.AttachmentLinkSalesforce.Success {
 				if a := resp.AttachmentLinkSalesforce.Attachment; a != nil {
@@ -1014,13 +976,12 @@ Examples:
 		}
 
 		if !success {
-			output.Error("Failed to link attachment", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to link attachment")
 		}
 
 		if jsonOut {
 			output.JSON(map[string]interface{}{"id": attID, "title": attTitle, "url": attURL, "createdAt": attCreated})
-			return
+			return nil
 		}
 		output.Success(fmt.Sprintf("Linked %s attachment to %s", provider, issueID), plaintext, jsonOut)
 		fmt.Printf("  ID:    %s\n", attID)
@@ -1028,6 +989,7 @@ Examples:
 			fmt.Printf("  Title: %s\n", attTitle)
 		}
 		fmt.Printf("  URL:   %s\n", attURL)
+		return nil
 	},
 }
 
@@ -1036,26 +998,22 @@ var attachmentSyncToSlackCmd = &cobra.Command{
 	Short: "Sync a Slack attachment's thread to the issue comment thread",
 	Long:  `Begin syncing an existing Slack message attachment's thread with the issue's comment thread.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		resp, err := api.AttachmentSyncToSlack(ctx, client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to sync attachment to Slack: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to sync attachment to Slack: %v", err)
 		}
 		if resp.AttachmentSyncToSlack == nil || !resp.AttachmentSyncToSlack.Success {
-			output.Error("Failed to sync attachment to Slack", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to sync attachment to Slack")
 		}
 
 		if jsonOut {
@@ -1063,6 +1021,7 @@ var attachmentSyncToSlackCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Syncing attachment %s to Slack", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 

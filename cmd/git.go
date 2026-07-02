@@ -2,12 +2,12 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"os"
 	"strings"
 
+	"github.com/Khan/genqlient/graphql"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -47,29 +47,26 @@ var gitStateCreateCmd = &cobra.Command{
 Pass --state to set the target workflow state (omit it to take no action,
 overriding any default rule for the event). Pass --target-branch to scope the
 rule to a target branch (omit it to apply to all branches).`,
-	Run: func(cmd *cobra.Command, args []string) {
-		plaintext := viper.GetBool("plaintext")
-		jsonOut := viper.GetBool("json")
-
+	RunE: func(cmd *cobra.Command, args []string) error {
 		team, _ := cmd.Flags().GetString("team")
 		if team == "" {
-			output.Error("Team is required (--team)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Team is required (--team)")
 		}
 		eventRaw, _ := cmd.Flags().GetString("event")
 		event, err := validateGitEvent(eventRaw)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
-		client, ctx := gitClient(plaintext, jsonOut)
+		client, ctx, err := gitClient()
+		if err != nil {
+			return err
+		}
 		cache := newResolverCache()
 
 		teamID, err := resolveTeam(ctx, client, cache, team)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := &api.GitAutomationStateCreateInput{
@@ -80,8 +77,7 @@ rule to a target branch (omit it to apply to all branches).`,
 			state, _ := cmd.Flags().GetString("state")
 			stateID, err := resolveWorkflowState(ctx, client, cache, teamID, state)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.StateId = &stateID
 		}
@@ -92,19 +88,20 @@ rule to a target branch (omit it to apply to all branches).`,
 
 		resp, err := api.GitAutomationStateCreate(ctx, client, input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create Git automation state: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create Git automation state: %v", err)
 		}
 		if resp.GitAutomationStateCreate == nil || !resp.GitAutomationStateCreate.Success {
-			output.Error("Failed to create Git automation state", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create Git automation state")
 		}
 
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
 		if jsonOut {
 			output.JSON(resp.GitAutomationStateCreate.GitAutomationState)
 		} else {
 			output.Success(fmt.Sprintf("Created Git automation state %s", resp.GitAutomationStateCreate.GitAutomationState.GitAutomationStateFields.Id), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -116,11 +113,11 @@ fields keep their current value (verified: gitAutomationStateUpdate treats an
 unset field as no-change, not as clear). Pass --team when --state is a state
 name rather than an ID, so the name can be resolved within that team.`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		plaintext := viper.GetBool("plaintext")
-		jsonOut := viper.GetBool("json")
-
-		client, ctx := gitClient(plaintext, jsonOut)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, ctx, err := gitClient()
+		if err != nil {
+			return err
+		}
 		cache := newResolverCache()
 
 		input := &api.GitAutomationStateUpdateInput{}
@@ -130,8 +127,7 @@ name rather than an ID, so the name can be resolved within that team.`,
 			eventRaw, _ := cmd.Flags().GetString("event")
 			event, err := validateGitEvent(eventRaw)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.Event = &event
 			changed = true
@@ -140,13 +136,11 @@ name rather than an ID, so the name can be resolved within that team.`,
 			state, _ := cmd.Flags().GetString("state")
 			team, _ := cmd.Flags().GetString("team")
 			if !isUUID(state) && team == "" {
-				output.Error("Pass --team to resolve a state name, or give --state as an ID", plaintext, jsonOut)
-				os.Exit(1)
+				return errors.New("Pass --team to resolve a state name, or give --state as an ID")
 			}
 			stateID, err := resolveWorkflowState(ctx, client, cache, team, state)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.StateId = &stateID
 			changed = true
@@ -158,25 +152,25 @@ name rather than an ID, so the name can be resolved within that team.`,
 		}
 
 		if !changed {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		resp, err := api.GitAutomationStateUpdate(ctx, client, args[0], input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update Git automation state: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update Git automation state: %v", err)
 		}
 		if resp.GitAutomationStateUpdate == nil || !resp.GitAutomationStateUpdate.Success {
-			output.Error("Failed to update Git automation state", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update Git automation state")
 		}
 
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
 		if jsonOut {
 			output.JSON(resp.GitAutomationStateUpdate.GitAutomationState)
 		} else {
 			output.Success(fmt.Sprintf("Updated Git automation state %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -185,27 +179,28 @@ var gitStateDeleteCmd = &cobra.Command{
 	Aliases: []string{"rm"},
 	Short:   "Delete a Git automation state",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		plaintext := viper.GetBool("plaintext")
-		jsonOut := viper.GetBool("json")
-
-		client, ctx := gitClient(plaintext, jsonOut)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, ctx, err := gitClient()
+		if err != nil {
+			return err
+		}
 
 		resp, err := api.GitAutomationStateDelete(ctx, client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete Git automation state: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete Git automation state: %v", err)
 		}
 		if resp.GitAutomationStateDelete == nil || !resp.GitAutomationStateDelete.Success {
-			output.Error("Failed to delete Git automation state", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to delete Git automation state")
 		}
 
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
 		if jsonOut {
 			output.JSON(map[string]interface{}{"success": true, "id": args[0]})
 		} else {
 			output.Success(fmt.Sprintf("Deleted Git automation state %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -224,28 +219,25 @@ var gitTargetBranchCreateCmd = &cobra.Command{
 	Aliases: []string{"new"},
 	Short:   "Create a Git automation target branch",
 	Long:    `Create a Git automation target branch. --team and --branch are required.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		plaintext := viper.GetBool("plaintext")
-		jsonOut := viper.GetBool("json")
-
+	RunE: func(cmd *cobra.Command, args []string) error {
 		team, _ := cmd.Flags().GetString("team")
 		if team == "" {
-			output.Error("Team is required (--team)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Team is required (--team)")
 		}
 		branch, _ := cmd.Flags().GetString("branch")
 		if branch == "" {
-			output.Error("Branch pattern is required (--branch)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Branch pattern is required (--branch)")
 		}
 
-		client, ctx := gitClient(plaintext, jsonOut)
+		client, ctx, err := gitClient()
+		if err != nil {
+			return err
+		}
 		cache := newResolverCache()
 
 		teamID, err := resolveTeam(ctx, client, cache, team)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		isRegex, _ := cmd.Flags().GetBool("regex")
@@ -257,19 +249,20 @@ var gitTargetBranchCreateCmd = &cobra.Command{
 
 		resp, err := api.GitAutomationTargetBranchCreate(ctx, client, input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create target branch: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create target branch: %v", err)
 		}
 		if resp.GitAutomationTargetBranchCreate == nil || !resp.GitAutomationTargetBranchCreate.Success {
-			output.Error("Failed to create target branch", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create target branch")
 		}
 
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
 		if jsonOut {
 			output.JSON(resp.GitAutomationTargetBranchCreate.TargetBranch)
 		} else {
 			output.Success(fmt.Sprintf("Created target branch %s", resp.GitAutomationTargetBranchCreate.TargetBranch.GitAutomationTargetBranchFields.Id), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -277,11 +270,11 @@ var gitTargetBranchUpdateCmd = &cobra.Command{
 	Use:   "update <id>",
 	Short: "Update a Git automation target branch",
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		plaintext := viper.GetBool("plaintext")
-		jsonOut := viper.GetBool("json")
-
-		client, ctx := gitClient(plaintext, jsonOut)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, ctx, err := gitClient()
+		if err != nil {
+			return err
+		}
 
 		input := &api.GitAutomationTargetBranchUpdateInput{}
 		changed := false
@@ -298,25 +291,25 @@ var gitTargetBranchUpdateCmd = &cobra.Command{
 		}
 
 		if !changed {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		resp, err := api.GitAutomationTargetBranchUpdate(ctx, client, args[0], input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update target branch: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update target branch: %v", err)
 		}
 		if resp.GitAutomationTargetBranchUpdate == nil || !resp.GitAutomationTargetBranchUpdate.Success {
-			output.Error("Failed to update target branch", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update target branch")
 		}
 
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
 		if jsonOut {
 			output.JSON(resp.GitAutomationTargetBranchUpdate.TargetBranch)
 		} else {
 			output.Success(fmt.Sprintf("Updated target branch %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -325,27 +318,28 @@ var gitTargetBranchDeleteCmd = &cobra.Command{
 	Aliases: []string{"rm"},
 	Short:   "Delete a Git automation target branch",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		plaintext := viper.GetBool("plaintext")
-		jsonOut := viper.GetBool("json")
-
-		client, ctx := gitClient(plaintext, jsonOut)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, ctx, err := gitClient()
+		if err != nil {
+			return err
+		}
 
 		resp, err := api.GitAutomationTargetBranchDelete(ctx, client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete target branch: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete target branch: %v", err)
 		}
 		if resp.GitAutomationTargetBranchDelete == nil || !resp.GitAutomationTargetBranchDelete.Success {
-			output.Error("Failed to delete target branch", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to delete target branch")
 		}
 
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
 		if jsonOut {
 			output.JSON(map[string]interface{}{"success": true, "id": args[0]})
 		} else {
 			output.Success(fmt.Sprintf("Deleted target branch %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -371,14 +365,13 @@ func validateGitEvent(event string) (api.GitAutomationStates, error) {
 }
 
 // gitClient builds the authenticated client and context shared by the git
-// subcommands, exiting on an auth failure.
-func gitClient(plaintext, jsonOut bool) (*api.Client, context.Context) {
-	authHeader, err := auth.GetAuthHeader()
+// subcommands.
+func gitClient() (graphql.Client, context.Context, error) {
+	client, err := newGraphQLClient()
 	if err != nil {
-		output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return nil, nil, err
 	}
-	return api.NewClient(authHeader), context.Background()
+	return client, context.Background(), nil
 }
 
 func init() {

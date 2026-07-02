@@ -538,8 +538,8 @@ lincli view prefs create --scope user --view-type board --preferences '{"groupin
 #### Template Commands
 Manage reusable issue and project templates.
 ```bash
-lincli template list --type issue
-lincli template create --name "Bug Report" --type issue --data '{"title":"Bug: "}'
+lincli template list --template-type issue
+lincli template create --name "Bug Report" --template-type issue --data '{"title":"Bug: "}'
 ```
 
 #### Favorite Commands
@@ -664,6 +664,19 @@ lincli user set-role jane@company.com --role admin
 lincli user external list
 lincli user settings update --marketing=false
 ```
+
+### Not Yet Supported
+
+A few Linear capabilities are out of scope for a personal API key and have no
+command:
+
+- **Release writes** need the Business plan; Linear returns `FEATURE_NOT_ACCESSIBLE`.
+- **Triage writes** are forbidden on the current plan; `triage` ships read-only.
+- **OAuth app management** needs the `oauth:create` scope, which a personal API
+  key cannot hold.
+- **Agents** need an agent-app actor, which a personal API key is not.
+
+`triage`, `audit`, `sla`, and `user external` are read-only by design.
 
 ## 🎨 Output Formats
 

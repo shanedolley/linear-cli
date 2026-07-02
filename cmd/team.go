@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -31,19 +32,14 @@ var teamListCmd = &cobra.Command{
 	Aliases: []string{"ls"},
 	Short:   "List teams",
 	Long:    `List all teams in your Linear workspace.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		// Get auth header
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		// Create API client
-		client := api.NewClient(authHeader)
 
 		// Get limit
 		limit, _ := cmd.Flags().GetInt("limit")
@@ -63,8 +59,7 @@ var teamListCmd = &cobra.Command{
 				// Use nil for Linear's default sort
 				orderByEnum = nil
 			default:
-				output.Error(fmt.Sprintf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy)
 			}
 		}
 
@@ -77,8 +72,7 @@ var teamListCmd = &cobra.Command{
 		// Get teams
 		resp, err := api.ListTeams(context.Background(), client, limitPtr, nil, orderByEnum)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list teams: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list teams: %v", err)
 		}
 
 		// Handle output
@@ -145,6 +139,7 @@ var teamListCmd = &cobra.Command{
 					len(resp.Teams.Nodes))
 			}
 		}
+		return nil
 	},
 }
 
@@ -154,26 +149,20 @@ var teamGetCmd = &cobra.Command{
 	Short:   "Get team details",
 	Long:    `Get detailed information about a specific team.`,
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 		teamKey := args[0]
 
-		// Get auth header
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		// Create API client
-		client := api.NewClient(authHeader)
 
 		// Get team details
 		resp, err := api.GetTeam(context.Background(), client, teamKey)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get team: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get team: %v", err)
 		}
 		team := resp.Team.TeamDetailFields
 
@@ -211,6 +200,7 @@ var teamGetCmd = &cobra.Command{
 			fmt.Printf("%s %d\n", color.New(color.Bold).Sprint("Total Issues:"), team.IssueCount)
 			fmt.Println()
 		}
+		return nil
 	},
 }
 
@@ -219,26 +209,20 @@ var teamMembersCmd = &cobra.Command{
 	Short: "List team members",
 	Long:  `List all members of a specific team.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 		teamKey := args[0]
 
-		// Get auth header
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		// Create API client
-		client := api.NewClient(authHeader)
 
 		// Get team members
 		resp, err := api.GetTeamMembers(context.Background(), client, teamKey)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get team members: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get team members: %v", err)
 		}
 		members := resp.Team.Members.Nodes
 
@@ -301,6 +285,7 @@ var teamMembersCmd = &cobra.Command{
 					color.New(color.FgCyan).Sprint(teamKey))
 			}
 		}
+		return nil
 	},
 }
 
@@ -309,22 +294,18 @@ var teamCreateCmd = &cobra.Command{
 	Aliases: []string{"new"},
 	Short:   "Create a team",
 	Long:    `Create a new team. Without --key, Linear derives one from the name.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 
 		name, _ := cmd.Flags().GetString("name")
 		if name == "" {
-			output.Error("Name is required (--name)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Name is required (--name)")
 		}
 
 		input := api.TeamCreateInput{Name: name}
@@ -347,12 +328,10 @@ var teamCreateCmd = &cobra.Command{
 
 		resp, err := api.TeamCreate(context.Background(), client, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create team: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create team: %v", err)
 		}
 		if resp.TeamCreate == nil || !resp.TeamCreate.Success || resp.TeamCreate.Team == nil {
-			output.Error("Failed to create team", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create team")
 		}
 
 		if jsonOut {
@@ -361,6 +340,7 @@ var teamCreateCmd = &cobra.Command{
 			t := resp.TeamCreate.Team.TeamDetailFields
 			output.Success(fmt.Sprintf("Created team %s (%s)", t.Name, t.Key), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -369,24 +349,20 @@ var teamUpdateCmd = &cobra.Command{
 	Short: "Update a team",
 	Long:  `Update a team's name, key, description, privacy, color, or icon.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		teamID, err := resolveTeam(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := api.TeamUpdateInput{}
@@ -416,18 +392,15 @@ var teamUpdateCmd = &cobra.Command{
 		}
 
 		if input.Name == nil && input.Key == nil && input.Description == nil && input.Color == nil && input.Icon == nil && input.Private == nil {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		resp, err := api.TeamUpdate(ctx, client, teamID, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update team: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update team: %v", err)
 		}
 		if resp.TeamUpdate == nil || !resp.TeamUpdate.Success {
-			output.Error("Failed to update team", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update team")
 		}
 
 		if jsonOut {
@@ -435,6 +408,7 @@ var teamUpdateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Updated team %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -445,8 +419,9 @@ var teamDeleteCmd = &cobra.Command{
 prompt and archives the team along with its issues. Reversible with
 'team unarchive'.`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		runTeamStateChange(cmd, args[0], true)
+		return nil
 	},
 }
 
@@ -456,8 +431,9 @@ var teamUnarchiveCmd = &cobra.Command{
 	Short:   "Restore an archived team",
 	Long:    `Restore a previously archived team.`,
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		runTeamStateChange(cmd, args[0], false)
+		return nil
 	},
 }
 
@@ -539,40 +515,33 @@ var teamMemberAddCmd = &cobra.Command{
 	Short: "Add a user to a team",
 	Long:  `Add a user (email, name, or 'me') to a team.`,
 	Args:  cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		teamID, err := resolveTeam(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 		userID, err := resolveUser(ctx, client, cache, args[1])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := api.TeamMembershipCreateInput{TeamId: teamID, UserId: userID}
 		resp, err := api.TeamMembershipCreate(ctx, client, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to add member: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to add member: %v", err)
 		}
 		if resp.TeamMembershipCreate == nil || !resp.TeamMembershipCreate.Success {
-			output.Error("Failed to add member", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to add member")
 		}
 
 		if jsonOut {
@@ -580,6 +549,7 @@ var teamMemberAddCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Added %s to team %s", args[1], args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -589,34 +559,28 @@ var teamMemberRemoveCmd = &cobra.Command{
 	Short:   "Remove a user from a team",
 	Long:    `Remove a user (email, name, or 'me') from a team.`,
 	Args:    cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		membershipID, err := resolveTeamMembership(ctx, client, cache, args[0], args[1])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.TeamMembershipDelete(ctx, client, membershipID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to remove member: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to remove member: %v", err)
 		}
 		if resp.TeamMembershipDelete == nil || !resp.TeamMembershipDelete.Success {
-			output.Error("Failed to remove member", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to remove member")
 		}
 
 		if jsonOut {
@@ -624,6 +588,7 @@ var teamMemberRemoveCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Removed %s from team %s", args[1], args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -634,42 +599,35 @@ var teamSetRoleCmd = &cobra.Command{
 membership role, not the organization role; use 'user set-role' to change a
 user's org role (admin, guest, and so on).`,
 	Args: cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		role, _ := cmd.Flags().GetString("role")
 		owner, err := parseTeamOwnerRole(role)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		membershipID, err := resolveTeamMembership(ctx, client, cache, args[0], args[1])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := api.TeamMembershipUpdateInput{Owner: &owner}
 		resp, err := api.TeamMembershipUpdate(ctx, client, membershipID, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to set role: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to set role: %v", err)
 		}
 		if resp.TeamMembershipUpdate == nil || !resp.TeamMembershipUpdate.Success {
-			output.Error("Failed to set role", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to set role")
 		}
 
 		if jsonOut {
@@ -677,6 +635,7 @@ user's org role (admin, guest, and so on).`,
 		} else {
 			output.Success(fmt.Sprintf("Set %s to %s in team %s", args[1], role, args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 

@@ -2,12 +2,11 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"os"
 
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -48,17 +47,14 @@ var stateListCmd = &cobra.Command{
 	Short:   "List a team's workflow states",
 	Long:    `List the workflow states for a team. Accepts a team key or ID.`,
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		// state list reuses GetTeamStates, which embeds the team's states -
@@ -66,18 +62,17 @@ var stateListCmd = &cobra.Command{
 		// a key or an ID directly.
 		resp, err := api.GetTeamStates(ctx, client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list workflow states: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list workflow states: %v", err)
 		}
 		if resp.Team == nil || resp.Team.States == nil || len(resp.Team.States.Nodes) == 0 {
 			output.Info(fmt.Sprintf("No workflow states found for team '%s'", args[0]), plaintext, jsonOut)
-			return
+			return nil
 		}
 		nodes := resp.Team.States.Nodes
 
 		if jsonOut {
 			output.JSON(nodes)
-			return
+			return nil
 		}
 
 		if plaintext {
@@ -91,7 +86,7 @@ var stateListCmd = &cobra.Command{
 				fmt.Println()
 			}
 			fmt.Printf("\nTotal: %d states\n", len(nodes))
-			return
+			return nil
 		}
 
 		headers := []string{"ID", "Name", "Type", "Color", "Position"}
@@ -105,6 +100,7 @@ var stateListCmd = &cobra.Command{
 		if !plaintext && !jsonOut {
 			fmt.Printf("\n%s %d states\n", color.New(color.FgGreen).Sprint("✓"), len(nodes))
 		}
+		return nil
 	},
 }
 
@@ -114,33 +110,28 @@ var stateGetCmd = &cobra.Command{
 	Short:   "Get workflow state details",
 	Long:    `Get detailed information about a workflow state.`,
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		resp, err := api.GetWorkflowState(ctx, client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get workflow state: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get workflow state: %v", err)
 		}
 		if resp.WorkflowState == nil {
-			output.Error(fmt.Sprintf("Workflow state not found: %s", args[0]), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Workflow state not found: %s", args[0])
 		}
 		f := resp.WorkflowState.WorkflowStateFields
 
 		if jsonOut {
 			output.JSON(resp.WorkflowState)
-			return
+			return nil
 		}
 
 		if plaintext {
@@ -153,7 +144,7 @@ var stateGetCmd = &cobra.Command{
 			if f.Description != nil && *f.Description != "" {
 				fmt.Printf("- **Description**: %s\n", *f.Description)
 			}
-			return
+			return nil
 		}
 
 		fmt.Printf("%s %s\n", color.New(color.FgCyan, color.Bold).Sprint("State:"), f.Name)
@@ -165,6 +156,7 @@ var stateGetCmd = &cobra.Command{
 		if f.Description != nil && *f.Description != "" {
 			fmt.Printf("  Description: %s\n", *f.Description)
 		}
+		return nil
 	},
 }
 
@@ -173,17 +165,11 @@ var stateCreateCmd = &cobra.Command{
 	Aliases: []string{"new"},
 	Short:   "Create a new workflow state",
 	Long:    `Create a new workflow state for a team. --name, --state-type, and --color are required.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		plaintext := viper.GetBool("plaintext")
-		jsonOut := viper.GetBool("json")
-
-		authHeader, err := auth.GetAuthHeader()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
@@ -194,27 +180,21 @@ var stateCreateCmd = &cobra.Command{
 
 		switch {
 		case team == "":
-			output.Error("Team is required (--team)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Team is required (--team)")
 		case name == "":
-			output.Error("Name is required (--name)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Name is required (--name)")
 		case stateType == "":
-			output.Error("Type is required (--state-type)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Type is required (--state-type)")
 		case stateColor == "":
-			output.Error("Color is required (--color)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Color is required (--color)")
 		}
 		if !isValidStateType(stateType) {
-			output.Error(fmt.Sprintf("Invalid --state-type '%s'. Valid values: backlog, unstarted, started, completed, canceled", stateType), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Invalid --state-type '%s'. Valid values: backlog, unstarted, started, completed, canceled", stateType)
 		}
 
 		teamID, err := resolveTeam(ctx, client, cache, team)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := api.WorkflowStateCreateInput{
@@ -233,19 +213,20 @@ var stateCreateCmd = &cobra.Command{
 
 		resp, err := api.WorkflowStateCreate(ctx, client, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create workflow state: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create workflow state: %v", err)
 		}
 		if !resp.WorkflowStateCreate.Success {
-			output.Error("Failed to create workflow state", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create workflow state")
 		}
 
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
 		if jsonOut {
 			output.JSON(resp.WorkflowStateCreate.WorkflowState)
 		} else {
 			output.Success(fmt.Sprintf("Created workflow state %s", resp.WorkflowStateCreate.WorkflowState.WorkflowStateFields.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -254,17 +235,11 @@ var stateUpdateCmd = &cobra.Command{
 	Short: "Update a workflow state",
 	Long:  `Update a workflow state's name, description, or color.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		plaintext := viper.GetBool("plaintext")
-		jsonOut := viper.GetBool("json")
-
-		authHeader, err := auth.GetAuthHeader()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		input := api.WorkflowStateUpdateInput{}
@@ -292,25 +267,25 @@ var stateUpdateCmd = &cobra.Command{
 		}
 
 		if !hasUpdates {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		resp, err := api.WorkflowStateUpdate(ctx, client, args[0], &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update workflow state: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update workflow state: %v", err)
 		}
 		if !resp.WorkflowStateUpdate.Success {
-			output.Error("Failed to update workflow state", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update workflow state")
 		}
 
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
 		if jsonOut {
 			output.JSON(resp.WorkflowStateUpdate.WorkflowState)
 		} else {
 			output.Success(fmt.Sprintf("Updated workflow state %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -319,34 +294,29 @@ var stateArchiveCmd = &cobra.Command{
 	Short: "Archive a workflow state",
 	Long:  `Archive a workflow state (Linear has no hard delete). Executes immediately with no confirmation prompt.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		plaintext := viper.GetBool("plaintext")
-		jsonOut := viper.GetBool("json")
-
-		authHeader, err := auth.GetAuthHeader()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		resp, err := api.WorkflowStateArchive(ctx, client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to archive workflow state: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to archive workflow state: %v", err)
 		}
 		if !resp.WorkflowStateArchive.Success {
-			output.Error("Failed to archive workflow state", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to archive workflow state")
 		}
 
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
 		if jsonOut {
 			output.JSON(map[string]interface{}{"success": true, "id": args[0]})
 		} else {
 			output.Success(fmt.Sprintf("Archived workflow state %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 

@@ -3,11 +3,9 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -30,17 +28,14 @@ var userExternalListCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
 	Short:   "List external users",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		limit, _ := cmd.Flags().GetInt("limit")
@@ -51,18 +46,17 @@ var userExternalListCmd = &cobra.Command{
 
 		resp, err := api.ListExternalUsers(ctx, client, limitPtr, nil)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list external users: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list external users: %v", err)
 		}
 
 		if resp.ExternalUsers == nil || len(resp.ExternalUsers.Nodes) == 0 {
 			output.Info("No external users found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(resp.ExternalUsers.Nodes)
-			return
+			return nil
 		}
 
 		headers := []string{"ID", "Name", "Display Name", "Email", "Last Seen"}
@@ -87,6 +81,7 @@ var userExternalListCmd = &cobra.Command{
 		if !plaintext && !jsonOut {
 			fmt.Printf("\n%s %d external users\n", color.New(color.FgGreen).Sprint("✓"), len(resp.ExternalUsers.Nodes))
 		}
+		return nil
 	},
 }
 
@@ -95,27 +90,23 @@ var userExternalGetCmd = &cobra.Command{
 	Aliases: []string{"show"},
 	Short:   "Get an external user",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		resp, err := api.GetExternalUser(context.Background(), client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get external user: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get external user: %v", err)
 		}
 		f := resp.ExternalUser.ExternalUserFields
 
 		if jsonOut {
 			output.JSON(resp.ExternalUser)
-			return
+			return nil
 		}
 
 		if plaintext {
@@ -123,7 +114,7 @@ var userExternalGetCmd = &cobra.Command{
 			fmt.Printf("- **ID**: %s\n", f.Id)
 			fmt.Printf("- **Display Name**: %s\n", f.DisplayName)
 			fmt.Printf("- **Email**: %s\n", derefStr(f.Email))
-			return
+			return nil
 		}
 
 		fmt.Printf("%s %s\n", color.New(color.FgCyan, color.Bold).Sprint("External user:"), f.Name)
@@ -133,6 +124,7 @@ var userExternalGetCmd = &cobra.Command{
 		if f.LastSeen != nil {
 			fmt.Printf("  Last Seen:    %s\n", f.LastSeen.Format("2006-01-02 15:04"))
 		}
+		return nil
 	},
 }
 

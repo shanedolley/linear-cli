@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -31,19 +32,14 @@ var userListCmd = &cobra.Command{
 	Aliases: []string{"ls"},
 	Short:   "List users",
 	Long:    `List all users in your Linear workspace.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		// Get auth header
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		// Create API client
-		client := api.NewClient(authHeader)
 
 		// Get filters
 		limit, _ := cmd.Flags().GetInt("limit")
@@ -64,8 +60,7 @@ var userListCmd = &cobra.Command{
 				// Use nil for Linear's default sort
 				orderByEnum = nil
 			default:
-				output.Error(fmt.Sprintf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy)
 			}
 		}
 
@@ -78,8 +73,7 @@ var userListCmd = &cobra.Command{
 		// Get users
 		resp, err := api.ListUsers(context.Background(), client, limitPtr, nil, orderByEnum)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list users: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list users: %v", err)
 		}
 
 		// Filter active users if requested
@@ -159,6 +153,7 @@ var userListCmd = &cobra.Command{
 					len(filteredUsers))
 			}
 		}
+		return nil
 	},
 }
 
@@ -168,20 +163,15 @@ var userGetCmd = &cobra.Command{
 	Short:   "Get user details",
 	Long:    `Get detailed information about a specific user by email.`,
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 		email := args[0]
 
-		// Get auth header
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		// Create API client
-		client := api.NewClient(authHeader)
 
 		// Get user details using generated function
 		filter := &api.UserFilter{
@@ -190,13 +180,11 @@ var userGetCmd = &cobra.Command{
 
 		userResp, err := api.GetUserByEmail(context.Background(), client, filter)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get user: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get user: %v", err)
 		}
 
 		if len(userResp.Users.Nodes) == 0 {
-			output.Error(fmt.Sprintf("User not found with email: %s", email), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("User not found with email: %s", email)
 		}
 
 		user := &userResp.Users.Nodes[0].UserDetailFields
@@ -249,6 +237,7 @@ var userGetCmd = &cobra.Command{
 			}
 			fmt.Println()
 		}
+		return nil
 	},
 }
 
@@ -256,25 +245,19 @@ var userMeCmd = &cobra.Command{
 	Use:   "me",
 	Short: "Show current user",
 	Long:  `Display information about the currently authenticated user.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		// Get auth header
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		// Create API client
-		client := api.NewClient(authHeader)
 
 		// Get current user
 		resp, err := api.GetViewer(context.Background(), client)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get current user: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get current user: %v", err)
 		}
 		user := resp.Viewer.UserDetailFields
 
@@ -322,6 +305,7 @@ var userMeCmd = &cobra.Command{
 			}
 			fmt.Println()
 		}
+		return nil
 	},
 }
 
@@ -330,24 +314,20 @@ var userUpdateCmd = &cobra.Command{
 	Short: "Update a user's profile",
 	Long:  `Update a user's profile fields (name, display name, title, description, timezone).`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		userID, err := resolveUser(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := api.UserUpdateInput{}
@@ -373,18 +353,15 @@ var userUpdateCmd = &cobra.Command{
 		}
 
 		if input.Name == nil && input.DisplayName == nil && input.Title == nil && input.Description == nil && input.Timezone == nil {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		resp, err := api.UserUpdate(ctx, client, userID, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update user: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update user: %v", err)
 		}
 		if resp.UserUpdate == nil || !resp.UserUpdate.Success {
-			output.Error("Failed to update user", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update user")
 		}
 
 		if jsonOut {
@@ -392,6 +369,7 @@ var userUpdateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Updated user %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -402,41 +380,34 @@ var userSetRoleCmd = &cobra.Command{
 the workspace-wide role, not team membership; use 'team set-role' to change a
 user's role within a team.`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		roleStr, _ := cmd.Flags().GetString("role")
 		role, err := validateUserRole(roleStr)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		userID, err := resolveUser(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.UserChangeRole(ctx, client, userID, role)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to set role: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to set role: %v", err)
 		}
 		if resp.UserChangeRole == nil || !resp.UserChangeRole.Success {
-			output.Error("Failed to set role", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to set role")
 		}
 
 		if jsonOut {
@@ -444,6 +415,7 @@ user's role within a team.`,
 		} else {
 			output.Success(fmt.Sprintf("Set %s org role to %s", args[0], role), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -454,8 +426,9 @@ var userSuspendCmd = &cobra.Command{
 This action executes immediately with no confirmation prompt. Reversible with
 'user unsuspend'.`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		runUserSuspension(cmd, args[0], true)
+		return nil
 	},
 }
 
@@ -464,8 +437,9 @@ var userUnsuspendCmd = &cobra.Command{
 	Short: "Unsuspend a user",
 	Long:  `Reactivate a suspended user, restoring their workspace access.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		runUserSuspension(cmd, args[0], false)
+		return nil
 	},
 }
 
@@ -536,17 +510,14 @@ var userSettingsUpdateCmd = &cobra.Command{
 	Short: "Update your email subscription settings",
 	Long: `Update the authenticated user's email subscription settings. Linear only
 exposes the current user's own settings, so this always targets you.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		input := api.UserSettingsUpdateInput{}
@@ -574,28 +545,23 @@ exposes the current user's own settings, so this always targets you.`,
 		if input.SubscribedToChangelog == nil && input.SubscribedToGeneralMarketingCommunications == nil &&
 			input.SubscribedToInviteAccepted == nil && input.SubscribedToDPA == nil &&
 			input.SubscribedToPrivacyLegalUpdates == nil {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		settingsResp, err := api.GetUserSettings(ctx, client)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to load your settings: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to load your settings: %v", err)
 		}
 		if settingsResp.UserSettings == nil {
-			output.Error("Could not resolve your settings", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Could not resolve your settings")
 		}
 
 		resp, err := api.UserSettingsUpdate(ctx, client, settingsResp.UserSettings.Id, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update settings: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update settings: %v", err)
 		}
 		if resp.UserSettingsUpdate == nil || !resp.UserSettingsUpdate.Success {
-			output.Error("Failed to update settings", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update settings")
 		}
 
 		if jsonOut {
@@ -603,6 +569,7 @@ exposes the current user's own settings, so this always targets you.`,
 		} else {
 			output.Success("Updated your settings", plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 

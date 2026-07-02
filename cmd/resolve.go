@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -20,6 +21,72 @@ var uuidPattern = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]
 // name), we skip the API round-trip entirely.
 func isUUID(s string) bool {
 	return uuidPattern.MatchString(s)
+}
+
+// resolveIssueDetail resolves an issue reference (a "TEAM-123" identifier or a
+// UUID) to its detail fields. GetIssue returns a nullable Issue, so a reference
+// that matches nothing comes back as (non-nil resp, nil err) with resp.Issue
+// == nil; guarding it here turns a bad reference into a clean error instead of
+// a nil-pointer panic at the call site.
+func resolveIssueDetail(ctx context.Context, client graphql.Client, ref string) (*api.IssueDetailFields, error) {
+	resp, err := api.GetIssue(ctx, client, ref)
+	if err != nil {
+		return nil, fmt.Errorf("issue '%s': %w", ref, err)
+	}
+	if resp.Issue == nil {
+		return nil, fmt.Errorf("issue '%s' not found", ref)
+	}
+	return &resp.Issue.IssueDetailFields, nil
+}
+
+// resolveIssueID resolves an issue reference to its UUID, erroring cleanly if
+// the issue does not exist.
+func resolveIssueID(ctx context.Context, client graphql.Client, ref string) (string, error) {
+	detail, err := resolveIssueDetail(ctx, client, ref)
+	if err != nil {
+		return "", err
+	}
+	return detail.Id, nil
+}
+
+// nameCandidate is a normalized (name, id) pair used by resolveByName to build
+// match, ambiguity, and not-found results across entity types.
+type nameCandidate struct {
+	name string
+	id   string
+}
+
+// resolveByName is the shared skeleton for the name-or-ID resolvers whose lookup
+// follows the same shape: return a UUID unchanged, serve a cached id, else run
+// fetch (a case-insensitive server-side name query) and require exactly one
+// match. entity names the kind for the "not found" message. Zero matches is a
+// not-found error; more than one is an "ambiguous" error listing the candidates
+// as "name (id)". A single match is cached under the lowercased reference.
+func resolveByName(nameOrID, entity string, cache map[string]string, fetch func() ([]nameCandidate, error)) (string, error) {
+	if isUUID(nameOrID) {
+		return nameOrID, nil
+	}
+	cacheKey := strings.ToLower(nameOrID)
+	if id, ok := cache[cacheKey]; ok {
+		return id, nil
+	}
+	matches, err := fetch()
+	if err != nil {
+		return "", err
+	}
+	switch len(matches) {
+	case 0:
+		return "", fmt.Errorf("%s not found: %s", entity, nameOrID)
+	case 1:
+		cache[cacheKey] = matches[0].id
+		return matches[0].id, nil
+	default:
+		candidates := make([]string, 0, len(matches))
+		for _, m := range matches {
+			candidates = append(candidates, fmt.Sprintf("%s (%s)", m.name, m.id))
+		}
+		return "", fmt.Errorf("Multiple matches for '%s': %s", nameOrID, strings.Join(candidates, ", "))
+	}
 }
 
 // workflowStateInfo is a minimal, resolver-local view of a team's workflow
@@ -232,39 +299,19 @@ func resolveUser(ctx context.Context, client graphql.Client, cache *ResolverCach
 // returns an error listing the candidates (name and id); a name matching no
 // project returns a "not found" error.
 func resolveProject(ctx context.Context, client graphql.Client, cache *ResolverCache, nameOrID string) (string, error) {
-	if isUUID(nameOrID) {
-		return nameOrID, nil
-	}
-
-	cacheKey := strings.ToLower(nameOrID)
-	if id, ok := cache.projects[cacheKey]; ok {
-		return id, nil
-	}
-
-	filter := &api.ProjectFilter{
-		Name: &api.StringComparator{EqIgnoreCase: &nameOrID},
-	}
-	limit := 10
-	resp, err := api.ListProjects(ctx, client, filter, &limit, nil, nil)
-	if err != nil {
-		return "", fmt.Errorf("failed to find project '%s': %w", nameOrID, err)
-	}
-
-	nodes := resp.Projects.Nodes
-	if len(nodes) == 0 {
-		return "", fmt.Errorf("Project not found: %s", nameOrID)
-	}
-	if len(nodes) > 1 {
-		candidates := make([]string, 0, len(nodes))
-		for _, n := range nodes {
-			candidates = append(candidates, fmt.Sprintf("%s (%s)", n.ProjectListFields.Name, n.ProjectListFields.Id))
+	return resolveByName(nameOrID, "Project", cache.projects, func() ([]nameCandidate, error) {
+		filter := &api.ProjectFilter{Name: &api.StringComparator{EqIgnoreCase: &nameOrID}}
+		limit := 10
+		resp, err := api.ListProjects(ctx, client, filter, &limit, nil, nil)
+		if err != nil {
+			return nil, fmt.Errorf("failed to find project '%s': %w", nameOrID, err)
 		}
-		return "", fmt.Errorf("Multiple matches for '%s': %s", nameOrID, strings.Join(candidates, ", "))
-	}
-
-	id := nodes[0].ProjectListFields.Id
-	cache.projects[cacheKey] = id
-	return id, nil
+		out := make([]nameCandidate, 0, len(resp.Projects.Nodes))
+		for _, n := range resp.Projects.Nodes {
+			out = append(out, nameCandidate{n.ProjectListFields.Name, n.ProjectListFields.Id})
+		}
+		return out, nil
+	})
 }
 
 // resolveInitiative resolves an initiative name or UUID to an initiative ID.
@@ -272,39 +319,19 @@ func resolveProject(ctx context.Context, client graphql.Client, cache *ResolverC
 // returns an error listing the candidates (name and id); a name matching no
 // initiative returns a "not found" error.
 func resolveInitiative(ctx context.Context, client graphql.Client, cache *ResolverCache, nameOrID string) (string, error) {
-	if isUUID(nameOrID) {
-		return nameOrID, nil
-	}
-
-	cacheKey := strings.ToLower(nameOrID)
-	if id, ok := cache.initiatives[cacheKey]; ok {
-		return id, nil
-	}
-
-	filter := &api.InitiativeFilter{
-		Name: &api.StringComparator{EqIgnoreCase: &nameOrID},
-	}
-	limit := 10
-	resp, err := api.ListInitiatives(ctx, client, filter, &limit, nil, nil, nil)
-	if err != nil {
-		return "", fmt.Errorf("failed to find initiative '%s': %w", nameOrID, err)
-	}
-
-	nodes := resp.Initiatives.Nodes
-	if len(nodes) == 0 {
-		return "", fmt.Errorf("Initiative not found: %s", nameOrID)
-	}
-	if len(nodes) > 1 {
-		candidates := make([]string, 0, len(nodes))
-		for _, n := range nodes {
-			candidates = append(candidates, fmt.Sprintf("%s (%s)", n.InitiativeListFields.Name, n.InitiativeListFields.Id))
+	return resolveByName(nameOrID, "Initiative", cache.initiatives, func() ([]nameCandidate, error) {
+		filter := &api.InitiativeFilter{Name: &api.StringComparator{EqIgnoreCase: &nameOrID}}
+		limit := 10
+		resp, err := api.ListInitiatives(ctx, client, filter, &limit, nil, nil, nil)
+		if err != nil {
+			return nil, fmt.Errorf("failed to find initiative '%s': %w", nameOrID, err)
 		}
-		return "", fmt.Errorf("Multiple matches for '%s': %s", nameOrID, strings.Join(candidates, ", "))
-	}
-
-	id := nodes[0].InitiativeListFields.Id
-	cache.initiatives[cacheKey] = id
-	return id, nil
+		out := make([]nameCandidate, 0, len(resp.Initiatives.Nodes))
+		for _, n := range resp.Initiatives.Nodes {
+			out = append(out, nameCandidate{n.InitiativeListFields.Name, n.InitiativeListFields.Id})
+		}
+		return out, nil
+	})
 }
 
 // resolveLabel resolves an issue label name or UUID to an IssueLabel ID.
@@ -318,39 +345,19 @@ func resolveInitiative(ctx context.Context, client graphql.Client, cache *Resolv
 // initiativeAddLabel/initiativeRemoveLabel reject an IssueLabel id). See
 // resolveInitiativeLabel for that catalog.
 func resolveLabel(ctx context.Context, client graphql.Client, cache *ResolverCache, nameOrID string) (string, error) {
-	if isUUID(nameOrID) {
-		return nameOrID, nil
-	}
-
-	cacheKey := strings.ToLower(nameOrID)
-	if id, ok := cache.labels[cacheKey]; ok {
-		return id, nil
-	}
-
-	filter := &api.IssueLabelFilter{
-		Name: &api.StringComparator{EqIgnoreCase: &nameOrID},
-	}
-	limit := 10
-	resp, err := api.ListIssueLabels(ctx, client, filter, &limit)
-	if err != nil {
-		return "", fmt.Errorf("failed to find label '%s': %w", nameOrID, err)
-	}
-
-	nodes := resp.IssueLabels.Nodes
-	if len(nodes) == 0 {
-		return "", fmt.Errorf("Label not found: %s", nameOrID)
-	}
-	if len(nodes) > 1 {
-		candidates := make([]string, 0, len(nodes))
-		for _, n := range nodes {
-			candidates = append(candidates, fmt.Sprintf("%s (%s)", n.LabelListFields.Name, n.LabelListFields.Id))
+	return resolveByName(nameOrID, "Label", cache.labels, func() ([]nameCandidate, error) {
+		filter := &api.IssueLabelFilter{Name: &api.StringComparator{EqIgnoreCase: &nameOrID}}
+		limit := 10
+		resp, err := api.ListIssueLabels(ctx, client, filter, &limit)
+		if err != nil {
+			return nil, fmt.Errorf("failed to find label '%s': %w", nameOrID, err)
 		}
-		return "", fmt.Errorf("Multiple matches for '%s': %s", nameOrID, strings.Join(candidates, ", "))
-	}
-
-	id := nodes[0].LabelListFields.Id
-	cache.labels[cacheKey] = id
-	return id, nil
+		out := make([]nameCandidate, 0, len(resp.IssueLabels.Nodes))
+		for _, n := range resp.IssueLabels.Nodes {
+			out = append(out, nameCandidate{n.LabelListFields.Name, n.LabelListFields.Id})
+		}
+		return out, nil
+	})
 }
 
 // resolveInitiativeLabel resolves an initiative label name or UUID to an
@@ -364,39 +371,19 @@ func resolveLabel(ctx context.Context, client graphql.Client, cache *ResolverCac
 // ListInitiativeLabels call fails with a clear "Feature ... is not enabled"
 // error from Linear, which is surfaced as-is.
 func resolveInitiativeLabel(ctx context.Context, client graphql.Client, cache *ResolverCache, nameOrID string) (string, error) {
-	if isUUID(nameOrID) {
-		return nameOrID, nil
-	}
-
-	cacheKey := strings.ToLower(nameOrID)
-	if id, ok := cache.initiativeLabels[cacheKey]; ok {
-		return id, nil
-	}
-
-	filter := &api.InitiativeLabelFilter{
-		Name: &api.StringComparator{EqIgnoreCase: &nameOrID},
-	}
-	limit := 10
-	resp, err := api.ListInitiativeLabels(ctx, client, filter, &limit)
-	if err != nil {
-		return "", fmt.Errorf("failed to find initiative label '%s': %w", nameOrID, err)
-	}
-
-	nodes := resp.InitiativeLabels.Nodes
-	if len(nodes) == 0 {
-		return "", fmt.Errorf("Initiative label not found: %s", nameOrID)
-	}
-	if len(nodes) > 1 {
-		candidates := make([]string, 0, len(nodes))
-		for _, n := range nodes {
-			candidates = append(candidates, fmt.Sprintf("%s (%s)", n.Name, n.Id))
+	return resolveByName(nameOrID, "Initiative label", cache.initiativeLabels, func() ([]nameCandidate, error) {
+		filter := &api.InitiativeLabelFilter{Name: &api.StringComparator{EqIgnoreCase: &nameOrID}}
+		limit := 10
+		resp, err := api.ListInitiativeLabels(ctx, client, filter, &limit)
+		if err != nil {
+			return nil, fmt.Errorf("failed to find initiative label '%s': %w", nameOrID, err)
 		}
-		return "", fmt.Errorf("Multiple matches for '%s': %s", nameOrID, strings.Join(candidates, ", "))
-	}
-
-	id := nodes[0].Id
-	cache.initiativeLabels[cacheKey] = id
-	return id, nil
+		out := make([]nameCandidate, 0, len(resp.InitiativeLabels.Nodes))
+		for _, n := range resp.InitiativeLabels.Nodes {
+			out = append(out, nameCandidate{n.Name, n.Id})
+		}
+		return out, nil
+	})
 }
 
 // resolveProjectLabel resolves a project label name or UUID to a
@@ -409,39 +396,19 @@ func resolveInitiativeLabel(ctx context.Context, client graphql.Client, cache *R
 // confirmed against schema.graphql, which has no cross-reference between
 // the three label types.
 func resolveProjectLabel(ctx context.Context, client graphql.Client, cache *ResolverCache, nameOrID string) (string, error) {
-	if isUUID(nameOrID) {
-		return nameOrID, nil
-	}
-
-	cacheKey := strings.ToLower(nameOrID)
-	if id, ok := cache.projectLabels[cacheKey]; ok {
-		return id, nil
-	}
-
-	filter := &api.ProjectLabelFilter{
-		Name: &api.StringComparator{EqIgnoreCase: &nameOrID},
-	}
-	limit := 10
-	resp, err := api.ListProjectLabels(ctx, client, filter, &limit)
-	if err != nil {
-		return "", fmt.Errorf("failed to find project label '%s': %w", nameOrID, err)
-	}
-
-	nodes := resp.ProjectLabels.Nodes
-	if len(nodes) == 0 {
-		return "", fmt.Errorf("Project label not found: %s", nameOrID)
-	}
-	if len(nodes) > 1 {
-		candidates := make([]string, 0, len(nodes))
-		for _, n := range nodes {
-			candidates = append(candidates, fmt.Sprintf("%s (%s)", n.Name, n.Id))
+	return resolveByName(nameOrID, "Project label", cache.projectLabels, func() ([]nameCandidate, error) {
+		filter := &api.ProjectLabelFilter{Name: &api.StringComparator{EqIgnoreCase: &nameOrID}}
+		limit := 10
+		resp, err := api.ListProjectLabels(ctx, client, filter, &limit)
+		if err != nil {
+			return nil, fmt.Errorf("failed to find project label '%s': %w", nameOrID, err)
 		}
-		return "", fmt.Errorf("Multiple matches for '%s': %s", nameOrID, strings.Join(candidates, ", "))
-	}
-
-	id := nodes[0].Id
-	cache.projectLabels[cacheKey] = id
-	return id, nil
+		out := make([]nameCandidate, 0, len(resp.ProjectLabels.Nodes))
+		for _, n := range resp.ProjectLabels.Nodes {
+			out = append(out, nameCandidate{n.Name, n.Id})
+		}
+		return out, nil
+	})
 }
 
 // resolveWorkflowState resolves a workflow state name or UUID to a state ID
@@ -721,39 +688,19 @@ func resolveTemplate(ctx context.Context, client graphql.Client, cache *Resolver
 // an error listing the candidates (name and id); a name matching no customer
 // returns a "not found" error.
 func resolveCustomer(ctx context.Context, client graphql.Client, cache *ResolverCache, nameOrID string) (string, error) {
-	if isUUID(nameOrID) {
-		return nameOrID, nil
-	}
-
-	cacheKey := strings.ToLower(nameOrID)
-	if id, ok := cache.customers[cacheKey]; ok {
-		return id, nil
-	}
-
-	filter := &api.CustomerFilter{
-		Name: &api.StringComparator{EqIgnoreCase: &nameOrID},
-	}
-	limit := 10
-	resp, err := api.ListCustomers(ctx, client, filter, &limit, nil, nil)
-	if err != nil {
-		return "", fmt.Errorf("failed to find customer '%s': %w", nameOrID, err)
-	}
-
-	nodes := resp.Customers.Nodes
-	if len(nodes) == 0 {
-		return "", fmt.Errorf("Customer not found: %s", nameOrID)
-	}
-	if len(nodes) > 1 {
-		candidates := make([]string, 0, len(nodes))
-		for _, n := range nodes {
-			candidates = append(candidates, fmt.Sprintf("%s (%s)", n.CustomerFields.Name, n.CustomerFields.Id))
+	return resolveByName(nameOrID, "Customer", cache.customers, func() ([]nameCandidate, error) {
+		filter := &api.CustomerFilter{Name: &api.StringComparator{EqIgnoreCase: &nameOrID}}
+		limit := 10
+		resp, err := api.ListCustomers(ctx, client, filter, &limit, nil, nil)
+		if err != nil {
+			return nil, fmt.Errorf("failed to find customer '%s': %w", nameOrID, err)
 		}
-		return "", fmt.Errorf("Multiple matches for '%s': %s", nameOrID, strings.Join(candidates, ", "))
-	}
-
-	id := nodes[0].CustomerFields.Id
-	cache.customers[cacheKey] = id
-	return id, nil
+		out := make([]nameCandidate, 0, len(resp.Customers.Nodes))
+		for _, n := range resp.Customers.Nodes {
+			out = append(out, nameCandidate{n.CustomerFields.Name, n.CustomerFields.Id})
+		}
+		return out, nil
+	})
 }
 
 // resolveCustomerStatus resolves a customer status name or UUID to a
@@ -790,6 +737,7 @@ func resolveCustomerStatus(ctx context.Context, client graphql.Client, cache *Re
 	for name := range cache.customerStatuses {
 		names = append(names, name)
 	}
+	sort.Strings(names)
 	return "", fmt.Errorf("Customer status '%s' not found. Valid values: %s", nameOrID, strings.Join(names, ", "))
 }
 
@@ -825,6 +773,7 @@ func resolveCustomerTier(ctx context.Context, client graphql.Client, cache *Reso
 	for name := range cache.customerTiers {
 		names = append(names, name)
 	}
+	sort.Strings(names)
 	return "", fmt.Errorf("Customer tier '%s' not found. Valid values: %s", nameOrID, strings.Join(names, ", "))
 }
 
@@ -861,5 +810,6 @@ func resolveTimeSchedule(ctx context.Context, client graphql.Client, cache *Reso
 	for name := range cache.timeSchedules {
 		names = append(names, name)
 	}
+	sort.Strings(names)
 	return "", fmt.Errorf("Time schedule not found: %s. Available: %s", nameOrID, strings.Join(names, ", "))
 }

@@ -2,15 +2,15 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"net/url"
-	"os"
+	"strconv"
 	"strings"
 
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -38,17 +38,14 @@ var webhookListCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
 	Short:   "List webhooks",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		limit, _ := cmd.Flags().GetInt("limit")
@@ -59,18 +56,17 @@ var webhookListCmd = &cobra.Command{
 
 		resp, err := api.ListWebhooks(ctx, client, limitPtr, nil, nil)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list webhooks: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list webhooks: %v", err)
 		}
 
 		if resp.Webhooks == nil || len(resp.Webhooks.Nodes) == 0 {
 			output.Info("No webhooks found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(resp.Webhooks.Nodes)
-			return
+			return nil
 		}
 
 		headers := []string{"ID", "Label", "URL", "Enabled", "Resources"}
@@ -91,6 +87,7 @@ var webhookListCmd = &cobra.Command{
 		if !plaintext && !jsonOut {
 			fmt.Printf("\n%s %d webhooks\n", color.New(color.FgGreen).Sprint("✓"), len(resp.Webhooks.Nodes))
 		}
+		return nil
 	},
 }
 
@@ -99,32 +96,27 @@ var webhookGetCmd = &cobra.Command{
 	Aliases: []string{"show"},
 	Short:   "Get a webhook",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 
 		resp, err := api.GetWebhook(context.Background(), client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get webhook: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get webhook: %v", err)
 		}
 		if resp.Webhook == nil {
-			output.Error(fmt.Sprintf("Webhook not found: %s", args[0]), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Webhook not found: %s", args[0])
 		}
 		f := resp.Webhook.WebhookFields
 
 		if jsonOut {
 			output.JSON(resp.Webhook)
-			return
+			return nil
 		}
 
 		if plaintext {
@@ -133,7 +125,7 @@ var webhookGetCmd = &cobra.Command{
 			fmt.Printf("- **URL**: %s\n", webhookURL(f))
 			fmt.Printf("- **Enabled**: %t\n", f.Enabled)
 			fmt.Printf("- **Resources**: %s\n", strings.Join(f.ResourceTypes, ", "))
-			return
+			return nil
 		}
 
 		fmt.Printf("%s %s\n", color.New(color.FgCyan, color.Bold).Sprint("Webhook:"), webhookLabel(f))
@@ -146,6 +138,7 @@ var webhookGetCmd = &cobra.Command{
 		} else if f.AllPublicTeams {
 			fmt.Printf("  Team:      all public teams\n")
 		}
+		return nil
 	},
 }
 
@@ -158,34 +151,28 @@ var webhookCreateCmd = &cobra.Command{
 The URL is validated locally before the API call: localhost, loopback,
 link-local, and private/internal IP addresses are rejected because Linear
 fetches the URL server-side.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		targetURL, _ := cmd.Flags().GetString("url")
 		if targetURL == "" {
-			output.Error("URL is required (--url)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("URL is required (--url)")
 		}
 		if err := validateWebhookURL(targetURL); err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resourceTypes, _ := cmd.Flags().GetStringSlice("resource-types")
 		if len(resourceTypes) == 0 {
-			output.Error("At least one resource type is required (--resource-types)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("At least one resource type is required (--resource-types)")
 		}
 
 		input := &api.WebhookCreateInput{
@@ -212,20 +199,17 @@ fetches the URL server-side.`,
 		if team, _ := cmd.Flags().GetString("team"); team != "" {
 			teamID, err := resolveTeam(ctx, client, cache, team)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.TeamId = &teamID
 		}
 
 		resp, err := api.WebhookCreate(ctx, client, input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create webhook: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create webhook: %v", err)
 		}
 		if resp.WebhookCreate == nil || !resp.WebhookCreate.Success {
-			output.Error("Failed to create webhook", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create webhook")
 		}
 
 		if jsonOut {
@@ -233,6 +217,7 @@ fetches the URL server-side.`,
 		} else {
 			output.Success(fmt.Sprintf("Created webhook %s", resp.WebhookCreate.Webhook.WebhookFields.Id), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -241,17 +226,14 @@ var webhookUpdateCmd = &cobra.Command{
 	Short: "Update a webhook",
 	Long:  `Update a webhook's URL, label, resource types, or enabled state.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 
 		input := &api.WebhookUpdateInput{}
 		changed := false
@@ -259,8 +241,7 @@ var webhookUpdateCmd = &cobra.Command{
 		if cmd.Flags().Changed("url") {
 			targetURL, _ := cmd.Flags().GetString("url")
 			if err := validateWebhookURL(targetURL); err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.Url = &targetURL
 			changed = true
@@ -287,18 +268,15 @@ var webhookUpdateCmd = &cobra.Command{
 		}
 
 		if !changed {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		resp, err := api.WebhookUpdate(context.Background(), client, args[0], input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update webhook: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update webhook: %v", err)
 		}
 		if resp.WebhookUpdate == nil || !resp.WebhookUpdate.Success {
-			output.Error("Failed to update webhook", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update webhook")
 		}
 
 		if jsonOut {
@@ -306,6 +284,7 @@ var webhookUpdateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Updated webhook %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -314,26 +293,21 @@ var webhookDeleteCmd = &cobra.Command{
 	Aliases: []string{"rm"},
 	Short:   "Delete a webhook",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 
 		resp, err := api.WebhookDelete(context.Background(), client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete webhook: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete webhook: %v", err)
 		}
 		if resp.WebhookDelete == nil || !resp.WebhookDelete.Success {
-			output.Error("Failed to delete webhook", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to delete webhook")
 		}
 
 		if jsonOut {
@@ -341,6 +315,7 @@ var webhookDeleteCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Deleted webhook %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -352,39 +327,35 @@ var webhookRotateSecretCmd = &cobra.Command{
 The new secret is printed a single time; capture it now. lincli does not store
 it, and rotating again replaces it.`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 
 		resp, err := api.WebhookRotateSecret(context.Background(), client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to rotate webhook secret: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to rotate webhook secret: %v", err)
 		}
 		if resp.WebhookRotateSecret == nil || !resp.WebhookRotateSecret.Success {
-			output.Error("Failed to rotate webhook secret", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to rotate webhook secret")
 		}
 
 		secret := resp.WebhookRotateSecret.Secret
 		if jsonOut {
 			output.JSON(map[string]interface{}{"success": true, "id": args[0], "secret": secret})
-			return
+			return nil
 		}
 		if plaintext {
 			fmt.Println(secret)
-			return
+			return nil
 		}
 		fmt.Printf("%s Rotated secret for webhook %s\n", color.New(color.FgGreen).Sprint("✓"), args[0])
 		fmt.Printf("  New secret (shown once): %s\n", color.New(color.FgYellow).Sprint(secret))
+		return nil
 	},
 }
 
@@ -392,7 +363,13 @@ it, and rotating again replaces it.`,
 // address. Linear fetches the URL server-side, so a localhost, loopback,
 // link-local, or private/internal IP target would let a caller probe Linear's
 // own network (server-side request forgery). Only http/https URLs with a host
-// are accepted; IP-literal hosts are checked against the reserved ranges.
+// are accepted; IP-literal and integer-encoded hosts are checked against the
+// reserved ranges.
+//
+// This is a best-effort, local, defense-in-depth check; Linear also validates
+// the target server-side. A DNS name that resolves to a private address (or is
+// rebound after this check) cannot be caught here without resolving it, so that
+// residual case is left to Linear's own validation.
 func validateWebhookURL(rawURL string) error {
 	u, err := url.Parse(rawURL)
 	if err != nil {
@@ -418,6 +395,16 @@ func validateWebhookURL(rawURL string) error {
 		if ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() || ip.IsPrivate() || ip.IsUnspecified() {
 			return fmt.Errorf("webhook URL host %q is not allowed (internal address)", host)
 		}
+		return nil
+	}
+
+	// net.ParseIP only recognizes the dotted/colon IP forms, so an
+	// integer-encoded address (decimal 2130706433, hex 0x7f000001, octal
+	// 017700000001) would slip past the reserved-range check yet still resolve
+	// to a loopback/private address server-side. No legitimate webhook host is
+	// a bare integer, so reject any all-numeric host outright.
+	if _, err := strconv.ParseUint(lower, 0, 64); err == nil {
+		return fmt.Errorf("webhook URL host %q is not allowed (numeric/encoded address)", host)
 	}
 	return nil
 }

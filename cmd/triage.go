@@ -3,12 +3,11 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 
+	"github.com/Khan/genqlient/graphql"
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -38,11 +37,14 @@ var triageListCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
 	Short:   "List triage responsibilities",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := triageClient(plaintext, jsonOut)
+		client, ctx, err := triageClient()
+		if err != nil {
+			return err
+		}
 
 		limit, _ := cmd.Flags().GetInt("limit")
 		var limitPtr *int
@@ -52,18 +54,17 @@ var triageListCmd = &cobra.Command{
 
 		resp, err := api.ListTriageResponsibilities(ctx, client, limitPtr, nil, nil)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list triage responsibilities: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list triage responsibilities: %v", err)
 		}
 
 		if resp.TriageResponsibilities == nil || len(resp.TriageResponsibilities.Nodes) == 0 {
 			output.Info("No triage responsibilities found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(resp.TriageResponsibilities.Nodes)
-			return
+			return nil
 		}
 
 		headers := []string{"ID", "Team", "Action", "Schedule", "Current"}
@@ -90,6 +91,7 @@ var triageListCmd = &cobra.Command{
 		if !plaintext && !jsonOut {
 			fmt.Printf("\n%s %d responsibilities\n", color.New(color.FgGreen).Sprint("✓"), len(resp.TriageResponsibilities.Nodes))
 		}
+		return nil
 	},
 }
 
@@ -98,22 +100,23 @@ var triageGetCmd = &cobra.Command{
 	Aliases: []string{"show"},
 	Short:   "Get a triage responsibility",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		plaintext := viper.GetBool("plaintext")
+	RunE: func(cmd *cobra.Command, args []string) error {
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := triageClient(plaintext, jsonOut)
+		client, ctx, err := triageClient()
+		if err != nil {
+			return err
+		}
 
 		resp, err := api.GetTriageResponsibility(ctx, client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get triage responsibility: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get triage responsibility: %v", err)
 		}
 		f := resp.TriageResponsibility.TriageResponsibilityFields
 
 		if jsonOut {
 			output.JSON(resp.TriageResponsibility)
-			return
+			return nil
 		}
 
 		fmt.Printf("%s %s\n", color.New(color.FgCyan, color.Bold).Sprint("Triage responsibility:"), f.Id)
@@ -130,18 +133,18 @@ var triageGetCmd = &cobra.Command{
 		if f.ManualSelection != nil && len(f.ManualSelection.UserIds) > 0 {
 			fmt.Printf("  Users:    %s\n", strings.Join(f.ManualSelection.UserIds, ", "))
 		}
+		return nil
 	},
 }
 
 // triageClient builds the authenticated client and context shared by the triage
-// subcommands, exiting on an auth failure.
-func triageClient(plaintext, jsonOut bool) (*api.Client, context.Context) {
-	authHeader, err := auth.GetAuthHeader()
+// subcommands.
+func triageClient() (graphql.Client, context.Context, error) {
+	client, err := newGraphQLClient()
 	if err != nil {
-		output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return nil, nil, err
 	}
-	return api.NewClient(authHeader), context.Background()
+	return client, context.Background(), nil
 }
 
 func init() {

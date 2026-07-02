@@ -2,14 +2,13 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/shanedolley/lincli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -104,17 +103,14 @@ var initiativeListCmd = &cobra.Command{
 	Aliases: []string{"ls"},
 	Short:   "List initiatives",
 	Long:    `List all initiatives in your Linear workspace.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		limit, _ := cmd.Flags().GetInt("limit")
@@ -137,30 +133,31 @@ var initiativeListCmd = &cobra.Command{
 				// Use nil for Linear's default sort
 				orderByEnum = nil
 			default:
-				output.Error(fmt.Sprintf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy)
 			}
 		}
 
-		filter := buildInitiativeFilterTyped(cmd, plaintext, jsonOut)
+		filter, err := buildInitiativeFilterTyped(cmd)
+		if err != nil {
+			return err
+		}
 
 		includeArchived, _ := cmd.Flags().GetBool("include-archived")
 		includeArchivedPtr := &includeArchived
 
 		resp, err := api.ListInitiatives(ctx, client, &filter, limitPtr, nil, orderByEnum, includeArchivedPtr)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list initiatives: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list initiatives: %v", err)
 		}
 
 		if len(resp.Initiatives.Nodes) == 0 {
 			output.Info("No initiatives found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(resp.Initiatives.Nodes)
-			return
+			return nil
 		}
 
 		if plaintext {
@@ -185,7 +182,7 @@ var initiativeListCmd = &cobra.Command{
 				fmt.Println()
 			}
 			fmt.Printf("\nTotal: %d initiatives\n", len(resp.Initiatives.Nodes))
-			return
+			return nil
 		}
 
 		// Table output.
@@ -236,6 +233,7 @@ var initiativeListCmd = &cobra.Command{
 				color.New(color.FgGreen).Sprint("✓"),
 				len(resp.Initiatives.Nodes))
 		}
+		return nil
 	},
 }
 
@@ -245,30 +243,25 @@ var initiativeGetCmd = &cobra.Command{
 	Short:   "Get initiative details",
 	Long:    `Get detailed information about a specific initiative. Accepts an initiative ID or an exact (case-insensitive) name.`,
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		initiativeID, err := resolveInitiative(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.GetInitiative(ctx, client, initiativeID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get initiative: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get initiative: %v", err)
 		}
 		f := resp.Initiative.InitiativeDetailFields
 
@@ -289,7 +282,7 @@ var initiativeGetCmd = &cobra.Command{
 				api.InitiativeDetailFields
 				Labels []*api.GetInitiativeLabelsInitiativeLabelsInitiativeLabelConnectionNodesInitiativeLabel `json:"labels,omitempty"`
 			}{InitiativeDetailFields: f, Labels: labels})
-			return
+			return nil
 		}
 
 		if plaintext {
@@ -385,7 +378,7 @@ var initiativeGetCmd = &cobra.Command{
 			}
 
 			fmt.Printf("\n## URL\n- %s\n", f.Url)
-			return
+			return nil
 		}
 
 		// Rich display
@@ -484,6 +477,7 @@ var initiativeGetCmd = &cobra.Command{
 		}
 
 		fmt.Println()
+		return nil
 	},
 }
 
@@ -492,24 +486,20 @@ var initiativeCreateCmd = &cobra.Command{
 	Aliases: []string{"new"},
 	Short:   "Create a new initiative",
 	Long:    `Create a new initiative in Linear.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		name, _ := cmd.Flags().GetString("name")
 		if name == "" {
-			output.Error("Name is required (--name)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Name is required (--name)")
 		}
 
 		input := api.InitiativeCreateInput{Name: name}
@@ -521,8 +511,7 @@ var initiativeCreateCmd = &cobra.Command{
 		if owner, _ := cmd.Flags().GetString("owner"); owner != "" {
 			ownerID, err := resolveUser(ctx, client, cache, owner)
 			if err != nil {
-				output.Error(fmt.Sprintf("Failed to find owner '%s': %v", owner, err), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Failed to find owner '%s': %v", owner, err)
 			}
 			input.OwnerId = &ownerID
 		}
@@ -534,21 +523,18 @@ var initiativeCreateCmd = &cobra.Command{
 		if status, _ := cmd.Flags().GetString("status"); status != "" {
 			statusEnum, err := parseInitiativeStatus(status)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.Status = &statusEnum
 		}
 
 		createResp, err := api.CreateInitiative(ctx, client, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create initiative: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create initiative: %v", err)
 		}
 
 		if !createResp.InitiativeCreate.Success {
-			output.Error("Failed to create initiative", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create initiative")
 		}
 
 		initiative := createResp.InitiativeCreate.Initiative
@@ -565,6 +551,7 @@ var initiativeCreateCmd = &cobra.Command{
 				fmt.Printf("  Owner: %s\n", color.New(color.FgCyan).Sprint(initiative.InitiativeListFields.Owner.Name))
 			}
 		}
+		return nil
 	},
 }
 
@@ -581,24 +568,20 @@ Examples:
   lincli initiative update ID --target-date 2025-12-31
   lincli initiative update ID --owner unassigned`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		initiativeID, err := resolveInitiative(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := api.InitiativeUpdateInput{}
@@ -624,8 +607,7 @@ Examples:
 			default:
 				ownerID, err := resolveUser(ctx, client, cache, owner)
 				if err != nil {
-					output.Error(fmt.Sprintf("Failed to find owner '%s': %v", owner, err), plaintext, jsonOut)
-					os.Exit(1)
+					return fmt.Errorf("Failed to find owner '%s': %v", owner, err)
 				}
 				input.OwnerId = &ownerID
 			}
@@ -645,8 +627,7 @@ Examples:
 			status, _ := cmd.Flags().GetString("status")
 			statusEnum, err := parseInitiativeStatus(status)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.Status = &statusEnum
 		}
@@ -658,19 +639,16 @@ Examples:
 			input.Status != nil
 
 		if !hasUpdates {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		updateResp, err := api.UpdateInitiative(ctx, client, initiativeID, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update initiative: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update initiative: %v", err)
 		}
 
 		if !updateResp.InitiativeUpdate.Success {
-			output.Error("Failed to update initiative", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update initiative")
 		}
 
 		updated := updateResp.InitiativeUpdate.Initiative
@@ -682,6 +660,7 @@ Examples:
 		} else {
 			output.Success(fmt.Sprintf("Updated initiative %s", updated.InitiativeListFields.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -690,35 +669,29 @@ var initiativeArchiveCmd = &cobra.Command{
 	Short: "Archive an initiative",
 	Long:  `Archive an initiative. This action executes immediately with no confirmation prompt.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		initiativeID, err := resolveInitiative(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.InitiativeArchive(ctx, client, initiativeID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to archive initiative: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to archive initiative: %v", err)
 		}
 
 		if !resp.InitiativeArchive.Success {
-			output.Error("Failed to archive initiative", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to archive initiative")
 		}
 
 		name := initiativeID
@@ -733,6 +706,7 @@ var initiativeArchiveCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Archived initiative %s", name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -741,35 +715,29 @@ var initiativeUnarchiveCmd = &cobra.Command{
 	Short: "Unarchive an initiative",
 	Long:  `Unarchive a previously archived initiative. This action executes immediately with no confirmation prompt.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		initiativeID, err := resolveInitiative(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.InitiativeUnarchive(ctx, client, initiativeID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to unarchive initiative: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to unarchive initiative: %v", err)
 		}
 
 		if !resp.InitiativeUnarchive.Success {
-			output.Error("Failed to unarchive initiative", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to unarchive initiative")
 		}
 
 		name := initiativeID
@@ -784,6 +752,7 @@ var initiativeUnarchiveCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Unarchived initiative %s", name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -792,35 +761,29 @@ var initiativeDeleteCmd = &cobra.Command{
 	Short: "Delete an initiative",
 	Long:  `Delete (trash) an initiative. This action executes immediately with no confirmation prompt.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		initiativeID, err := resolveInitiative(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.InitiativeDelete(ctx, client, initiativeID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete initiative: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete initiative: %v", err)
 		}
 
 		if !resp.InitiativeDelete.Success {
-			output.Error("Failed to delete initiative", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to delete initiative")
 		}
 
 		if jsonOut {
@@ -830,6 +793,7 @@ var initiativeDeleteCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Deleted initiative %s", resp.InitiativeDelete.EntityId), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -845,14 +809,13 @@ Examples:
   lincli initiative set-lead ID --team ENG --mode includeDescendants
   lincli initiative set-lead ID --team none   # clear the lead team`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		team, _ := cmd.Flags().GetString("team")
 		if team == "" {
-			output.Error("Team is required (--team)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Team is required (--team)")
 		}
 
 		modeStr, _ := cmd.Flags().GetString("mode")
@@ -865,24 +828,19 @@ Examples:
 			val := api.InitiativeLeadTeamChangeModeIncludedescendants
 			mode = &val
 		default:
-			output.Error(fmt.Sprintf("Invalid mode '%s'. Valid values: selectedOnly, includeDescendants", modeStr), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Invalid mode '%s'. Valid values: selectedOnly, includeDescendants", modeStr)
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		initiativeID, err := resolveInitiative(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		var leadTeamID *string
@@ -900,21 +858,18 @@ Examples:
 		} else {
 			id, err := resolveTeam(ctx, client, cache, team)
 			if err != nil {
-				output.Error(fmt.Sprintf("Failed to find team '%s': %v", team, err), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Failed to find team '%s': %v", team, err)
 			}
 			leadTeamID = &id
 		}
 
 		resp, err := api.InitiativeLeadTeamUpdate(ctx, client, initiativeID, leadTeamID, mode)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update lead team: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update lead team: %v", err)
 		}
 
 		if !resp.InitiativeLeadTeamUpdate.Success {
-			output.Error("Failed to update lead team", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update lead team")
 		}
 
 		initiative := resp.InitiativeLeadTeamUpdate.Initiative
@@ -926,6 +881,7 @@ Examples:
 		} else {
 			output.Success(fmt.Sprintf("Updated lead team for initiative %s", initiative.InitiativeListFields.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -969,29 +925,24 @@ var initiativeProjectAddCmd = &cobra.Command{
 	Short: "Associate a project with an initiative",
 	Long:  `Associate a project with an initiative. A project can only belong to one initiative hierarchy at a time.`,
 	Args:  cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		initiativeID, err := resolveInitiative(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 		projectID, err := resolveProject(ctx, client, cache, args[1])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := api.InitiativeToProjectCreateInput{
@@ -1001,12 +952,10 @@ var initiativeProjectAddCmd = &cobra.Command{
 
 		resp, err := api.InitiativeToProjectCreate(ctx, client, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to add project to initiative: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to add project to initiative: %v", err)
 		}
 		if !resp.InitiativeToProjectCreate.Success {
-			output.Error("Failed to add project to initiative", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to add project to initiative")
 		}
 
 		link := resp.InitiativeToProjectCreate.InitiativeToProject
@@ -1018,6 +967,7 @@ var initiativeProjectAddCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Added project %s to initiative %s", link.Project.Name, link.Initiative.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1027,45 +977,37 @@ var initiativeProjectRemoveCmd = &cobra.Command{
 	Short:   "Remove a project from an initiative",
 	Long:    `Remove a project from an initiative. This action executes immediately with no confirmation prompt.`,
 	Args:    cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		initiativeID, err := resolveInitiative(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 		projectID, err := resolveProject(ctx, client, cache, args[1])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		linkID, err := findInitiativeToProjectLink(ctx, client, initiativeID, projectID)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.InitiativeToProjectDelete(ctx, client, linkID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to remove project from initiative: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to remove project from initiative: %v", err)
 		}
 		if !resp.InitiativeToProjectDelete.Success {
-			output.Error("Failed to remove project from initiative", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to remove project from initiative")
 		}
 
 		if jsonOut {
@@ -1075,6 +1017,7 @@ var initiativeProjectRemoveCmd = &cobra.Command{
 		} else {
 			output.Success("Removed project from initiative", plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1083,52 +1026,43 @@ var initiativeProjectReorderCmd = &cobra.Command{
 	Short: "Change a project's sort order within an initiative",
 	Long:  `Change the sort order of a project within an initiative's project list.`,
 	Args:  cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		if !cmd.Flags().Changed("sort-order") {
-			output.Error("Sort order is required (--sort-order)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Sort order is required (--sort-order)")
 		}
 		sortOrder, _ := cmd.Flags().GetFloat64("sort-order")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		initiativeID, err := resolveInitiative(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 		projectID, err := resolveProject(ctx, client, cache, args[1])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		linkID, err := findInitiativeToProjectLink(ctx, client, initiativeID, projectID)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := api.InitiativeToProjectUpdateInput{SortOrder: &sortOrder}
 		resp, err := api.InitiativeToProjectUpdate(ctx, client, linkID, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to reorder project: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to reorder project: %v", err)
 		}
 		if !resp.InitiativeToProjectUpdate.Success {
-			output.Error("Failed to reorder project", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to reorder project")
 		}
 
 		link := resp.InitiativeToProjectUpdate.InitiativeToProject
@@ -1140,6 +1074,7 @@ var initiativeProjectReorderCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Reordered project %s to sort order %s", link.Project.Name, link.SortOrder), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1162,39 +1097,32 @@ var initiativeLabelAddCmd = &cobra.Command{
 	Use:   "add <initiative-id-or-name> <label-name-or-id>",
 	Short: "Add a label to an initiative",
 	Args:  cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		initiativeID, err := resolveInitiative(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 		labelID, err := resolveInitiativeLabel(ctx, client, cache, args[1])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.InitiativeAddLabel(ctx, client, initiativeID, labelID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to add label to initiative: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to add label to initiative: %v", err)
 		}
 		if !resp.InitiativeAddLabel.Success {
-			output.Error("Failed to add label to initiative", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to add label to initiative")
 		}
 
 		initiative := resp.InitiativeAddLabel.Initiative
@@ -1206,6 +1134,7 @@ var initiativeLabelAddCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Added label to initiative %s", initiative.InitiativeListFields.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1215,39 +1144,32 @@ var initiativeLabelRemoveCmd = &cobra.Command{
 	Short:   "Remove a label from an initiative",
 	Long:    `Remove a label from an initiative. This action executes immediately with no confirmation prompt.`,
 	Args:    cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		initiativeID, err := resolveInitiative(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 		labelID, err := resolveInitiativeLabel(ctx, client, cache, args[1])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.InitiativeRemoveLabel(ctx, client, initiativeID, labelID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to remove label from initiative: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to remove label from initiative: %v", err)
 		}
 		if !resp.InitiativeRemoveLabel.Success {
-			output.Error("Failed to remove label from initiative", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to remove label from initiative")
 		}
 
 		initiative := resp.InitiativeRemoveLabel.Initiative
@@ -1259,6 +1181,7 @@ var initiativeLabelRemoveCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Removed label from initiative %s", initiative.InitiativeListFields.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1278,29 +1201,24 @@ Examples:
   lincli initiative relate "Platform" "Platform: Auth"
   lincli initiative relate "Platform" "Platform: Auth" --sort-order 10`,
 	Args: cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		parentID, err := resolveInitiative(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 		childID, err := resolveInitiative(ctx, client, cache, args[1])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := api.InitiativeRelationCreateInput{
@@ -1314,12 +1232,10 @@ Examples:
 
 		resp, err := api.InitiativeRelationCreate(ctx, client, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create initiative relation: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create initiative relation: %v", err)
 		}
 		if !resp.InitiativeRelationCreate.Success {
-			output.Error("Failed to create initiative relation", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create initiative relation")
 		}
 
 		rel := resp.InitiativeRelationCreate.InitiativeRelation
@@ -1331,6 +1247,7 @@ Examples:
 		} else {
 			output.Success(fmt.Sprintf("Related %s as a sub-initiative of %s", rel.RelatedInitiative.Name, rel.Initiative.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1339,29 +1256,24 @@ var initiativeUnrelateCmd = &cobra.Command{
 	Short: "Remove a parent-child relation between two initiatives",
 	Long:  `Remove a parent-child hierarchy relation between two initiatives. This action executes immediately with no confirmation prompt.`,
 	Args:  cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		parentID, err := resolveInitiative(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 		childID, err := resolveInitiative(ctx, client, cache, args[1])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		// initiativeRelations has no filter argument, so finding the join id
@@ -1374,8 +1286,7 @@ var initiativeUnrelateCmd = &cobra.Command{
 		for after := (*string)(nil); ; {
 			resp, err := api.ListInitiativeRelations(ctx, client, &limit, after)
 			if err != nil {
-				output.Error(fmt.Sprintf("Failed to look up initiative relations: %v", err), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Failed to look up initiative relations: %v", err)
 			}
 			for _, node := range resp.InitiativeRelations.Nodes {
 				if node.Initiative != nil && node.RelatedInitiative != nil &&
@@ -1391,18 +1302,15 @@ var initiativeUnrelateCmd = &cobra.Command{
 		}
 
 		if relID == "" {
-			output.Error("No relation found between these initiatives", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No relation found between these initiatives")
 		}
 
 		resp, err := api.InitiativeRelationDelete(ctx, client, relID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to remove initiative relation: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to remove initiative relation: %v", err)
 		}
 		if !resp.InitiativeRelationDelete.Success {
-			output.Error("Failed to remove initiative relation", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to remove initiative relation")
 		}
 
 		if jsonOut {
@@ -1412,6 +1320,7 @@ var initiativeUnrelateCmd = &cobra.Command{
 		} else {
 			output.Success("Removed initiative relation", plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1438,24 +1347,20 @@ var initiativeUpdatePostListCmd = &cobra.Command{
 	Aliases: []string{"ls"},
 	Short:   "List status updates posted to an initiative",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		initiativeID, err := resolveInitiative(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		limit, _ := cmd.Flags().GetInt("limit")
@@ -1472,20 +1377,19 @@ var initiativeUpdatePostListCmd = &cobra.Command{
 
 		resp, err := api.ListInitiativeUpdates(ctx, client, filter, limitPtr, nil, nil)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list initiative updates: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list initiative updates: %v", err)
 		}
 
 		updates := resp.InitiativeUpdates.Nodes
 
 		if len(updates) == 0 {
 			output.Info("No status updates found for this initiative", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(updates)
-			return
+			return nil
 		}
 
 		if plaintext {
@@ -1502,7 +1406,7 @@ var initiativeUpdatePostListCmd = &cobra.Command{
 				}
 				fmt.Printf("\n%s\n\n", u.Body)
 			}
-			return
+			return nil
 		}
 
 		headers := []string{"ID", "Date", "Health", "Author", "Body"}
@@ -1521,6 +1425,7 @@ var initiativeUpdatePostListCmd = &cobra.Command{
 			}
 		}
 		output.Table(output.TableData{Headers: headers, Rows: rows}, plaintext, jsonOut)
+		return nil
 	},
 }
 
@@ -1529,40 +1434,34 @@ var initiativeUpdatePostCreateCmd = &cobra.Command{
 	Aliases: []string{"add", "new"},
 	Short:   "Post a new status update to an initiative",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		body, _ := cmd.Flags().GetString("body")
 		if body == "" {
-			output.Error("Body is required (--body)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Body is required (--body)")
 		}
 
 		var health *api.InitiativeUpdateHealthType
 		if healthStr, _ := cmd.Flags().GetString("health"); healthStr != "" {
 			h, err := parseInitiativeUpdateHealth(healthStr)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			health = &h
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		initiativeID, err := resolveInitiative(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := api.InitiativeUpdateCreateInput{
@@ -1573,12 +1472,10 @@ var initiativeUpdatePostCreateCmd = &cobra.Command{
 
 		resp, err := api.CreateInitiativeUpdate(ctx, client, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to post initiative update: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to post initiative update: %v", err)
 		}
 		if !resp.InitiativeUpdateCreate.Success {
-			output.Error("Failed to post initiative update", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to post initiative update")
 		}
 
 		update := resp.InitiativeUpdateCreate.InitiativeUpdate
@@ -1590,6 +1487,7 @@ var initiativeUpdatePostCreateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Posted status update %s", update.Id), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1597,7 +1495,7 @@ var initiativeUpdatePostEditCmd = &cobra.Command{
 	Use:   "edit <update-id>",
 	Short: "Edit a status update's body or health",
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 		updateID := args[0]
@@ -1611,33 +1509,26 @@ var initiativeUpdatePostEditCmd = &cobra.Command{
 			healthStr, _ := cmd.Flags().GetString("health")
 			h, err := parseInitiativeUpdateHealth(healthStr)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.Health = &h
 		}
 		if input.Body == nil && input.Health == nil {
-			output.Error("No updates specified. Use --body and/or --health.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use --body and/or --health.")
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		resp, err := api.UpdateInitiativeUpdate(ctx, client, updateID, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to edit status update: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to edit status update: %v", err)
 		}
 		if !resp.InitiativeUpdateUpdate.Success {
-			output.Error("Failed to edit status update", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to edit status update")
 		}
 
 		update := resp.InitiativeUpdateUpdate.InitiativeUpdate
@@ -1649,6 +1540,7 @@ var initiativeUpdatePostEditCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Updated status update %s", update.Id), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1657,28 +1549,23 @@ var initiativeUpdatePostArchiveCmd = &cobra.Command{
 	Short: "Archive a status update",
 	Long:  `Archive a status update. This action executes immediately with no confirmation prompt.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 		updateID := args[0]
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		resp, err := api.InitiativeUpdateArchive(ctx, client, updateID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to archive status update: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to archive status update: %v", err)
 		}
 		if !resp.InitiativeUpdateArchive.Success {
-			output.Error("Failed to archive status update", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to archive status update")
 		}
 
 		if jsonOut {
@@ -1688,6 +1575,7 @@ var initiativeUpdatePostArchiveCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Archived status update %s", updateID), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1696,28 +1584,23 @@ var initiativeUpdatePostUnarchiveCmd = &cobra.Command{
 	Short: "Unarchive a status update",
 	Long:  `Unarchive a previously archived status update. This action executes immediately with no confirmation prompt.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 		updateID := args[0]
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		resp, err := api.InitiativeUpdateUnarchive(ctx, client, updateID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to unarchive status update: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to unarchive status update: %v", err)
 		}
 		if !resp.InitiativeUpdateUnarchive.Success {
-			output.Error("Failed to unarchive status update", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to unarchive status update")
 		}
 
 		if jsonOut {
@@ -1727,6 +1610,7 @@ var initiativeUpdatePostUnarchiveCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Unarchived status update %s", updateID), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1740,44 +1624,37 @@ Examples:
   lincli initiative update-reminder "Q3 Growth"
   lincli initiative update-reminder "Q3 Growth" --user jane@example.com`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
 		initiativeID, err := resolveInitiative(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		var userID *string
 		if user, _ := cmd.Flags().GetString("user"); user != "" {
 			id, err := resolveUser(ctx, client, cache, user)
 			if err != nil {
-				output.Error(fmt.Sprintf("Failed to find user '%s': %v", user, err), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Failed to find user '%s': %v", user, err)
 			}
 			userID = &id
 		}
 
 		resp, err := api.CreateInitiativeUpdateReminder(ctx, client, initiativeID, userID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to send update reminder: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to send update reminder: %v", err)
 		}
 		if !resp.CreateInitiativeUpdateReminder.Success {
-			output.Error("Failed to send update reminder", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to send update reminder")
 		}
 
 		if jsonOut {
@@ -1787,6 +1664,7 @@ Examples:
 		} else {
 			output.Success("Sent update reminder", plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -1876,14 +1754,13 @@ func init() {
 }
 
 // buildInitiativeFilterTyped builds a typed InitiativeFilter from command flags.
-func buildInitiativeFilterTyped(cmd *cobra.Command, plaintext, jsonOut bool) api.InitiativeFilter {
+func buildInitiativeFilterTyped(cmd *cobra.Command) (api.InitiativeFilter, error) {
 	filter := api.InitiativeFilter{}
 
 	newerThan, _ := cmd.Flags().GetString("newer-than")
 	createdAt, err := utils.ParseTimeExpression(newerThan)
 	if err != nil {
-		output.Error(fmt.Sprintf("Invalid newer-than value: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return filter, fmt.Errorf("Invalid newer-than value: %v", err)
 	}
 	if createdAt != "" {
 		filter.CreatedAt = &api.DateComparator{
@@ -1891,5 +1768,5 @@ func buildInitiativeFilterTyped(cmd *cobra.Command, plaintext, jsonOut bool) api
 		}
 	}
 
-	return filter
+	return filter, nil
 }

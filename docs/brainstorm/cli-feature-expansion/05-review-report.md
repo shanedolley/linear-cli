@@ -84,5 +84,48 @@ remained, so the loop exited.
 - Align plaintext output on the Markdown shape (`document`/`initiative` follow
   it; `customer` emits a TSV table).
 - Simplify `handleRelationLink` (cyclomatic complexity 33; pre-existing).
-- Remove dead `stringIn` (`cmd/issue.go`) and `GetRootCmd` (`cmd/root.go`).
-- Decide on a generic name-or-ID resolver if a seventh entity needs one.
+- Remove dead `GetRootCmd` (`cmd/root.go`).
+
+## Second-review remediation (automated PR review on PR #1)
+
+A later multi-specialist review of PR #1 raised two merge items (M1, M5), three
+structural follow-ups (M2, M3, M4), and several lower-severity items. All are
+resolved on this branch.
+
+Merge items and lower-severity fixes:
+
+- **M1** - guarded the nullable `resp.Issue` behind `resolveIssueDetail` /
+  `resolveIssueID`; the batch-create, batch-update, and single-create parent
+  paths all route through it, so a bad reference errors instead of panicking.
+- **M5** - renamed `template --type` to `--template-type` with a hidden `--type`
+  alias, matching the state/status/relation convention.
+- Removed the dead `stringIn` helper.
+- Sorted map-derived output (issue-view reactions; customer status, customer
+  tier, and time-schedule resolver error lists) for deterministic order.
+- Redacted `secret`/`token`/`password`/`apikey` values in `LINCLI_DEBUG_GQL`
+  output, with a regression test.
+- Hardened the webhook SSRF filter against integer-encoded IP hosts (decimal,
+  hex, octal), with tests, and documented the residual DNS limitation.
+- Disclosed the `customer need create` attachment-source gap in help and the
+  plan deferrals in the README.
+
+Structural follow-ups (implemented, not deferred):
+
+- **M2** - migrated 226 command handlers from `os.Exit`-ing `Run` closures to
+  `RunE`, returning errors through a central formatter in `Execute` that renders
+  in the active output mode. Handlers now take an injectable client via the
+  `newGraphQLClient` seam, so they are unit-testable offline (see
+  `cmd/handler_test.go`). `os.Exit` in `cmd/` dropped from 931 to 59, with none
+  left inside a handler. `auth.go` keeps `Run` (no client, custom output). The
+  shared helpers that still `os.Exit` (for example `resolveParentIssueID`,
+  `runReaction`, `buildIssueCreateInput`) are a smaller, separable follow-up.
+- **M3** - documented the explicit-null design in `docs/adr/0001-explicit-null-handling.md`
+  and fixed both defects: `stripNulls` now preserves empty objects, and
+  `NullSentinel` is a per-process random token that no user value can collide
+  with. Tests cover both.
+- **M4** - factored the six name-or-ID resolvers (project, initiative, label,
+  initiative label, project label, customer) onto a shared `resolveByName`
+  skeleton.
+
+Verification: `go build`, `go vet`, `gofmt -l`, and `go test ./...` all clean;
+`./smoke_test.sh` 126/126.

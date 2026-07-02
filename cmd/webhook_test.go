@@ -37,6 +37,10 @@ func TestValidateWebhookURL_RejectsInternalHosts(t *testing.T) {
 		"https://172.16.5.4/hook",       // private 172.16/12
 		"https://192.168.1.1/hook",      // private 192.168/16
 		"http://169.254.169.254/latest", // link-local (cloud metadata)
+		"http://2130706433/hook",        // 127.0.0.1 as a decimal integer
+		"http://0x7f000001/hook",        // 127.0.0.1 as hex
+		"http://017700000001/hook",      // 127.0.0.1 as octal
+		"http://3232235521/hook",        // 192.168.0.1 as a decimal integer
 	}
 	for _, u := range blocked {
 		if err := validateWebhookURL(u); err == nil {

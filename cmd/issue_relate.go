@@ -2,12 +2,11 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -33,7 +32,7 @@ var issueRelateUpdateCmd = &cobra.Command{
 relation type: blocks, duplicate, related, similar), --issue, or --related (an
 issue identifier such as TEAM-123 or a UUID).`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
@@ -44,8 +43,7 @@ issue identifier such as TEAM-123 or a UUID).`,
 			raw, _ := cmd.Flags().GetString("relation")
 			relation, err := validateIssueRelationType(raw)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.Type = &relation
 			changed = true
@@ -62,25 +60,19 @@ issue identifier such as TEAM-123 or a UUID).`,
 		}
 
 		if !changed {
-			output.Error("No updates specified. Use --relation, --issue, or --related.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use --relation, --issue, or --related.")
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		resp, err := api.UpdateIssueRelation(context.Background(), client, args[0], input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update relation: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update relation: %v", err)
 		}
 		if resp.IssueRelationUpdate == nil || !resp.IssueRelationUpdate.Success {
-			output.Error("Failed to update relation", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update relation")
 		}
 
 		if jsonOut {
@@ -88,6 +80,7 @@ issue identifier such as TEAM-123 or a UUID).`,
 		} else {
 			output.Success(fmt.Sprintf("Updated relation %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 

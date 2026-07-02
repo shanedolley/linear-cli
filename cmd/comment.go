@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -32,20 +33,15 @@ var commentListCmd = &cobra.Command{
 	Short:   "List comments for an issue",
 	Long:    `List all comments for a specific issue.`,
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 		issueID := args[0]
 
-		// Get auth header
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		// Create API client
-		client := api.NewClient(authHeader)
 
 		// Get limit
 		limit, _ := cmd.Flags().GetInt("limit")
@@ -63,8 +59,7 @@ var commentListCmd = &cobra.Command{
 				// Use empty string for Linear's default sort
 				orderBy = ""
 			default:
-				output.Error(fmt.Sprintf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy), plaintext, jsonOut)
-				os.Exit(1)
+				return fmt.Errorf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy)
 			}
 		}
 
@@ -89,8 +84,7 @@ var commentListCmd = &cobra.Command{
 		// Get comments using generated function
 		resp, err := api.ListComments(context.Background(), client, issueID, limitPtr, nil, orderByEnum)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list comments: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list comments: %v", err)
 		}
 
 		// Check if no comments
@@ -100,7 +94,7 @@ var commentListCmd = &cobra.Command{
 			} else {
 				output.Info(fmt.Sprintf("No comments on issue %s", issueID), plaintext, jsonOut)
 			}
-			return
+			return nil
 		}
 
 		comments := resp.Issue.Comments.Nodes
@@ -148,6 +142,7 @@ var commentListCmd = &cobra.Command{
 				fmt.Printf("\n%s\n\n", comment.Body)
 			}
 		}
+		return nil
 	},
 }
 
@@ -163,26 +158,20 @@ Examples:
   lincli comment create LIN-123 --body "This is fixed"
   lincli comment create LIN-123 --body "Agreed" --parent COMMENT-ID`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 		issueID := args[0]
 
-		// Get auth header
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		// Create API client
-		client := api.NewClient(authHeader)
 
 		// Get comment body
 		body, _ := cmd.Flags().GetString("body")
 		if body == "" {
-			output.Error("Comment body is required (--body)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Comment body is required (--body)")
 		}
 
 		// Create comment input
@@ -199,8 +188,7 @@ Examples:
 		// Create comment
 		createResp, err := api.CreateComment(context.Background(), client, input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create comment: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create comment: %v", err)
 		}
 		comment := createResp.CommentCreate.Comment
 
@@ -217,6 +205,7 @@ Examples:
 				color.New(color.FgCyan, color.Bold).Sprint(issueID))
 			fmt.Printf("\n%s\n", comment.CommentFields.Body)
 		}
+		return nil
 	},
 }
 
@@ -226,33 +215,27 @@ var commentEditCmd = &cobra.Command{
 	Short:   "Edit a comment's body",
 	Long:    `Edit the body of an existing comment. Identify the comment by its ID.`,
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 
 		body, _ := cmd.Flags().GetString("body")
 		if body == "" {
-			output.Error("Comment body is required (--body)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Comment body is required (--body)")
 		}
 
 		input := &api.CommentUpdateInput{Body: &body}
 		resp, err := api.UpdateComment(context.Background(), client, args[0], input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to edit comment: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to edit comment: %v", err)
 		}
 		if resp.CommentUpdate == nil || resp.CommentUpdate.Comment == nil {
-			output.Error("Failed to edit comment", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to edit comment")
 		}
 
 		if jsonOut {
@@ -260,6 +243,7 @@ var commentEditCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Edited comment %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -271,26 +255,21 @@ var commentDeleteCmd = &cobra.Command{
 confirmation prompt, and it is permanent: unlike documents, Linear has no
 comment-restore API, so a deleted comment cannot be recovered.`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 
 		resp, err := api.DeleteComment(context.Background(), client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete comment: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete comment: %v", err)
 		}
 		if resp.CommentDelete == nil || !resp.CommentDelete.Success {
-			output.Error("Failed to delete comment", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to delete comment")
 		}
 
 		if jsonOut {
@@ -298,6 +277,7 @@ comment-restore API, so a deleted comment cannot be recovered.`,
 		} else {
 			output.Success(fmt.Sprintf("Deleted comment %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -306,8 +286,9 @@ var commentResolveCmd = &cobra.Command{
 	Short: "Resolve a comment thread",
 	Long:  `Resolve a comment thread, marking the root comment as resolved.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		runCommentResolution(cmd, args[0], true)
+		return nil
 	},
 }
 
@@ -316,8 +297,9 @@ var commentUnresolveCmd = &cobra.Command{
 	Short: "Unresolve a comment thread",
 	Long:  `Clear the resolved state on a previously resolved comment thread.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		runCommentResolution(cmd, args[0], false)
+		return nil
 	},
 }
 
@@ -380,8 +362,9 @@ Examples:
   lincli comment react COMMENT-ID --emoji 👍
   lincli comment react COMMENT-ID --emoji 👍 --remove`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		runReaction(cmd, "comment", args[0])
+		return nil
 	},
 }
 

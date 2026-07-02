@@ -2,14 +2,14 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
+	"github.com/Khan/genqlient/graphql"
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/shanedolley/lincli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -39,11 +39,14 @@ var scheduleListCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
 	Short:   "List time schedules",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := scheduleClient(plaintext, jsonOut)
+		client, ctx, err := scheduleClient()
+		if err != nil {
+			return err
+		}
 
 		limit, _ := cmd.Flags().GetInt("limit")
 		var limitPtr *int
@@ -54,19 +57,17 @@ var scheduleListCmd = &cobra.Command{
 		newerThan, _ := cmd.Flags().GetString("newer-than")
 		createdAtISO, err := utils.ParseTimeExpression(newerThan)
 		if err != nil {
-			output.Error(fmt.Sprintf("Invalid newer-than value: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Invalid newer-than value: %v", err)
 		}
 
 		resp, err := api.ListTimeSchedules(ctx, client, limitPtr, nil, nil)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list schedules: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list schedules: %v", err)
 		}
 
 		if resp.TimeSchedules == nil || len(resp.TimeSchedules.Nodes) == 0 {
 			output.Info("No time schedules found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		// timeSchedules has no server-side filter, so --newer-than is applied
@@ -81,12 +82,12 @@ var scheduleListCmd = &cobra.Command{
 		}
 		if len(nodes) == 0 {
 			output.Info("No time schedules found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(nodes)
-			return
+			return nil
 		}
 
 		headers := []string{"ID", "Name", "Entries", "Integration", "External ID"}
@@ -115,6 +116,7 @@ var scheduleListCmd = &cobra.Command{
 		if !plaintext && !jsonOut {
 			fmt.Printf("\n%s %d schedules\n", color.New(color.FgGreen).Sprint("✓"), len(nodes))
 		}
+		return nil
 	},
 }
 
@@ -123,29 +125,29 @@ var scheduleGetCmd = &cobra.Command{
 	Aliases: []string{"show"},
 	Short:   "Get a time schedule by name or ID",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		plaintext := viper.GetBool("plaintext")
+	RunE: func(cmd *cobra.Command, args []string) error {
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := scheduleClient(plaintext, jsonOut)
+		client, ctx, err := scheduleClient()
+		if err != nil {
+			return err
+		}
 		cache := newResolverCache()
 
 		id, err := resolveTimeSchedule(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.GetTimeSchedule(ctx, client, id)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to get schedule: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to get schedule: %v", err)
 		}
 		f := resp.TimeSchedule.TimeScheduleFields
 
 		if jsonOut {
 			output.JSON(resp.TimeSchedule)
-			return
+			return nil
 		}
 
 		fmt.Printf("%s %s\n", color.New(color.FgCyan, color.Bold).Sprint("Schedule:"), f.Name)
@@ -166,6 +168,7 @@ var scheduleGetCmd = &cobra.Command{
 			}
 			fmt.Printf("    %s → %s  %s\n", e.StartsAt.Format(time.RFC3339), e.EndsAt.Format(time.RFC3339), who)
 		}
+		return nil
 	},
 }
 
@@ -175,28 +178,28 @@ var scheduleCreateCmd = &cobra.Command{
 	Short:   "Create a time schedule",
 	Long: `Create a time schedule. --name and at least one --entry are required.
 Each --entry is "START|END|USER" (ISO-8601 timestamps; USER is an email, ID, or name).`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		name, _ := cmd.Flags().GetString("name")
 		if name == "" {
-			output.Error("Name is required (--name)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Name is required (--name)")
 		}
 
 		entryStrs, _ := cmd.Flags().GetStringArray("entry")
 		if len(entryStrs) == 0 {
-			output.Error("At least one --entry is required", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("At least one --entry is required")
 		}
 		entries, err := parseScheduleEntries(entryStrs)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
-		client, ctx := scheduleClient(plaintext, jsonOut)
+		client, ctx, err := scheduleClient()
+		if err != nil {
+			return err
+		}
 
 		input := &api.TimeScheduleCreateInput{Name: name, Entries: entries}
 		if cmd.Flags().Changed("external-id") {
@@ -210,12 +213,10 @@ Each --entry is "START|END|USER" (ISO-8601 timestamps; USER is an email, ID, or 
 
 		resp, err := api.TimeScheduleCreate(ctx, client, input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to create schedule: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to create schedule: %v", err)
 		}
 		if resp.TimeScheduleCreate == nil || !resp.TimeScheduleCreate.Success {
-			output.Error("Failed to create schedule", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to create schedule")
 		}
 
 		if jsonOut {
@@ -223,6 +224,7 @@ Each --entry is "START|END|USER" (ISO-8601 timestamps; USER is an email, ID, or 
 		} else {
 			output.Success(fmt.Sprintf("Created schedule %s", resp.TimeScheduleCreate.TimeSchedule.TimeScheduleFields.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -230,17 +232,19 @@ var scheduleUpdateCmd = &cobra.Command{
 	Use:   "update <name-or-id>",
 	Short: "Update a time schedule",
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := scheduleClient(plaintext, jsonOut)
+		client, ctx, err := scheduleClient()
+		if err != nil {
+			return err
+		}
 		cache := newResolverCache()
 
 		id, err := resolveTimeSchedule(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		input := &api.TimeScheduleUpdateInput{}
@@ -255,8 +259,7 @@ var scheduleUpdateCmd = &cobra.Command{
 			entryStrs, _ := cmd.Flags().GetStringArray("entry")
 			entries, err := parseScheduleEntries(entryStrs)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.Entries = entries
 			changed = true
@@ -273,18 +276,15 @@ var scheduleUpdateCmd = &cobra.Command{
 		}
 
 		if !changed {
-			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("No updates specified. Use flags to specify what to update.")
 		}
 
 		resp, err := api.TimeScheduleUpdate(ctx, client, id, input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to update schedule: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to update schedule: %v", err)
 		}
 		if resp.TimeScheduleUpdate == nil || !resp.TimeScheduleUpdate.Success {
-			output.Error("Failed to update schedule", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to update schedule")
 		}
 
 		if jsonOut {
@@ -292,6 +292,7 @@ var scheduleUpdateCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Updated schedule %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -300,27 +301,27 @@ var scheduleDeleteCmd = &cobra.Command{
 	Aliases: []string{"rm"},
 	Short:   "Delete a time schedule",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := scheduleClient(plaintext, jsonOut)
+		client, ctx, err := scheduleClient()
+		if err != nil {
+			return err
+		}
 		cache := newResolverCache()
 
 		id, err := resolveTimeSchedule(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.TimeScheduleDelete(ctx, client, id)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete schedule: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete schedule: %v", err)
 		}
 		if resp.TimeScheduleDelete == nil || !resp.TimeScheduleDelete.Success {
-			output.Error("Failed to delete schedule", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to delete schedule")
 		}
 
 		if jsonOut {
@@ -328,6 +329,7 @@ var scheduleDeleteCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Deleted schedule %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -337,17 +339,19 @@ var scheduleUpsertExternalCmd = &cobra.Command{
 	Long: `Create or update a time schedule, keyed on --external-id. If a schedule with
 that external identifier exists it is updated, otherwise a new one is created.
 --external-id is required; pass --name and/or --entry to set its contents.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		externalID, _ := cmd.Flags().GetString("external-id")
 		if externalID == "" {
-			output.Error("External ID is required (--external-id)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("External ID is required (--external-id)")
 		}
 
-		client, ctx := scheduleClient(plaintext, jsonOut)
+		client, ctx, err := scheduleClient()
+		if err != nil {
+			return err
+		}
 
 		input := &api.TimeScheduleUpdateInput{}
 		if cmd.Flags().Changed("name") {
@@ -358,8 +362,7 @@ that external identifier exists it is updated, otherwise a new one is created.
 			entryStrs, _ := cmd.Flags().GetStringArray("entry")
 			entries, err := parseScheduleEntries(entryStrs)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.Entries = entries
 		}
@@ -370,12 +373,10 @@ that external identifier exists it is updated, otherwise a new one is created.
 
 		resp, err := api.TimeScheduleUpsertExternal(ctx, client, externalID, input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to upsert schedule: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to upsert schedule: %v", err)
 		}
 		if resp.TimeScheduleUpsertExternal == nil || !resp.TimeScheduleUpsertExternal.Success {
-			output.Error("Failed to upsert schedule", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to upsert schedule")
 		}
 
 		if jsonOut {
@@ -383,6 +384,7 @@ that external identifier exists it is updated, otherwise a new one is created.
 		} else {
 			output.Success(fmt.Sprintf("Upserted schedule %s", resp.TimeScheduleUpsertExternal.TimeSchedule.TimeScheduleFields.Name), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -391,27 +393,27 @@ var scheduleRefreshCmd = &cobra.Command{
 	Short: "Refresh an integration-backed schedule",
 	Long:  `Refresh a schedule's entries from its backing integration.`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		client, ctx := scheduleClient(plaintext, jsonOut)
+		client, ctx, err := scheduleClient()
+		if err != nil {
+			return err
+		}
 		cache := newResolverCache()
 
 		id, err := resolveTimeSchedule(ctx, client, cache, args[0])
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
 		resp, err := api.TimeScheduleRefreshIntegrationSchedule(ctx, client, id)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to refresh schedule: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to refresh schedule: %v", err)
 		}
 		if resp.TimeScheduleRefreshIntegrationSchedule == nil || !resp.TimeScheduleRefreshIntegrationSchedule.Success {
-			output.Error("Failed to refresh schedule", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to refresh schedule")
 		}
 
 		if jsonOut {
@@ -419,6 +421,7 @@ var scheduleRefreshCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Refreshed schedule %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -485,14 +488,13 @@ func scheduleNewerThan(createdAt time.Time, thresholdISO string) bool {
 }
 
 // scheduleClient builds the authenticated client and context shared by the
-// schedule subcommands, exiting on an auth failure.
-func scheduleClient(plaintext, jsonOut bool) (*api.Client, context.Context) {
-	authHeader, err := auth.GetAuthHeader()
+// schedule subcommands.
+func scheduleClient() (graphql.Client, context.Context, error) {
+	client, err := newGraphQLClient()
 	if err != nil {
-		output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return nil, nil, err
 	}
-	return api.NewClient(authHeader), context.Background()
+	return client, context.Background(), nil
 }
 
 func init() {

@@ -2,13 +2,12 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -32,17 +31,14 @@ var favoriteListCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
 	Short:   "List your favorites",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 
 		limit, _ := cmd.Flags().GetInt("limit")
@@ -53,18 +49,17 @@ var favoriteListCmd = &cobra.Command{
 
 		resp, err := api.ListFavorites(ctx, client, limitPtr, nil, nil)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to list favorites: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to list favorites: %v", err)
 		}
 
 		if resp.Favorites == nil || len(resp.Favorites.Nodes) == 0 {
 			output.Info("No favorites found", plaintext, jsonOut)
-			return
+			return nil
 		}
 
 		if jsonOut {
 			output.JSON(resp.Favorites.Nodes)
-			return
+			return nil
 		}
 
 		headers := []string{"ID", "Type", "Title", "Reference"}
@@ -84,6 +79,7 @@ var favoriteListCmd = &cobra.Command{
 		if !plaintext && !jsonOut {
 			fmt.Printf("\n%s %d favorites\n", color.New(color.FgGreen).Sprint("✓"), len(resp.Favorites.Nodes))
 		}
+		return nil
 	},
 }
 
@@ -97,28 +93,23 @@ view, label, user, or initiative. The reference is resolved for kinds that
 support name/email lookup (issue identifier, project, label, user, initiative);
 for cycle, document, and view, pass the entity's ID.`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		entity, _ := cmd.Flags().GetString("entity")
 		if entity == "" {
-			output.Error("Entity kind is required (--entity)", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Entity kind is required (--entity)")
 		}
 		kind, err := favoriteEntityKind(entity)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 		ctx := context.Background()
 		cache := newResolverCache()
 
@@ -132,29 +123,25 @@ for cycle, document, and view, pass the entity's ID.`,
 		case "project":
 			id, err := resolveProject(ctx, client, cache, ref)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.ProjectId = &id
 		case "label":
 			id, err := resolveLabel(ctx, client, cache, ref)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.LabelId = &id
 		case "user":
 			id, err := resolveUser(ctx, client, cache, ref)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.UserId = &id
 		case "initiative":
 			id, err := resolveInitiative(ctx, client, cache, ref)
 			if err != nil {
-				output.Error(err.Error(), plaintext, jsonOut)
-				os.Exit(1)
+				return err
 			}
 			input.InitiativeId = &id
 		case "cycle":
@@ -167,12 +154,10 @@ for cycle, document, and view, pass the entity's ID.`,
 
 		resp, err := api.FavoriteCreate(ctx, client, input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to add favorite: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to add favorite: %v", err)
 		}
 		if resp.FavoriteCreate == nil || !resp.FavoriteCreate.Success {
-			output.Error("Failed to add favorite", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to add favorite")
 		}
 
 		if jsonOut {
@@ -180,6 +165,7 @@ for cycle, document, and view, pass the entity's ID.`,
 		} else {
 			output.Success(fmt.Sprintf("Added favorite %s (%s)", resp.FavoriteCreate.Favorite.FavoriteFields.Id, kind), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
@@ -189,26 +175,21 @@ var favoriteRemoveCmd = &cobra.Command{
 	Short:   "Remove a favorite",
 	Long:    `Remove a favorite by its ID (from 'favorite list').`,
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		authHeader, err := auth.GetAuthHeader()
+		client, err := newGraphQLClient()
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
-
-		client := api.NewClient(authHeader)
 
 		resp, err := api.FavoriteDelete(context.Background(), client, args[0])
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to remove favorite: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to remove favorite: %v", err)
 		}
 		if resp.FavoriteDelete == nil || !resp.FavoriteDelete.Success {
-			output.Error("Failed to remove favorite", plaintext, jsonOut)
-			os.Exit(1)
+			return errors.New("Failed to remove favorite")
 		}
 
 		if jsonOut {
@@ -216,6 +197,7 @@ var favoriteRemoveCmd = &cobra.Command{
 		} else {
 			output.Success(fmt.Sprintf("Removed favorite %s", args[0]), plaintext, jsonOut)
 		}
+		return nil
 	},
 }
 
