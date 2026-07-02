@@ -79,6 +79,18 @@ type ResolverCache struct {
 	// Templates are matched by name within a type (issue or project), so the
 	// type is part of the key.
 	templates map[string]string
+
+	// customers caches resolved customer IDs, keyed by lower(name).
+	customers map[string]string
+
+	// customerStatuses and customerTiers cache the workspace's customer status
+	// and tier catalogs, keyed by lower(name); each is fetched at most once per
+	// invocation. The *Loaded bools distinguish "not fetched yet" from "fetched,
+	// workspace has none".
+	customerStatuses       map[string]string
+	customerStatusesLoaded bool
+	customerTiers          map[string]string
+	customerTiersLoaded    bool
 }
 
 // newResolverCache creates an empty ResolverCache. Call this once per
@@ -98,6 +110,9 @@ func newResolverCache() *ResolverCache {
 		milestones:       make(map[string][]milestoneInfo),
 		cycles:           make(map[string]string),
 		templates:        make(map[string]string),
+		customers:        make(map[string]string),
+		customerStatuses: make(map[string]string),
+		customerTiers:    make(map[string]string),
 	}
 }
 
@@ -692,4 +707,116 @@ func resolveTemplate(ctx context.Context, client graphql.Client, cache *Resolver
 
 	cache.templates[cacheKey] = matches[0].id
 	return matches[0].id, nil
+}
+
+// resolveCustomer resolves a customer name or UUID to a customer ID. Name
+// matching is case-insensitive. A name matching more than one customer returns
+// an error listing the candidates (name and id); a name matching no customer
+// returns a "not found" error.
+func resolveCustomer(ctx context.Context, client graphql.Client, cache *ResolverCache, nameOrID string) (string, error) {
+	if isUUID(nameOrID) {
+		return nameOrID, nil
+	}
+
+	cacheKey := strings.ToLower(nameOrID)
+	if id, ok := cache.customers[cacheKey]; ok {
+		return id, nil
+	}
+
+	filter := &api.CustomerFilter{
+		Name: &api.StringComparator{EqIgnoreCase: &nameOrID},
+	}
+	limit := 10
+	resp, err := api.ListCustomers(ctx, client, filter, &limit, nil, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to find customer '%s': %w", nameOrID, err)
+	}
+
+	nodes := resp.Customers.Nodes
+	if len(nodes) == 0 {
+		return "", fmt.Errorf("Customer not found: %s", nameOrID)
+	}
+	if len(nodes) > 1 {
+		candidates := make([]string, 0, len(nodes))
+		for _, n := range nodes {
+			candidates = append(candidates, fmt.Sprintf("%s (%s)", n.CustomerFields.Name, n.CustomerFields.Id))
+		}
+		return "", fmt.Errorf("Multiple matches for '%s': %s", nameOrID, strings.Join(candidates, ", "))
+	}
+
+	id := nodes[0].CustomerFields.Id
+	cache.customers[cacheKey] = id
+	return id, nil
+}
+
+// resolveCustomerStatus resolves a customer status name or UUID to a
+// CustomerStatus ID. The status catalog is workspace-wide and small, so it is
+// fetched at most once per invocation and matched case-insensitively against
+// both name and displayName. A name matching none returns an error listing the
+// valid status names.
+func resolveCustomerStatus(ctx context.Context, client graphql.Client, cache *ResolverCache, nameOrID string) (string, error) {
+	if isUUID(nameOrID) {
+		return nameOrID, nil
+	}
+
+	if !cache.customerStatusesLoaded {
+		limit := 250
+		resp, err := api.ListCustomerStatuses(ctx, client, &limit, nil, nil)
+		if err != nil {
+			return "", fmt.Errorf("failed to list customer statuses: %w", err)
+		}
+		if resp.CustomerStatuses != nil {
+			for _, n := range resp.CustomerStatuses.Nodes {
+				f := n.CustomerStatusFields
+				cache.customerStatuses[strings.ToLower(f.Name)] = f.Id
+				cache.customerStatuses[strings.ToLower(f.DisplayName)] = f.Id
+			}
+		}
+		cache.customerStatusesLoaded = true
+	}
+
+	if id, ok := cache.customerStatuses[strings.ToLower(nameOrID)]; ok {
+		return id, nil
+	}
+
+	names := make([]string, 0, len(cache.customerStatuses))
+	for name := range cache.customerStatuses {
+		names = append(names, name)
+	}
+	return "", fmt.Errorf("Customer status '%s' not found. Valid values: %s", nameOrID, strings.Join(names, ", "))
+}
+
+// resolveCustomerTier resolves a customer tier name or UUID to a CustomerTier
+// ID, mirroring resolveCustomerStatus: the workspace tier catalog is fetched at
+// most once and matched case-insensitively against name and displayName.
+func resolveCustomerTier(ctx context.Context, client graphql.Client, cache *ResolverCache, nameOrID string) (string, error) {
+	if isUUID(nameOrID) {
+		return nameOrID, nil
+	}
+
+	if !cache.customerTiersLoaded {
+		limit := 250
+		resp, err := api.ListCustomerTiers(ctx, client, &limit, nil, nil)
+		if err != nil {
+			return "", fmt.Errorf("failed to list customer tiers: %w", err)
+		}
+		if resp.CustomerTiers != nil {
+			for _, n := range resp.CustomerTiers.Nodes {
+				f := n.CustomerTierFields
+				cache.customerTiers[strings.ToLower(f.Name)] = f.Id
+				cache.customerTiers[strings.ToLower(f.DisplayName)] = f.Id
+			}
+		}
+		cache.customerTiersLoaded = true
+	}
+
+	if id, ok := cache.customerTiers[strings.ToLower(nameOrID)]; ok {
+		return id, nil
+	}
+
+	names := make([]string, 0, len(cache.customerTiers))
+	for name := range cache.customerTiers {
+		names = append(names, name)
+	}
+	return "", fmt.Errorf("Customer tier '%s' not found. Valid values: %s", nameOrID, strings.Join(names, ", "))
 }

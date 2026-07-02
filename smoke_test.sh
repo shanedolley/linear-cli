@@ -230,6 +230,15 @@ run_test "template list" "go run main.go template list"
 run_test "template list (json)" "go run main.go template list -j"
 run_test "template list (type filter)" "go run main.go template list --type issue"
 
+# Test customer/CRM commands (Tier 4a - PR 5a). Releases deferred (Business plan).
+echo -e "\n${YELLOW}Testing customer commands...${NC}"
+run_test "customer list" "go run main.go customer list --limit 5"
+run_test "customer list (json)" "go run main.go customer list --limit 5 -j"
+run_test "customer status list" "go run main.go customer status list"
+run_test "customer tier list" "go run main.go customer tier list"
+run_test "customer need list" "go run main.go customer need list --limit 5"
+run_test "customer need list (json)" "go run main.go customer need list --limit 5 -j"
+
 # Test help commands
 echo -e "\n${YELLOW}Testing help commands...${NC}"
 run_test "help" "go run main.go --help" "Usage:"
@@ -251,6 +260,8 @@ run_test "notification help" "go run main.go notification --help" "Available Com
 run_test "webhook help (rotate-secret)" "go run main.go webhook --help" "rotate-secret"
 run_test "template help" "go run main.go template --help" "Available Commands:"
 run_test "issue create help (template)" "go run main.go issue create --help" "template"
+run_test "customer help (merge/need)" "go run main.go customer --help" "merge"
+run_test "customer need help" "go run main.go customer need --help" "Available Commands:"
 
 # Test unknown command handling
 echo -e "\n${YELLOW}Testing error handling...${NC}"
