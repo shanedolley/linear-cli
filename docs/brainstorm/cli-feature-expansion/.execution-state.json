@@ -4,11 +4,11 @@
   "branch": "feature/cli-feature-expansion",
   "totalTasks": 12,
   "totalSubtasks": 52,
-  "completed": [1, 2, 3, 4, 5, 6],
+  "completed": [1, 2, 3, 4, 5, 6, 7],
   "inProgress": null,
-  "milestone": "Tier 3 (task 6) complete (team/user write ops, roles, org domain)",
+  "milestone": "Tier 3 (task 7) complete (favorites, views, notifications, webhooks, templates; --template on issue/project create)",
   "status": "in_progress",
   "sandbox": { "project": "lincli-sandbox", "team": "SD" },
   "startedAt": "2026-07-02",
-  "updatedAt": "2026-07-02"
+  "updatedAt": "2026-07-02T13:35:00Z"
 }

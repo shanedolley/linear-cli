@@ -448,7 +448,7 @@
         "dependencies": [
           "6"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -456,9 +456,10 @@
             "description": "Implement the favorites command group with list, add, and remove subcommands. The add command uses --entity flag to select the favorited entity type (issue, project, cycle, label, etc.).",
             "dependencies": [],
             "details": "Create cmd/favorite.go following existing command patterns from issue.go and project.go:\n\n1. Define GraphQL operations in pkg/api/operations/favorites.graphql:\n   - query ListFavorites($first: Int) with FavoriteListFields fragment (id, type, sortOrder, parent { id }, folderName, owner { id name email }, createdAt, updatedAt, and nullable entity refs: issue, project, cycle, label, etc.)\n   - query GetFavorite($id: String!) with FavoriteDetailFields fragment\n   - mutation FavoriteCreate($input: FavoriteCreateInput!)\n   - mutation FavoriteUpdate($id: String!, $input: FavoriteUpdateInput!)\n   - mutation FavoriteDelete($id: String!)\n\n2. Implement commands:\n   - favoriteCmd: root command with Use: \"favorite\", Aliases: [\"fav\"]\n   - favoriteListCmd: list favorites with --limit, supports all three output modes (table/plaintext/JSON)\n   - favoriteAddCmd: Use: \"add [entity-id]\", with --entity flag to specify type (issue, project, cycle, label, roadmap, custom-view, document, initiative, predefined-filter). Validate entity type, resolve entity ID, then call FavoriteCreate\n   - favoriteRemoveCmd: Use: \"remove [favorite-id]\", calls FavoriteDelete\n\n3. Key implementation details:\n   - --entity flag accepts: issue, project, cycle, label, roadmap, custom-view, document, initiative, predefined-filter\n   - Entity ID can be identifier format (TEAM-123 for issues) or UUID\n   - List output shows entity type, name, sortOrder, and folder\n   - Run go generate ./pkg/api after adding GraphQL operations",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Add smoke tests for favorite list (readonly). Manual verification: create favorite for an issue, list to confirm, remove to confirm deletion. Verify --entity flag validation rejects invalid types.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-07-02T03:27:04.685Z"
           },
           {
             "id": 2,
@@ -466,9 +467,10 @@
             "description": "Implement the view command group with custom view CRUD operations and view preferences subcommands for managing how views are displayed.",
             "dependencies": [],
             "details": "Create cmd/view.go with custom view management:\n\n1. Define GraphQL operations in pkg/api/operations/views.graphql:\n   - query ListCustomViews($first: Int, $filter: CustomViewFilter) with CustomViewListFields (id, name, description, icon, color, modelName, filterData, shared, creator { id name }, team { id key }, createdAt, updatedAt)\n   - query GetCustomView($id: String!) with CustomViewDetailFields (includes issues count, subscribers)\n   - mutation CustomViewCreate($input: CustomViewCreateInput!)\n   - mutation CustomViewUpdate($id: String!, $input: CustomViewUpdateInput!)\n   - mutation CustomViewDelete($id: String!)\n   - mutation ViewPreferencesCreate($input: ViewPreferencesCreateInput!)\n   - mutation ViewPreferencesUpdate($id: String!, $input: ViewPreferencesUpdateInput!)\n   - mutation ViewPreferencesDelete($id: String!)\n\n2. Implement commands:\n   - viewCmd: root with Use: \"view\"\n   - viewListCmd: list custom views with --team, --shared filters\n   - viewGetCmd: Use: \"get [view-id]\", show view details including filter config\n   - viewCreateCmd: Use: \"create\", with --name (required), --description, --team, --icon, --color, --filter-data (JSON string)\n   - viewUpdateCmd: Use: \"update [view-id]\", same flags as create\n   - viewDeleteCmd: Use: \"delete [view-id]\"\n   - viewPrefsCmd: subcommand group with create/update/delete for ViewPreferences\n\n3. Key implementation details:\n   - filterData is JSON - accept as string flag, validate it parses\n   - modelName indicates what the view shows (Issue, Project, etc.)\n   - View preferences control display options (columns, grouping)\n   - Team flag accepts key or ID, resolve to ID before API call",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Add smoke tests for view list (readonly). Manual verification: create a custom view, update its name, delete it. Verify filterData JSON validation catches malformed input.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-07-02T03:27:06.296Z"
           },
           {
             "id": 3,
@@ -476,9 +478,10 @@
             "description": "Implement the notification command group covering listing notifications, bulk read/unread/archive operations, snooze functionality, and notification subscription management (subscribe uses create, unsubscribe uses update with active=false).",
             "dependencies": [],
             "details": "Create cmd/notification.go:\n\n1. Define GraphQL operations in pkg/api/operations/notifications.graphql:\n   - query ListNotifications($first: Int, $filter: NotificationFilter) with NotificationListFields (id, type, readAt, snoozedUntilAt, archivedAt, actor { id name }, issue { id identifier title }, project { id name }, comment { id body }, createdAt)\n   - query GetNotification($id: String!) with NotificationDetailFields\n   - query GetNotificationsUnreadCount returns unreadCount integer\n   - mutation NotificationMarkReadAll\n   - mutation NotificationMarkUnreadAll\n   - mutation NotificationArchive($id: String!)\n   - mutation NotificationArchiveAll($filter: NotificationFilter)\n   - mutation NotificationSnoozeAll($input: NotificationSnoozeAllInput!)\n   - mutation NotificationSubscriptionCreate($input: NotificationSubscriptionCreateInput!)\n   - mutation NotificationSubscriptionUpdate($id: String!, $input: NotificationSubscriptionUpdateInput!)\n\n2. Implement commands:\n   - notificationCmd: root with Use: \"notification\", Aliases: [\"notif\"]\n   - notificationListCmd: list with --unread-only flag, shows unread count in output header\n   - notificationGetCmd: Use: \"get [notification-id]\"\n   - notificationReadAllCmd: Use: \"read-all\", marks all as read\n   - notificationUnreadAllCmd: Use: \"unread-all\"\n   - notificationArchiveCmd: Use: \"archive [notification-id]\" or \"archive --all\"\n   - notificationSnoozeCmd: Use: \"snooze [notification-id]\", with --until flag (datetime or duration like \"2h\", \"1d\")\n   - notificationSubscribeCmd: Use: \"subscribe\", with --team, --project, --user, --label flags to specify subscription target\n   - notificationUnsubscribeCmd: Use: \"unsubscribe [subscription-id]\", calls NotificationSubscriptionUpdate with active=false (not delete, per API guidance)\n\n3. Key implementation details:\n   - Unsubscribe MUST use update with active=false, never delete mutation (deprecated)\n   - Snooze duration parsing: accept ISO datetime or relative (2h, 1d, 1w)\n   - List shows notification type, source entity, and read status\n   - Subscribe needs to resolve target entity IDs from human-readable identifiers",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Add smoke tests for notification list (readonly). Manual verification: read-all, verify unread count drops to 0; snooze a notification, verify snoozedUntilAt set; create subscription, then unsubscribe with active=false.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-07-02T03:27:07.918Z"
           },
           {
             "id": 4,
@@ -486,9 +489,10 @@
             "description": "Implement the webhook command group with full CRUD, security-conscious URL validation that rejects localhost and private IP ranges, and a rotate-secret command that prints the new secret once to stdout.",
             "dependencies": [],
             "details": "Create cmd/webhook.go:\n\n1. Define GraphQL operations in pkg/api/operations/webhooks.graphql:\n   - query ListWebhooks($first: Int, $filter: WebhookFilter) with WebhookListFields (id, label, url, enabled, team { id key }, allPublicTeams, createdAt, updatedAt)\n   - query GetWebhook($id: String!) with WebhookDetailFields (includes resourceTypes array, secret presence indicator)\n   - mutation WebhookCreate($input: WebhookCreateInput!)\n   - mutation WebhookUpdate($id: String!, $input: WebhookUpdateInput!)\n   - mutation WebhookDelete($id: String!)\n   - mutation WebhookRotateSecret($id: String!) returns WebhookRotateSecretPayload with secret field\n\n2. Implement commands:\n   - webhookCmd: root with Use: \"webhook\"\n   - webhookListCmd: list webhooks, show enabled status and team\n   - webhookGetCmd: Use: \"get [webhook-id]\", show full details\n   - webhookCreateCmd: Use: \"create\", with --url (required), --label, --team, --resource-types (comma-separated: Issue, Comment, Project, Cycle, etc.), --enabled (default true)\n   - webhookUpdateCmd: Use: \"update [webhook-id]\", same flags as create\n   - webhookDeleteCmd: Use: \"delete [webhook-id]\"\n   - webhookRotateSecretCmd: Use: \"rotate-secret [webhook-id]\", prints new secret to stdout once\n\n3. URL validation (CRITICAL - security):\n   - Create validateWebhookURL() helper function in cmd/webhook.go\n   - Parse URL, extract host\n   - Reject if host is localhost, 127.0.0.1, ::1\n   - Resolve hostname to IP addresses using net.LookupIP()\n   - Reject if any resolved IP is in private ranges: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16 (link-local), fc00::/7 (IPv6 ULA), fe80::/10 (IPv6 link-local)\n   - Use net.IP.IsPrivate(), IsLoopback(), IsLinkLocalUnicast(), IsLinkLocalMulticast()\n   - Return clear error message listing why URL was rejected\n\n4. Key implementation details:\n   - rotate-secret prints secret in plaintext mode, JSON object in --json mode (accepted security risk, necessary for webhook configuration)\n   - resourceTypes accepts: Issue, Comment, Project, Cycle, IssueLabel, User, Reaction, ProjectUpdate, etc.\n   - URL validation runs before WebhookCreate mutation\n   - --enabled defaults to true; use --enabled=false to create disabled webhook",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Add smoke tests for webhook list (readonly). Manual verification: attempt create with localhost URL (must fail); attempt create with 10.0.0.1 (must fail); create with valid external URL (must succeed). Test rotate-secret prints secret exactly once.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-07-02T03:27:09.516Z"
           },
           {
             "id": 5,
@@ -501,14 +505,16 @@
               4
             ],
             "details": "Create cmd/template.go and modify cmd/issue.go and cmd/project.go:\n\n1. Define GraphQL operations in pkg/api/operations/templates.graphql:\n   - query ListTemplates($first: Int, $filter: TemplateFilter) with TemplateListFields (id, name, description, type, templateData, team { id key }, creator { id name }, createdAt, updatedAt)\n   - query GetTemplate($id: String!) with TemplateDetailFields (full templateData object)\n   - mutation TemplateCreate($input: TemplateCreateInput!)\n   - mutation TemplateUpdate($id: String!, $input: TemplateUpdateInput!)\n   - mutation TemplateDelete($id: String!)\n\n2. Implement template commands:\n   - templateCmd: root with Use: \"template\", Aliases: [\"tmpl\"]\n   - templateListCmd: list with --type filter (issue, project), --team filter\n   - templateGetCmd: Use: \"get [template-id]\", show template details and templateData\n   - templateCreateCmd: Use: \"create\", with --name (required), --type (required: issue or project), --team, --description, --template-data (JSON string for the template content)\n   - templateUpdateCmd: Use: \"update [template-id]\", same flags as create\n   - templateDeleteCmd: Use: \"delete [template-id]\"\n\n3. Thread --template into issue create (cmd/issue.go):\n   - Add --template flag to issueCreateCmd (accepts template name or ID)\n   - In issueCreateCmd.Run, if --template set:\n     - Resolve template by name (case-insensitive) or UUID\n     - Add templateId field to IssueCreateInput\n   - Template fields merged with explicit flags (explicit flags override template values)\n\n4. Thread --template into project create (cmd/project.go):\n   - Add projectCreateCmd if not exists, with --template flag\n   - Resolve template by name or ID, add templateId to ProjectCreateInput\n   - Same merge behavior: explicit flags override template defaults\n\n5. Key implementation details:\n   - Template type field distinguishes issue vs project templates\n   - templateData is JSON object containing default field values\n   - Template resolution: first try exact name match, then case-insensitive, then UUID\n   - If template not found, fail with helpful error listing available templates\n   - This subtask touches cmd/issue.go and cmd/project.go (cross-tier modification)",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Add smoke tests for template list (readonly). Manual verification: create issue template, use it with issue create --template, verify template fields applied. Verify explicit flags override template values. Test project create --template similarly.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-07-02T03:27:11.125Z"
           }
         ],
         "complexity": 7,
         "recommendedSubtasks": 5,
-        "expansionPrompt": "Break down into: (1) Create cmd/favorite.go with list/add/remove and --entity flag for entity type selection, (2) Create cmd/view.go with custom view CRUD and view preferences management, (3) Create cmd/notification.go with list/read-all/archive/snooze and subscription management, (4) Create cmd/webhook.go with CRUD, URL validation (reject localhost/private IPs), and rotate-secret command, (5) Create cmd/template.go with CRUD and thread --template flag into issue/project create commands."
+        "expansionPrompt": "Break down into: (1) Create cmd/favorite.go with list/add/remove and --entity flag for entity type selection, (2) Create cmd/view.go with custom view CRUD and view preferences management, (3) Create cmd/notification.go with list/read-all/archive/snooze and subscription management, (4) Create cmd/webhook.go with CRUD, URL validation (reject localhost/private IPs), and rotate-secret command, (5) Create cmd/template.go with CRUD and thread --template flag into issue/project create commands.",
+        "updatedAt": "2026-07-02T03:27:11.125Z"
       },
       {
         "id": "8",
@@ -820,9 +826,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-02T02:52:23.274Z",
+      "lastModified": "2026-07-02T03:27:11.125Z",
       "taskCount": 12,
-      "completedCount": 6,
+      "completedCount": 7,
       "tags": [
         "master"
       ]
