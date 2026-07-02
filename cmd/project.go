@@ -34,6 +34,73 @@ func constructProjectURL(projectID string, originalURL string) string {
 	return originalURL
 }
 
+// projectUpdateHealthValues lists the real ProjectUpdateHealthType enum
+// values (verified against schema.graphql), used both for --health
+// validation on 'project update-post create/edit' and to build the "valid
+// values" error message.
+var projectUpdateHealthValues = []string{
+	string(api.ProjectUpdateHealthTypeOntrack),
+	string(api.ProjectUpdateHealthTypeAtrisk),
+	string(api.ProjectUpdateHealthTypeOfftrack),
+}
+
+// parseProjectUpdateHealth validates a --health value against
+// ProjectUpdateHealthType (case-insensitively) and returns the canonical
+// enum value.
+func parseProjectUpdateHealth(health string) (api.ProjectUpdateHealthType, error) {
+	for _, v := range projectUpdateHealthValues {
+		if strings.EqualFold(v, health) {
+			return api.ProjectUpdateHealthType(v), nil
+		}
+	}
+	return "", fmt.Errorf("Invalid health '%s'. Valid values: %s", health, strings.Join(projectUpdateHealthValues, ", "))
+}
+
+// projectStatusTypeValues lists the real ProjectStatusType enum values
+// (verified against schema.graphql), used both for --type validation on
+// 'project status create/update' and to build the "valid values" error
+// message.
+var projectStatusTypeValues = []string{
+	string(api.ProjectStatusTypeBacklog),
+	string(api.ProjectStatusTypePlanned),
+	string(api.ProjectStatusTypeStarted),
+	string(api.ProjectStatusTypePaused),
+	string(api.ProjectStatusTypeCompleted),
+	string(api.ProjectStatusTypeCanceled),
+}
+
+// parseProjectStatusType validates a --type value against ProjectStatusType
+// (case-insensitively) and returns the canonical enum value.
+func parseProjectStatusType(t string) (api.ProjectStatusType, error) {
+	for _, v := range projectStatusTypeValues {
+		if strings.EqualFold(v, t) {
+			return api.ProjectStatusType(v), nil
+		}
+	}
+	return "", fmt.Errorf("Invalid status type '%s'. Valid values: %s", t, strings.Join(projectStatusTypeValues, ", "))
+}
+
+// projectRelationTypeValues lists the values Linear's API actually accepts
+// for ProjectRelationCreateInput/ProjectRelationUpdateInput's `type` field.
+// The field is typed as a plain String in schema.graphql (not a GraphQL
+// enum, unlike IssueRelationType), but the API still enforces a fixed set
+// server-side: confirmed live via an INVALID_INPUT/isEnum validation error
+// ("type must be one of the following values: dependency") when this CLI
+// was first built against a guessed "blocks" value.
+var projectRelationTypeValues = []string{"dependency"}
+
+// parseProjectRelationType validates a --type value against the real,
+// live-confirmed set of accepted values (case-insensitively) and returns
+// the canonical string.
+func parseProjectRelationType(t string) (string, error) {
+	for _, v := range projectRelationTypeValues {
+		if strings.EqualFold(v, t) {
+			return v, nil
+		}
+	}
+	return "", fmt.Errorf("Invalid relation type '%s'. Valid values: %s", t, strings.Join(projectRelationTypeValues, ", "))
+}
+
 // projectCmd represents the project command
 var projectCmd = &cobra.Command{
 	Use:   "project",
@@ -382,6 +449,31 @@ var projectGetCmd = &cobra.Command{
 				}
 			}
 
+			// Labels
+			if f.Labels != nil && len(f.Labels.Nodes) > 0 {
+				fmt.Printf("\n## Labels\n")
+				for _, l := range f.Labels.Nodes {
+					fmt.Printf("- %s\n", l.Name)
+				}
+			}
+
+			// Relations
+			hasRelations := f.Relations != nil && len(f.Relations.Nodes) > 0
+			hasInverseRelations := f.InverseRelations != nil && len(f.InverseRelations.Nodes) > 0
+			if hasRelations || hasInverseRelations {
+				fmt.Printf("\n## Relations\n")
+				if hasRelations {
+					for _, r := range f.Relations.Nodes {
+						fmt.Printf("- %s: %s\n", r.Type, r.RelatedProject.Name)
+					}
+				}
+				if hasInverseRelations {
+					for _, r := range f.InverseRelations.Nodes {
+						fmt.Printf("- %s (inverse): %s\n", r.Type, r.Project.Name)
+					}
+				}
+			}
+
 			// Show recent issues
 			if f.Issues != nil && len(f.Issues.Nodes) > 0 {
 				fmt.Printf("\n## Issues (%d total)\n", len(f.Issues.Nodes))
@@ -512,6 +604,47 @@ var projectGetCmd = &cobra.Command{
 					fmt.Printf("  • %s (%s)\n",
 						member.Name,
 						color.New(color.FgCyan).Sprint(member.Email))
+				}
+			}
+
+			// Recent project updates (status-update posts, distinct from the
+			// project record itself)
+			if f.ProjectUpdates != nil && len(f.ProjectUpdates.Nodes) > 0 {
+				fmt.Printf("\n%s\n", color.New(color.Bold).Sprint("Recent Updates:"))
+				for _, update := range f.ProjectUpdates.Nodes {
+					author := "Unknown"
+					if update.User != nil {
+						author = update.User.Name
+					}
+					fmt.Printf("  • [%s] %s by %s\n",
+						string(update.Health),
+						update.CreatedAt.Format("2006-01-02 15:04"),
+						author)
+				}
+			}
+
+			// Labels
+			if f.Labels != nil && len(f.Labels.Nodes) > 0 {
+				fmt.Printf("\n%s\n", color.New(color.Bold).Sprint("Labels:"))
+				for _, l := range f.Labels.Nodes {
+					fmt.Printf("  • %s\n", l.Name)
+				}
+			}
+
+			// Relations
+			hasRelationsRich := f.Relations != nil && len(f.Relations.Nodes) > 0
+			hasInverseRelationsRich := f.InverseRelations != nil && len(f.InverseRelations.Nodes) > 0
+			if hasRelationsRich || hasInverseRelationsRich {
+				fmt.Printf("\n%s\n", color.New(color.Bold).Sprint("Relations:"))
+				if hasRelationsRich {
+					for _, r := range f.Relations.Nodes {
+						fmt.Printf("  • %s: %s\n", r.Type, r.RelatedProject.Name)
+					}
+				}
+				if hasInverseRelationsRich {
+					for _, r := range f.InverseRelations.Nodes {
+						fmt.Printf("  • %s (inverse): %s\n", r.Type, r.Project.Name)
+					}
 				}
 			}
 
@@ -1642,6 +1775,1446 @@ var projectMilestoneDeleteCmd = &cobra.Command{
 	},
 }
 
+// --- Project status-update posts ---
+
+var projectUpdatePostCmd = &cobra.Command{
+	Use:   "update-post",
+	Short: "Manage project status-update posts",
+	Long: `List, create, edit, archive, and unarchive status updates posted to a
+project.
+
+Kept distinct from 'project update' (which edits the project record itself -
+name, description, lead, dates, status, etc): these are point-in-time
+status posts shown on the project's timeline, each capturing a health
+snapshot (onTrack/atRisk/offTrack).
+
+Examples:
+  lincli project update-post list "My Project"
+  lincli project update-post create "My Project" --body "Kicking off" --health onTrack
+  lincli project update-post edit UPDATE-ID --body "Revised" --health atRisk
+  lincli project update-post archive UPDATE-ID`,
+}
+
+var projectUpdatePostListCmd = &cobra.Command{
+	Use:     "list <project-id-or-name>",
+	Aliases: []string{"ls"},
+	Short:   "List status updates posted to a project",
+	Args:    cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+		cache := newResolverCache()
+
+		projectID, err := resolveProject(ctx, client, cache, args[0])
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		limit, _ := cmd.Flags().GetInt("limit")
+		var limitPtr *int
+		if limit > 0 {
+			limitPtr = &limit
+		}
+
+		filter := &api.ProjectUpdateFilter{
+			Project: &api.ProjectFilter{
+				Id: &api.IDComparator{Eq: &projectID},
+			},
+		}
+
+		resp, err := api.ListProjectUpdates(ctx, client, filter, limitPtr, nil, nil)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to list project updates: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		updates := resp.ProjectUpdates.Nodes
+
+		if len(updates) == 0 {
+			output.Info("No status updates found for this project", plaintext, jsonOut)
+			return
+		}
+
+		if jsonOut {
+			output.JSON(updates)
+			return
+		}
+
+		if plaintext {
+			fmt.Println("# Project Status Updates")
+			for _, u := range updates {
+				fmt.Printf("## %s\n", u.CreatedAt.Format("2006-01-02 15:04:05"))
+				fmt.Printf("- **ID**: %s\n", u.Id)
+				fmt.Printf("- **Health**: %s\n", u.Health)
+				if u.User != nil {
+					fmt.Printf("- **Author**: %s\n", u.User.Name)
+				}
+				if u.ArchivedAt != nil {
+					fmt.Printf("- **Archived**: %s\n", u.ArchivedAt.Format("2006-01-02"))
+				}
+				fmt.Printf("\n%s\n\n", u.Body)
+			}
+			return
+		}
+
+		headers := []string{"ID", "Date", "Health", "Author", "Body"}
+		rows := make([][]string, len(updates))
+		for i, u := range updates {
+			author := ""
+			if u.User != nil {
+				author = u.User.Name
+			}
+			rows[i] = []string{
+				u.Id,
+				u.CreatedAt.Format("2006-01-02 15:04"),
+				string(u.Health),
+				author,
+				truncateString(u.Body, 50),
+			}
+		}
+		output.Table(output.TableData{Headers: headers, Rows: rows}, plaintext, jsonOut)
+	},
+}
+
+var projectUpdatePostCreateCmd = &cobra.Command{
+	Use:     "create <project-id-or-name>",
+	Aliases: []string{"add", "new"},
+	Short:   "Post a new status update to a project",
+	Args:    cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		body, _ := cmd.Flags().GetString("body")
+		if body == "" {
+			output.Error("Body is required (--body)", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		var health *api.ProjectUpdateHealthType
+		if healthStr, _ := cmd.Flags().GetString("health"); healthStr != "" {
+			h, err := parseProjectUpdateHealth(healthStr)
+			if err != nil {
+				output.Error(err.Error(), plaintext, jsonOut)
+				os.Exit(1)
+			}
+			health = &h
+		}
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+		cache := newResolverCache()
+
+		projectID, err := resolveProject(ctx, client, cache, args[0])
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		input := api.ProjectUpdateCreateInput{
+			ProjectId: projectID,
+			Body:      &body,
+			Health:    health,
+		}
+
+		resp, err := api.ProjectUpdateCreate(ctx, client, &input)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to post project update: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.ProjectUpdateCreate.Success {
+			output.Error("Failed to post project update", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		update := resp.ProjectUpdateCreate.ProjectUpdate
+
+		if jsonOut {
+			output.JSON(update)
+		} else if plaintext {
+			fmt.Printf("Posted status update %s\n", update.Id)
+		} else {
+			output.Success(fmt.Sprintf("Posted status update %s", update.Id), plaintext, jsonOut)
+		}
+	},
+}
+
+var projectUpdatePostEditCmd = &cobra.Command{
+	Use:   "edit <update-id>",
+	Short: "Edit a status update's body or health",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+		updateID := args[0]
+
+		input := api.ProjectUpdateUpdateInput{}
+		if cmd.Flags().Changed("body") {
+			body, _ := cmd.Flags().GetString("body")
+			input.Body = &body
+		}
+		if cmd.Flags().Changed("health") {
+			healthStr, _ := cmd.Flags().GetString("health")
+			h, err := parseProjectUpdateHealth(healthStr)
+			if err != nil {
+				output.Error(err.Error(), plaintext, jsonOut)
+				os.Exit(1)
+			}
+			input.Health = &h
+		}
+		if input.Body == nil && input.Health == nil {
+			output.Error("No updates specified. Use --body and/or --health.", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+
+		resp, err := api.ProjectUpdateUpdate(ctx, client, updateID, &input)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to edit status update: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.ProjectUpdateUpdate.Success {
+			output.Error("Failed to edit status update", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		update := resp.ProjectUpdateUpdate.ProjectUpdate
+
+		if jsonOut {
+			output.JSON(update)
+		} else if plaintext {
+			fmt.Printf("Updated status update %s\n", update.Id)
+		} else {
+			output.Success(fmt.Sprintf("Updated status update %s", update.Id), plaintext, jsonOut)
+		}
+	},
+}
+
+var projectUpdatePostArchiveCmd = &cobra.Command{
+	Use:   "archive <update-id>",
+	Short: "Archive a status update",
+	Long:  `Archive a status update. This action executes immediately with no confirmation prompt.`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+		updateID := args[0]
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+
+		resp, err := api.ProjectUpdateArchive(ctx, client, updateID)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to archive status update: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.ProjectUpdateArchive.Success {
+			output.Error("Failed to archive status update", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if jsonOut {
+			output.JSON(map[string]interface{}{"success": true, "id": updateID})
+		} else if plaintext {
+			fmt.Printf("Archived status update %s\n", updateID)
+		} else {
+			output.Success(fmt.Sprintf("Archived status update %s", updateID), plaintext, jsonOut)
+		}
+	},
+}
+
+var projectUpdatePostUnarchiveCmd = &cobra.Command{
+	Use:   "unarchive <update-id>",
+	Short: "Unarchive a status update",
+	Long:  `Unarchive a previously archived status update. This action executes immediately with no confirmation prompt.`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+		updateID := args[0]
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+
+		resp, err := api.ProjectUpdateUnarchive(ctx, client, updateID)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to unarchive status update: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.ProjectUpdateUnarchive.Success {
+			output.Error("Failed to unarchive status update", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if jsonOut {
+			output.JSON(map[string]interface{}{"success": true, "id": updateID})
+		} else if plaintext {
+			fmt.Printf("Unarchived status update %s\n", updateID)
+		} else {
+			output.Success(fmt.Sprintf("Unarchived status update %s", updateID), plaintext, jsonOut)
+		}
+	},
+}
+
+var projectUpdateReminderCmd = &cobra.Command{
+	Use:   "update-reminder <project-id-or-name>",
+	Short: "Notify a user to post a project status update",
+	Long: `Send a notification reminding a user to post a status update for a
+project. Defaults to the project's lead if --user is not given.
+
+Examples:
+  lincli project update-reminder "My Project"
+  lincli project update-reminder "My Project" --user jane@example.com`,
+	Args: cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+		cache := newResolverCache()
+
+		projectID, err := resolveProject(ctx, client, cache, args[0])
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		var userID *string
+		if user, _ := cmd.Flags().GetString("user"); user != "" {
+			id, err := resolveUser(ctx, client, cache, user)
+			if err != nil {
+				output.Error(fmt.Sprintf("Failed to find user '%s': %v", user, err), plaintext, jsonOut)
+				os.Exit(1)
+			}
+			userID = &id
+		}
+
+		resp, err := api.CreateProjectUpdateReminder(ctx, client, projectID, userID)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to send update reminder: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.CreateProjectUpdateReminder.Success {
+			output.Error("Failed to send update reminder", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if jsonOut {
+			output.JSON(map[string]interface{}{"success": true})
+		} else if plaintext {
+			fmt.Println("Sent update reminder")
+		} else {
+			output.Success("Sent update reminder", plaintext, jsonOut)
+		}
+	},
+}
+
+// --- Project labels ---
+
+var projectLabelCmd = &cobra.Command{
+	Use:   "label",
+	Short: "Manage the workspace's project label catalog",
+	Long: `List, create, update, delete, retire, and restore project labels, and
+add/remove a label on a specific project.
+
+ProjectLabel is a distinct, workspace-wide catalog from IssueLabel and
+InitiativeLabel - it has its own names/ids and is not shared with either.
+
+Examples:
+  lincli project label list
+  lincli project label create --name "Design" --color "#5e6ad2"
+  lincli project label add "My Project" "Design"
+  lincli project label remove "My Project" "Design"
+  lincli project label retire LABEL-ID
+  lincli project label restore LABEL-ID`,
+}
+
+var projectLabelListCmd = &cobra.Command{
+	Use:     "list",
+	Aliases: []string{"ls"},
+	Short:   "List the workspace's project labels",
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+
+		limit, _ := cmd.Flags().GetInt("limit")
+		var limitPtr *int
+		if limit > 0 {
+			limitPtr = &limit
+		}
+
+		resp, err := api.ListProjectLabels(ctx, client, nil, limitPtr)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to list project labels: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		labels := []*api.ListProjectLabelsProjectLabelsProjectLabelConnectionNodesProjectLabel{}
+		if resp.ProjectLabels != nil {
+			labels = resp.ProjectLabels.Nodes
+		}
+
+		if len(labels) == 0 {
+			output.Info("No project labels found", plaintext, jsonOut)
+			return
+		}
+
+		if jsonOut {
+			output.JSON(labels)
+			return
+		}
+
+		if plaintext {
+			fmt.Println("# Project Labels")
+			for _, l := range labels {
+				fmt.Printf("## %s\n", l.Name)
+				fmt.Printf("- **ID**: %s\n", l.Id)
+				fmt.Printf("- **Color**: %s\n", l.Color)
+				if l.Description != nil && *l.Description != "" {
+					fmt.Printf("- **Description**: %s\n", *l.Description)
+				}
+				if l.RetiredAt != nil {
+					fmt.Printf("- **Retired**: %s\n", l.RetiredAt.Format("2006-01-02"))
+				}
+				fmt.Println()
+			}
+			return
+		}
+
+		headers := []string{"Name", "ID", "Color", "Description", "Retired"}
+		rows := make([][]string, len(labels))
+		for i, l := range labels {
+			description := ""
+			if l.Description != nil {
+				description = *l.Description
+			}
+			retired := ""
+			if l.RetiredAt != nil {
+				retired = l.RetiredAt.Format("2006-01-02")
+			}
+			rows[i] = []string{l.Name, l.Id, l.Color, description, retired}
+		}
+		output.Table(output.TableData{Headers: headers, Rows: rows}, plaintext, jsonOut)
+	},
+}
+
+var projectLabelCreateCmd = &cobra.Command{
+	Use:     "create",
+	Aliases: []string{"new"},
+	Short:   "Create a new project label",
+	Args:    cobra.NoArgs,
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		name, _ := cmd.Flags().GetString("name")
+		if name == "" {
+			output.Error("Name is required (--name)", plaintext, jsonOut)
+			os.Exit(1)
+		}
+		color, _ := cmd.Flags().GetString("color")
+		if color == "" {
+			output.Error("Color is required (--color)", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		input := api.ProjectLabelCreateInput{Name: name, Color: &color}
+		if description, _ := cmd.Flags().GetString("description"); description != "" {
+			input.Description = &description
+		}
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+
+		resp, err := api.ProjectLabelCreate(ctx, client, &input)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to create project label: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.ProjectLabelCreate.Success || resp.ProjectLabelCreate.ProjectLabel == nil {
+			output.Error("Failed to create project label", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		label := resp.ProjectLabelCreate.ProjectLabel
+
+		if jsonOut {
+			output.JSON(label)
+		} else if plaintext {
+			fmt.Printf("Created project label: %s\n", label.Name)
+		} else {
+			output.Success(fmt.Sprintf("Created project label: %s", label.Name), plaintext, jsonOut)
+		}
+	},
+}
+
+var projectLabelUpdateCmd = &cobra.Command{
+	Use:   "update <label-id-or-name>",
+	Short: "Update a project label",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+		cache := newResolverCache()
+
+		labelID, err := resolveProjectLabel(ctx, client, cache, args[0])
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		input := api.ProjectLabelUpdateInput{}
+		if cmd.Flags().Changed("name") {
+			name, _ := cmd.Flags().GetString("name")
+			input.Name = &name
+		}
+		if cmd.Flags().Changed("color") {
+			color, _ := cmd.Flags().GetString("color")
+			input.Color = &color
+		}
+		if cmd.Flags().Changed("description") {
+			description, _ := cmd.Flags().GetString("description")
+			input.Description = &description
+		}
+
+		if input.Name == nil && input.Color == nil && input.Description == nil {
+			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		resp, err := api.ProjectLabelUpdate(ctx, client, labelID, &input)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to update project label: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.ProjectLabelUpdate.Success || resp.ProjectLabelUpdate.ProjectLabel == nil {
+			output.Error("Failed to update project label", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		label := resp.ProjectLabelUpdate.ProjectLabel
+
+		if jsonOut {
+			output.JSON(label)
+		} else if plaintext {
+			fmt.Printf("Updated project label: %s\n", label.Name)
+		} else {
+			output.Success(fmt.Sprintf("Updated project label: %s", label.Name), plaintext, jsonOut)
+		}
+	},
+}
+
+var projectLabelDeleteCmd = &cobra.Command{
+	Use:   "delete <label-id-or-name>",
+	Short: "Delete a project label",
+	Long:  `Delete a project label. This action executes immediately with no confirmation prompt.`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+		cache := newResolverCache()
+
+		labelID, err := resolveProjectLabel(ctx, client, cache, args[0])
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		resp, err := api.ProjectLabelDelete(ctx, client, labelID)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to delete project label: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.ProjectLabelDelete.Success {
+			output.Error("Failed to delete project label", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if jsonOut {
+			output.JSON(map[string]interface{}{"success": true, "id": resp.ProjectLabelDelete.EntityId})
+		} else if plaintext {
+			fmt.Printf("Deleted project label %s\n", resp.ProjectLabelDelete.EntityId)
+		} else {
+			output.Success(fmt.Sprintf("Deleted project label %s", resp.ProjectLabelDelete.EntityId), plaintext, jsonOut)
+		}
+	},
+}
+
+var projectLabelRetireCmd = &cobra.Command{
+	Use:   "retire <label-id-or-name>",
+	Short: "Retire a project label",
+	Long:  `Retire a project label. Retired labels remain on projects that already use them but can't be applied to new ones. This action executes immediately with no confirmation prompt.`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+		cache := newResolverCache()
+
+		labelID, err := resolveProjectLabel(ctx, client, cache, args[0])
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		resp, err := api.ProjectLabelRetire(ctx, client, labelID)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to retire project label: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.ProjectLabelRetire.Success {
+			output.Error("Failed to retire project label", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		name := labelID
+		if resp.ProjectLabelRetire.ProjectLabel != nil {
+			name = resp.ProjectLabelRetire.ProjectLabel.Name
+		}
+
+		if jsonOut {
+			output.JSON(map[string]interface{}{"success": true, "id": labelID})
+		} else if plaintext {
+			fmt.Printf("Retired project label %s\n", name)
+		} else {
+			output.Success(fmt.Sprintf("Retired project label %s", name), plaintext, jsonOut)
+		}
+	},
+}
+
+var projectLabelRestoreCmd = &cobra.Command{
+	Use:   "restore <label-id-or-name>",
+	Short: "Restore a previously retired project label",
+	Long:  `Restore a previously retired project label, making it available for use on new projects. This action executes immediately with no confirmation prompt.`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+		cache := newResolverCache()
+
+		labelID, err := resolveProjectLabel(ctx, client, cache, args[0])
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		resp, err := api.ProjectLabelRestore(ctx, client, labelID)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to restore project label: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.ProjectLabelRestore.Success {
+			output.Error("Failed to restore project label", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		name := labelID
+		if resp.ProjectLabelRestore.ProjectLabel != nil {
+			name = resp.ProjectLabelRestore.ProjectLabel.Name
+		}
+
+		if jsonOut {
+			output.JSON(map[string]interface{}{"success": true, "id": labelID})
+		} else if plaintext {
+			fmt.Printf("Restored project label %s\n", name)
+		} else {
+			output.Success(fmt.Sprintf("Restored project label %s", name), plaintext, jsonOut)
+		}
+	},
+}
+
+var projectLabelAddCmd = &cobra.Command{
+	Use:   "add <project-id-or-name> <label-id-or-name>",
+	Short: "Add a label to a project",
+	Args:  cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+		cache := newResolverCache()
+
+		projectID, err := resolveProject(ctx, client, cache, args[0])
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		labelID, err := resolveProjectLabel(ctx, client, cache, args[1])
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		resp, err := api.ProjectAddLabel(ctx, client, projectID, labelID)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to add label to project: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.ProjectAddLabel.Success {
+			output.Error("Failed to add label to project", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		// ProjectPayload.project is nullable in the schema, and confirmed
+		// live: projectAddLabel returns success: true with project: null even
+		// though the label is genuinely applied (visible on a subsequent
+		// 'project get'). Fall back to the already-resolved project/label ids
+		// rather than dereferencing a nil project.
+		if resp.ProjectAddLabel.Project == nil {
+			if jsonOut {
+				output.JSON(map[string]interface{}{"success": true, "projectId": projectID, "labelId": labelID})
+			} else if plaintext {
+				fmt.Println("Added label to project")
+			} else {
+				output.Success("Added label to project", plaintext, jsonOut)
+			}
+			return
+		}
+
+		project := resp.ProjectAddLabel.Project
+
+		if jsonOut {
+			output.JSON(project)
+		} else if plaintext {
+			fmt.Printf("Added label to project %s\n", project.ProjectListFields.Name)
+		} else {
+			output.Success(fmt.Sprintf("Added label to project %s", project.ProjectListFields.Name), plaintext, jsonOut)
+		}
+	},
+}
+
+var projectLabelRemoveCmd = &cobra.Command{
+	Use:     "remove <project-id-or-name> <label-id-or-name>",
+	Aliases: []string{"rm"},
+	Short:   "Remove a label from a project",
+	Long:    `Remove a label from a project. This action executes immediately with no confirmation prompt.`,
+	Args:    cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+		cache := newResolverCache()
+
+		projectID, err := resolveProject(ctx, client, cache, args[0])
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		labelID, err := resolveProjectLabel(ctx, client, cache, args[1])
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		resp, err := api.ProjectRemoveLabel(ctx, client, projectID, labelID)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to remove label from project: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.ProjectRemoveLabel.Success {
+			output.Error("Failed to remove label from project", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		// See the matching comment in 'project label add': ProjectPayload.project
+		// is nullable, and projectRemoveLabel is confirmed live to return
+		// success: true with project: null even though the label is genuinely
+		// removed.
+		if resp.ProjectRemoveLabel.Project == nil {
+			if jsonOut {
+				output.JSON(map[string]interface{}{"success": true, "projectId": projectID, "labelId": labelID})
+			} else if plaintext {
+				fmt.Println("Removed label from project")
+			} else {
+				output.Success("Removed label from project", plaintext, jsonOut)
+			}
+			return
+		}
+
+		project := resp.ProjectRemoveLabel.Project
+
+		if jsonOut {
+			output.JSON(project)
+		} else if plaintext {
+			fmt.Printf("Removed label from project %s\n", project.ProjectListFields.Name)
+		} else {
+			output.Success(fmt.Sprintf("Removed label from project %s", project.ProjectListFields.Name), plaintext, jsonOut)
+		}
+	},
+}
+
+// --- Project relations ---
+
+// findProjectRelation locates the ProjectRelation join record between
+// projectID and otherID, checking both the outgoing `relations` connection
+// (projectID is the source) and the incoming `inverseRelations` connection
+// (projectID is the target), since 'project relate' may have been run with
+// either project as the first argument. Project's relation connections take
+// no filter for matching a specific related project, so both lists are
+// paginated (up to `first`) and matched client-side.
+func findProjectRelation(ctx context.Context, client graphql.Client, projectID, otherID string) (string, error) {
+	first := 250
+	resp, err := api.GetProjectRelations(ctx, client, projectID, &first)
+	if err != nil {
+		return "", fmt.Errorf("failed to look up project relations: %w", err)
+	}
+	if resp.Project == nil {
+		return "", fmt.Errorf("project not found")
+	}
+	if resp.Project.Relations != nil {
+		for _, node := range resp.Project.Relations.Nodes {
+			if node.RelatedProject != nil && node.RelatedProject.Id == otherID {
+				return node.Id, nil
+			}
+		}
+	}
+	if resp.Project.InverseRelations != nil {
+		for _, node := range resp.Project.InverseRelations.Nodes {
+			if node.Project != nil && node.Project.Id == otherID {
+				return node.Id, nil
+			}
+		}
+	}
+	return "", fmt.Errorf("no relation found between these projects")
+}
+
+var projectRelateCmd = &cobra.Command{
+	Use:   "relate <project-id-or-name> <other-project-id-or-name>",
+	Short: "Create a finish-to-start dependency between two projects",
+	Long: `Create a dependency relation between two projects: <project> must finish
+before <other-project> starts.
+
+Despite ProjectRelationCreateInput typing 'type'/'anchorType'/
+'relatedAnchorType' as plain strings in schema.graphql (not GraphQL enums,
+unlike IssueRelationType), the API enforces a fixed set of values for all
+three server-side - confirmed live via INVALID_INPUT validation errors:
+  - type: dependency (the only value currently accepted)
+  - anchorType / relatedAnchorType: start, end, milestone
+This command always anchors <project>'s end to <other-project>'s start
+(a "finish-to-start" dependency); anchoring to a specific milestone isn't
+exposed here.
+
+Examples:
+  lincli project relate "API" "Mobile App"`,
+	Args: cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		relTypeFlag, _ := cmd.Flags().GetString("type")
+		if relTypeFlag == "" {
+			relTypeFlag = "dependency"
+		}
+		relType, err := parseProjectRelationType(relTypeFlag)
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+		cache := newResolverCache()
+
+		projectID, err := resolveProject(ctx, client, cache, args[0])
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		otherID, err := resolveProject(ctx, client, cache, args[1])
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		input := api.ProjectRelationCreateInput{
+			ProjectId:         projectID,
+			RelatedProjectId:  otherID,
+			AnchorType:        "end",
+			RelatedAnchorType: "start",
+			Type:              relType,
+		}
+
+		resp, err := api.ProjectRelationCreate(ctx, client, &input)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to create project relation: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.ProjectRelationCreate.Success {
+			output.Error("Failed to create project relation", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		rel := resp.ProjectRelationCreate.ProjectRelation
+
+		if jsonOut {
+			output.JSON(rel)
+		} else if plaintext {
+			fmt.Printf("Related %s %s %s\n", rel.Project.Name, rel.Type, rel.RelatedProject.Name)
+		} else {
+			output.Success(fmt.Sprintf("Related %s %s %s", rel.Project.Name, rel.Type, rel.RelatedProject.Name), plaintext, jsonOut)
+		}
+	},
+}
+
+var projectUnrelateCmd = &cobra.Command{
+	Use:   "unrelate <project-id-or-name> <other-project-id-or-name>",
+	Short: "Remove a dependency relation between two projects",
+	Long:  `Remove a dependency relation between two projects. This action executes immediately with no confirmation prompt.`,
+	Args:  cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+		cache := newResolverCache()
+
+		projectID, err := resolveProject(ctx, client, cache, args[0])
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		otherID, err := resolveProject(ctx, client, cache, args[1])
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		relID, err := findProjectRelation(ctx, client, projectID, otherID)
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		resp, err := api.ProjectRelationDelete(ctx, client, relID)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to remove project relation: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.ProjectRelationDelete.Success {
+			output.Error("Failed to remove project relation", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if jsonOut {
+			output.JSON(map[string]interface{}{"success": true, "id": resp.ProjectRelationDelete.EntityId})
+		} else if plaintext {
+			fmt.Println("Removed project relation")
+		} else {
+			output.Success("Removed project relation", plaintext, jsonOut)
+		}
+	},
+}
+
+// --- Project statuses ---
+
+var projectStatusCmd = &cobra.Command{
+	Use:   "status",
+	Short: "Manage the workspace's project status catalog",
+	Long: `List, create, update, archive, and unarchive project statuses: the
+workspace-wide catalog a project's --status flag resolves against (see
+resolveProjectStatus).
+
+Examples:
+  lincli project status list
+  lincli project status create --name "In Review" --type started
+  lincli project status update STATUS-ID --color "#f2c94c"
+  lincli project status archive STATUS-ID`,
+}
+
+var projectStatusListCmd = &cobra.Command{
+	Use:     "list",
+	Aliases: []string{"ls"},
+	Short:   "List the workspace's project statuses",
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+
+		limit := 250
+		resp, err := api.ListProjectStatuses(ctx, client, &limit)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to list project statuses: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		statuses := []*api.ListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus{}
+		if resp.ProjectStatuses != nil {
+			statuses = resp.ProjectStatuses.Nodes
+		}
+
+		if len(statuses) == 0 {
+			output.Info("No project statuses found", plaintext, jsonOut)
+			return
+		}
+
+		if jsonOut {
+			output.JSON(statuses)
+			return
+		}
+
+		if plaintext {
+			fmt.Println("# Project Statuses")
+			for _, s := range statuses {
+				fmt.Printf("## %s\n", s.Name)
+				fmt.Printf("- **ID**: %s\n", s.Id)
+				fmt.Printf("- **Type**: %s\n", s.Type)
+				fmt.Printf("- **Color**: %s\n", s.Color)
+				fmt.Printf("- **Position**: %.0f\n", s.Position)
+				if s.Description != nil && *s.Description != "" {
+					fmt.Printf("- **Description**: %s\n", *s.Description)
+				}
+				fmt.Println()
+			}
+			return
+		}
+
+		headers := []string{"Name", "ID", "Type", "Color", "Position"}
+		rows := make([][]string, len(statuses))
+		for i, s := range statuses {
+			rows[i] = []string{s.Name, s.Id, string(s.Type), s.Color, fmt.Sprintf("%.0f", s.Position)}
+		}
+		output.Table(output.TableData{Headers: headers, Rows: rows}, plaintext, jsonOut)
+	},
+}
+
+var projectStatusCreateCmd = &cobra.Command{
+	Use:     "create",
+	Aliases: []string{"new"},
+	Short:   "Create a new project status",
+	Args:    cobra.NoArgs,
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		name, _ := cmd.Flags().GetString("name")
+		if name == "" {
+			output.Error("Name is required (--name)", plaintext, jsonOut)
+			os.Exit(1)
+		}
+		typeStr, _ := cmd.Flags().GetString("type")
+		if typeStr == "" {
+			output.Error(fmt.Sprintf("Type is required (--type). Valid values: %s", strings.Join(projectStatusTypeValues, ", ")), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		statusType, err := parseProjectStatusType(typeStr)
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		color, _ := cmd.Flags().GetString("color")
+		position, _ := cmd.Flags().GetFloat64("position")
+
+		input := api.ProjectStatusCreateInput{
+			Name:     name,
+			Type:     statusType,
+			Color:    color,
+			Position: position,
+		}
+		if description, _ := cmd.Flags().GetString("description"); description != "" {
+			input.Description = &description
+		}
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+
+		resp, err := api.ProjectStatusCreate(ctx, client, &input)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to create project status: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.ProjectStatusCreate.Success || resp.ProjectStatusCreate.Status == nil {
+			output.Error("Failed to create project status", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		status := resp.ProjectStatusCreate.Status
+
+		if jsonOut {
+			output.JSON(status)
+		} else if plaintext {
+			fmt.Printf("Created project status: %s\n", status.Name)
+		} else {
+			output.Success(fmt.Sprintf("Created project status: %s", status.Name), plaintext, jsonOut)
+		}
+	},
+}
+
+var projectStatusUpdateCmd = &cobra.Command{
+	Use:   "update <status-id-or-name>",
+	Short: "Update a project status",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+		cache := newResolverCache()
+
+		statusID, err := resolveProjectStatus(ctx, client, cache, args[0])
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		input := api.ProjectStatusUpdateInput{}
+		if cmd.Flags().Changed("name") {
+			name, _ := cmd.Flags().GetString("name")
+			input.Name = &name
+		}
+		if cmd.Flags().Changed("type") {
+			typeStr, _ := cmd.Flags().GetString("type")
+			statusType, err := parseProjectStatusType(typeStr)
+			if err != nil {
+				output.Error(err.Error(), plaintext, jsonOut)
+				os.Exit(1)
+			}
+			input.Type = &statusType
+		}
+		if cmd.Flags().Changed("color") {
+			color, _ := cmd.Flags().GetString("color")
+			input.Color = &color
+		}
+		if cmd.Flags().Changed("position") {
+			position, _ := cmd.Flags().GetFloat64("position")
+			input.Position = &position
+		}
+		if cmd.Flags().Changed("description") {
+			description, _ := cmd.Flags().GetString("description")
+			input.Description = &description
+		}
+
+		if input.Name == nil && input.Type == nil && input.Color == nil && input.Position == nil && input.Description == nil {
+			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		resp, err := api.ProjectStatusUpdate(ctx, client, statusID, &input)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to update project status: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.ProjectStatusUpdate.Success || resp.ProjectStatusUpdate.Status == nil {
+			output.Error("Failed to update project status", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		status := resp.ProjectStatusUpdate.Status
+
+		if jsonOut {
+			output.JSON(status)
+		} else if plaintext {
+			fmt.Printf("Updated project status: %s\n", status.Name)
+		} else {
+			output.Success(fmt.Sprintf("Updated project status: %s", status.Name), plaintext, jsonOut)
+		}
+	},
+}
+
+var projectStatusArchiveCmd = &cobra.Command{
+	Use:   "archive <status-id-or-name>",
+	Short: "Archive a project status",
+	Long:  `Archive a project status. The status must not have any active projects assigned to it and must not be the last status of its type. This action executes immediately with no confirmation prompt.`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+		cache := newResolverCache()
+
+		statusID, err := resolveProjectStatus(ctx, client, cache, args[0])
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		resp, err := api.ProjectStatusArchive(ctx, client, statusID)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to archive project status: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.ProjectStatusArchive.Success {
+			output.Error("Failed to archive project status", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		name := statusID
+		if resp.ProjectStatusArchive.Entity != nil {
+			name = resp.ProjectStatusArchive.Entity.Name
+		}
+
+		if jsonOut {
+			output.JSON(map[string]interface{}{"success": true, "id": statusID})
+		} else if plaintext {
+			fmt.Printf("Archived project status %s\n", name)
+		} else {
+			output.Success(fmt.Sprintf("Archived project status %s", name), plaintext, jsonOut)
+		}
+	},
+}
+
+var projectStatusUnarchiveCmd = &cobra.Command{
+	Use:   "unarchive <status-id-or-name>",
+	Short: "Unarchive a project status",
+	Long:  `Unarchive a previously archived project status. This action executes immediately with no confirmation prompt.`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+		cache := newResolverCache()
+
+		statusID, err := resolveProjectStatus(ctx, client, cache, args[0])
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		resp, err := api.ProjectStatusUnarchive(ctx, client, statusID)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to unarchive project status: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.ProjectStatusUnarchive.Success {
+			output.Error("Failed to unarchive project status", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		name := statusID
+		if resp.ProjectStatusUnarchive.Entity != nil {
+			name = resp.ProjectStatusUnarchive.Entity.Name
+		}
+
+		if jsonOut {
+			output.JSON(map[string]interface{}{"success": true, "id": statusID})
+		} else if plaintext {
+			fmt.Printf("Unarchived project status %s\n", name)
+		} else {
+			output.Success(fmt.Sprintf("Unarchived project status %s", name), plaintext, jsonOut)
+		}
+	},
+}
+
+var projectReassignStatusCmd = &cobra.Command{
+	Use:   "reassign-status",
+	Short: "Move all projects from one status to another",
+	Long: `[INTERNAL] Reassign every project currently on one status to a
+different status. Typically used before archiving or deleting a status that
+still has projects assigned to it.
+
+Examples:
+  lincli project reassign-status --from "In Review" --to "In Progress"`,
+	Args: cobra.NoArgs,
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		from, _ := cmd.Flags().GetString("from")
+		to, _ := cmd.Flags().GetString("to")
+		if from == "" || to == "" {
+			output.Error("Both --from and --to are required", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+		cache := newResolverCache()
+
+		fromID, err := resolveProjectStatus(ctx, client, cache, from)
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		toID, err := resolveProjectStatus(ctx, client, cache, to)
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		resp, err := api.ProjectReassignStatus(ctx, client, fromID, toID)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to reassign project status: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.ProjectReassignStatus.Success {
+			output.Error("Failed to reassign project status", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if jsonOut {
+			output.JSON(map[string]interface{}{"success": true})
+		} else if plaintext {
+			fmt.Printf("Reassigned projects from %s to %s\n", from, to)
+		} else {
+			output.Success(fmt.Sprintf("Reassigned projects from %s to %s", from, to), plaintext, jsonOut)
+		}
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(projectCmd)
 	projectCmd.AddCommand(projectListCmd)
@@ -1719,6 +3292,92 @@ func init() {
 	projectMilestoneMoveCmd.Flags().String("project", "", "Destination project name or ID (required)")
 	projectMilestoneMoveCmd.Flags().Float64("sort-order", 0, "New sort order within the destination project")
 	_ = projectMilestoneMoveCmd.MarkFlagRequired("project")
+
+	// Status-update posts
+	projectCmd.AddCommand(projectUpdatePostCmd)
+	projectUpdatePostCmd.AddCommand(projectUpdatePostListCmd)
+	projectUpdatePostCmd.AddCommand(projectUpdatePostCreateCmd)
+	projectUpdatePostCmd.AddCommand(projectUpdatePostEditCmd)
+	projectUpdatePostCmd.AddCommand(projectUpdatePostArchiveCmd)
+	projectUpdatePostCmd.AddCommand(projectUpdatePostUnarchiveCmd)
+	projectCmd.AddCommand(projectUpdateReminderCmd)
+
+	// Update-post list command flags
+	projectUpdatePostListCmd.Flags().IntP("limit", "l", 50, "Maximum number of status updates to return")
+
+	// Update-post create command flags
+	projectUpdatePostCreateCmd.Flags().String("body", "", "Status update body in markdown (required)")
+	projectUpdatePostCreateCmd.Flags().String("health", "", fmt.Sprintf("Project health at the time of the update: %s", strings.Join(projectUpdateHealthValues, ", ")))
+	_ = projectUpdatePostCreateCmd.MarkFlagRequired("body")
+
+	// Update-post edit command flags
+	projectUpdatePostEditCmd.Flags().String("body", "", "New status update body in markdown")
+	projectUpdatePostEditCmd.Flags().String("health", "", fmt.Sprintf("New health value: %s", strings.Join(projectUpdateHealthValues, ", ")))
+
+	// Update-reminder command flags
+	projectUpdateReminderCmd.Flags().String("user", "", "User email, name, 'me', or ID to remind (defaults to the project lead)")
+
+	// Labels
+	projectCmd.AddCommand(projectLabelCmd)
+	projectLabelCmd.AddCommand(projectLabelListCmd)
+	projectLabelCmd.AddCommand(projectLabelCreateCmd)
+	projectLabelCmd.AddCommand(projectLabelUpdateCmd)
+	projectLabelCmd.AddCommand(projectLabelDeleteCmd)
+	projectLabelCmd.AddCommand(projectLabelRetireCmd)
+	projectLabelCmd.AddCommand(projectLabelRestoreCmd)
+	projectLabelCmd.AddCommand(projectLabelAddCmd)
+	projectLabelCmd.AddCommand(projectLabelRemoveCmd)
+
+	// Label list command flags
+	projectLabelListCmd.Flags().IntP("limit", "l", 250, "Maximum number of project labels to return")
+
+	// Label create command flags
+	projectLabelCreateCmd.Flags().String("name", "", "Label name (required)")
+	projectLabelCreateCmd.Flags().String("color", "", "Label color as a HEX string, e.g. #5e6ad2 (required)")
+	projectLabelCreateCmd.Flags().StringP("description", "d", "", "Label description")
+	_ = projectLabelCreateCmd.MarkFlagRequired("name")
+	_ = projectLabelCreateCmd.MarkFlagRequired("color")
+
+	// Label update command flags
+	projectLabelUpdateCmd.Flags().String("name", "", "New label name")
+	projectLabelUpdateCmd.Flags().String("color", "", "New label color as a HEX string")
+	projectLabelUpdateCmd.Flags().StringP("description", "d", "", "New description")
+
+	// Relations
+	projectCmd.AddCommand(projectRelateCmd)
+	projectCmd.AddCommand(projectUnrelateCmd)
+	projectRelateCmd.Flags().String("type", "dependency", fmt.Sprintf("Relation type: %s", strings.Join(projectRelationTypeValues, ", ")))
+
+	// Statuses
+	projectCmd.AddCommand(projectStatusCmd)
+	projectStatusCmd.AddCommand(projectStatusListCmd)
+	projectStatusCmd.AddCommand(projectStatusCreateCmd)
+	projectStatusCmd.AddCommand(projectStatusUpdateCmd)
+	projectStatusCmd.AddCommand(projectStatusArchiveCmd)
+	projectStatusCmd.AddCommand(projectStatusUnarchiveCmd)
+	projectCmd.AddCommand(projectReassignStatusCmd)
+
+	// Status create command flags
+	projectStatusCreateCmd.Flags().String("name", "", "Status name (required)")
+	projectStatusCreateCmd.Flags().String("type", "", fmt.Sprintf("Status type (required): %s", strings.Join(projectStatusTypeValues, ", ")))
+	projectStatusCreateCmd.Flags().String("color", "#bec2c8", "Status color as a HEX string")
+	projectStatusCreateCmd.Flags().Float64("position", 0, "Position within the workspace's project flow")
+	projectStatusCreateCmd.Flags().StringP("description", "d", "", "Status description")
+	_ = projectStatusCreateCmd.MarkFlagRequired("name")
+	_ = projectStatusCreateCmd.MarkFlagRequired("type")
+
+	// Status update command flags
+	projectStatusUpdateCmd.Flags().String("name", "", "New status name")
+	projectStatusUpdateCmd.Flags().String("type", "", fmt.Sprintf("New status type: %s", strings.Join(projectStatusTypeValues, ", ")))
+	projectStatusUpdateCmd.Flags().String("color", "", "New status color as a HEX string")
+	projectStatusUpdateCmd.Flags().Float64("position", 0, "New position within the workspace's project flow")
+	projectStatusUpdateCmd.Flags().StringP("description", "d", "", "New description")
+
+	// Reassign-status command flags
+	projectReassignStatusCmd.Flags().String("from", "", "Status name or ID to move projects off of (required)")
+	projectReassignStatusCmd.Flags().String("to", "", "Status name or ID to move projects onto (required)")
+	_ = projectReassignStatusCmd.MarkFlagRequired("from")
+	_ = projectReassignStatusCmd.MarkFlagRequired("to")
 }
 
 // buildProjectFilterTyped builds a typed ProjectFilter from command flags

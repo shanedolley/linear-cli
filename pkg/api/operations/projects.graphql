@@ -161,6 +161,33 @@ fragment ProjectDetailFields on Project {
       }
     }
   }
+  labels(first: 20) {
+    nodes {
+      id
+      name
+      color
+    }
+  }
+  relations(first: 20) {
+    nodes {
+      id
+      type
+      relatedProject {
+        id
+        name
+      }
+    }
+  }
+  inverseRelations(first: 20) {
+    nodes {
+      id
+      type
+      project {
+        id
+        name
+      }
+    }
+  }
 }
 
 # Query: Get paginated list of projects with optional filtering
@@ -242,7 +269,10 @@ fragment ProjectStatusFields on ProjectStatus {
   name
   type
   color
+  description
   position
+  indefinite
+  archivedAt
 }
 
 query ListProjectStatuses($first: Int) {
@@ -335,5 +365,319 @@ mutation ProjectMilestoneDelete($id: String!) {
   projectMilestoneDelete(id: $id) {
     success
     entityId
+  }
+}
+
+# --- Project labels (ProjectLabel - a distinct workspace-wide catalog from
+# IssueLabel and InitiativeLabel; confirmed against schema.graphql, which
+# has no cross-reference between the three label types) ---
+
+fragment ProjectLabelFields on ProjectLabel {
+  id
+  name
+  color
+  description
+  isGroup
+  archivedAt
+  retiredAt
+  parent {
+    id
+    name
+  }
+}
+
+query ListProjectLabels($filter: ProjectLabelFilter, $first: Int) {
+  projectLabels(filter: $filter, first: $first) {
+    nodes {
+      ...ProjectLabelFields
+    }
+  }
+}
+
+mutation ProjectLabelCreate($input: ProjectLabelCreateInput!) {
+  projectLabelCreate(input: $input) {
+    success
+    projectLabel {
+      ...ProjectLabelFields
+    }
+  }
+}
+
+mutation ProjectLabelUpdate($id: String!, $input: ProjectLabelUpdateInput!) {
+  projectLabelUpdate(id: $id, input: $input) {
+    success
+    projectLabel {
+      ...ProjectLabelFields
+    }
+  }
+}
+
+mutation ProjectLabelDelete($id: String!) {
+  projectLabelDelete(id: $id) {
+    success
+    entityId
+  }
+}
+
+# Retire/restore, not archive/unarchive - ProjectLabel has no
+# projectLabelArchive mutation (verified against schema.graphql). Retired
+# labels remain on projects that already use them but can't be applied to
+# new ones.
+mutation ProjectLabelRetire($id: String!) {
+  projectLabelRetire(id: $id) {
+    success
+    projectLabel {
+      ...ProjectLabelFields
+    }
+  }
+}
+
+mutation ProjectLabelRestore($id: String!) {
+  projectLabelRestore(id: $id) {
+    success
+    projectLabel {
+      ...ProjectLabelFields
+    }
+  }
+}
+
+mutation ProjectAddLabel($id: String!, $labelId: String!) {
+  projectAddLabel(id: $id, labelId: $labelId) {
+    success
+    project {
+      ...ProjectListFields
+    }
+  }
+}
+
+mutation ProjectRemoveLabel($id: String!, $labelId: String!) {
+  projectRemoveLabel(id: $id, labelId: $labelId) {
+    success
+    project {
+      ...ProjectListFields
+    }
+  }
+}
+
+# --- Project relations (Gantt-style dependency relations between projects) ---
+#
+# Unlike IssueRelation/InitiativeRelation, ProjectRelationCreateInput's
+# `type`, `anchorType`, and `relatedAnchorType` fields are plain strings in
+# schema.graphql (String!, not a GraphQL enum). The API still enforces a
+# fixed set of values for each server-side, though - confirmed live via
+# INVALID_INPUT/isEnum validation errors surfaced on a bad guess:
+#   - type: dependency (the only value currently accepted)
+#   - anchorType / relatedAnchorType: start, end, milestone
+# ("project" - the original guess based on the field descriptions alone -
+# is rejected). cmd/project.go's `project relate` validates --type against
+# this real set and always anchors the source project's "end" to the
+# target's "start" (a finish-to-start dependency); anchoring to a specific
+# milestone (via projectMilestoneId/relatedProjectMilestoneId) isn't
+# exposed by this CLI.
+fragment ProjectRelationFields on ProjectRelation {
+  id
+  type
+  anchorType
+  relatedAnchorType
+  project {
+    id
+    name
+  }
+  relatedProject {
+    id
+    name
+  }
+}
+
+# Query: fetch both directions of a project's relations (outgoing via
+# `relations`, incoming via `inverseRelations`), used by `project unrelate`
+# to locate a relation's join id regardless of which project it was created
+# from. Project's relation connections take no filter argument for matching
+# a specific related project, so the caller matches client-side.
+query GetProjectRelations($id: String!, $first: Int) {
+  project(id: $id) {
+    relations(first: $first) {
+      nodes {
+        ...ProjectRelationFields
+      }
+    }
+    inverseRelations(first: $first) {
+      nodes {
+        ...ProjectRelationFields
+      }
+    }
+  }
+}
+
+mutation ProjectRelationCreate($input: ProjectRelationCreateInput!) {
+  projectRelationCreate(input: $input) {
+    success
+    projectRelation {
+      ...ProjectRelationFields
+    }
+  }
+}
+
+mutation ProjectRelationUpdate($id: String!, $input: ProjectRelationUpdateInput!) {
+  projectRelationUpdate(id: $id, input: $input) {
+    success
+    projectRelation {
+      ...ProjectRelationFields
+    }
+  }
+}
+
+mutation ProjectRelationDelete($id: String!) {
+  projectRelationDelete(id: $id) {
+    success
+    entityId
+  }
+}
+
+# --- Project status CRUD/lifecycle (workspace-wide catalog) ---
+#
+# ListProjectStatuses/ProjectStatusFields already exist above, used by
+# resolveProjectStatus. Extended here with create/update/archive/unarchive
+# and the reassign-status mutation (used when archiving or deleting a
+# status that still has projects assigned to it).
+
+mutation ProjectStatusCreate($input: ProjectStatusCreateInput!) {
+  projectStatusCreate(input: $input) {
+    success
+    status {
+      ...ProjectStatusFields
+    }
+  }
+}
+
+mutation ProjectStatusUpdate($id: String!, $input: ProjectStatusUpdateInput!) {
+  projectStatusUpdate(id: $id, input: $input) {
+    success
+    status {
+      ...ProjectStatusFields
+    }
+  }
+}
+
+mutation ProjectStatusArchive($id: String!) {
+  projectStatusArchive(id: $id) {
+    success
+    entity {
+      ...ProjectStatusFields
+    }
+  }
+}
+
+mutation ProjectStatusUnarchive($id: String!) {
+  projectStatusUnarchive(id: $id) {
+    success
+    entity {
+      ...ProjectStatusFields
+    }
+  }
+}
+
+# [INTERNAL] per the schema's own description - reassigns all of one
+# status's projects onto another status. projectReassignStatus takes its
+# two ids as direct arguments, not a wrapped input type (verified against
+# schema.graphql - there is no ProjectReassignStatusInput).
+mutation ProjectReassignStatus($originalProjectStatusId: String!, $newProjectStatusId: String!) {
+  projectReassignStatus(originalProjectStatusId: $originalProjectStatusId, newProjectStatusId: $newProjectStatusId) {
+    success
+  }
+}
+
+# --- Project status-update posts (ProjectUpdate) ---
+#
+# Kept clearly distinct from the `UpdateProject`/`projectUpdate` mutation
+# above (which edits the Project record itself): these are point-in-time
+# status posts, named `project update-post` in the CLI, mirroring
+# `initiative update-post`. The mutation names below match Linear's own
+# field names exactly (projectUpdateCreate, projectUpdateUpdate, ...)
+# rather than being prefixed like the Initiative equivalents
+# (CreateInitiativeUpdate) - both forms are collision-free since genqlient
+# derives the generated Go function name from the operation name, and the
+# query GetProjectUpdate is already distinct from the ProjectUpdateCreate/
+# ProjectUpdateUpdate mutations.
+fragment ProjectUpdateFields on ProjectUpdate {
+  id
+  slugId
+  body
+  health
+  createdAt
+  updatedAt
+  editedAt
+  archivedAt
+  url
+  user {
+    id
+    name
+    email
+  }
+  project {
+    id
+    name
+  }
+}
+
+query ListProjectUpdates($filter: ProjectUpdateFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
+  projectUpdates(filter: $filter, first: $first, after: $after, orderBy: $orderBy) {
+    nodes {
+      ...ProjectUpdateFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+query GetProjectUpdate($id: String!) {
+  projectUpdate(id: $id) {
+    ...ProjectUpdateFields
+  }
+}
+
+mutation ProjectUpdateCreate($input: ProjectUpdateCreateInput!) {
+  projectUpdateCreate(input: $input) {
+    success
+    projectUpdate {
+      ...ProjectUpdateFields
+    }
+  }
+}
+
+mutation ProjectUpdateUpdate($id: String!, $input: ProjectUpdateUpdateInput!) {
+  projectUpdateUpdate(id: $id, input: $input) {
+    success
+    projectUpdate {
+      ...ProjectUpdateFields
+    }
+  }
+}
+
+mutation ProjectUpdateArchive($id: String!) {
+  projectUpdateArchive(id: $id) {
+    success
+    entity {
+      id
+      archivedAt
+    }
+  }
+}
+
+mutation ProjectUpdateUnarchive($id: String!) {
+  projectUpdateUnarchive(id: $id) {
+    success
+    entity {
+      id
+      archivedAt
+    }
+  }
+}
+
+mutation CreateProjectUpdateReminder($projectId: String!, $userId: String) {
+  createProjectUpdateReminder(projectId: $projectId, userId: $userId) {
+    success
   }
 }

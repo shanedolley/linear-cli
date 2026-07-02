@@ -57,6 +57,7 @@ type ResolverCache struct {
 	states           map[string][]workflowStateInfo
 	labels           map[string]string
 	initiativeLabels map[string]string
+	projectLabels    map[string]string
 
 	// projectStatuses caches the workspace's ProjectStatus catalog, fetched
 	// at most once per invocation. It is workspace-wide (not keyed by
@@ -82,6 +83,7 @@ func newResolverCache() *ResolverCache {
 		states:           make(map[string][]workflowStateInfo),
 		labels:           make(map[string]string),
 		initiativeLabels: make(map[string]string),
+		projectLabels:    make(map[string]string),
 		milestones:       make(map[string][]milestoneInfo),
 	}
 }
@@ -359,6 +361,51 @@ func resolveInitiativeLabel(ctx context.Context, client graphql.Client, cache *R
 
 	id := nodes[0].Id
 	cache.initiativeLabels[cacheKey] = id
+	return id, nil
+}
+
+// resolveProjectLabel resolves a project label name or UUID to a
+// ProjectLabel ID. Name matching is case-insensitive. A name matching more
+// than one label returns an error listing the candidates (name and id); a
+// name matching no label returns a "not found" error.
+//
+// ProjectLabel is a distinct, workspace-wide catalog from both IssueLabel
+// (see resolveLabel) and InitiativeLabel (see resolveInitiativeLabel) -
+// confirmed against schema.graphql, which has no cross-reference between
+// the three label types.
+func resolveProjectLabel(ctx context.Context, client graphql.Client, cache *ResolverCache, nameOrID string) (string, error) {
+	if isUUID(nameOrID) {
+		return nameOrID, nil
+	}
+
+	cacheKey := strings.ToLower(nameOrID)
+	if id, ok := cache.projectLabels[cacheKey]; ok {
+		return id, nil
+	}
+
+	filter := &api.ProjectLabelFilter{
+		Name: &api.StringComparator{EqIgnoreCase: &nameOrID},
+	}
+	limit := 10
+	resp, err := api.ListProjectLabels(ctx, client, filter, &limit)
+	if err != nil {
+		return "", fmt.Errorf("failed to find project label '%s': %w", nameOrID, err)
+	}
+
+	nodes := resp.ProjectLabels.Nodes
+	if len(nodes) == 0 {
+		return "", fmt.Errorf("Project label not found: %s", nameOrID)
+	}
+	if len(nodes) > 1 {
+		candidates := make([]string, 0, len(nodes))
+		for _, n := range nodes {
+			candidates = append(candidates, fmt.Sprintf("%s (%s)", n.Name, n.Id))
+		}
+		return "", fmt.Errorf("Multiple matches for '%s': %s", nameOrID, strings.Join(candidates, ", "))
+	}
+
+	id := nodes[0].Id
+	cache.projectLabels[cacheKey] = id
 	return id, nil
 }
 

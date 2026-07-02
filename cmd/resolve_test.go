@@ -671,6 +671,100 @@ func TestResolveInitiativeLabel_CacheHit(t *testing.T) {
 	}
 }
 
+// --- resolveProjectLabel ---
+
+func TestResolveProjectLabel_UUIDPassthrough(t *testing.T) {
+	client := newMockGraphQLClient()
+	cache := newResolverCache()
+
+	id := "550e8400-e29b-41d4-a716-446655440000"
+	got, err := resolveProjectLabel(context.Background(), client, cache, id)
+	if err != nil {
+		t.Fatalf("resolveProjectLabel() error = %v", err)
+	}
+	if got != id {
+		t.Errorf("resolveProjectLabel() = %q, want %q", got, id)
+	}
+	if len(client.calls) != 0 {
+		t.Errorf("expected no API calls for UUID passthrough, got %v", client.calls)
+	}
+}
+
+func TestResolveProjectLabel_ExactMatch(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListProjectLabels"] = `{"projectLabels": {"nodes": [{"id": "plabel-uuid-1", "name": "Design", "color": "#5e6ad2", "description": null, "isGroup": false, "archivedAt": null, "retiredAt": null, "parent": null}]}}`
+	cache := newResolverCache()
+
+	got, err := resolveProjectLabel(context.Background(), client, cache, "design")
+	if err != nil {
+		t.Fatalf("resolveProjectLabel() error = %v", err)
+	}
+	if got != "plabel-uuid-1" {
+		t.Errorf("resolveProjectLabel() = %q, want %q", got, "plabel-uuid-1")
+	}
+	if client.callCount("ListProjectLabels") != 1 {
+		t.Errorf("expected exactly 1 ListProjectLabels call, got %d", client.callCount("ListProjectLabels"))
+	}
+}
+
+func TestResolveProjectLabel_Ambiguous(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListProjectLabels"] = `{"projectLabels": {"nodes": [
+		{"id": "plabel-uuid-1", "name": "Design", "color": "#5e6ad2", "description": null, "isGroup": false, "archivedAt": null, "retiredAt": null, "parent": null},
+		{"id": "plabel-uuid-2", "name": "Design", "color": "#000000", "description": null, "isGroup": false, "archivedAt": null, "retiredAt": null, "parent": null}
+	]}}`
+	cache := newResolverCache()
+
+	_, err := resolveProjectLabel(context.Background(), client, cache, "Design")
+	if err == nil {
+		t.Fatal("expected an ambiguous match error, got nil")
+	}
+	if !strings.Contains(err.Error(), "Multiple matches") {
+		t.Errorf("expected ambiguous error message, got: %v", err)
+	}
+	if !strings.Contains(err.Error(), "plabel-uuid-1") || !strings.Contains(err.Error(), "plabel-uuid-2") {
+		t.Errorf("expected error to list both candidate ids, got: %v", err)
+	}
+}
+
+func TestResolveProjectLabel_NotFound(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListProjectLabels"] = `{"projectLabels": {"nodes": []}}`
+	cache := newResolverCache()
+
+	_, err := resolveProjectLabel(context.Background(), client, cache, "Nonexistent")
+	if err == nil {
+		t.Fatal("expected error for unknown project label, got nil")
+	}
+	if !strings.Contains(err.Error(), "Nonexistent") {
+		t.Errorf("expected error to mention the label name, got: %v", err)
+	}
+}
+
+func TestResolveProjectLabel_CacheHit(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListProjectLabels"] = `{"projectLabels": {"nodes": [{"id": "plabel-uuid-1", "name": "Design", "color": "#5e6ad2", "description": null, "isGroup": false, "archivedAt": null, "retiredAt": null, "parent": null}]}}`
+	cache := newResolverCache()
+
+	if _, err := resolveProjectLabel(context.Background(), client, cache, "Design"); err != nil {
+		t.Fatalf("first resolveProjectLabel() error = %v", err)
+	}
+	if client.callCount("ListProjectLabels") != 1 {
+		t.Fatalf("expected exactly 1 ListProjectLabels call after first resolve, got %d", client.callCount("ListProjectLabels"))
+	}
+
+	got, err := resolveProjectLabel(context.Background(), client, cache, "design")
+	if err != nil {
+		t.Fatalf("second resolveProjectLabel() error = %v", err)
+	}
+	if got != "plabel-uuid-1" {
+		t.Errorf("resolveProjectLabel() = %q, want %q", got, "plabel-uuid-1")
+	}
+	if client.callCount("ListProjectLabels") != 1 {
+		t.Errorf("expected cache hit to avoid a second ListProjectLabels call, total calls = %d", client.callCount("ListProjectLabels"))
+	}
+}
+
 // --- resolveWorkflowState ---
 
 func TestResolveWorkflowState_UUIDPassthrough(t *testing.T) {
