@@ -325,14 +325,318 @@ var userMeCmd = &cobra.Command{
 	},
 }
 
+var userUpdateCmd = &cobra.Command{
+	Use:   "update <email>",
+	Short: "Update a user's profile",
+	Long:  `Update a user's profile fields (name, display name, title, description, timezone).`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+		cache := newResolverCache()
+
+		userID, err := resolveUser(ctx, client, cache, args[0])
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		input := api.UserUpdateInput{}
+		if cmd.Flags().Changed("name") {
+			name, _ := cmd.Flags().GetString("name")
+			input.Name = &name
+		}
+		if cmd.Flags().Changed("display-name") {
+			displayName, _ := cmd.Flags().GetString("display-name")
+			input.DisplayName = &displayName
+		}
+		if cmd.Flags().Changed("title") {
+			title, _ := cmd.Flags().GetString("title")
+			input.Title = &title
+		}
+		if cmd.Flags().Changed("description") {
+			description, _ := cmd.Flags().GetString("description")
+			input.Description = &description
+		}
+		if cmd.Flags().Changed("timezone") {
+			timezone, _ := cmd.Flags().GetString("timezone")
+			input.Timezone = &timezone
+		}
+
+		if input.Name == nil && input.DisplayName == nil && input.Title == nil && input.Description == nil && input.Timezone == nil {
+			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		resp, err := api.UserUpdate(ctx, client, userID, &input)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to update user: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if resp.UserUpdate == nil || !resp.UserUpdate.Success {
+			output.Error("Failed to update user", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if jsonOut {
+			output.JSON(resp.UserUpdate.User)
+		} else {
+			output.Success(fmt.Sprintf("Updated user %s", args[0]), plaintext, jsonOut)
+		}
+	},
+}
+
+var userSetRoleCmd = &cobra.Command{
+	Use:   "set-role <email>",
+	Short: "Set a user's organization role",
+	Long: `Set a user's ORGANIZATION role: owner, admin, guest, user, or app. This is
+the workspace-wide role, not team membership; use 'team set-role' to change a
+user's role within a team.`,
+	Args: cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		roleStr, _ := cmd.Flags().GetString("role")
+		role, err := validateUserRole(roleStr)
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+		cache := newResolverCache()
+
+		userID, err := resolveUser(ctx, client, cache, args[0])
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		resp, err := api.UserChangeRole(ctx, client, userID, role)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to set role: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if resp.UserChangeRole == nil || !resp.UserChangeRole.Success {
+			output.Error("Failed to set role", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if jsonOut {
+			output.JSON(map[string]interface{}{"success": true, "email": args[0], "role": string(role)})
+		} else {
+			output.Success(fmt.Sprintf("Set %s org role to %s", args[0], role), plaintext, jsonOut)
+		}
+	},
+}
+
+var userSuspendCmd = &cobra.Command{
+	Use:   "suspend <email>",
+	Short: "Suspend a user",
+	Long: `Suspend a user, deactivating their account and revoking workspace access.
+This action executes immediately with no confirmation prompt. Reversible with
+'user unsuspend'.`,
+	Args: cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		runUserSuspension(cmd, args[0], true)
+	},
+}
+
+var userUnsuspendCmd = &cobra.Command{
+	Use:   "unsuspend <email>",
+	Short: "Unsuspend a user",
+	Long:  `Reactivate a suspended user, restoring their workspace access.`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		runUserSuspension(cmd, args[0], false)
+	},
+}
+
+// runUserSuspension handles suspend/unsuspend, which share the same shape:
+// resolve the user, call the mutation, report.
+func runUserSuspension(cmd *cobra.Command, ref string, suspend bool) {
+	plaintext := viper.GetBool("plaintext")
+	jsonOut := viper.GetBool("json")
+
+	authHeader, err := auth.GetAuthHeader()
+	if err != nil {
+		output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+		os.Exit(1)
+	}
+
+	client := api.NewClient(authHeader)
+	ctx := context.Background()
+	cache := newResolverCache()
+
+	userID, err := resolveUser(ctx, client, cache, ref)
+	if err != nil {
+		output.Error(err.Error(), plaintext, jsonOut)
+		os.Exit(1)
+	}
+
+	verb, pastVerb := "suspend", "Suspended"
+	if !suspend {
+		verb, pastVerb = "unsuspend", "Unsuspended"
+	}
+
+	var success bool
+	if suspend {
+		resp, err := api.UserSuspend(ctx, client, userID)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to suspend user: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		success = resp.UserSuspend != nil && resp.UserSuspend.Success
+	} else {
+		resp, err := api.UserUnsuspend(ctx, client, userID)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to unsuspend user: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		success = resp.UserUnsuspend != nil && resp.UserUnsuspend.Success
+	}
+
+	if !success {
+		output.Error(fmt.Sprintf("Failed to %s user", verb), plaintext, jsonOut)
+		os.Exit(1)
+	}
+
+	if jsonOut {
+		output.JSON(map[string]interface{}{"success": true, "email": ref})
+	} else {
+		output.Success(fmt.Sprintf("%s user %s", pastVerb, ref), plaintext, jsonOut)
+	}
+}
+
+var userSettingsCmd = &cobra.Command{
+	Use:   "settings",
+	Short: "Manage your user settings",
+	Long:  `Manage the authenticated user's settings.`,
+}
+
+var userSettingsUpdateCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Update your email subscription settings",
+	Long: `Update the authenticated user's email subscription settings. Linear only
+exposes the current user's own settings, so this always targets you.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+
+		input := api.UserSettingsUpdateInput{}
+		if cmd.Flags().Changed("changelog") {
+			v, _ := cmd.Flags().GetBool("changelog")
+			input.SubscribedToChangelog = &v
+		}
+		if cmd.Flags().Changed("marketing") {
+			v, _ := cmd.Flags().GetBool("marketing")
+			input.SubscribedToGeneralMarketingCommunications = &v
+		}
+		if cmd.Flags().Changed("invite-accepted") {
+			v, _ := cmd.Flags().GetBool("invite-accepted")
+			input.SubscribedToInviteAccepted = &v
+		}
+
+		if input.SubscribedToChangelog == nil && input.SubscribedToGeneralMarketingCommunications == nil && input.SubscribedToInviteAccepted == nil {
+			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		settingsResp, err := api.GetUserSettings(ctx, client)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to load your settings: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if settingsResp.UserSettings == nil {
+			output.Error("Could not resolve your settings", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		resp, err := api.UserSettingsUpdate(ctx, client, settingsResp.UserSettings.Id, &input)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to update settings: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if resp.UserSettingsUpdate == nil || !resp.UserSettingsUpdate.Success {
+			output.Error("Failed to update settings", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if jsonOut {
+			output.JSON(map[string]interface{}{"success": true})
+		} else {
+			output.Success("Updated your settings", plaintext, jsonOut)
+		}
+	},
+}
+
+// validateUserRole checks an organization role string against Linear's
+// UserRoleType values. "member" is a team-scope concept and is rejected here.
+func validateUserRole(role string) (api.UserRoleType, error) {
+	switch strings.ToLower(role) {
+	case "owner", "admin", "guest", "user", "app":
+		return api.UserRoleType(strings.ToLower(role)), nil
+	default:
+		return "", fmt.Errorf("invalid org role %q. Valid values: owner, admin, guest, user, app", role)
+	}
+}
+
 func init() {
 	rootCmd.AddCommand(userCmd)
 	userCmd.AddCommand(userListCmd)
 	userCmd.AddCommand(userGetCmd)
 	userCmd.AddCommand(userMeCmd)
+	userCmd.AddCommand(userUpdateCmd)
+	userCmd.AddCommand(userSetRoleCmd)
+	userCmd.AddCommand(userSuspendCmd)
+	userCmd.AddCommand(userUnsuspendCmd)
+	userCmd.AddCommand(userSettingsCmd)
+	userSettingsCmd.AddCommand(userSettingsUpdateCmd)
 
 	// List command flags
 	userListCmd.Flags().IntP("limit", "l", 50, "Maximum number of users to return")
 	userListCmd.Flags().BoolP("active", "a", false, "Show only active users")
 	userListCmd.Flags().StringP("sort", "o", "linear", "Sort order: linear (default), created, updated")
+
+	// Update command flags
+	userUpdateCmd.Flags().String("name", "", "Full name")
+	userUpdateCmd.Flags().String("display-name", "", "Display name")
+	userUpdateCmd.Flags().String("title", "", "Job title")
+	userUpdateCmd.Flags().StringP("description", "d", "", "Profile description")
+	userUpdateCmd.Flags().String("timezone", "", "Timezone (e.g. America/New_York)")
+
+	// set-role flags
+	userSetRoleCmd.Flags().String("role", "", "Organization role: owner, admin, guest, user, or app (required)")
+	_ = userSetRoleCmd.MarkFlagRequired("role")
+
+	// settings update flags
+	userSettingsUpdateCmd.Flags().Bool("changelog", false, "Subscribe to changelog emails")
+	userSettingsUpdateCmd.Flags().Bool("marketing", false, "Subscribe to general marketing communications")
+	userSettingsUpdateCmd.Flags().Bool("invite-accepted", false, "Subscribe to invite-accepted emails")
 }

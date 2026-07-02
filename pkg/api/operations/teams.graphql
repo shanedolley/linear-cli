@@ -83,3 +83,96 @@ query GetTeamStates($key: String!) {
     }
   }
 }
+
+# Query: Get a team's memberships, used to resolve a membership ID from a user
+# (for `team member remove` and `team set-role`). A team membership's "role" is
+# the owner boolean, not an enum. Paginated because the connection defaults to
+# 50 nodes; resolveTeamMembership walks every page.
+query GetTeamMemberships($id: String!, $first: Int, $after: String) {
+  team(id: $id) {
+    id
+    memberships(first: $first, after: $after) {
+      nodes {
+        id
+        owner
+        user {
+          id
+          name
+          email
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+}
+
+# Mutation: Create a team
+mutation TeamCreate($input: TeamCreateInput!) {
+  teamCreate(input: $input) {
+    success
+    team {
+      ...TeamDetailFields
+    }
+  }
+}
+
+# Mutation: Update a team
+mutation TeamUpdate($id: String!, $input: TeamUpdateInput!) {
+  teamUpdate(id: $id, input: $input) {
+    success
+    team {
+      ...TeamDetailFields
+    }
+  }
+}
+
+# Mutation: Delete a team (executes immediately)
+mutation TeamDelete($id: String!) {
+  teamDelete(id: $id) {
+    success
+    entityId
+  }
+}
+
+# Mutation: Restore an archived/deleted team
+mutation TeamUnarchive($id: String!) {
+  teamUnarchive(id: $id) {
+    success
+    entity {
+      id
+    }
+  }
+}
+
+# Mutation: Add a user to a team
+mutation TeamMembershipCreate($input: TeamMembershipCreateInput!) {
+  teamMembershipCreate(input: $input) {
+    success
+    teamMembership {
+      id
+      owner
+    }
+  }
+}
+
+# Mutation: Remove a team membership by its ID
+mutation TeamMembershipDelete($id: String!) {
+  teamMembershipDelete(id: $id) {
+    success
+    entityId
+  }
+}
+
+# Mutation: Update a team membership (its owner flag)
+mutation TeamMembershipUpdate($id: String!, $input: TeamMembershipUpdateInput!) {
+  teamMembershipUpdate(id: $id, input: $input) {
+    success
+    teamMembership {
+      id
+      owner
+    }
+  }
+}

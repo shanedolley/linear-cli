@@ -1,0 +1,81 @@
+# Organization operations (Tier 3).
+#
+# The workspace's organization is a singleton (`organization` takes no args).
+# Invites are a top-level collection, not a field on Organization.
+
+fragment OrganizationFields on Organization {
+  id
+  name
+  urlKey
+  userCount
+  createdAt
+  updatedAt
+}
+
+query GetOrganization {
+  organization {
+    ...OrganizationFields
+  }
+}
+
+mutation OrganizationUpdate($input: OrganizationUpdateInput!) {
+  organizationUpdate(input: $input) {
+    success
+    organization {
+      ...OrganizationFields
+    }
+  }
+}
+
+fragment OrganizationInviteFields on OrganizationInvite {
+  id
+  email
+  role
+  external
+  createdAt
+  acceptedAt
+  expiresAt
+  inviter {
+    name
+    email
+  }
+  invitee {
+    name
+    email
+  }
+}
+
+query ListOrganizationInvites($first: Int, $after: String) {
+  organizationInvites(first: $first, after: $after) {
+    nodes {
+      ...OrganizationInviteFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+mutation OrganizationInviteCreate($input: OrganizationInviteCreateInput!) {
+  organizationInviteCreate(input: $input) {
+    success
+    organizationInvite {
+      ...OrganizationInviteFields
+    }
+  }
+}
+
+mutation OrganizationInviteDelete($id: String!) {
+  organizationInviteDelete(id: $id) {
+    success
+    entityId
+  }
+}
+
+mutation ResendOrganizationInvite($id: String!) {
+  resendOrganizationInvite(id: $id) {
+    success
+    entityId
+  }
+}

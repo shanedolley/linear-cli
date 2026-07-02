@@ -551,6 +551,48 @@ func resolveMilestone(ctx context.Context, client graphql.Client, cache *Resolve
 	return matches[0].id, nil
 }
 
+// resolveTeamMembership resolves a (team, user) pair to the user's team
+// membership ID, needed to update or remove a membership. It resolves the team
+// key/ID and user reference, then scans the team's memberships for that user,
+// paging through all memberships (the connection defaults to 50 per page, so a
+// single page would miss members of larger teams).
+func resolveTeamMembership(ctx context.Context, client graphql.Client, cache *ResolverCache, teamRef, userRef string) (string, error) {
+	teamID, err := resolveTeam(ctx, client, cache, teamRef)
+	if err != nil {
+		return "", err
+	}
+	userID, err := resolveUser(ctx, client, cache, userRef)
+	if err != nil {
+		return "", err
+	}
+
+	pageSize := 250
+	var after *string
+	for {
+		resp, err := api.GetTeamMemberships(ctx, client, teamID, &pageSize, after)
+		if err != nil {
+			return "", fmt.Errorf("failed to load team memberships: %w", err)
+		}
+		if resp.Team == nil || resp.Team.Memberships == nil {
+			return "", fmt.Errorf("team not found: %s", teamRef)
+		}
+
+		for _, m := range resp.Team.Memberships.Nodes {
+			if m.User != nil && m.User.Id == userID {
+				return m.Id, nil
+			}
+		}
+
+		pageInfo := resp.Team.Memberships.PageInfo
+		if pageInfo == nil || !pageInfo.HasNextPage || pageInfo.EndCursor == nil {
+			break
+		}
+		after = pageInfo.EndCursor
+	}
+
+	return "", fmt.Errorf("user %q is not a member of team %q", userRef, teamRef)
+}
+
 // resolveCycle resolves a cycle reference to a cycle ID within the given team.
 // ref may be a UUID (returned as-is), a cycle number (e.g. "12"), or a cycle
 // name; numbers and names are matched within teamID. A reference matching more

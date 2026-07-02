@@ -2222,6 +2222,90 @@ func (v *CustomerTierFilter) GetPosition() *NumberComparator { return v.Position
 // GetUpdatedAt returns CustomerTierFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *CustomerTierFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
 
+// [Internal] Configuration for the customer attributes data source.
+type CustomersAttributesDataSourceConfigurationInput struct {
+	// [Internal] Whether to allow manual edits to customer attributes when no source is configured.
+	AllowManualEdits *bool `json:"allowManualEdits"`
+	// [Internal] Errors encountered while syncing customer attributes (set by sync workers).
+	AttributesErrors *map[string]interface{} `json:"attributesErrors"`
+	// [Internal] Mapping from customer attribute keys (owner, revenue, size, status, tier, externalId) to external field IDs.
+	AttributesMapping *map[string]interface{} `json:"attributesMapping"`
+	// [Internal] Integration details (when sourceType is 'integration').
+	Integration *CustomersAttributesDataSourceIntegrationInput `json:"integration,omitempty"`
+	// [Internal] How customer attribute values are sourced: 'manual' or 'integration'.
+	SourceType string `json:"sourceType"`
+}
+
+// GetAllowManualEdits returns CustomersAttributesDataSourceConfigurationInput.AllowManualEdits, and is useful for accessing the field via an interface.
+func (v *CustomersAttributesDataSourceConfigurationInput) GetAllowManualEdits() *bool {
+	return v.AllowManualEdits
+}
+
+// GetAttributesErrors returns CustomersAttributesDataSourceConfigurationInput.AttributesErrors, and is useful for accessing the field via an interface.
+func (v *CustomersAttributesDataSourceConfigurationInput) GetAttributesErrors() *map[string]interface{} {
+	return v.AttributesErrors
+}
+
+// GetAttributesMapping returns CustomersAttributesDataSourceConfigurationInput.AttributesMapping, and is useful for accessing the field via an interface.
+func (v *CustomersAttributesDataSourceConfigurationInput) GetAttributesMapping() *map[string]interface{} {
+	return v.AttributesMapping
+}
+
+// GetIntegration returns CustomersAttributesDataSourceConfigurationInput.Integration, and is useful for accessing the field via an interface.
+func (v *CustomersAttributesDataSourceConfigurationInput) GetIntegration() *CustomersAttributesDataSourceIntegrationInput {
+	return v.Integration
+}
+
+// GetSourceType returns CustomersAttributesDataSourceConfigurationInput.SourceType, and is useful for accessing the field via an interface.
+func (v *CustomersAttributesDataSourceConfigurationInput) GetSourceType() string { return v.SourceType }
+
+// [Internal] Integration providing customer attribute data.
+type CustomersAttributesDataSourceIntegrationInput struct {
+	// [Internal] The integration service that manages customer attributes.
+	Service IntegrationService `json:"service"`
+}
+
+// GetService returns CustomersAttributesDataSourceIntegrationInput.Service, and is useful for accessing the field via an interface.
+func (v *CustomersAttributesDataSourceIntegrationInput) GetService() IntegrationService {
+	return v.Service
+}
+
+// [Internal] Input for updating workspace Customers feature configuration.
+type CustomersConfigurationInput struct {
+	// [Internal] Configuration for the customer attributes data source.
+	AttributesDataSourceConfiguration *CustomersAttributesDataSourceConfigurationInput `json:"attributesDataSourceConfiguration,omitempty"`
+	// [Internal] The team to use to create default issues for new request items.
+	DefaultTeamId *string `json:"defaultTeamId"`
+	// [Internal] Domains or email addresses excluded entirely from the Customers feature.
+	ExcludeList []string `json:"excludeList"`
+	// [Internal] Domains or email addresses ignored when matching to a customer.
+	IgnoreList []string `json:"ignoreList"`
+	// [Internal] The currency code used for customer revenue.
+	RevenueCurrencyCode *string `json:"revenueCurrencyCode"`
+	// [Internal] How customer revenue should be displayed.
+	RevenueDisplay *string `json:"revenueDisplay"`
+}
+
+// GetAttributesDataSourceConfiguration returns CustomersConfigurationInput.AttributesDataSourceConfiguration, and is useful for accessing the field via an interface.
+func (v *CustomersConfigurationInput) GetAttributesDataSourceConfiguration() *CustomersAttributesDataSourceConfigurationInput {
+	return v.AttributesDataSourceConfiguration
+}
+
+// GetDefaultTeamId returns CustomersConfigurationInput.DefaultTeamId, and is useful for accessing the field via an interface.
+func (v *CustomersConfigurationInput) GetDefaultTeamId() *string { return v.DefaultTeamId }
+
+// GetExcludeList returns CustomersConfigurationInput.ExcludeList, and is useful for accessing the field via an interface.
+func (v *CustomersConfigurationInput) GetExcludeList() []string { return v.ExcludeList }
+
+// GetIgnoreList returns CustomersConfigurationInput.IgnoreList, and is useful for accessing the field via an interface.
+func (v *CustomersConfigurationInput) GetIgnoreList() []string { return v.IgnoreList }
+
+// GetRevenueCurrencyCode returns CustomersConfigurationInput.RevenueCurrencyCode, and is useful for accessing the field via an interface.
+func (v *CustomersConfigurationInput) GetRevenueCurrencyCode() *string { return v.RevenueCurrencyCode }
+
+// GetRevenueDisplay returns CustomersConfigurationInput.RevenueDisplay, and is useful for accessing the field via an interface.
+func (v *CustomersConfigurationInput) GetRevenueDisplay() *string { return v.RevenueDisplay }
+
 // CycleArchiveCycleArchiveCycleArchivePayload includes the requested fields of the GraphQL type CycleArchivePayload.
 // The GraphQL type's documentation follows.
 //
@@ -4657,6 +4741,21 @@ func (v *EstimateComparator) GetNull() *bool { return v.Null }
 // GetOr returns EstimateComparator.Or, and is useful for accessing the field via an interface.
 func (v *EstimateComparator) GetOr() []*NullableNumberComparator { return v.Or }
 
+// Cadence to generate feed summary
+type FeedSummarySchedule string
+
+const (
+	FeedSummaryScheduleDaily  FeedSummarySchedule = "daily"
+	FeedSummaryScheduleWeekly FeedSummarySchedule = "weekly"
+	FeedSummaryScheduleNever  FeedSummarySchedule = "never"
+)
+
+var AllFeedSummarySchedule = []FeedSummarySchedule{
+	FeedSummaryScheduleDaily,
+	FeedSummaryScheduleWeekly,
+	FeedSummaryScheduleNever,
+}
+
 // FileUploadFileUploadUploadPayload includes the requested fields of the GraphQL type UploadPayload.
 type FileUploadFileUploadUploadPayload struct {
 	// Whether the operation was successful.
@@ -6091,6 +6190,105 @@ type GetIssueResponse struct {
 // GetIssue returns GetIssueResponse.Issue, and is useful for accessing the field via an interface.
 func (v *GetIssueResponse) GetIssue() *GetIssueIssue { return v.Issue }
 
+// GetOrganizationOrganization includes the requested fields of the GraphQL type Organization.
+// The GraphQL type's documentation follows.
+//
+// A workspace (referred to as Organization in the API). Workspaces are the
+// root-level container for all teams, users, projects, issues, and settings. Every
+// user belongs to at least one workspace, and all data is scoped within a
+// workspace boundary.
+type GetOrganizationOrganization struct {
+	OrganizationFields `json:"-"`
+}
+
+// GetId returns GetOrganizationOrganization.Id, and is useful for accessing the field via an interface.
+func (v *GetOrganizationOrganization) GetId() string { return v.OrganizationFields.Id }
+
+// GetName returns GetOrganizationOrganization.Name, and is useful for accessing the field via an interface.
+func (v *GetOrganizationOrganization) GetName() string { return v.OrganizationFields.Name }
+
+// GetUrlKey returns GetOrganizationOrganization.UrlKey, and is useful for accessing the field via an interface.
+func (v *GetOrganizationOrganization) GetUrlKey() string { return v.OrganizationFields.UrlKey }
+
+// GetUserCount returns GetOrganizationOrganization.UserCount, and is useful for accessing the field via an interface.
+func (v *GetOrganizationOrganization) GetUserCount() int { return v.OrganizationFields.UserCount }
+
+// GetCreatedAt returns GetOrganizationOrganization.CreatedAt, and is useful for accessing the field via an interface.
+func (v *GetOrganizationOrganization) GetCreatedAt() time.Time { return v.OrganizationFields.CreatedAt }
+
+// GetUpdatedAt returns GetOrganizationOrganization.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *GetOrganizationOrganization) GetUpdatedAt() time.Time { return v.OrganizationFields.UpdatedAt }
+
+func (v *GetOrganizationOrganization) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*GetOrganizationOrganization
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.GetOrganizationOrganization = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.OrganizationFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalGetOrganizationOrganization struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	UrlKey string `json:"urlKey"`
+
+	UserCount int `json:"userCount"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+func (v *GetOrganizationOrganization) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *GetOrganizationOrganization) __premarshalJSON() (*__premarshalGetOrganizationOrganization, error) {
+	var retval __premarshalGetOrganizationOrganization
+
+	retval.Id = v.OrganizationFields.Id
+	retval.Name = v.OrganizationFields.Name
+	retval.UrlKey = v.OrganizationFields.UrlKey
+	retval.UserCount = v.OrganizationFields.UserCount
+	retval.CreatedAt = v.OrganizationFields.CreatedAt
+	retval.UpdatedAt = v.OrganizationFields.UpdatedAt
+	return &retval, nil
+}
+
+// GetOrganizationResponse is returned by GetOrganization on success.
+type GetOrganizationResponse struct {
+	// The authenticated user's workspace.
+	Organization *GetOrganizationOrganization `json:"organization"`
+}
+
+// GetOrganization returns GetOrganizationResponse.Organization, and is useful for accessing the field via an interface.
+func (v *GetOrganizationResponse) GetOrganization() *GetOrganizationOrganization {
+	return v.Organization
+}
+
 // GetProjectInitiativeLinksProject includes the requested fields of the GraphQL type Project.
 // The GraphQL type's documentation follows.
 //
@@ -7120,6 +7318,135 @@ func (v *GetTeamMembersTeamMembersUserConnectionPageInfo) GetHasNextPage() bool 
 // GetEndCursor returns GetTeamMembersTeamMembersUserConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
 func (v *GetTeamMembersTeamMembersUserConnectionPageInfo) GetEndCursor() *string { return v.EndCursor }
 
+// GetTeamMembershipsResponse is returned by GetTeamMemberships on success.
+type GetTeamMembershipsResponse struct {
+	// Fetches a specific team by its ID.
+	Team *GetTeamMembershipsTeam `json:"team"`
+}
+
+// GetTeam returns GetTeamMembershipsResponse.Team, and is useful for accessing the field via an interface.
+func (v *GetTeamMembershipsResponse) GetTeam() *GetTeamMembershipsTeam { return v.Team }
+
+// GetTeamMembershipsTeam includes the requested fields of the GraphQL type Team.
+// The GraphQL type's documentation follows.
+//
+// A team is the primary organizational unit in Linear. Issues belong to teams, and
+// each team has its own workflow states, cycles, labels, and settings. Teams can
+// be public (visible to all workspace members), private (visible only to team
+// members), or restricted (visible only within an enclosing private-team
+// boundary). Teams can also have sub-teams that inherit settings from their parent.
+type GetTeamMembershipsTeam struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// Memberships associated with the team. For easier access of the same data, use `members` query.
+	Memberships *GetTeamMembershipsTeamMembershipsTeamMembershipConnection `json:"memberships"`
+}
+
+// GetId returns GetTeamMembershipsTeam.Id, and is useful for accessing the field via an interface.
+func (v *GetTeamMembershipsTeam) GetId() string { return v.Id }
+
+// GetMemberships returns GetTeamMembershipsTeam.Memberships, and is useful for accessing the field via an interface.
+func (v *GetTeamMembershipsTeam) GetMemberships() *GetTeamMembershipsTeamMembershipsTeamMembershipConnection {
+	return v.Memberships
+}
+
+// GetTeamMembershipsTeamMembershipsTeamMembershipConnection includes the requested fields of the GraphQL type TeamMembershipConnection.
+type GetTeamMembershipsTeamMembershipsTeamMembershipConnection struct {
+	Nodes    []*GetTeamMembershipsTeamMembershipsTeamMembershipConnectionNodesTeamMembership `json:"nodes"`
+	PageInfo *GetTeamMembershipsTeamMembershipsTeamMembershipConnectionPageInfo              `json:"pageInfo"`
+}
+
+// GetNodes returns GetTeamMembershipsTeamMembershipsTeamMembershipConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *GetTeamMembershipsTeamMembershipsTeamMembershipConnection) GetNodes() []*GetTeamMembershipsTeamMembershipsTeamMembershipConnectionNodesTeamMembership {
+	return v.Nodes
+}
+
+// GetPageInfo returns GetTeamMembershipsTeamMembershipsTeamMembershipConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *GetTeamMembershipsTeamMembershipsTeamMembershipConnection) GetPageInfo() *GetTeamMembershipsTeamMembershipsTeamMembershipConnectionPageInfo {
+	return v.PageInfo
+}
+
+// GetTeamMembershipsTeamMembershipsTeamMembershipConnectionNodesTeamMembership includes the requested fields of the GraphQL type TeamMembership.
+// The GraphQL type's documentation follows.
+//
+// A join entity that defines a user's membership in a team. Each membership record
+// links a user to a team and tracks whether the user is a team owner. Users can be
+// members of multiple teams, and their memberships determine which teams' issues
+// and resources they can access.
+type GetTeamMembershipsTeamMembershipsTeamMembershipConnectionNodesTeamMembership struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// Whether the user is an owner of the team. Team owners have elevated
+	// permissions for managing team settings, members, and resources.
+	Owner bool `json:"owner"`
+	// The user that the membership is associated with.
+	User *GetTeamMembershipsTeamMembershipsTeamMembershipConnectionNodesTeamMembershipUser `json:"user"`
+}
+
+// GetId returns GetTeamMembershipsTeamMembershipsTeamMembershipConnectionNodesTeamMembership.Id, and is useful for accessing the field via an interface.
+func (v *GetTeamMembershipsTeamMembershipsTeamMembershipConnectionNodesTeamMembership) GetId() string {
+	return v.Id
+}
+
+// GetOwner returns GetTeamMembershipsTeamMembershipsTeamMembershipConnectionNodesTeamMembership.Owner, and is useful for accessing the field via an interface.
+func (v *GetTeamMembershipsTeamMembershipsTeamMembershipConnectionNodesTeamMembership) GetOwner() bool {
+	return v.Owner
+}
+
+// GetUser returns GetTeamMembershipsTeamMembershipsTeamMembershipConnectionNodesTeamMembership.User, and is useful for accessing the field via an interface.
+func (v *GetTeamMembershipsTeamMembershipsTeamMembershipConnectionNodesTeamMembership) GetUser() *GetTeamMembershipsTeamMembershipsTeamMembershipConnectionNodesTeamMembershipUser {
+	return v.User
+}
+
+// GetTeamMembershipsTeamMembershipsTeamMembershipConnectionNodesTeamMembershipUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
+type GetTeamMembershipsTeamMembershipsTeamMembershipConnectionNodesTeamMembershipUser struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The user's full name.
+	Name string `json:"name"`
+	// The user's email address.
+	Email string `json:"email"`
+}
+
+// GetId returns GetTeamMembershipsTeamMembershipsTeamMembershipConnectionNodesTeamMembershipUser.Id, and is useful for accessing the field via an interface.
+func (v *GetTeamMembershipsTeamMembershipsTeamMembershipConnectionNodesTeamMembershipUser) GetId() string {
+	return v.Id
+}
+
+// GetName returns GetTeamMembershipsTeamMembershipsTeamMembershipConnectionNodesTeamMembershipUser.Name, and is useful for accessing the field via an interface.
+func (v *GetTeamMembershipsTeamMembershipsTeamMembershipConnectionNodesTeamMembershipUser) GetName() string {
+	return v.Name
+}
+
+// GetEmail returns GetTeamMembershipsTeamMembershipsTeamMembershipConnectionNodesTeamMembershipUser.Email, and is useful for accessing the field via an interface.
+func (v *GetTeamMembershipsTeamMembershipsTeamMembershipConnectionNodesTeamMembershipUser) GetEmail() string {
+	return v.Email
+}
+
+// GetTeamMembershipsTeamMembershipsTeamMembershipConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+type GetTeamMembershipsTeamMembershipsTeamMembershipConnectionPageInfo struct {
+	// Indicates if there are more results when paginating forward.
+	HasNextPage bool `json:"hasNextPage"`
+	// Cursor representing the last result in the paginated results.
+	EndCursor *string `json:"endCursor"`
+}
+
+// GetHasNextPage returns GetTeamMembershipsTeamMembershipsTeamMembershipConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *GetTeamMembershipsTeamMembershipsTeamMembershipConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// GetEndCursor returns GetTeamMembershipsTeamMembershipsTeamMembershipConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *GetTeamMembershipsTeamMembershipsTeamMembershipConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
 // GetTeamResponse is returned by GetTeam on success.
 type GetTeamResponse struct {
 	// Fetches a specific team by its ID.
@@ -7481,6 +7808,32 @@ func (v *GetUserByEmailUsersUserConnectionNodesUser) __premarshalJSON() (*__prem
 	retval.CreatedAt = v.UserDetailFields.CreatedAt
 	return &retval, nil
 }
+
+// GetUserSettingsResponse is returned by GetUserSettings on success.
+type GetUserSettingsResponse struct {
+	// The authenticated user's notification and UI settings.
+	UserSettings *GetUserSettingsUserSettings `json:"userSettings"`
+}
+
+// GetUserSettings returns GetUserSettingsResponse.UserSettings, and is useful for accessing the field via an interface.
+func (v *GetUserSettingsResponse) GetUserSettings() *GetUserSettingsUserSettings {
+	return v.UserSettings
+}
+
+// GetUserSettingsUserSettings includes the requested fields of the GraphQL type UserSettings.
+// The GraphQL type's documentation follows.
+//
+// Per-user settings and preferences for a workspace member. Includes notification
+// delivery preferences, email subscription settings, notification category and
+// channel preferences, theme configuration, and various UI preferences. Each user
+// has exactly one UserSettings record per workspace.
+type GetUserSettingsUserSettings struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+}
+
+// GetId returns GetUserSettingsUserSettings.Id, and is useful for accessing the field via an interface.
+func (v *GetUserSettingsUserSettings) GetId() string { return v.Id }
 
 // GetViewerResponse is returned by GetViewer on success.
 type GetViewerResponse struct {
@@ -16556,6 +16909,32 @@ func (v *LabelListFieldsTeam) GetId() string { return v.Id }
 // GetKey returns LabelListFieldsTeam.Key, and is useful for accessing the field via an interface.
 func (v *LabelListFieldsTeam) GetKey() string { return v.Key }
 
+// How workspace MCP server access is restricted for Linear Agent.
+type LinearAgentMcpServersMode string
+
+const (
+	LinearAgentMcpServersModeAll       LinearAgentMcpServersMode = "all"
+	LinearAgentMcpServersModeAllowlist LinearAgentMcpServersMode = "allowlist"
+)
+
+var AllLinearAgentMcpServersMode = []LinearAgentMcpServersMode{
+	LinearAgentMcpServersModeAll,
+	LinearAgentMcpServersModeAllowlist,
+}
+
+// How workspace trusted source access is restricted for agent loops.
+type LinearAgentTrustedSourcesMode string
+
+const (
+	LinearAgentTrustedSourcesModeNone      LinearAgentTrustedSourcesMode = "none"
+	LinearAgentTrustedSourcesModeAllowlist LinearAgentTrustedSourcesMode = "allowlist"
+)
+
+var AllLinearAgentTrustedSourcesMode = []LinearAgentTrustedSourcesMode{
+	LinearAgentTrustedSourcesModeNone,
+	LinearAgentTrustedSourcesModeAllowlist,
+}
+
 // ListAttachmentsIssue includes the requested fields of the GraphQL type Issue.
 // The GraphQL type's documentation follows.
 //
@@ -18072,6 +18451,174 @@ type ListIssuesResponse struct {
 // GetIssues returns ListIssuesResponse.Issues, and is useful for accessing the field via an interface.
 func (v *ListIssuesResponse) GetIssues() *ListIssuesIssuesIssueConnection { return v.Issues }
 
+// ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnection includes the requested fields of the GraphQL type OrganizationInviteConnection.
+type ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnection struct {
+	Nodes    []*ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite `json:"nodes"`
+	PageInfo *ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionPageInfo                  `json:"pageInfo"`
+}
+
+// GetNodes returns ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnection) GetNodes() []*ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite {
+	return v.Nodes
+}
+
+// GetPageInfo returns ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnection) GetPageInfo() *ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionPageInfo {
+	return v.PageInfo
+}
+
+// ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite includes the requested fields of the GraphQL type OrganizationInvite.
+// The GraphQL type's documentation follows.
+//
+// A pending invitation to join the workspace, sent via email. Invites specify the
+// role the invitee will receive and can optionally include team assignments.
+// Invites can expire and must be accepted by the invitee to grant workspace access.
+type ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite struct {
+	OrganizationInviteFields `json:"-"`
+}
+
+// GetId returns ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite.Id, and is useful for accessing the field via an interface.
+func (v *ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite) GetId() string {
+	return v.OrganizationInviteFields.Id
+}
+
+// GetEmail returns ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite.Email, and is useful for accessing the field via an interface.
+func (v *ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite) GetEmail() string {
+	return v.OrganizationInviteFields.Email
+}
+
+// GetRole returns ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite.Role, and is useful for accessing the field via an interface.
+func (v *ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite) GetRole() UserRoleType {
+	return v.OrganizationInviteFields.Role
+}
+
+// GetExternal returns ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite.External, and is useful for accessing the field via an interface.
+func (v *ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite) GetExternal() bool {
+	return v.OrganizationInviteFields.External
+}
+
+// GetCreatedAt returns ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite) GetCreatedAt() time.Time {
+	return v.OrganizationInviteFields.CreatedAt
+}
+
+// GetAcceptedAt returns ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite.AcceptedAt, and is useful for accessing the field via an interface.
+func (v *ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite) GetAcceptedAt() *time.Time {
+	return v.OrganizationInviteFields.AcceptedAt
+}
+
+// GetExpiresAt returns ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite.ExpiresAt, and is useful for accessing the field via an interface.
+func (v *ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite) GetExpiresAt() *time.Time {
+	return v.OrganizationInviteFields.ExpiresAt
+}
+
+// GetInviter returns ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite.Inviter, and is useful for accessing the field via an interface.
+func (v *ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite) GetInviter() *OrganizationInviteFieldsInviterUser {
+	return v.OrganizationInviteFields.Inviter
+}
+
+// GetInvitee returns ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite.Invitee, and is useful for accessing the field via an interface.
+func (v *ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite) GetInvitee() *OrganizationInviteFieldsInviteeUser {
+	return v.OrganizationInviteFields.Invitee
+}
+
+func (v *ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.OrganizationInviteFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite struct {
+	Id string `json:"id"`
+
+	Email string `json:"email"`
+
+	Role UserRoleType `json:"role"`
+
+	External bool `json:"external"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	AcceptedAt *time.Time `json:"acceptedAt"`
+
+	ExpiresAt *time.Time `json:"expiresAt"`
+
+	Inviter *OrganizationInviteFieldsInviterUser `json:"inviter"`
+
+	Invitee *OrganizationInviteFieldsInviteeUser `json:"invitee"`
+}
+
+func (v *ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite) __premarshalJSON() (*__premarshalListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite, error) {
+	var retval __premarshalListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionNodesOrganizationInvite
+
+	retval.Id = v.OrganizationInviteFields.Id
+	retval.Email = v.OrganizationInviteFields.Email
+	retval.Role = v.OrganizationInviteFields.Role
+	retval.External = v.OrganizationInviteFields.External
+	retval.CreatedAt = v.OrganizationInviteFields.CreatedAt
+	retval.AcceptedAt = v.OrganizationInviteFields.AcceptedAt
+	retval.ExpiresAt = v.OrganizationInviteFields.ExpiresAt
+	retval.Inviter = v.OrganizationInviteFields.Inviter
+	retval.Invitee = v.OrganizationInviteFields.Invitee
+	return &retval, nil
+}
+
+// ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+type ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionPageInfo struct {
+	// Indicates if there are more results when paginating forward.
+	HasNextPage bool `json:"hasNextPage"`
+	// Cursor representing the last result in the paginated results.
+	EndCursor *string `json:"endCursor"`
+}
+
+// GetHasNextPage returns ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// GetEndCursor returns ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// ListOrganizationInvitesResponse is returned by ListOrganizationInvites on success.
+type ListOrganizationInvitesResponse struct {
+	// All pending and accepted invites for the workspace.
+	OrganizationInvites *ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnection `json:"organizationInvites"`
+}
+
+// GetOrganizationInvites returns ListOrganizationInvitesResponse.OrganizationInvites, and is useful for accessing the field via an interface.
+func (v *ListOrganizationInvitesResponse) GetOrganizationInvites() *ListOrganizationInvitesOrganizationInvitesOrganizationInviteConnection {
+	return v.OrganizationInvites
+}
+
 // ListProjectLabelsProjectLabelsProjectLabelConnection includes the requested fields of the GraphQL type ProjectLabelConnection.
 type ListProjectLabelsProjectLabelsProjectLabelConnection struct {
 	Nodes []*ListProjectLabelsProjectLabelsProjectLabelConnectionNodesProjectLabel `json:"nodes"`
@@ -19168,6 +19715,207 @@ func (v *ListUsersUsersUserConnectionPageInfo) GetHasNextPage() bool { return v.
 
 // GetEndCursor returns ListUsersUsersUserConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
 func (v *ListUsersUsersUserConnectionPageInfo) GetEndCursor() *string { return v.EndCursor }
+
+type NotificationCategoryPreferencesInput struct {
+	// The preferences for notifications about apps and integrations.
+	AppsAndIntegrations *PartialNotificationChannelPreferencesInput `json:"appsAndIntegrations,omitempty"`
+	// The preferences for notifications about assignments.
+	Assignments *PartialNotificationChannelPreferencesInput `json:"assignments,omitempty"`
+	// The preferences for billing notifications.
+	Billing *PartialNotificationChannelPreferencesInput `json:"billing,omitempty"`
+	// The preferences for notifications about comments and replies.
+	CommentsAndReplies *PartialNotificationChannelPreferencesInput `json:"commentsAndReplies,omitempty"`
+	// The preferences for notifications about customers.
+	Customers *PartialNotificationChannelPreferencesInput `json:"customers,omitempty"`
+	// The preferences for notifications about document changes.
+	DocumentChanges *PartialNotificationChannelPreferencesInput `json:"documentChanges,omitempty"`
+	// The preferences for notifications about feed summaries.
+	Feed *PartialNotificationChannelPreferencesInput `json:"feed,omitempty"`
+	// The preferences for notifications about mentions.
+	Mentions *PartialNotificationChannelPreferencesInput `json:"mentions,omitempty"`
+	// The preferences for notifications about posts and updates.
+	PostsAndUpdates *PartialNotificationChannelPreferencesInput `json:"postsAndUpdates,omitempty"`
+	// The preferences for notifications about reactions.
+	Reactions *PartialNotificationChannelPreferencesInput `json:"reactions,omitempty"`
+	// The preferences for notifications about reminders.
+	Reminders *PartialNotificationChannelPreferencesInput `json:"reminders,omitempty"`
+	// The preferences for notifications about reviews.
+	Reviews *PartialNotificationChannelPreferencesInput `json:"reviews,omitempty"`
+	// The preferences for notifications about status changes.
+	StatusChanges *PartialNotificationChannelPreferencesInput `json:"statusChanges,omitempty"`
+	// The preferences for notifications about subscriptions.
+	Subscriptions *PartialNotificationChannelPreferencesInput `json:"subscriptions,omitempty"`
+	// The preferences for notifications about triage.
+	Triage *PartialNotificationChannelPreferencesInput `json:"triage,omitempty"`
+}
+
+// GetAppsAndIntegrations returns NotificationCategoryPreferencesInput.AppsAndIntegrations, and is useful for accessing the field via an interface.
+func (v *NotificationCategoryPreferencesInput) GetAppsAndIntegrations() *PartialNotificationChannelPreferencesInput {
+	return v.AppsAndIntegrations
+}
+
+// GetAssignments returns NotificationCategoryPreferencesInput.Assignments, and is useful for accessing the field via an interface.
+func (v *NotificationCategoryPreferencesInput) GetAssignments() *PartialNotificationChannelPreferencesInput {
+	return v.Assignments
+}
+
+// GetBilling returns NotificationCategoryPreferencesInput.Billing, and is useful for accessing the field via an interface.
+func (v *NotificationCategoryPreferencesInput) GetBilling() *PartialNotificationChannelPreferencesInput {
+	return v.Billing
+}
+
+// GetCommentsAndReplies returns NotificationCategoryPreferencesInput.CommentsAndReplies, and is useful for accessing the field via an interface.
+func (v *NotificationCategoryPreferencesInput) GetCommentsAndReplies() *PartialNotificationChannelPreferencesInput {
+	return v.CommentsAndReplies
+}
+
+// GetCustomers returns NotificationCategoryPreferencesInput.Customers, and is useful for accessing the field via an interface.
+func (v *NotificationCategoryPreferencesInput) GetCustomers() *PartialNotificationChannelPreferencesInput {
+	return v.Customers
+}
+
+// GetDocumentChanges returns NotificationCategoryPreferencesInput.DocumentChanges, and is useful for accessing the field via an interface.
+func (v *NotificationCategoryPreferencesInput) GetDocumentChanges() *PartialNotificationChannelPreferencesInput {
+	return v.DocumentChanges
+}
+
+// GetFeed returns NotificationCategoryPreferencesInput.Feed, and is useful for accessing the field via an interface.
+func (v *NotificationCategoryPreferencesInput) GetFeed() *PartialNotificationChannelPreferencesInput {
+	return v.Feed
+}
+
+// GetMentions returns NotificationCategoryPreferencesInput.Mentions, and is useful for accessing the field via an interface.
+func (v *NotificationCategoryPreferencesInput) GetMentions() *PartialNotificationChannelPreferencesInput {
+	return v.Mentions
+}
+
+// GetPostsAndUpdates returns NotificationCategoryPreferencesInput.PostsAndUpdates, and is useful for accessing the field via an interface.
+func (v *NotificationCategoryPreferencesInput) GetPostsAndUpdates() *PartialNotificationChannelPreferencesInput {
+	return v.PostsAndUpdates
+}
+
+// GetReactions returns NotificationCategoryPreferencesInput.Reactions, and is useful for accessing the field via an interface.
+func (v *NotificationCategoryPreferencesInput) GetReactions() *PartialNotificationChannelPreferencesInput {
+	return v.Reactions
+}
+
+// GetReminders returns NotificationCategoryPreferencesInput.Reminders, and is useful for accessing the field via an interface.
+func (v *NotificationCategoryPreferencesInput) GetReminders() *PartialNotificationChannelPreferencesInput {
+	return v.Reminders
+}
+
+// GetReviews returns NotificationCategoryPreferencesInput.Reviews, and is useful for accessing the field via an interface.
+func (v *NotificationCategoryPreferencesInput) GetReviews() *PartialNotificationChannelPreferencesInput {
+	return v.Reviews
+}
+
+// GetStatusChanges returns NotificationCategoryPreferencesInput.StatusChanges, and is useful for accessing the field via an interface.
+func (v *NotificationCategoryPreferencesInput) GetStatusChanges() *PartialNotificationChannelPreferencesInput {
+	return v.StatusChanges
+}
+
+// GetSubscriptions returns NotificationCategoryPreferencesInput.Subscriptions, and is useful for accessing the field via an interface.
+func (v *NotificationCategoryPreferencesInput) GetSubscriptions() *PartialNotificationChannelPreferencesInput {
+	return v.Subscriptions
+}
+
+// GetTriage returns NotificationCategoryPreferencesInput.Triage, and is useful for accessing the field via an interface.
+func (v *NotificationCategoryPreferencesInput) GetTriage() *PartialNotificationChannelPreferencesInput {
+	return v.Triage
+}
+
+type NotificationDeliveryPreferencesChannelInput struct {
+	// The schedule for notifications on this channel.
+	Schedule *NotificationDeliveryPreferencesScheduleInput `json:"schedule,omitempty"`
+}
+
+// GetSchedule returns NotificationDeliveryPreferencesChannelInput.Schedule, and is useful for accessing the field via an interface.
+func (v *NotificationDeliveryPreferencesChannelInput) GetSchedule() *NotificationDeliveryPreferencesScheduleInput {
+	return v.Schedule
+}
+
+type NotificationDeliveryPreferencesDayInput struct {
+	// The end time of the notification delivery window in HH:MM military time format
+	// (e.g., '18:00'). Must be later than 'start'.
+	End *string `json:"end"`
+	// The start time of the notification delivery window in HH:MM military time
+	// format (e.g., '09:00'). Must be earlier than 'end'.
+	Start *string `json:"start"`
+}
+
+// GetEnd returns NotificationDeliveryPreferencesDayInput.End, and is useful for accessing the field via an interface.
+func (v *NotificationDeliveryPreferencesDayInput) GetEnd() *string { return v.End }
+
+// GetStart returns NotificationDeliveryPreferencesDayInput.Start, and is useful for accessing the field via an interface.
+func (v *NotificationDeliveryPreferencesDayInput) GetStart() *string { return v.Start }
+
+type NotificationDeliveryPreferencesInput struct {
+	// The delivery preferences for the mobile channel.
+	Mobile *NotificationDeliveryPreferencesChannelInput `json:"mobile,omitempty"`
+}
+
+// GetMobile returns NotificationDeliveryPreferencesInput.Mobile, and is useful for accessing the field via an interface.
+func (v *NotificationDeliveryPreferencesInput) GetMobile() *NotificationDeliveryPreferencesChannelInput {
+	return v.Mobile
+}
+
+type NotificationDeliveryPreferencesScheduleInput struct {
+	// Whether the entire delivery schedule is disabled. When true, notifications are
+	// delivered at any time regardless of the per-day settings.
+	Disabled *bool `json:"disabled"`
+	// Delivery preferences for Friday.
+	Friday *NotificationDeliveryPreferencesDayInput `json:"friday,omitempty"`
+	// Delivery preferences for Monday.
+	Monday *NotificationDeliveryPreferencesDayInput `json:"monday,omitempty"`
+	// Delivery preferences for Saturday.
+	Saturday *NotificationDeliveryPreferencesDayInput `json:"saturday,omitempty"`
+	// Delivery preferences for Sunday.
+	Sunday *NotificationDeliveryPreferencesDayInput `json:"sunday,omitempty"`
+	// Delivery preferences for Thursday.
+	Thursday *NotificationDeliveryPreferencesDayInput `json:"thursday,omitempty"`
+	// Delivery preferences for Tuesday.
+	Tuesday *NotificationDeliveryPreferencesDayInput `json:"tuesday,omitempty"`
+	// Delivery preferences for Wednesday.
+	Wednesday *NotificationDeliveryPreferencesDayInput `json:"wednesday,omitempty"`
+}
+
+// GetDisabled returns NotificationDeliveryPreferencesScheduleInput.Disabled, and is useful for accessing the field via an interface.
+func (v *NotificationDeliveryPreferencesScheduleInput) GetDisabled() *bool { return v.Disabled }
+
+// GetFriday returns NotificationDeliveryPreferencesScheduleInput.Friday, and is useful for accessing the field via an interface.
+func (v *NotificationDeliveryPreferencesScheduleInput) GetFriday() *NotificationDeliveryPreferencesDayInput {
+	return v.Friday
+}
+
+// GetMonday returns NotificationDeliveryPreferencesScheduleInput.Monday, and is useful for accessing the field via an interface.
+func (v *NotificationDeliveryPreferencesScheduleInput) GetMonday() *NotificationDeliveryPreferencesDayInput {
+	return v.Monday
+}
+
+// GetSaturday returns NotificationDeliveryPreferencesScheduleInput.Saturday, and is useful for accessing the field via an interface.
+func (v *NotificationDeliveryPreferencesScheduleInput) GetSaturday() *NotificationDeliveryPreferencesDayInput {
+	return v.Saturday
+}
+
+// GetSunday returns NotificationDeliveryPreferencesScheduleInput.Sunday, and is useful for accessing the field via an interface.
+func (v *NotificationDeliveryPreferencesScheduleInput) GetSunday() *NotificationDeliveryPreferencesDayInput {
+	return v.Sunday
+}
+
+// GetThursday returns NotificationDeliveryPreferencesScheduleInput.Thursday, and is useful for accessing the field via an interface.
+func (v *NotificationDeliveryPreferencesScheduleInput) GetThursday() *NotificationDeliveryPreferencesDayInput {
+	return v.Thursday
+}
+
+// GetTuesday returns NotificationDeliveryPreferencesScheduleInput.Tuesday, and is useful for accessing the field via an interface.
+func (v *NotificationDeliveryPreferencesScheduleInput) GetTuesday() *NotificationDeliveryPreferencesDayInput {
+	return v.Tuesday
+}
+
+// GetWednesday returns NotificationDeliveryPreferencesScheduleInput.Wednesday, and is useful for accessing the field via an interface.
+func (v *NotificationDeliveryPreferencesScheduleInput) GetWednesday() *NotificationDeliveryPreferencesDayInput {
+	return v.Wednesday
+}
 
 // Comment filtering options.
 type NullableCommentFilter struct {
@@ -20943,6 +21691,1023 @@ func (v *NumberComparator) GetNeq() *float64 { return v.Neq }
 // GetNin returns NumberComparator.Nin, and is useful for accessing the field via an interface.
 func (v *NumberComparator) GetNin() []float64 { return v.Nin }
 
+// Input for updating workspace authentication settings.
+type OrganizationAuthSettingsInput struct {
+	// [Internal] The minimum role required for the auth service bypass exemption.
+	AllowedAuthServiceBypassRole *string `json:"allowedAuthServiceBypassRole"`
+	// Allowed authentication providers, empty array means all are allowed.
+	AllowedAuthServices []string `json:"allowedAuthServices"`
+	// Whether to disable admin/owner auth service bypass.
+	DisableAuthServiceBypass *bool `json:"disableAuthServiceBypass"`
+	// Whether to hide non-primary workspaces during signup for users with matching email domains.
+	HideNonPrimaryOrganizations *bool `json:"hideNonPrimaryOrganizations"`
+}
+
+// GetAllowedAuthServiceBypassRole returns OrganizationAuthSettingsInput.AllowedAuthServiceBypassRole, and is useful for accessing the field via an interface.
+func (v *OrganizationAuthSettingsInput) GetAllowedAuthServiceBypassRole() *string {
+	return v.AllowedAuthServiceBypassRole
+}
+
+// GetAllowedAuthServices returns OrganizationAuthSettingsInput.AllowedAuthServices, and is useful for accessing the field via an interface.
+func (v *OrganizationAuthSettingsInput) GetAllowedAuthServices() []string {
+	return v.AllowedAuthServices
+}
+
+// GetDisableAuthServiceBypass returns OrganizationAuthSettingsInput.DisableAuthServiceBypass, and is useful for accessing the field via an interface.
+func (v *OrganizationAuthSettingsInput) GetDisableAuthServiceBypass() *bool {
+	return v.DisableAuthServiceBypass
+}
+
+// GetHideNonPrimaryOrganizations returns OrganizationAuthSettingsInput.HideNonPrimaryOrganizations, and is useful for accessing the field via an interface.
+func (v *OrganizationAuthSettingsInput) GetHideNonPrimaryOrganizations() *bool {
+	return v.HideNonPrimaryOrganizations
+}
+
+// [Internal] Input for updating Coding Sessions settings for the workspace.
+type OrganizationCodingAgentSettingsInput struct {
+	// [Internal] Whether Coding Sessions require uploaded user commit signing keys.
+	CommitSigningEnabled *bool `json:"commitSigningEnabled"`
+	// [Internal] The provider-agnostic reasoning effort level used for Coding
+	// Sessions. Clamped to the selected model's provider when the session runs.
+	Effort *string `json:"effort"`
+	// [Internal] The model preference used for Coding Sessions.
+	Model *string `json:"model"`
+}
+
+// GetCommitSigningEnabled returns OrganizationCodingAgentSettingsInput.CommitSigningEnabled, and is useful for accessing the field via an interface.
+func (v *OrganizationCodingAgentSettingsInput) GetCommitSigningEnabled() *bool {
+	return v.CommitSigningEnabled
+}
+
+// GetEffort returns OrganizationCodingAgentSettingsInput.Effort, and is useful for accessing the field via an interface.
+func (v *OrganizationCodingAgentSettingsInput) GetEffort() *string { return v.Effort }
+
+// GetModel returns OrganizationCodingAgentSettingsInput.Model, and is useful for accessing the field via an interface.
+func (v *OrganizationCodingAgentSettingsInput) GetModel() *string { return v.Model }
+
+// OrganizationFields includes the GraphQL fields of Organization requested by the fragment OrganizationFields.
+// The GraphQL type's documentation follows.
+//
+// A workspace (referred to as Organization in the API). Workspaces are the
+// root-level container for all teams, users, projects, issues, and settings. Every
+// user belongs to at least one workspace, and all data is scoped within a
+// workspace boundary.
+type OrganizationFields struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The workspace's name.
+	Name string `json:"name"`
+	// The workspace's unique URL key, used in URLs to identify the workspace.
+	UrlKey string `json:"urlKey"`
+	// The number of active (non-deactivated) users in the workspace.
+	UserCount int `json:"userCount"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+	// been updated after creation.
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// GetId returns OrganizationFields.Id, and is useful for accessing the field via an interface.
+func (v *OrganizationFields) GetId() string { return v.Id }
+
+// GetName returns OrganizationFields.Name, and is useful for accessing the field via an interface.
+func (v *OrganizationFields) GetName() string { return v.Name }
+
+// GetUrlKey returns OrganizationFields.UrlKey, and is useful for accessing the field via an interface.
+func (v *OrganizationFields) GetUrlKey() string { return v.UrlKey }
+
+// GetUserCount returns OrganizationFields.UserCount, and is useful for accessing the field via an interface.
+func (v *OrganizationFields) GetUserCount() int { return v.UserCount }
+
+// GetCreatedAt returns OrganizationFields.CreatedAt, and is useful for accessing the field via an interface.
+func (v *OrganizationFields) GetCreatedAt() time.Time { return v.CreatedAt }
+
+// GetUpdatedAt returns OrganizationFields.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *OrganizationFields) GetUpdatedAt() time.Time { return v.UpdatedAt }
+
+type OrganizationInviteCreateInput struct {
+	// The email of the invitee.
+	Email string `json:"email"`
+	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
+	Id *string `json:"id"`
+	// [INTERNAL] Optional metadata about the invite.
+	Metadata *map[string]interface{} `json:"metadata"`
+	// What user role the invite should grant.
+	Role *UserRoleType `json:"role"`
+	// The teams that the user has been invited to.
+	TeamIds []string `json:"teamIds"`
+}
+
+// GetEmail returns OrganizationInviteCreateInput.Email, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteCreateInput) GetEmail() string { return v.Email }
+
+// GetId returns OrganizationInviteCreateInput.Id, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteCreateInput) GetId() *string { return v.Id }
+
+// GetMetadata returns OrganizationInviteCreateInput.Metadata, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteCreateInput) GetMetadata() *map[string]interface{} { return v.Metadata }
+
+// GetRole returns OrganizationInviteCreateInput.Role, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteCreateInput) GetRole() *UserRoleType { return v.Role }
+
+// GetTeamIds returns OrganizationInviteCreateInput.TeamIds, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteCreateInput) GetTeamIds() []string { return v.TeamIds }
+
+// OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayload includes the requested fields of the GraphQL type OrganizationInvitePayload.
+// The GraphQL type's documentation follows.
+//
+// Workspace invite operation response.
+type OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The organization invite that was created or updated.
+	OrganizationInvite *OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite `json:"organizationInvite"`
+}
+
+// GetSuccess returns OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayload.Success, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetOrganizationInvite returns OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayload.OrganizationInvite, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayload) GetOrganizationInvite() *OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite {
+	return v.OrganizationInvite
+}
+
+// OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite includes the requested fields of the GraphQL type OrganizationInvite.
+// The GraphQL type's documentation follows.
+//
+// A pending invitation to join the workspace, sent via email. Invites specify the
+// role the invitee will receive and can optionally include team assignments.
+// Invites can expire and must be accepted by the invitee to grant workspace access.
+type OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite struct {
+	OrganizationInviteFields `json:"-"`
+}
+
+// GetId returns OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite.Id, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite) GetId() string {
+	return v.OrganizationInviteFields.Id
+}
+
+// GetEmail returns OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite.Email, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite) GetEmail() string {
+	return v.OrganizationInviteFields.Email
+}
+
+// GetRole returns OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite.Role, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite) GetRole() UserRoleType {
+	return v.OrganizationInviteFields.Role
+}
+
+// GetExternal returns OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite.External, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite) GetExternal() bool {
+	return v.OrganizationInviteFields.External
+}
+
+// GetCreatedAt returns OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite.CreatedAt, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite) GetCreatedAt() time.Time {
+	return v.OrganizationInviteFields.CreatedAt
+}
+
+// GetAcceptedAt returns OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite.AcceptedAt, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite) GetAcceptedAt() *time.Time {
+	return v.OrganizationInviteFields.AcceptedAt
+}
+
+// GetExpiresAt returns OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite.ExpiresAt, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite) GetExpiresAt() *time.Time {
+	return v.OrganizationInviteFields.ExpiresAt
+}
+
+// GetInviter returns OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite.Inviter, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite) GetInviter() *OrganizationInviteFieldsInviterUser {
+	return v.OrganizationInviteFields.Inviter
+}
+
+// GetInvitee returns OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite.Invitee, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite) GetInvitee() *OrganizationInviteFieldsInviteeUser {
+	return v.OrganizationInviteFields.Invitee
+}
+
+func (v *OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.OrganizationInviteFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalOrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite struct {
+	Id string `json:"id"`
+
+	Email string `json:"email"`
+
+	Role UserRoleType `json:"role"`
+
+	External bool `json:"external"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	AcceptedAt *time.Time `json:"acceptedAt"`
+
+	ExpiresAt *time.Time `json:"expiresAt"`
+
+	Inviter *OrganizationInviteFieldsInviterUser `json:"inviter"`
+
+	Invitee *OrganizationInviteFieldsInviteeUser `json:"invitee"`
+}
+
+func (v *OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite) __premarshalJSON() (*__premarshalOrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite, error) {
+	var retval __premarshalOrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayloadOrganizationInvite
+
+	retval.Id = v.OrganizationInviteFields.Id
+	retval.Email = v.OrganizationInviteFields.Email
+	retval.Role = v.OrganizationInviteFields.Role
+	retval.External = v.OrganizationInviteFields.External
+	retval.CreatedAt = v.OrganizationInviteFields.CreatedAt
+	retval.AcceptedAt = v.OrganizationInviteFields.AcceptedAt
+	retval.ExpiresAt = v.OrganizationInviteFields.ExpiresAt
+	retval.Inviter = v.OrganizationInviteFields.Inviter
+	retval.Invitee = v.OrganizationInviteFields.Invitee
+	return &retval, nil
+}
+
+// OrganizationInviteCreateResponse is returned by OrganizationInviteCreate on success.
+type OrganizationInviteCreateResponse struct {
+	// Creates a new workspace invite and sends an invitation email to the specified
+	// address. The invite includes a role assignment and optional team memberships.
+	OrganizationInviteCreate *OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayload `json:"organizationInviteCreate"`
+}
+
+// GetOrganizationInviteCreate returns OrganizationInviteCreateResponse.OrganizationInviteCreate, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteCreateResponse) GetOrganizationInviteCreate() *OrganizationInviteCreateOrganizationInviteCreateOrganizationInvitePayload {
+	return v.OrganizationInviteCreate
+}
+
+// OrganizationInviteDeleteOrganizationInviteDeleteDeletePayload includes the requested fields of the GraphQL type DeletePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity deletion mutations.
+type OrganizationInviteDeleteOrganizationInviteDeleteDeletePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The identifier of the deleted entity.
+	EntityId string `json:"entityId"`
+}
+
+// GetSuccess returns OrganizationInviteDeleteOrganizationInviteDeleteDeletePayload.Success, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteDeleteOrganizationInviteDeleteDeletePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetEntityId returns OrganizationInviteDeleteOrganizationInviteDeleteDeletePayload.EntityId, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteDeleteOrganizationInviteDeleteDeletePayload) GetEntityId() string {
+	return v.EntityId
+}
+
+// OrganizationInviteDeleteResponse is returned by OrganizationInviteDelete on success.
+type OrganizationInviteDeleteResponse struct {
+	// Deletes (archives) a workspace invite, preventing it from being accepted.
+	OrganizationInviteDelete *OrganizationInviteDeleteOrganizationInviteDeleteDeletePayload `json:"organizationInviteDelete"`
+}
+
+// GetOrganizationInviteDelete returns OrganizationInviteDeleteResponse.OrganizationInviteDelete, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteDeleteResponse) GetOrganizationInviteDelete() *OrganizationInviteDeleteOrganizationInviteDeleteDeletePayload {
+	return v.OrganizationInviteDelete
+}
+
+// OrganizationInviteFields includes the GraphQL fields of OrganizationInvite requested by the fragment OrganizationInviteFields.
+// The GraphQL type's documentation follows.
+//
+// A pending invitation to join the workspace, sent via email. Invites specify the
+// role the invitee will receive and can optionally include team assignments.
+// Invites can expire and must be accepted by the invitee to grant workspace access.
+type OrganizationInviteFields struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The email address of the person being invited to the workspace.
+	Email string `json:"email"`
+	// The workspace role (admin, member, guest, or owner) that the invitee will receive upon accepting the invite.
+	Role UserRoleType `json:"role"`
+	// Whether the invite was sent to an email address outside the workspace's verified domains.
+	External bool `json:"external"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The time at which the invite was accepted by the invitee. Null if the invite is still pending.
+	AcceptedAt *time.Time `json:"acceptedAt"`
+	// The time at which the invite will expire and can no longer be accepted. Null
+	// if the invite does not have an expiration date.
+	ExpiresAt *time.Time `json:"expiresAt"`
+	// The user who created the invitation.
+	Inviter *OrganizationInviteFieldsInviterUser `json:"inviter"`
+	// The user who has accepted the invite. Null, if the invite hasn't been accepted.
+	Invitee *OrganizationInviteFieldsInviteeUser `json:"invitee"`
+}
+
+// GetId returns OrganizationInviteFields.Id, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteFields) GetId() string { return v.Id }
+
+// GetEmail returns OrganizationInviteFields.Email, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteFields) GetEmail() string { return v.Email }
+
+// GetRole returns OrganizationInviteFields.Role, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteFields) GetRole() UserRoleType { return v.Role }
+
+// GetExternal returns OrganizationInviteFields.External, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteFields) GetExternal() bool { return v.External }
+
+// GetCreatedAt returns OrganizationInviteFields.CreatedAt, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteFields) GetCreatedAt() time.Time { return v.CreatedAt }
+
+// GetAcceptedAt returns OrganizationInviteFields.AcceptedAt, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteFields) GetAcceptedAt() *time.Time { return v.AcceptedAt }
+
+// GetExpiresAt returns OrganizationInviteFields.ExpiresAt, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteFields) GetExpiresAt() *time.Time { return v.ExpiresAt }
+
+// GetInviter returns OrganizationInviteFields.Inviter, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteFields) GetInviter() *OrganizationInviteFieldsInviterUser {
+	return v.Inviter
+}
+
+// GetInvitee returns OrganizationInviteFields.Invitee, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteFields) GetInvitee() *OrganizationInviteFieldsInviteeUser {
+	return v.Invitee
+}
+
+// OrganizationInviteFieldsInviteeUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
+type OrganizationInviteFieldsInviteeUser struct {
+	// The user's full name.
+	Name string `json:"name"`
+	// The user's email address.
+	Email string `json:"email"`
+}
+
+// GetName returns OrganizationInviteFieldsInviteeUser.Name, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteFieldsInviteeUser) GetName() string { return v.Name }
+
+// GetEmail returns OrganizationInviteFieldsInviteeUser.Email, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteFieldsInviteeUser) GetEmail() string { return v.Email }
+
+// OrganizationInviteFieldsInviterUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
+type OrganizationInviteFieldsInviterUser struct {
+	// The user's full name.
+	Name string `json:"name"`
+	// The user's email address.
+	Email string `json:"email"`
+}
+
+// GetName returns OrganizationInviteFieldsInviterUser.Name, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteFieldsInviterUser) GetName() string { return v.Name }
+
+// GetEmail returns OrganizationInviteFieldsInviterUser.Email, and is useful for accessing the field via an interface.
+func (v *OrganizationInviteFieldsInviterUser) GetEmail() string { return v.Email }
+
+// [INTERNAL] Organization IP restriction configuration.
+type OrganizationIpRestrictionInput struct {
+	// Optional restriction description.
+	Description *string `json:"description"`
+	// Whether the restriction is enabled.
+	Enabled bool `json:"enabled"`
+	// IP range in CIDR format.
+	Range string `json:"range"`
+	// Restriction type.
+	Type string `json:"type"`
+}
+
+// GetDescription returns OrganizationIpRestrictionInput.Description, and is useful for accessing the field via an interface.
+func (v *OrganizationIpRestrictionInput) GetDescription() *string { return v.Description }
+
+// GetEnabled returns OrganizationIpRestrictionInput.Enabled, and is useful for accessing the field via an interface.
+func (v *OrganizationIpRestrictionInput) GetEnabled() bool { return v.Enabled }
+
+// GetRange returns OrganizationIpRestrictionInput.Range, and is useful for accessing the field via an interface.
+func (v *OrganizationIpRestrictionInput) GetRange() string { return v.Range }
+
+// GetType returns OrganizationIpRestrictionInput.Type, and is useful for accessing the field via an interface.
+func (v *OrganizationIpRestrictionInput) GetType() string { return v.Type }
+
+// [Internal] An MCP server URL entry for the Linear Agent allowlist.
+type OrganizationLinearAgentMcpServerAllowlistEntryInput struct {
+	// [Internal] Slug of the built-in MCP integration this entry was added from, if any.
+	KnownIntegrationKey *string `json:"knownIntegrationKey"`
+	// [Internal] The MCP server URL that Linear Agent is allowed to use.
+	Url string `json:"url"`
+}
+
+// GetKnownIntegrationKey returns OrganizationLinearAgentMcpServerAllowlistEntryInput.KnownIntegrationKey, and is useful for accessing the field via an interface.
+func (v *OrganizationLinearAgentMcpServerAllowlistEntryInput) GetKnownIntegrationKey() *string {
+	return v.KnownIntegrationKey
+}
+
+// GetUrl returns OrganizationLinearAgentMcpServerAllowlistEntryInput.Url, and is useful for accessing the field via an interface.
+func (v *OrganizationLinearAgentMcpServerAllowlistEntryInput) GetUrl() string { return v.Url }
+
+// [Internal] Input for updating Linear Agent settings for the workspace.
+type OrganizationLinearAgentSettingsInput struct {
+	// [Internal] Legacy MCP server allowlist for Linear Agent.
+	McpServersAllowlist []*OrganizationLinearAgentMcpServerAllowlistEntryInput `json:"mcpServersAllowlist,omitempty"`
+	// [Internal] Whether the workspace has enabled MCP servers for Linear Agent.
+	McpServersEnabled *bool `json:"mcpServersEnabled"`
+	// [Internal] Whether all MCP servers or only approved MCP servers are allowed for Linear Agent.
+	McpServersMode *LinearAgentMcpServersMode `json:"mcpServersMode"`
+	// [Internal] Trusted-source allowlist for Linear Agent loops.
+	TrustedSourcesAllowlist []*OrganizationLinearAgentTrustedSourcesAllowlistEntryInput `json:"trustedSourcesAllowlist,omitempty"`
+	// [Internal] Whether external trusted sources are disabled or restricted to approved sources for agent loops.
+	TrustedSourcesMode *LinearAgentTrustedSourcesMode `json:"trustedSourcesMode"`
+	// [Internal] Whether the workspace has enabled web search for Linear Agent.
+	WebSearchEnabled *bool `json:"webSearchEnabled"`
+}
+
+// GetMcpServersAllowlist returns OrganizationLinearAgentSettingsInput.McpServersAllowlist, and is useful for accessing the field via an interface.
+func (v *OrganizationLinearAgentSettingsInput) GetMcpServersAllowlist() []*OrganizationLinearAgentMcpServerAllowlistEntryInput {
+	return v.McpServersAllowlist
+}
+
+// GetMcpServersEnabled returns OrganizationLinearAgentSettingsInput.McpServersEnabled, and is useful for accessing the field via an interface.
+func (v *OrganizationLinearAgentSettingsInput) GetMcpServersEnabled() *bool {
+	return v.McpServersEnabled
+}
+
+// GetMcpServersMode returns OrganizationLinearAgentSettingsInput.McpServersMode, and is useful for accessing the field via an interface.
+func (v *OrganizationLinearAgentSettingsInput) GetMcpServersMode() *LinearAgentMcpServersMode {
+	return v.McpServersMode
+}
+
+// GetTrustedSourcesAllowlist returns OrganizationLinearAgentSettingsInput.TrustedSourcesAllowlist, and is useful for accessing the field via an interface.
+func (v *OrganizationLinearAgentSettingsInput) GetTrustedSourcesAllowlist() []*OrganizationLinearAgentTrustedSourcesAllowlistEntryInput {
+	return v.TrustedSourcesAllowlist
+}
+
+// GetTrustedSourcesMode returns OrganizationLinearAgentSettingsInput.TrustedSourcesMode, and is useful for accessing the field via an interface.
+func (v *OrganizationLinearAgentSettingsInput) GetTrustedSourcesMode() *LinearAgentTrustedSourcesMode {
+	return v.TrustedSourcesMode
+}
+
+// GetWebSearchEnabled returns OrganizationLinearAgentSettingsInput.WebSearchEnabled, and is useful for accessing the field via an interface.
+func (v *OrganizationLinearAgentSettingsInput) GetWebSearchEnabled() *bool { return v.WebSearchEnabled }
+
+// [Internal] A trusted-source entry for the Linear Agent loop allowlist.
+type OrganizationLinearAgentTrustedSourcesAllowlistEntryInput struct {
+	// [Internal] The trusted-source key that Linear Agent loops are allowed to use.
+	Key string `json:"key"`
+}
+
+// GetKey returns OrganizationLinearAgentTrustedSourcesAllowlistEntryInput.Key, and is useful for accessing the field via an interface.
+func (v *OrganizationLinearAgentTrustedSourcesAllowlistEntryInput) GetKey() string { return v.Key }
+
+// Input for updating workspace security settings such as role-based access controls.
+type OrganizationSecuritySettingsInput struct {
+	// The minimum role required to manage agent guidance prompts and settings.
+	AgentGuidanceRole *UserRoleType `json:"agentGuidanceRole"`
+	// The minimum role required to manage API settings.
+	ApiSettingsRole *UserRoleType `json:"apiSettingsRole"`
+	// The minimum role required to manage workspace loops.
+	AutomationManagementRole *UserRoleType `json:"automationManagementRole"`
+	// The minimum role required to import data.
+	ImportRole *UserRoleType `json:"importRole"`
+	// The minimum role required to install and connect new integrations.
+	IntegrationCreationRole *UserRoleType `json:"integrationCreationRole"`
+	// The minimum role required to invite users.
+	InvitationsRole *UserRoleType `json:"invitationsRole"`
+	// The minimum role required to manage workspace labels.
+	LabelManagementRole *UserRoleType `json:"labelManagementRole"`
+	// The minimum role required to create personal API keys.
+	PersonalApiKeysRole *UserRoleType `json:"personalApiKeysRole"`
+	// The minimum role required to create teams.
+	TeamCreationRole *UserRoleType `json:"teamCreationRole"`
+	// The minimum role required to manage workspace templates.
+	TemplateManagementRole *UserRoleType `json:"templateManagementRole"`
+}
+
+// GetAgentGuidanceRole returns OrganizationSecuritySettingsInput.AgentGuidanceRole, and is useful for accessing the field via an interface.
+func (v *OrganizationSecuritySettingsInput) GetAgentGuidanceRole() *UserRoleType {
+	return v.AgentGuidanceRole
+}
+
+// GetApiSettingsRole returns OrganizationSecuritySettingsInput.ApiSettingsRole, and is useful for accessing the field via an interface.
+func (v *OrganizationSecuritySettingsInput) GetApiSettingsRole() *UserRoleType {
+	return v.ApiSettingsRole
+}
+
+// GetAutomationManagementRole returns OrganizationSecuritySettingsInput.AutomationManagementRole, and is useful for accessing the field via an interface.
+func (v *OrganizationSecuritySettingsInput) GetAutomationManagementRole() *UserRoleType {
+	return v.AutomationManagementRole
+}
+
+// GetImportRole returns OrganizationSecuritySettingsInput.ImportRole, and is useful for accessing the field via an interface.
+func (v *OrganizationSecuritySettingsInput) GetImportRole() *UserRoleType { return v.ImportRole }
+
+// GetIntegrationCreationRole returns OrganizationSecuritySettingsInput.IntegrationCreationRole, and is useful for accessing the field via an interface.
+func (v *OrganizationSecuritySettingsInput) GetIntegrationCreationRole() *UserRoleType {
+	return v.IntegrationCreationRole
+}
+
+// GetInvitationsRole returns OrganizationSecuritySettingsInput.InvitationsRole, and is useful for accessing the field via an interface.
+func (v *OrganizationSecuritySettingsInput) GetInvitationsRole() *UserRoleType {
+	return v.InvitationsRole
+}
+
+// GetLabelManagementRole returns OrganizationSecuritySettingsInput.LabelManagementRole, and is useful for accessing the field via an interface.
+func (v *OrganizationSecuritySettingsInput) GetLabelManagementRole() *UserRoleType {
+	return v.LabelManagementRole
+}
+
+// GetPersonalApiKeysRole returns OrganizationSecuritySettingsInput.PersonalApiKeysRole, and is useful for accessing the field via an interface.
+func (v *OrganizationSecuritySettingsInput) GetPersonalApiKeysRole() *UserRoleType {
+	return v.PersonalApiKeysRole
+}
+
+// GetTeamCreationRole returns OrganizationSecuritySettingsInput.TeamCreationRole, and is useful for accessing the field via an interface.
+func (v *OrganizationSecuritySettingsInput) GetTeamCreationRole() *UserRoleType {
+	return v.TeamCreationRole
+}
+
+// GetTemplateManagementRole returns OrganizationSecuritySettingsInput.TemplateManagementRole, and is useful for accessing the field via an interface.
+func (v *OrganizationSecuritySettingsInput) GetTemplateManagementRole() *UserRoleType {
+	return v.TemplateManagementRole
+}
+
+// [Internal] Input for updating workspace theme settings.
+type OrganizationThemeSettingsInput struct {
+	// [ALPHA] Dark theme palette: CSS custom property name (`--name`) to color or length value.
+	DarkTheme *map[string]interface{} `json:"darkTheme"`
+	// [ALPHA] Light theme palette: CSS custom property name (`--name`) to color or length value.
+	LightTheme *map[string]interface{} `json:"lightTheme"`
+}
+
+// GetDarkTheme returns OrganizationThemeSettingsInput.DarkTheme, and is useful for accessing the field via an interface.
+func (v *OrganizationThemeSettingsInput) GetDarkTheme() *map[string]interface{} { return v.DarkTheme }
+
+// GetLightTheme returns OrganizationThemeSettingsInput.LightTheme, and is useful for accessing the field via an interface.
+func (v *OrganizationThemeSettingsInput) GetLightTheme() *map[string]interface{} { return v.LightTheme }
+
+// Input for updating the workspace.
+type OrganizationUpdateInput struct {
+	// [INTERNAL] Whether the workspace has enabled agent loops.
+	AgentAutomationEnabled *bool `json:"agentAutomationEnabled"`
+	// [INTERNAL] Whether the workspace has enabled the AI add-on.
+	AiAddonEnabled *bool `json:"aiAddonEnabled"`
+	// Whether the workspace has enabled AI discussion summaries for issues.
+	AiDiscussionSummariesEnabled *bool `json:"aiDiscussionSummariesEnabled"`
+	// [INTERNAL] Whether the workspace has opted in to AI telemetry.
+	AiTelemetryEnabled *bool `json:"aiTelemetryEnabled"`
+	// Whether the workspace has enabled resolved thread AI summaries.
+	AiThreadSummariesEnabled *bool `json:"aiThreadSummariesEnabled"`
+	// Allowed file upload content types.
+	AllowedFileUploadContentTypes []string `json:"allowedFileUploadContentTypes"`
+	// The authentication settings for the workspace.
+	AuthSettings *OrganizationAuthSettingsInput `json:"authSettings,omitempty"`
+	// [INTERNAL] Whether code intelligence is enabled for the workspace.
+	CodeIntelligenceEnabled *bool `json:"codeIntelligenceEnabled"`
+	// [INTERNAL] GitHub repository in owner/repo format for code intelligence.
+	CodeIntelligenceRepository *string `json:"codeIntelligenceRepository"`
+	// [INTERNAL] Whether the workspace has enabled Coding Sessions.
+	CodingAgentEnabled *bool `json:"codingAgentEnabled"`
+	// [Internal] Settings for Coding Sessions features.
+	CodingAgentSettings *OrganizationCodingAgentSettingsInput `json:"codingAgentSettings,omitempty"`
+	// [INTERNAL] Configuration settings for the Customers feature.
+	CustomersConfiguration *CustomersConfigurationInput `json:"customersConfiguration,omitempty"`
+	// [INTERNAL] Whether the workspace is using customers.
+	CustomersEnabled *bool `json:"customersEnabled"`
+	// Default schedule for how often feed summaries are generated.
+	DefaultFeedSummarySchedule *FeedSummarySchedule `json:"defaultFeedSummarySchedule"`
+	// Whether the workspace has enabled the feed feature.
+	FeedEnabled *bool `json:"feedEnabled"`
+	// The month at which the fiscal year starts.
+	FiscalYearStartMonth *float64 `json:"fiscalYearStartMonth"`
+	// [INTERNAL] Whether the workspace has enabled generated updates.
+	GeneratedUpdatesEnabled *bool `json:"generatedUpdatesEnabled"`
+	// How git branches are formatted. If null, default formatting will be used.
+	GitBranchFormat *string `json:"gitBranchFormat"`
+	// Whether issue descriptions should be included in Git integration linkback messages.
+	GitLinkbackDescriptionsEnabled *bool `json:"gitLinkbackDescriptionsEnabled"`
+	// Whether the Git integration linkback messages should be sent for private repositories.
+	GitLinkbackMessagesEnabled *bool `json:"gitLinkbackMessagesEnabled"`
+	// Whether the Git integration linkback messages should be sent for public repositories.
+	GitPublicLinkbackMessagesEnabled *bool `json:"gitPublicLinkbackMessagesEnabled"`
+	// Whether HIPAA compliance is enabled for the workspace.
+	HipaaComplianceEnabled *bool `json:"hipaaComplianceEnabled"`
+	// [ALPHA] The n-weekly frequency at which to prompt for initiative updates.
+	InitiativeUpdateReminderFrequencyInWeeks *float64 `json:"initiativeUpdateReminderFrequencyInWeeks"`
+	// [ALPHA] The day at which initiative updates are sent.
+	InitiativeUpdateRemindersDay *Day `json:"initiativeUpdateRemindersDay"`
+	// [ALPHA] The hour at which initiative updates are sent.
+	InitiativeUpdateRemindersHour *float64 `json:"initiativeUpdateRemindersHour"`
+	// IP restriction configurations controlling allowed access the workspace.
+	IpRestrictions []*OrganizationIpRestrictionInput `json:"ipRestrictions,omitempty"`
+	// [Internal] Whether the workspace has enabled Linear Agent.
+	LinearAgentEnabled *bool `json:"linearAgentEnabled"`
+	// [Internal] Settings for Linear Agent features.
+	LinearAgentSettings *OrganizationLinearAgentSettingsInput `json:"linearAgentSettings,omitempty"`
+	// The logo URL of the workspace.
+	LogoUrl *string `json:"logoUrl"`
+	// The name of the workspace.
+	Name *string `json:"name"`
+	// Whether the workspace has opted for having to approve all OAuth applications for install.
+	OauthAppReview *bool `json:"oauthAppReview"`
+	// The n-weekly frequency at which to prompt for project updates.
+	ProjectUpdateReminderFrequencyInWeeks *float64 `json:"projectUpdateReminderFrequencyInWeeks"`
+	// The day at which project updates are sent.
+	ProjectUpdateRemindersDay *Day `json:"projectUpdateRemindersDay"`
+	// The hour at which project updates are sent.
+	ProjectUpdateRemindersHour *float64 `json:"projectUpdateRemindersHour"`
+	// Whether the workspace generates AI Pull Request guides for new pull requests.
+	PullRequestTourEnabled *bool `json:"pullRequestTourEnabled"`
+	// Whether the workspace has opted for reduced customer support attachment information.
+	ReducedPersonalInformation *bool `json:"reducedPersonalInformation"`
+	// Whether agent invocation is restricted to full workspace members.
+	RestrictAgentInvocationToMembers *bool `json:"restrictAgentInvocationToMembers"`
+	// Whether the workspace is using roadmap.
+	RoadmapEnabled *bool `json:"roadmapEnabled"`
+	// The security settings for the workspace.
+	SecuritySettings *OrganizationSecuritySettingsInput `json:"securitySettings,omitempty"`
+	// [Internal] Whether to automatically create a Slack channel when a new project is created.
+	SlackAutoCreateProjectChannel *bool `json:"slackAutoCreateProjectChannel"`
+	// The ID of the Slack integration to use for auto-creating project channels.
+	SlackProjectChannelIntegrationId *string `json:"slackProjectChannelIntegrationId"`
+	// The prefix to use for auto-created Slack project channels (p-, proj-, or project-).
+	SlackProjectChannelPrefix *string `json:"slackProjectChannelPrefix"`
+	// [Internal] Whether the Slack project channels feature is enabled for the workspace.
+	SlackProjectChannelsEnabled *bool `json:"slackProjectChannelsEnabled"`
+	// Internal. Whether SLAs have been enabled for the workspace.
+	SlaEnabled *bool `json:"slaEnabled"`
+	// [ALPHA] Theme settings for the workspace.
+	ThemeSettings *OrganizationThemeSettingsInput `json:"themeSettings,omitempty"`
+	// The URL key of the workspace.
+	UrlKey *string `json:"urlKey"`
+	// [Internal] The list of working days. Sunday is 0, Monday is 1, etc.
+	WorkingDays []float64 `json:"workingDays"`
+}
+
+// GetAgentAutomationEnabled returns OrganizationUpdateInput.AgentAutomationEnabled, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetAgentAutomationEnabled() *bool { return v.AgentAutomationEnabled }
+
+// GetAiAddonEnabled returns OrganizationUpdateInput.AiAddonEnabled, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetAiAddonEnabled() *bool { return v.AiAddonEnabled }
+
+// GetAiDiscussionSummariesEnabled returns OrganizationUpdateInput.AiDiscussionSummariesEnabled, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetAiDiscussionSummariesEnabled() *bool {
+	return v.AiDiscussionSummariesEnabled
+}
+
+// GetAiTelemetryEnabled returns OrganizationUpdateInput.AiTelemetryEnabled, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetAiTelemetryEnabled() *bool { return v.AiTelemetryEnabled }
+
+// GetAiThreadSummariesEnabled returns OrganizationUpdateInput.AiThreadSummariesEnabled, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetAiThreadSummariesEnabled() *bool {
+	return v.AiThreadSummariesEnabled
+}
+
+// GetAllowedFileUploadContentTypes returns OrganizationUpdateInput.AllowedFileUploadContentTypes, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetAllowedFileUploadContentTypes() []string {
+	return v.AllowedFileUploadContentTypes
+}
+
+// GetAuthSettings returns OrganizationUpdateInput.AuthSettings, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetAuthSettings() *OrganizationAuthSettingsInput {
+	return v.AuthSettings
+}
+
+// GetCodeIntelligenceEnabled returns OrganizationUpdateInput.CodeIntelligenceEnabled, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetCodeIntelligenceEnabled() *bool {
+	return v.CodeIntelligenceEnabled
+}
+
+// GetCodeIntelligenceRepository returns OrganizationUpdateInput.CodeIntelligenceRepository, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetCodeIntelligenceRepository() *string {
+	return v.CodeIntelligenceRepository
+}
+
+// GetCodingAgentEnabled returns OrganizationUpdateInput.CodingAgentEnabled, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetCodingAgentEnabled() *bool { return v.CodingAgentEnabled }
+
+// GetCodingAgentSettings returns OrganizationUpdateInput.CodingAgentSettings, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetCodingAgentSettings() *OrganizationCodingAgentSettingsInput {
+	return v.CodingAgentSettings
+}
+
+// GetCustomersConfiguration returns OrganizationUpdateInput.CustomersConfiguration, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetCustomersConfiguration() *CustomersConfigurationInput {
+	return v.CustomersConfiguration
+}
+
+// GetCustomersEnabled returns OrganizationUpdateInput.CustomersEnabled, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetCustomersEnabled() *bool { return v.CustomersEnabled }
+
+// GetDefaultFeedSummarySchedule returns OrganizationUpdateInput.DefaultFeedSummarySchedule, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetDefaultFeedSummarySchedule() *FeedSummarySchedule {
+	return v.DefaultFeedSummarySchedule
+}
+
+// GetFeedEnabled returns OrganizationUpdateInput.FeedEnabled, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetFeedEnabled() *bool { return v.FeedEnabled }
+
+// GetFiscalYearStartMonth returns OrganizationUpdateInput.FiscalYearStartMonth, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetFiscalYearStartMonth() *float64 { return v.FiscalYearStartMonth }
+
+// GetGeneratedUpdatesEnabled returns OrganizationUpdateInput.GeneratedUpdatesEnabled, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetGeneratedUpdatesEnabled() *bool {
+	return v.GeneratedUpdatesEnabled
+}
+
+// GetGitBranchFormat returns OrganizationUpdateInput.GitBranchFormat, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetGitBranchFormat() *string { return v.GitBranchFormat }
+
+// GetGitLinkbackDescriptionsEnabled returns OrganizationUpdateInput.GitLinkbackDescriptionsEnabled, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetGitLinkbackDescriptionsEnabled() *bool {
+	return v.GitLinkbackDescriptionsEnabled
+}
+
+// GetGitLinkbackMessagesEnabled returns OrganizationUpdateInput.GitLinkbackMessagesEnabled, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetGitLinkbackMessagesEnabled() *bool {
+	return v.GitLinkbackMessagesEnabled
+}
+
+// GetGitPublicLinkbackMessagesEnabled returns OrganizationUpdateInput.GitPublicLinkbackMessagesEnabled, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetGitPublicLinkbackMessagesEnabled() *bool {
+	return v.GitPublicLinkbackMessagesEnabled
+}
+
+// GetHipaaComplianceEnabled returns OrganizationUpdateInput.HipaaComplianceEnabled, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetHipaaComplianceEnabled() *bool { return v.HipaaComplianceEnabled }
+
+// GetInitiativeUpdateReminderFrequencyInWeeks returns OrganizationUpdateInput.InitiativeUpdateReminderFrequencyInWeeks, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetInitiativeUpdateReminderFrequencyInWeeks() *float64 {
+	return v.InitiativeUpdateReminderFrequencyInWeeks
+}
+
+// GetInitiativeUpdateRemindersDay returns OrganizationUpdateInput.InitiativeUpdateRemindersDay, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetInitiativeUpdateRemindersDay() *Day {
+	return v.InitiativeUpdateRemindersDay
+}
+
+// GetInitiativeUpdateRemindersHour returns OrganizationUpdateInput.InitiativeUpdateRemindersHour, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetInitiativeUpdateRemindersHour() *float64 {
+	return v.InitiativeUpdateRemindersHour
+}
+
+// GetIpRestrictions returns OrganizationUpdateInput.IpRestrictions, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetIpRestrictions() []*OrganizationIpRestrictionInput {
+	return v.IpRestrictions
+}
+
+// GetLinearAgentEnabled returns OrganizationUpdateInput.LinearAgentEnabled, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetLinearAgentEnabled() *bool { return v.LinearAgentEnabled }
+
+// GetLinearAgentSettings returns OrganizationUpdateInput.LinearAgentSettings, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetLinearAgentSettings() *OrganizationLinearAgentSettingsInput {
+	return v.LinearAgentSettings
+}
+
+// GetLogoUrl returns OrganizationUpdateInput.LogoUrl, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetLogoUrl() *string { return v.LogoUrl }
+
+// GetName returns OrganizationUpdateInput.Name, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetName() *string { return v.Name }
+
+// GetOauthAppReview returns OrganizationUpdateInput.OauthAppReview, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetOauthAppReview() *bool { return v.OauthAppReview }
+
+// GetProjectUpdateReminderFrequencyInWeeks returns OrganizationUpdateInput.ProjectUpdateReminderFrequencyInWeeks, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetProjectUpdateReminderFrequencyInWeeks() *float64 {
+	return v.ProjectUpdateReminderFrequencyInWeeks
+}
+
+// GetProjectUpdateRemindersDay returns OrganizationUpdateInput.ProjectUpdateRemindersDay, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetProjectUpdateRemindersDay() *Day {
+	return v.ProjectUpdateRemindersDay
+}
+
+// GetProjectUpdateRemindersHour returns OrganizationUpdateInput.ProjectUpdateRemindersHour, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetProjectUpdateRemindersHour() *float64 {
+	return v.ProjectUpdateRemindersHour
+}
+
+// GetPullRequestTourEnabled returns OrganizationUpdateInput.PullRequestTourEnabled, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetPullRequestTourEnabled() *bool { return v.PullRequestTourEnabled }
+
+// GetReducedPersonalInformation returns OrganizationUpdateInput.ReducedPersonalInformation, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetReducedPersonalInformation() *bool {
+	return v.ReducedPersonalInformation
+}
+
+// GetRestrictAgentInvocationToMembers returns OrganizationUpdateInput.RestrictAgentInvocationToMembers, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetRestrictAgentInvocationToMembers() *bool {
+	return v.RestrictAgentInvocationToMembers
+}
+
+// GetRoadmapEnabled returns OrganizationUpdateInput.RoadmapEnabled, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetRoadmapEnabled() *bool { return v.RoadmapEnabled }
+
+// GetSecuritySettings returns OrganizationUpdateInput.SecuritySettings, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetSecuritySettings() *OrganizationSecuritySettingsInput {
+	return v.SecuritySettings
+}
+
+// GetSlackAutoCreateProjectChannel returns OrganizationUpdateInput.SlackAutoCreateProjectChannel, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetSlackAutoCreateProjectChannel() *bool {
+	return v.SlackAutoCreateProjectChannel
+}
+
+// GetSlackProjectChannelIntegrationId returns OrganizationUpdateInput.SlackProjectChannelIntegrationId, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetSlackProjectChannelIntegrationId() *string {
+	return v.SlackProjectChannelIntegrationId
+}
+
+// GetSlackProjectChannelPrefix returns OrganizationUpdateInput.SlackProjectChannelPrefix, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetSlackProjectChannelPrefix() *string {
+	return v.SlackProjectChannelPrefix
+}
+
+// GetSlackProjectChannelsEnabled returns OrganizationUpdateInput.SlackProjectChannelsEnabled, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetSlackProjectChannelsEnabled() *bool {
+	return v.SlackProjectChannelsEnabled
+}
+
+// GetSlaEnabled returns OrganizationUpdateInput.SlaEnabled, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetSlaEnabled() *bool { return v.SlaEnabled }
+
+// GetThemeSettings returns OrganizationUpdateInput.ThemeSettings, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetThemeSettings() *OrganizationThemeSettingsInput {
+	return v.ThemeSettings
+}
+
+// GetUrlKey returns OrganizationUpdateInput.UrlKey, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetUrlKey() *string { return v.UrlKey }
+
+// GetWorkingDays returns OrganizationUpdateInput.WorkingDays, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateInput) GetWorkingDays() []float64 { return v.WorkingDays }
+
+// OrganizationUpdateOrganizationUpdateOrganizationPayload includes the requested fields of the GraphQL type OrganizationPayload.
+// The GraphQL type's documentation follows.
+//
+// Workspace update operation response.
+type OrganizationUpdateOrganizationUpdateOrganizationPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The workspace that was created or updated.
+	Organization *OrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization `json:"organization"`
+}
+
+// GetSuccess returns OrganizationUpdateOrganizationUpdateOrganizationPayload.Success, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateOrganizationUpdateOrganizationPayload) GetSuccess() bool { return v.Success }
+
+// GetOrganization returns OrganizationUpdateOrganizationUpdateOrganizationPayload.Organization, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateOrganizationUpdateOrganizationPayload) GetOrganization() *OrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization {
+	return v.Organization
+}
+
+// OrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization includes the requested fields of the GraphQL type Organization.
+// The GraphQL type's documentation follows.
+//
+// A workspace (referred to as Organization in the API). Workspaces are the
+// root-level container for all teams, users, projects, issues, and settings. Every
+// user belongs to at least one workspace, and all data is scoped within a
+// workspace boundary.
+type OrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization struct {
+	OrganizationFields `json:"-"`
+}
+
+// GetId returns OrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization.Id, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization) GetId() string {
+	return v.OrganizationFields.Id
+}
+
+// GetName returns OrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization.Name, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization) GetName() string {
+	return v.OrganizationFields.Name
+}
+
+// GetUrlKey returns OrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization.UrlKey, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization) GetUrlKey() string {
+	return v.OrganizationFields.UrlKey
+}
+
+// GetUserCount returns OrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization.UserCount, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization) GetUserCount() int {
+	return v.OrganizationFields.UserCount
+}
+
+// GetCreatedAt returns OrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization.CreatedAt, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization) GetCreatedAt() time.Time {
+	return v.OrganizationFields.CreatedAt
+}
+
+// GetUpdatedAt returns OrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization) GetUpdatedAt() time.Time {
+	return v.OrganizationFields.UpdatedAt
+}
+
+func (v *OrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*OrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.OrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.OrganizationFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalOrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	UrlKey string `json:"urlKey"`
+
+	UserCount int `json:"userCount"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+func (v *OrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *OrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization) __premarshalJSON() (*__premarshalOrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization, error) {
+	var retval __premarshalOrganizationUpdateOrganizationUpdateOrganizationPayloadOrganization
+
+	retval.Id = v.OrganizationFields.Id
+	retval.Name = v.OrganizationFields.Name
+	retval.UrlKey = v.OrganizationFields.UrlKey
+	retval.UserCount = v.OrganizationFields.UserCount
+	retval.CreatedAt = v.OrganizationFields.CreatedAt
+	retval.UpdatedAt = v.OrganizationFields.UpdatedAt
+	return &retval, nil
+}
+
+// OrganizationUpdateResponse is returned by OrganizationUpdate on success.
+type OrganizationUpdateResponse struct {
+	// Updates the user's workspace settings. Different settings require different
+	// permission levels; most require the workspaceSettings admin permission.
+	OrganizationUpdate *OrganizationUpdateOrganizationUpdateOrganizationPayload `json:"organizationUpdate"`
+}
+
+// GetOrganizationUpdate returns OrganizationUpdateResponse.OrganizationUpdate, and is useful for accessing the field via an interface.
+func (v *OrganizationUpdateResponse) GetOrganizationUpdate() *OrganizationUpdateOrganizationUpdateOrganizationPayload {
+	return v.OrganizationUpdate
+}
+
 // By which field should the pagination order by
 type PaginationOrderBy string
 
@@ -20954,6 +22719,46 @@ const (
 var AllPaginationOrderBy = []PaginationOrderBy{
 	PaginationOrderByCreatedat,
 	PaginationOrderByUpdatedat,
+}
+
+type PartialNotificationChannelPreferencesInput struct {
+	// Whether notifications are currently enabled for desktop.
+	Desktop *bool `json:"desktop"`
+	// Whether notifications are currently enabled for email.
+	Email *bool `json:"email"`
+	// Whether notifications are currently enabled for mobile.
+	Mobile *bool `json:"mobile"`
+	// Whether notifications are currently enabled for Slack.
+	Slack *bool `json:"slack"`
+}
+
+// GetDesktop returns PartialNotificationChannelPreferencesInput.Desktop, and is useful for accessing the field via an interface.
+func (v *PartialNotificationChannelPreferencesInput) GetDesktop() *bool { return v.Desktop }
+
+// GetEmail returns PartialNotificationChannelPreferencesInput.Email, and is useful for accessing the field via an interface.
+func (v *PartialNotificationChannelPreferencesInput) GetEmail() *bool { return v.Email }
+
+// GetMobile returns PartialNotificationChannelPreferencesInput.Mobile, and is useful for accessing the field via an interface.
+func (v *PartialNotificationChannelPreferencesInput) GetMobile() *bool { return v.Mobile }
+
+// GetSlack returns PartialNotificationChannelPreferencesInput.Slack, and is useful for accessing the field via an interface.
+func (v *PartialNotificationChannelPreferencesInput) GetSlack() *bool { return v.Slack }
+
+// [Internal] The scope of product intelligence suggestion data for a team.
+type ProductIntelligenceScope string
+
+const (
+	ProductIntelligenceScopeWorkspace     ProductIntelligenceScope = "workspace"
+	ProductIntelligenceScopeTeamhierarchy ProductIntelligenceScope = "teamHierarchy"
+	ProductIntelligenceScopeTeam          ProductIntelligenceScope = "team"
+	ProductIntelligenceScopeNone          ProductIntelligenceScope = "none"
+)
+
+var AllProductIntelligenceScope = []ProductIntelligenceScope{
+	ProductIntelligenceScopeWorkspace,
+	ProductIntelligenceScopeTeamhierarchy,
+	ProductIntelligenceScopeTeam,
+	ProductIntelligenceScopeNone,
 }
 
 // ProjectAddLabelProjectAddLabelProjectPayload includes the requested fields of the GraphQL type ProjectPayload.
@@ -27742,6 +29547,38 @@ func (v *ReleaseStageTypeComparator) GetNin() []ReleaseStageType { return v.Nin 
 // GetNull returns ReleaseStageTypeComparator.Null, and is useful for accessing the field via an interface.
 func (v *ReleaseStageTypeComparator) GetNull() *bool { return v.Null }
 
+// ResendOrganizationInviteResendOrganizationInviteDeletePayload includes the requested fields of the GraphQL type DeletePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity deletion mutations.
+type ResendOrganizationInviteResendOrganizationInviteDeletePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The identifier of the deleted entity.
+	EntityId string `json:"entityId"`
+}
+
+// GetSuccess returns ResendOrganizationInviteResendOrganizationInviteDeletePayload.Success, and is useful for accessing the field via an interface.
+func (v *ResendOrganizationInviteResendOrganizationInviteDeletePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetEntityId returns ResendOrganizationInviteResendOrganizationInviteDeletePayload.EntityId, and is useful for accessing the field via an interface.
+func (v *ResendOrganizationInviteResendOrganizationInviteDeletePayload) GetEntityId() string {
+	return v.EntityId
+}
+
+// ResendOrganizationInviteResponse is returned by ResendOrganizationInvite on success.
+type ResendOrganizationInviteResponse struct {
+	// Re-sends a workspace invitation email for the specified invite ID.
+	ResendOrganizationInvite *ResendOrganizationInviteResendOrganizationInviteDeletePayload `json:"resendOrganizationInvite"`
+}
+
+// GetResendOrganizationInvite returns ResendOrganizationInviteResponse.ResendOrganizationInvite, and is useful for accessing the field via an interface.
+func (v *ResendOrganizationInviteResponse) GetResendOrganizationInvite() *ResendOrganizationInviteResendOrganizationInviteDeletePayload {
+	return v.ResendOrganizationInvite
+}
+
 // ResolveCommentCommentResolveCommentPayload includes the requested fields of the GraphQL type CommentPayload.
 // The GraphQL type's documentation follows.
 //
@@ -28931,6 +30768,419 @@ func (v *TeamCollectionFilter) GetSome() *TeamFilter { return v.Some }
 // GetUpdatedAt returns TeamCollectionFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *TeamCollectionFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
 
+type TeamCreateInput struct {
+	// Period after which closed (completed, canceled, or duplicate) issues are
+	// automatically archived, in months. 0 means disabled.
+	AutoArchivePeriod *float64 `json:"autoArchivePeriod"`
+	// Period after which issues are automatically closed, in months.
+	AutoClosePeriod *float64 `json:"autoClosePeriod"`
+	// The canceled workflow state which auto closed issues will be set to.
+	AutoCloseStateId *string `json:"autoCloseStateId"`
+	// The color of the team.
+	Color *string `json:"color"`
+	// The cooldown time after each cycle in weeks.
+	CycleCooldownTime *int `json:"cycleCooldownTime"`
+	// The duration of each cycle in weeks.
+	CycleDuration *int `json:"cycleDuration"`
+	// Auto assign completed issues to current active cycle setting.
+	CycleIssueAutoAssignCompleted *bool `json:"cycleIssueAutoAssignCompleted"`
+	// Auto assign started issues to current active cycle setting.
+	CycleIssueAutoAssignStarted *bool `json:"cycleIssueAutoAssignStarted"`
+	// Only allow issues issues with cycles in Active Issues.
+	CycleLockToActive *bool `json:"cycleLockToActive"`
+	// Whether the team uses cycles.
+	CyclesEnabled *bool `json:"cyclesEnabled"`
+	// The day of the week that a new cycle starts.
+	CycleStartDay *float64 `json:"cycleStartDay"`
+	// What to use as an default estimate for unestimated issues.
+	DefaultIssueEstimate *float64 `json:"defaultIssueEstimate"`
+	// The identifier of the default project template of this team.
+	DefaultProjectTemplateId *string `json:"defaultProjectTemplateId"`
+	// The identifier of the default template for members of this team.
+	DefaultTemplateForMembersId *string `json:"defaultTemplateForMembersId"`
+	// The identifier of the default template for non-members of this team.
+	DefaultTemplateForNonMembersId *string `json:"defaultTemplateForNonMembersId"`
+	// The description of the team.
+	Description *string `json:"description"`
+	// Whether to group recent issue history entries.
+	GroupIssueHistory *bool `json:"groupIssueHistory"`
+	// The icon of the team.
+	Icon *string `json:"icon"`
+	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
+	Id *string `json:"id"`
+	// Whether the team should inherit estimation settings from its parent. Only applies to sub-teams.
+	InheritIssueEstimation *bool `json:"inheritIssueEstimation"`
+	// [Internal] Whether the team should inherit its product intelligence scope from its parent. Only applies to sub-teams.
+	InheritProductIntelligenceScope *bool `json:"inheritProductIntelligenceScope"`
+	// [Internal] Whether the team should inherit its Slack auto-create project
+	// channel setting from its parent. Only applies to sub-teams.
+	InheritSlackAutoCreateProjectChannel *bool `json:"inheritSlackAutoCreateProjectChannel"`
+	// [Internal] Whether the team should inherit workflow statuses from its parent.
+	InheritWorkflowStatuses *bool `json:"inheritWorkflowStatuses"`
+	// [ALPHA] Whether initiatives are shown in the team's sidebar.
+	InitiativesEnabled *bool `json:"initiativesEnabled"`
+	// Whether to allow zeros in issues estimates.
+	IssueEstimationAllowZero *bool `json:"issueEstimationAllowZero"`
+	// Whether to add additional points to the estimate scale.
+	IssueEstimationExtended *bool `json:"issueEstimationExtended"`
+	// The issue estimation type to use. Must be one of "notUsed", "exponential", "fibonacci", "linear", "tShirt".
+	IssueEstimationType *string `json:"issueEstimationType"`
+	// Whether issue sharing is enabled for this team.
+	IssueSharingEnabled *bool `json:"issueSharingEnabled"`
+	// The key of the team. If not given, the key will be generated based on the name of the team.
+	Key *string `json:"key"`
+	// The name of the team.
+	Name string `json:"name"`
+	// The parent team ID.
+	ParentId *string `json:"parentId"`
+	// Internal. Whether the team is private or not.
+	Private *bool `json:"private"`
+	// [Internal] The scope of product intelligence suggestion data for the team.
+	ProductIntelligenceScope *ProductIntelligenceScope `json:"productIntelligenceScope"`
+	// Whether an issue needs to have a priority set before leaving triage.
+	RequirePriorityToLeaveTriage *bool `json:"requirePriorityToLeaveTriage"`
+	// Whether to move issues to bottom of the column when changing state.
+	SetIssueSortOrderOnStateChange *string `json:"setIssueSortOrderOnStateChange"`
+	// [Internal] Whether to automatically create a Slack channel when a new project is created in this team.
+	SlackAutoCreateProjectChannel *bool `json:"slackAutoCreateProjectChannel"`
+	// The timezone of the team.
+	Timezone *string `json:"timezone"`
+	// Whether triage mode is enabled for the team.
+	TriageEnabled *bool `json:"triageEnabled"`
+	// How many upcoming cycles to create.
+	UpcomingCycleCount *float64 `json:"upcomingCycleCount"`
+}
+
+// GetAutoArchivePeriod returns TeamCreateInput.AutoArchivePeriod, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetAutoArchivePeriod() *float64 { return v.AutoArchivePeriod }
+
+// GetAutoClosePeriod returns TeamCreateInput.AutoClosePeriod, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetAutoClosePeriod() *float64 { return v.AutoClosePeriod }
+
+// GetAutoCloseStateId returns TeamCreateInput.AutoCloseStateId, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetAutoCloseStateId() *string { return v.AutoCloseStateId }
+
+// GetColor returns TeamCreateInput.Color, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetColor() *string { return v.Color }
+
+// GetCycleCooldownTime returns TeamCreateInput.CycleCooldownTime, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetCycleCooldownTime() *int { return v.CycleCooldownTime }
+
+// GetCycleDuration returns TeamCreateInput.CycleDuration, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetCycleDuration() *int { return v.CycleDuration }
+
+// GetCycleIssueAutoAssignCompleted returns TeamCreateInput.CycleIssueAutoAssignCompleted, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetCycleIssueAutoAssignCompleted() *bool {
+	return v.CycleIssueAutoAssignCompleted
+}
+
+// GetCycleIssueAutoAssignStarted returns TeamCreateInput.CycleIssueAutoAssignStarted, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetCycleIssueAutoAssignStarted() *bool {
+	return v.CycleIssueAutoAssignStarted
+}
+
+// GetCycleLockToActive returns TeamCreateInput.CycleLockToActive, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetCycleLockToActive() *bool { return v.CycleLockToActive }
+
+// GetCyclesEnabled returns TeamCreateInput.CyclesEnabled, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetCyclesEnabled() *bool { return v.CyclesEnabled }
+
+// GetCycleStartDay returns TeamCreateInput.CycleStartDay, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetCycleStartDay() *float64 { return v.CycleStartDay }
+
+// GetDefaultIssueEstimate returns TeamCreateInput.DefaultIssueEstimate, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetDefaultIssueEstimate() *float64 { return v.DefaultIssueEstimate }
+
+// GetDefaultProjectTemplateId returns TeamCreateInput.DefaultProjectTemplateId, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetDefaultProjectTemplateId() *string { return v.DefaultProjectTemplateId }
+
+// GetDefaultTemplateForMembersId returns TeamCreateInput.DefaultTemplateForMembersId, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetDefaultTemplateForMembersId() *string {
+	return v.DefaultTemplateForMembersId
+}
+
+// GetDefaultTemplateForNonMembersId returns TeamCreateInput.DefaultTemplateForNonMembersId, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetDefaultTemplateForNonMembersId() *string {
+	return v.DefaultTemplateForNonMembersId
+}
+
+// GetDescription returns TeamCreateInput.Description, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetDescription() *string { return v.Description }
+
+// GetGroupIssueHistory returns TeamCreateInput.GroupIssueHistory, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetGroupIssueHistory() *bool { return v.GroupIssueHistory }
+
+// GetIcon returns TeamCreateInput.Icon, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetIcon() *string { return v.Icon }
+
+// GetId returns TeamCreateInput.Id, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetId() *string { return v.Id }
+
+// GetInheritIssueEstimation returns TeamCreateInput.InheritIssueEstimation, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetInheritIssueEstimation() *bool { return v.InheritIssueEstimation }
+
+// GetInheritProductIntelligenceScope returns TeamCreateInput.InheritProductIntelligenceScope, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetInheritProductIntelligenceScope() *bool {
+	return v.InheritProductIntelligenceScope
+}
+
+// GetInheritSlackAutoCreateProjectChannel returns TeamCreateInput.InheritSlackAutoCreateProjectChannel, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetInheritSlackAutoCreateProjectChannel() *bool {
+	return v.InheritSlackAutoCreateProjectChannel
+}
+
+// GetInheritWorkflowStatuses returns TeamCreateInput.InheritWorkflowStatuses, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetInheritWorkflowStatuses() *bool { return v.InheritWorkflowStatuses }
+
+// GetInitiativesEnabled returns TeamCreateInput.InitiativesEnabled, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetInitiativesEnabled() *bool { return v.InitiativesEnabled }
+
+// GetIssueEstimationAllowZero returns TeamCreateInput.IssueEstimationAllowZero, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetIssueEstimationAllowZero() *bool { return v.IssueEstimationAllowZero }
+
+// GetIssueEstimationExtended returns TeamCreateInput.IssueEstimationExtended, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetIssueEstimationExtended() *bool { return v.IssueEstimationExtended }
+
+// GetIssueEstimationType returns TeamCreateInput.IssueEstimationType, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetIssueEstimationType() *string { return v.IssueEstimationType }
+
+// GetIssueSharingEnabled returns TeamCreateInput.IssueSharingEnabled, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetIssueSharingEnabled() *bool { return v.IssueSharingEnabled }
+
+// GetKey returns TeamCreateInput.Key, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetKey() *string { return v.Key }
+
+// GetName returns TeamCreateInput.Name, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetName() string { return v.Name }
+
+// GetParentId returns TeamCreateInput.ParentId, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetParentId() *string { return v.ParentId }
+
+// GetPrivate returns TeamCreateInput.Private, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetPrivate() *bool { return v.Private }
+
+// GetProductIntelligenceScope returns TeamCreateInput.ProductIntelligenceScope, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetProductIntelligenceScope() *ProductIntelligenceScope {
+	return v.ProductIntelligenceScope
+}
+
+// GetRequirePriorityToLeaveTriage returns TeamCreateInput.RequirePriorityToLeaveTriage, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetRequirePriorityToLeaveTriage() *bool {
+	return v.RequirePriorityToLeaveTriage
+}
+
+// GetSetIssueSortOrderOnStateChange returns TeamCreateInput.SetIssueSortOrderOnStateChange, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetSetIssueSortOrderOnStateChange() *string {
+	return v.SetIssueSortOrderOnStateChange
+}
+
+// GetSlackAutoCreateProjectChannel returns TeamCreateInput.SlackAutoCreateProjectChannel, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetSlackAutoCreateProjectChannel() *bool {
+	return v.SlackAutoCreateProjectChannel
+}
+
+// GetTimezone returns TeamCreateInput.Timezone, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetTimezone() *string { return v.Timezone }
+
+// GetTriageEnabled returns TeamCreateInput.TriageEnabled, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetTriageEnabled() *bool { return v.TriageEnabled }
+
+// GetUpcomingCycleCount returns TeamCreateInput.UpcomingCycleCount, and is useful for accessing the field via an interface.
+func (v *TeamCreateInput) GetUpcomingCycleCount() *float64 { return v.UpcomingCycleCount }
+
+// TeamCreateResponse is returned by TeamCreate on success.
+type TeamCreateResponse struct {
+	// Creates a new team. The user who creates the team will automatically be added
+	// as a member and owner of the newly created team. Default workflow states,
+	// labels, and other team resources are created alongside the team.
+	TeamCreate *TeamCreateTeamCreateTeamPayload `json:"teamCreate"`
+}
+
+// GetTeamCreate returns TeamCreateResponse.TeamCreate, and is useful for accessing the field via an interface.
+func (v *TeamCreateResponse) GetTeamCreate() *TeamCreateTeamCreateTeamPayload { return v.TeamCreate }
+
+// TeamCreateTeamCreateTeamPayload includes the requested fields of the GraphQL type TeamPayload.
+// The GraphQL type's documentation follows.
+//
+// Team operation response.
+type TeamCreateTeamCreateTeamPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The team that was created or updated.
+	Team *TeamCreateTeamCreateTeamPayloadTeam `json:"team"`
+}
+
+// GetSuccess returns TeamCreateTeamCreateTeamPayload.Success, and is useful for accessing the field via an interface.
+func (v *TeamCreateTeamCreateTeamPayload) GetSuccess() bool { return v.Success }
+
+// GetTeam returns TeamCreateTeamCreateTeamPayload.Team, and is useful for accessing the field via an interface.
+func (v *TeamCreateTeamCreateTeamPayload) GetTeam() *TeamCreateTeamCreateTeamPayloadTeam {
+	return v.Team
+}
+
+// TeamCreateTeamCreateTeamPayloadTeam includes the requested fields of the GraphQL type Team.
+// The GraphQL type's documentation follows.
+//
+// A team is the primary organizational unit in Linear. Issues belong to teams, and
+// each team has its own workflow states, cycles, labels, and settings. Teams can
+// be public (visible to all workspace members), private (visible only to team
+// members), or restricted (visible only within an enclosing private-team
+// boundary). Teams can also have sub-teams that inherit settings from their parent.
+type TeamCreateTeamCreateTeamPayloadTeam struct {
+	TeamDetailFields `json:"-"`
+}
+
+// GetId returns TeamCreateTeamCreateTeamPayloadTeam.Id, and is useful for accessing the field via an interface.
+func (v *TeamCreateTeamCreateTeamPayloadTeam) GetId() string { return v.TeamDetailFields.Id }
+
+// GetKey returns TeamCreateTeamCreateTeamPayloadTeam.Key, and is useful for accessing the field via an interface.
+func (v *TeamCreateTeamCreateTeamPayloadTeam) GetKey() string { return v.TeamDetailFields.Key }
+
+// GetName returns TeamCreateTeamCreateTeamPayloadTeam.Name, and is useful for accessing the field via an interface.
+func (v *TeamCreateTeamCreateTeamPayloadTeam) GetName() string { return v.TeamDetailFields.Name }
+
+// GetDescription returns TeamCreateTeamCreateTeamPayloadTeam.Description, and is useful for accessing the field via an interface.
+func (v *TeamCreateTeamCreateTeamPayloadTeam) GetDescription() *string {
+	return v.TeamDetailFields.Description
+}
+
+// GetIcon returns TeamCreateTeamCreateTeamPayloadTeam.Icon, and is useful for accessing the field via an interface.
+func (v *TeamCreateTeamCreateTeamPayloadTeam) GetIcon() *string { return v.TeamDetailFields.Icon }
+
+// GetColor returns TeamCreateTeamCreateTeamPayloadTeam.Color, and is useful for accessing the field via an interface.
+func (v *TeamCreateTeamCreateTeamPayloadTeam) GetColor() *string { return v.TeamDetailFields.Color }
+
+// GetPrivate returns TeamCreateTeamCreateTeamPayloadTeam.Private, and is useful for accessing the field via an interface.
+func (v *TeamCreateTeamCreateTeamPayloadTeam) GetPrivate() bool { return v.TeamDetailFields.Private }
+
+// GetIssueCount returns TeamCreateTeamCreateTeamPayloadTeam.IssueCount, and is useful for accessing the field via an interface.
+func (v *TeamCreateTeamCreateTeamPayloadTeam) GetIssueCount() int {
+	return v.TeamDetailFields.IssueCount
+}
+
+// GetCyclesEnabled returns TeamCreateTeamCreateTeamPayloadTeam.CyclesEnabled, and is useful for accessing the field via an interface.
+func (v *TeamCreateTeamCreateTeamPayloadTeam) GetCyclesEnabled() bool {
+	return v.TeamDetailFields.CyclesEnabled
+}
+
+// GetCycleStartDay returns TeamCreateTeamCreateTeamPayloadTeam.CycleStartDay, and is useful for accessing the field via an interface.
+func (v *TeamCreateTeamCreateTeamPayloadTeam) GetCycleStartDay() float64 {
+	return v.TeamDetailFields.CycleStartDay
+}
+
+// GetCycleDuration returns TeamCreateTeamCreateTeamPayloadTeam.CycleDuration, and is useful for accessing the field via an interface.
+func (v *TeamCreateTeamCreateTeamPayloadTeam) GetCycleDuration() float64 {
+	return v.TeamDetailFields.CycleDuration
+}
+
+// GetUpcomingCycleCount returns TeamCreateTeamCreateTeamPayloadTeam.UpcomingCycleCount, and is useful for accessing the field via an interface.
+func (v *TeamCreateTeamCreateTeamPayloadTeam) GetUpcomingCycleCount() float64 {
+	return v.TeamDetailFields.UpcomingCycleCount
+}
+
+func (v *TeamCreateTeamCreateTeamPayloadTeam) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*TeamCreateTeamCreateTeamPayloadTeam
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.TeamCreateTeamCreateTeamPayloadTeam = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.TeamDetailFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalTeamCreateTeamCreateTeamPayloadTeam struct {
+	Id string `json:"id"`
+
+	Key string `json:"key"`
+
+	Name string `json:"name"`
+
+	Description *string `json:"description"`
+
+	Icon *string `json:"icon"`
+
+	Color *string `json:"color"`
+
+	Private bool `json:"private"`
+
+	IssueCount int `json:"issueCount"`
+
+	CyclesEnabled bool `json:"cyclesEnabled"`
+
+	CycleStartDay float64 `json:"cycleStartDay"`
+
+	CycleDuration float64 `json:"cycleDuration"`
+
+	UpcomingCycleCount float64 `json:"upcomingCycleCount"`
+}
+
+func (v *TeamCreateTeamCreateTeamPayloadTeam) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *TeamCreateTeamCreateTeamPayloadTeam) __premarshalJSON() (*__premarshalTeamCreateTeamCreateTeamPayloadTeam, error) {
+	var retval __premarshalTeamCreateTeamCreateTeamPayloadTeam
+
+	retval.Id = v.TeamDetailFields.Id
+	retval.Key = v.TeamDetailFields.Key
+	retval.Name = v.TeamDetailFields.Name
+	retval.Description = v.TeamDetailFields.Description
+	retval.Icon = v.TeamDetailFields.Icon
+	retval.Color = v.TeamDetailFields.Color
+	retval.Private = v.TeamDetailFields.Private
+	retval.IssueCount = v.TeamDetailFields.IssueCount
+	retval.CyclesEnabled = v.TeamDetailFields.CyclesEnabled
+	retval.CycleStartDay = v.TeamDetailFields.CycleStartDay
+	retval.CycleDuration = v.TeamDetailFields.CycleDuration
+	retval.UpcomingCycleCount = v.TeamDetailFields.UpcomingCycleCount
+	return &retval, nil
+}
+
+// TeamDeleteResponse is returned by TeamDelete on success.
+type TeamDeleteResponse struct {
+	// Archives a team and schedules its data for deletion. Requires team owner or workspace admin permissions.
+	TeamDelete *TeamDeleteTeamDeleteDeletePayload `json:"teamDelete"`
+}
+
+// GetTeamDelete returns TeamDeleteResponse.TeamDelete, and is useful for accessing the field via an interface.
+func (v *TeamDeleteResponse) GetTeamDelete() *TeamDeleteTeamDeleteDeletePayload { return v.TeamDelete }
+
+// TeamDeleteTeamDeleteDeletePayload includes the requested fields of the GraphQL type DeletePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity deletion mutations.
+type TeamDeleteTeamDeleteDeletePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The identifier of the deleted entity.
+	EntityId string `json:"entityId"`
+}
+
+// GetSuccess returns TeamDeleteTeamDeleteDeletePayload.Success, and is useful for accessing the field via an interface.
+func (v *TeamDeleteTeamDeleteDeletePayload) GetSuccess() bool { return v.Success }
+
+// GetEntityId returns TeamDeleteTeamDeleteDeletePayload.EntityId, and is useful for accessing the field via an interface.
+func (v *TeamDeleteTeamDeleteDeletePayload) GetEntityId() string { return v.EntityId }
+
 // Fragment for detailed team fields used in single team view
 type TeamDetailFields struct {
 	// The unique identifier of the entity.
@@ -29122,6 +31372,777 @@ func (v *TeamListFields) GetPrivate() bool { return v.Private }
 
 // GetIssueCount returns TeamListFields.IssueCount, and is useful for accessing the field via an interface.
 func (v *TeamListFields) GetIssueCount() int { return v.IssueCount }
+
+// Input for creating a new team membership.
+type TeamMembershipCreateInput struct {
+	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
+	Id *string `json:"id"`
+	// Internal. Whether the user is the owner of the team.
+	Owner *bool `json:"owner"`
+	// The position of the item in the users list.
+	SortOrder *float64 `json:"sortOrder"`
+	// The identifier of the team associated with the membership.
+	TeamId string `json:"teamId"`
+	// The identifier of the user associated with the membership.
+	UserId string `json:"userId"`
+}
+
+// GetId returns TeamMembershipCreateInput.Id, and is useful for accessing the field via an interface.
+func (v *TeamMembershipCreateInput) GetId() *string { return v.Id }
+
+// GetOwner returns TeamMembershipCreateInput.Owner, and is useful for accessing the field via an interface.
+func (v *TeamMembershipCreateInput) GetOwner() *bool { return v.Owner }
+
+// GetSortOrder returns TeamMembershipCreateInput.SortOrder, and is useful for accessing the field via an interface.
+func (v *TeamMembershipCreateInput) GetSortOrder() *float64 { return v.SortOrder }
+
+// GetTeamId returns TeamMembershipCreateInput.TeamId, and is useful for accessing the field via an interface.
+func (v *TeamMembershipCreateInput) GetTeamId() string { return v.TeamId }
+
+// GetUserId returns TeamMembershipCreateInput.UserId, and is useful for accessing the field via an interface.
+func (v *TeamMembershipCreateInput) GetUserId() string { return v.UserId }
+
+// TeamMembershipCreateResponse is returned by TeamMembershipCreate on success.
+type TeamMembershipCreateResponse struct {
+	// Creates a new team membership, adding a user to a team. Validates that the
+	// user is not already a member, the team is not archived or retired, and the
+	// requesting user has permission to add members.
+	TeamMembershipCreate *TeamMembershipCreateTeamMembershipCreateTeamMembershipPayload `json:"teamMembershipCreate"`
+}
+
+// GetTeamMembershipCreate returns TeamMembershipCreateResponse.TeamMembershipCreate, and is useful for accessing the field via an interface.
+func (v *TeamMembershipCreateResponse) GetTeamMembershipCreate() *TeamMembershipCreateTeamMembershipCreateTeamMembershipPayload {
+	return v.TeamMembershipCreate
+}
+
+// TeamMembershipCreateTeamMembershipCreateTeamMembershipPayload includes the requested fields of the GraphQL type TeamMembershipPayload.
+// The GraphQL type's documentation follows.
+//
+// Team membership operation response.
+type TeamMembershipCreateTeamMembershipCreateTeamMembershipPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The team membership that was created or updated.
+	TeamMembership *TeamMembershipCreateTeamMembershipCreateTeamMembershipPayloadTeamMembership `json:"teamMembership"`
+}
+
+// GetSuccess returns TeamMembershipCreateTeamMembershipCreateTeamMembershipPayload.Success, and is useful for accessing the field via an interface.
+func (v *TeamMembershipCreateTeamMembershipCreateTeamMembershipPayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetTeamMembership returns TeamMembershipCreateTeamMembershipCreateTeamMembershipPayload.TeamMembership, and is useful for accessing the field via an interface.
+func (v *TeamMembershipCreateTeamMembershipCreateTeamMembershipPayload) GetTeamMembership() *TeamMembershipCreateTeamMembershipCreateTeamMembershipPayloadTeamMembership {
+	return v.TeamMembership
+}
+
+// TeamMembershipCreateTeamMembershipCreateTeamMembershipPayloadTeamMembership includes the requested fields of the GraphQL type TeamMembership.
+// The GraphQL type's documentation follows.
+//
+// A join entity that defines a user's membership in a team. Each membership record
+// links a user to a team and tracks whether the user is a team owner. Users can be
+// members of multiple teams, and their memberships determine which teams' issues
+// and resources they can access.
+type TeamMembershipCreateTeamMembershipCreateTeamMembershipPayloadTeamMembership struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// Whether the user is an owner of the team. Team owners have elevated
+	// permissions for managing team settings, members, and resources.
+	Owner bool `json:"owner"`
+}
+
+// GetId returns TeamMembershipCreateTeamMembershipCreateTeamMembershipPayloadTeamMembership.Id, and is useful for accessing the field via an interface.
+func (v *TeamMembershipCreateTeamMembershipCreateTeamMembershipPayloadTeamMembership) GetId() string {
+	return v.Id
+}
+
+// GetOwner returns TeamMembershipCreateTeamMembershipCreateTeamMembershipPayloadTeamMembership.Owner, and is useful for accessing the field via an interface.
+func (v *TeamMembershipCreateTeamMembershipCreateTeamMembershipPayloadTeamMembership) GetOwner() bool {
+	return v.Owner
+}
+
+// TeamMembershipDeleteResponse is returned by TeamMembershipDelete on success.
+type TeamMembershipDeleteResponse struct {
+	// Deletes a team membership, removing the user from the team. Users can remove
+	// their own membership, or team owners and workspace admins can remove other members.
+	TeamMembershipDelete *TeamMembershipDeleteTeamMembershipDeleteDeletePayload `json:"teamMembershipDelete"`
+}
+
+// GetTeamMembershipDelete returns TeamMembershipDeleteResponse.TeamMembershipDelete, and is useful for accessing the field via an interface.
+func (v *TeamMembershipDeleteResponse) GetTeamMembershipDelete() *TeamMembershipDeleteTeamMembershipDeleteDeletePayload {
+	return v.TeamMembershipDelete
+}
+
+// TeamMembershipDeleteTeamMembershipDeleteDeletePayload includes the requested fields of the GraphQL type DeletePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity deletion mutations.
+type TeamMembershipDeleteTeamMembershipDeleteDeletePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The identifier of the deleted entity.
+	EntityId string `json:"entityId"`
+}
+
+// GetSuccess returns TeamMembershipDeleteTeamMembershipDeleteDeletePayload.Success, and is useful for accessing the field via an interface.
+func (v *TeamMembershipDeleteTeamMembershipDeleteDeletePayload) GetSuccess() bool { return v.Success }
+
+// GetEntityId returns TeamMembershipDeleteTeamMembershipDeleteDeletePayload.EntityId, and is useful for accessing the field via an interface.
+func (v *TeamMembershipDeleteTeamMembershipDeleteDeletePayload) GetEntityId() string {
+	return v.EntityId
+}
+
+// Input for updating an existing team membership.
+type TeamMembershipUpdateInput struct {
+	// Internal. Whether the user is the owner of the team.
+	Owner *bool `json:"owner"`
+	// The position of the item in the users list.
+	SortOrder *float64 `json:"sortOrder"`
+}
+
+// GetOwner returns TeamMembershipUpdateInput.Owner, and is useful for accessing the field via an interface.
+func (v *TeamMembershipUpdateInput) GetOwner() *bool { return v.Owner }
+
+// GetSortOrder returns TeamMembershipUpdateInput.SortOrder, and is useful for accessing the field via an interface.
+func (v *TeamMembershipUpdateInput) GetSortOrder() *float64 { return v.SortOrder }
+
+// TeamMembershipUpdateResponse is returned by TeamMembershipUpdate on success.
+type TeamMembershipUpdateResponse struct {
+	// Updates a team membership, such as changing ownership status or sort order.
+	TeamMembershipUpdate *TeamMembershipUpdateTeamMembershipUpdateTeamMembershipPayload `json:"teamMembershipUpdate"`
+}
+
+// GetTeamMembershipUpdate returns TeamMembershipUpdateResponse.TeamMembershipUpdate, and is useful for accessing the field via an interface.
+func (v *TeamMembershipUpdateResponse) GetTeamMembershipUpdate() *TeamMembershipUpdateTeamMembershipUpdateTeamMembershipPayload {
+	return v.TeamMembershipUpdate
+}
+
+// TeamMembershipUpdateTeamMembershipUpdateTeamMembershipPayload includes the requested fields of the GraphQL type TeamMembershipPayload.
+// The GraphQL type's documentation follows.
+//
+// Team membership operation response.
+type TeamMembershipUpdateTeamMembershipUpdateTeamMembershipPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The team membership that was created or updated.
+	TeamMembership *TeamMembershipUpdateTeamMembershipUpdateTeamMembershipPayloadTeamMembership `json:"teamMembership"`
+}
+
+// GetSuccess returns TeamMembershipUpdateTeamMembershipUpdateTeamMembershipPayload.Success, and is useful for accessing the field via an interface.
+func (v *TeamMembershipUpdateTeamMembershipUpdateTeamMembershipPayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetTeamMembership returns TeamMembershipUpdateTeamMembershipUpdateTeamMembershipPayload.TeamMembership, and is useful for accessing the field via an interface.
+func (v *TeamMembershipUpdateTeamMembershipUpdateTeamMembershipPayload) GetTeamMembership() *TeamMembershipUpdateTeamMembershipUpdateTeamMembershipPayloadTeamMembership {
+	return v.TeamMembership
+}
+
+// TeamMembershipUpdateTeamMembershipUpdateTeamMembershipPayloadTeamMembership includes the requested fields of the GraphQL type TeamMembership.
+// The GraphQL type's documentation follows.
+//
+// A join entity that defines a user's membership in a team. Each membership record
+// links a user to a team and tracks whether the user is a team owner. Users can be
+// members of multiple teams, and their memberships determine which teams' issues
+// and resources they can access.
+type TeamMembershipUpdateTeamMembershipUpdateTeamMembershipPayloadTeamMembership struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// Whether the user is an owner of the team. Team owners have elevated
+	// permissions for managing team settings, members, and resources.
+	Owner bool `json:"owner"`
+}
+
+// GetId returns TeamMembershipUpdateTeamMembershipUpdateTeamMembershipPayloadTeamMembership.Id, and is useful for accessing the field via an interface.
+func (v *TeamMembershipUpdateTeamMembershipUpdateTeamMembershipPayloadTeamMembership) GetId() string {
+	return v.Id
+}
+
+// GetOwner returns TeamMembershipUpdateTeamMembershipUpdateTeamMembershipPayloadTeamMembership.Owner, and is useful for accessing the field via an interface.
+func (v *TeamMembershipUpdateTeamMembershipUpdateTeamMembershipPayloadTeamMembership) GetOwner() bool {
+	return v.Owner
+}
+
+// [Internal] How to handle sub-teams when retiring a parent team.
+type TeamRetirementSubTeamHandling string
+
+const (
+	TeamRetirementSubTeamHandlingUnnest TeamRetirementSubTeamHandling = "unnest"
+	TeamRetirementSubTeamHandlingRetire TeamRetirementSubTeamHandling = "retire"
+)
+
+var AllTeamRetirementSubTeamHandling = []TeamRetirementSubTeamHandling{
+	TeamRetirementSubTeamHandlingUnnest,
+	TeamRetirementSubTeamHandlingRetire,
+}
+
+// All possible roles within a team in terms of access to team settings and operations.
+type TeamRoleType string
+
+const (
+	TeamRoleTypeOwner  TeamRoleType = "owner"
+	TeamRoleTypeMember TeamRoleType = "member"
+)
+
+var AllTeamRoleType = []TeamRoleType{
+	TeamRoleTypeOwner,
+	TeamRoleTypeMember,
+}
+
+type TeamSecuritySettingsInput struct {
+	// The minimum team role required to manage agent skills in the team.
+	AgentSkillsManagement *TeamRoleType `json:"agentSkillsManagement"`
+	// The minimum team role required to manage loops in the team.
+	AutomationManagement *TeamRoleType `json:"automationManagement"`
+	// The minimum team role required to share issues with non-team-members.
+	IssueSharing *TeamRoleType `json:"issueSharing"`
+	// The minimum team role required to manage labels in the team.
+	LabelManagement *TeamRoleType `json:"labelManagement"`
+	// The minimum team role required to manage full workspace members (non-guests) in the team.
+	MemberManagement *TeamRoleType `json:"memberManagement"`
+	// The minimum team role required to manage team settings.
+	TeamManagement *TeamRoleType `json:"teamManagement"`
+	// The minimum team role required to manage templates in the team.
+	TemplateManagement *TeamRoleType `json:"templateManagement"`
+}
+
+// GetAgentSkillsManagement returns TeamSecuritySettingsInput.AgentSkillsManagement, and is useful for accessing the field via an interface.
+func (v *TeamSecuritySettingsInput) GetAgentSkillsManagement() *TeamRoleType {
+	return v.AgentSkillsManagement
+}
+
+// GetAutomationManagement returns TeamSecuritySettingsInput.AutomationManagement, and is useful for accessing the field via an interface.
+func (v *TeamSecuritySettingsInput) GetAutomationManagement() *TeamRoleType {
+	return v.AutomationManagement
+}
+
+// GetIssueSharing returns TeamSecuritySettingsInput.IssueSharing, and is useful for accessing the field via an interface.
+func (v *TeamSecuritySettingsInput) GetIssueSharing() *TeamRoleType { return v.IssueSharing }
+
+// GetLabelManagement returns TeamSecuritySettingsInput.LabelManagement, and is useful for accessing the field via an interface.
+func (v *TeamSecuritySettingsInput) GetLabelManagement() *TeamRoleType { return v.LabelManagement }
+
+// GetMemberManagement returns TeamSecuritySettingsInput.MemberManagement, and is useful for accessing the field via an interface.
+func (v *TeamSecuritySettingsInput) GetMemberManagement() *TeamRoleType { return v.MemberManagement }
+
+// GetTeamManagement returns TeamSecuritySettingsInput.TeamManagement, and is useful for accessing the field via an interface.
+func (v *TeamSecuritySettingsInput) GetTeamManagement() *TeamRoleType { return v.TeamManagement }
+
+// GetTemplateManagement returns TeamSecuritySettingsInput.TemplateManagement, and is useful for accessing the field via an interface.
+func (v *TeamSecuritySettingsInput) GetTemplateManagement() *TeamRoleType {
+	return v.TemplateManagement
+}
+
+// TeamUnarchiveResponse is returned by TeamUnarchive on success.
+type TeamUnarchiveResponse struct {
+	// Unarchives a team and cancels deletion.
+	TeamUnarchive *TeamUnarchiveTeamUnarchiveTeamArchivePayload `json:"teamUnarchive"`
+}
+
+// GetTeamUnarchive returns TeamUnarchiveResponse.TeamUnarchive, and is useful for accessing the field via an interface.
+func (v *TeamUnarchiveResponse) GetTeamUnarchive() *TeamUnarchiveTeamUnarchiveTeamArchivePayload {
+	return v.TeamUnarchive
+}
+
+// TeamUnarchiveTeamUnarchiveTeamArchivePayload includes the requested fields of the GraphQL type TeamArchivePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity archive mutations.
+type TeamUnarchiveTeamUnarchiveTeamArchivePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The archived/unarchived entity. Null if entity was deleted.
+	Entity *TeamUnarchiveTeamUnarchiveTeamArchivePayloadEntityTeam `json:"entity"`
+}
+
+// GetSuccess returns TeamUnarchiveTeamUnarchiveTeamArchivePayload.Success, and is useful for accessing the field via an interface.
+func (v *TeamUnarchiveTeamUnarchiveTeamArchivePayload) GetSuccess() bool { return v.Success }
+
+// GetEntity returns TeamUnarchiveTeamUnarchiveTeamArchivePayload.Entity, and is useful for accessing the field via an interface.
+func (v *TeamUnarchiveTeamUnarchiveTeamArchivePayload) GetEntity() *TeamUnarchiveTeamUnarchiveTeamArchivePayloadEntityTeam {
+	return v.Entity
+}
+
+// TeamUnarchiveTeamUnarchiveTeamArchivePayloadEntityTeam includes the requested fields of the GraphQL type Team.
+// The GraphQL type's documentation follows.
+//
+// A team is the primary organizational unit in Linear. Issues belong to teams, and
+// each team has its own workflow states, cycles, labels, and settings. Teams can
+// be public (visible to all workspace members), private (visible only to team
+// members), or restricted (visible only within an enclosing private-team
+// boundary). Teams can also have sub-teams that inherit settings from their parent.
+type TeamUnarchiveTeamUnarchiveTeamArchivePayloadEntityTeam struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+}
+
+// GetId returns TeamUnarchiveTeamUnarchiveTeamArchivePayloadEntityTeam.Id, and is useful for accessing the field via an interface.
+func (v *TeamUnarchiveTeamUnarchiveTeamArchivePayloadEntityTeam) GetId() string { return v.Id }
+
+type TeamUpdateInput struct {
+	// Whether to enable AI discussion summaries for issues.
+	AiDiscussionSummariesEnabled *bool `json:"aiDiscussionSummariesEnabled"`
+	// Whether to enable resolved thread AI summaries.
+	AiThreadSummariesEnabled *bool `json:"aiThreadSummariesEnabled"`
+	// Whether all members in the workspace can join the team. Only used for public teams.
+	AllMembersCanJoin *bool `json:"allMembersCanJoin"`
+	// Period after which closed (completed, canceled, or duplicate) issues are automatically archived, in months.
+	AutoArchivePeriod *float64 `json:"autoArchivePeriod"`
+	// Whether to automatically close all sub-issues when a parent issue in this team is closed.
+	AutoCloseChildIssues *bool `json:"autoCloseChildIssues"`
+	// Whether to automatically close a parent issue in this team if all its sub-issues are closed.
+	AutoCloseParentIssues *bool `json:"autoCloseParentIssues"`
+	// Period after which issues are automatically closed, in months.
+	AutoClosePeriod *float64 `json:"autoClosePeriod"`
+	// The canceled workflow state which auto closed issues will be set to.
+	AutoCloseStateId *string `json:"autoCloseStateId"`
+	// The color of the team.
+	Color *string `json:"color"`
+	// The cooldown time after each cycle in weeks.
+	CycleCooldownTime *int `json:"cycleCooldownTime"`
+	// The duration of each cycle in weeks.
+	CycleDuration *int `json:"cycleDuration"`
+	// The time at which to begin cycles.
+	CycleEnabledStartDate *time.Time `json:"cycleEnabledStartDate"`
+	// Auto assign completed issues to current active cycle setting.
+	CycleIssueAutoAssignCompleted *bool `json:"cycleIssueAutoAssignCompleted"`
+	// Auto assign started issues to current active cycle setting.
+	CycleIssueAutoAssignStarted *bool `json:"cycleIssueAutoAssignStarted"`
+	// Only allow issues with cycles in Active Issues.
+	CycleLockToActive *bool `json:"cycleLockToActive"`
+	// Whether the team uses cycles.
+	CyclesEnabled *bool `json:"cyclesEnabled"`
+	// The day of the week that a new cycle starts.
+	CycleStartDay *float64 `json:"cycleStartDay"`
+	// What to use as an default estimate for unestimated issues.
+	DefaultIssueEstimate *float64 `json:"defaultIssueEstimate"`
+	// Default status for newly created issues.
+	DefaultIssueStateId *string `json:"defaultIssueStateId"`
+	// The identifier of the default project template of this team.
+	DefaultProjectTemplateId *string `json:"defaultProjectTemplateId"`
+	// The identifier of the default template for members of this team.
+	DefaultTemplateForMembersId *string `json:"defaultTemplateForMembersId"`
+	// The identifier of the default template for non-members of this team.
+	DefaultTemplateForNonMembersId *string `json:"defaultTemplateForNonMembersId"`
+	// The description of the team.
+	Description *string `json:"description"`
+	// Whether to group recent issue history entries.
+	GroupIssueHistory *bool `json:"groupIssueHistory"`
+	// [Internal] How to handle sub-teams when retiring. Required if the team has active sub-teams.
+	HandleSubTeamsOnRetirement *TeamRetirementSubTeamHandling `json:"handleSubTeamsOnRetirement"`
+	// The icon of the team.
+	Icon *string `json:"icon"`
+	// Whether the team should inherit estimation settings from its parent. Only applies to sub-teams.
+	InheritIssueEstimation *bool `json:"inheritIssueEstimation"`
+	// [Internal] Whether the team should inherit its product intelligence scope from its parent. Only applies to sub-teams.
+	InheritProductIntelligenceScope *bool `json:"inheritProductIntelligenceScope"`
+	// [Internal] Whether the team should inherit its Slack auto-create project
+	// channel setting from its parent. Only applies to sub-teams.
+	InheritSlackAutoCreateProjectChannel *bool `json:"inheritSlackAutoCreateProjectChannel"`
+	// [Internal] Whether the team should inherit workflow statuses from its parent.
+	InheritWorkflowStatuses *bool `json:"inheritWorkflowStatuses"`
+	// [ALPHA] Whether initiatives are shown in the team's sidebar.
+	InitiativesEnabled *bool `json:"initiativesEnabled"`
+	// Whether to allow zeros in issues estimates.
+	IssueEstimationAllowZero *bool `json:"issueEstimationAllowZero"`
+	// Whether to add additional points to the estimate scale.
+	IssueEstimationExtended *bool `json:"issueEstimationExtended"`
+	// The issue estimation type to use. Must be one of "notUsed", "exponential", "fibonacci", "linear", "tShirt".
+	IssueEstimationType *string `json:"issueEstimationType"`
+	// Whether issue sharing is enabled for this team.
+	IssueSharingEnabled *bool `json:"issueSharingEnabled"`
+	// Whether new users should join this team by default. Mutation restricted to workspace admins or owners!
+	JoinByDefault *bool `json:"joinByDefault"`
+	// The key of the team.
+	Key *string `json:"key"`
+	// The name of the team.
+	Name *string `json:"name"`
+	// The parent team ID.
+	ParentId *string `json:"parentId"`
+	// Whether the team is private or not.
+	Private *bool `json:"private"`
+	// [Internal] The scope of product intelligence suggestion data for the team.
+	ProductIntelligenceScope *ProductIntelligenceScope `json:"productIntelligenceScope"`
+	// Whether an issue needs to have a priority set before leaving triage.
+	RequirePriorityToLeaveTriage *bool `json:"requirePriorityToLeaveTriage"`
+	// When the team was retired.
+	RetiredAt *time.Time `json:"retiredAt"`
+	// The SCIM group name for the team.
+	ScimGroupName *string `json:"scimGroupName"`
+	// Whether the team is managed by SCIM integration. Mutation restricted to
+	// workspace admins or owners and only unsetting is allowed!
+	ScimManaged *bool `json:"scimManaged"`
+	// The security settings for the team.
+	SecuritySettings *TeamSecuritySettingsInput `json:"securitySettings,omitempty"`
+	// Whether to move issues to bottom of the column when changing state.
+	SetIssueSortOrderOnStateChange *string `json:"setIssueSortOrderOnStateChange"`
+	// [Internal] Whether to automatically create a Slack channel when a new project is created in this team.
+	SlackAutoCreateProjectChannel *bool `json:"slackAutoCreateProjectChannel"`
+	// Whether to send new issue comment notifications to Slack.
+	SlackIssueComments *bool `json:"slackIssueComments"`
+	// Whether to send issue status update notifications to Slack.
+	SlackIssueStatuses *bool `json:"slackIssueStatuses"`
+	// Whether to send new issue notifications to Slack.
+	SlackNewIssue *bool `json:"slackNewIssue"`
+	// The timezone of the team.
+	Timezone *string `json:"timezone"`
+	// Whether triage mode is enabled for the team.
+	TriageEnabled *bool `json:"triageEnabled"`
+	// How many upcoming cycles to create.
+	UpcomingCycleCount *float64 `json:"upcomingCycleCount"`
+}
+
+// GetAiDiscussionSummariesEnabled returns TeamUpdateInput.AiDiscussionSummariesEnabled, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetAiDiscussionSummariesEnabled() *bool {
+	return v.AiDiscussionSummariesEnabled
+}
+
+// GetAiThreadSummariesEnabled returns TeamUpdateInput.AiThreadSummariesEnabled, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetAiThreadSummariesEnabled() *bool { return v.AiThreadSummariesEnabled }
+
+// GetAllMembersCanJoin returns TeamUpdateInput.AllMembersCanJoin, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetAllMembersCanJoin() *bool { return v.AllMembersCanJoin }
+
+// GetAutoArchivePeriod returns TeamUpdateInput.AutoArchivePeriod, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetAutoArchivePeriod() *float64 { return v.AutoArchivePeriod }
+
+// GetAutoCloseChildIssues returns TeamUpdateInput.AutoCloseChildIssues, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetAutoCloseChildIssues() *bool { return v.AutoCloseChildIssues }
+
+// GetAutoCloseParentIssues returns TeamUpdateInput.AutoCloseParentIssues, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetAutoCloseParentIssues() *bool { return v.AutoCloseParentIssues }
+
+// GetAutoClosePeriod returns TeamUpdateInput.AutoClosePeriod, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetAutoClosePeriod() *float64 { return v.AutoClosePeriod }
+
+// GetAutoCloseStateId returns TeamUpdateInput.AutoCloseStateId, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetAutoCloseStateId() *string { return v.AutoCloseStateId }
+
+// GetColor returns TeamUpdateInput.Color, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetColor() *string { return v.Color }
+
+// GetCycleCooldownTime returns TeamUpdateInput.CycleCooldownTime, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetCycleCooldownTime() *int { return v.CycleCooldownTime }
+
+// GetCycleDuration returns TeamUpdateInput.CycleDuration, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetCycleDuration() *int { return v.CycleDuration }
+
+// GetCycleEnabledStartDate returns TeamUpdateInput.CycleEnabledStartDate, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetCycleEnabledStartDate() *time.Time { return v.CycleEnabledStartDate }
+
+// GetCycleIssueAutoAssignCompleted returns TeamUpdateInput.CycleIssueAutoAssignCompleted, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetCycleIssueAutoAssignCompleted() *bool {
+	return v.CycleIssueAutoAssignCompleted
+}
+
+// GetCycleIssueAutoAssignStarted returns TeamUpdateInput.CycleIssueAutoAssignStarted, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetCycleIssueAutoAssignStarted() *bool {
+	return v.CycleIssueAutoAssignStarted
+}
+
+// GetCycleLockToActive returns TeamUpdateInput.CycleLockToActive, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetCycleLockToActive() *bool { return v.CycleLockToActive }
+
+// GetCyclesEnabled returns TeamUpdateInput.CyclesEnabled, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetCyclesEnabled() *bool { return v.CyclesEnabled }
+
+// GetCycleStartDay returns TeamUpdateInput.CycleStartDay, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetCycleStartDay() *float64 { return v.CycleStartDay }
+
+// GetDefaultIssueEstimate returns TeamUpdateInput.DefaultIssueEstimate, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetDefaultIssueEstimate() *float64 { return v.DefaultIssueEstimate }
+
+// GetDefaultIssueStateId returns TeamUpdateInput.DefaultIssueStateId, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetDefaultIssueStateId() *string { return v.DefaultIssueStateId }
+
+// GetDefaultProjectTemplateId returns TeamUpdateInput.DefaultProjectTemplateId, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetDefaultProjectTemplateId() *string { return v.DefaultProjectTemplateId }
+
+// GetDefaultTemplateForMembersId returns TeamUpdateInput.DefaultTemplateForMembersId, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetDefaultTemplateForMembersId() *string {
+	return v.DefaultTemplateForMembersId
+}
+
+// GetDefaultTemplateForNonMembersId returns TeamUpdateInput.DefaultTemplateForNonMembersId, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetDefaultTemplateForNonMembersId() *string {
+	return v.DefaultTemplateForNonMembersId
+}
+
+// GetDescription returns TeamUpdateInput.Description, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetDescription() *string { return v.Description }
+
+// GetGroupIssueHistory returns TeamUpdateInput.GroupIssueHistory, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetGroupIssueHistory() *bool { return v.GroupIssueHistory }
+
+// GetHandleSubTeamsOnRetirement returns TeamUpdateInput.HandleSubTeamsOnRetirement, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetHandleSubTeamsOnRetirement() *TeamRetirementSubTeamHandling {
+	return v.HandleSubTeamsOnRetirement
+}
+
+// GetIcon returns TeamUpdateInput.Icon, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetIcon() *string { return v.Icon }
+
+// GetInheritIssueEstimation returns TeamUpdateInput.InheritIssueEstimation, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetInheritIssueEstimation() *bool { return v.InheritIssueEstimation }
+
+// GetInheritProductIntelligenceScope returns TeamUpdateInput.InheritProductIntelligenceScope, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetInheritProductIntelligenceScope() *bool {
+	return v.InheritProductIntelligenceScope
+}
+
+// GetInheritSlackAutoCreateProjectChannel returns TeamUpdateInput.InheritSlackAutoCreateProjectChannel, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetInheritSlackAutoCreateProjectChannel() *bool {
+	return v.InheritSlackAutoCreateProjectChannel
+}
+
+// GetInheritWorkflowStatuses returns TeamUpdateInput.InheritWorkflowStatuses, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetInheritWorkflowStatuses() *bool { return v.InheritWorkflowStatuses }
+
+// GetInitiativesEnabled returns TeamUpdateInput.InitiativesEnabled, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetInitiativesEnabled() *bool { return v.InitiativesEnabled }
+
+// GetIssueEstimationAllowZero returns TeamUpdateInput.IssueEstimationAllowZero, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetIssueEstimationAllowZero() *bool { return v.IssueEstimationAllowZero }
+
+// GetIssueEstimationExtended returns TeamUpdateInput.IssueEstimationExtended, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetIssueEstimationExtended() *bool { return v.IssueEstimationExtended }
+
+// GetIssueEstimationType returns TeamUpdateInput.IssueEstimationType, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetIssueEstimationType() *string { return v.IssueEstimationType }
+
+// GetIssueSharingEnabled returns TeamUpdateInput.IssueSharingEnabled, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetIssueSharingEnabled() *bool { return v.IssueSharingEnabled }
+
+// GetJoinByDefault returns TeamUpdateInput.JoinByDefault, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetJoinByDefault() *bool { return v.JoinByDefault }
+
+// GetKey returns TeamUpdateInput.Key, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetKey() *string { return v.Key }
+
+// GetName returns TeamUpdateInput.Name, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetName() *string { return v.Name }
+
+// GetParentId returns TeamUpdateInput.ParentId, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetParentId() *string { return v.ParentId }
+
+// GetPrivate returns TeamUpdateInput.Private, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetPrivate() *bool { return v.Private }
+
+// GetProductIntelligenceScope returns TeamUpdateInput.ProductIntelligenceScope, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetProductIntelligenceScope() *ProductIntelligenceScope {
+	return v.ProductIntelligenceScope
+}
+
+// GetRequirePriorityToLeaveTriage returns TeamUpdateInput.RequirePriorityToLeaveTriage, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetRequirePriorityToLeaveTriage() *bool {
+	return v.RequirePriorityToLeaveTriage
+}
+
+// GetRetiredAt returns TeamUpdateInput.RetiredAt, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetRetiredAt() *time.Time { return v.RetiredAt }
+
+// GetScimGroupName returns TeamUpdateInput.ScimGroupName, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetScimGroupName() *string { return v.ScimGroupName }
+
+// GetScimManaged returns TeamUpdateInput.ScimManaged, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetScimManaged() *bool { return v.ScimManaged }
+
+// GetSecuritySettings returns TeamUpdateInput.SecuritySettings, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetSecuritySettings() *TeamSecuritySettingsInput { return v.SecuritySettings }
+
+// GetSetIssueSortOrderOnStateChange returns TeamUpdateInput.SetIssueSortOrderOnStateChange, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetSetIssueSortOrderOnStateChange() *string {
+	return v.SetIssueSortOrderOnStateChange
+}
+
+// GetSlackAutoCreateProjectChannel returns TeamUpdateInput.SlackAutoCreateProjectChannel, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetSlackAutoCreateProjectChannel() *bool {
+	return v.SlackAutoCreateProjectChannel
+}
+
+// GetSlackIssueComments returns TeamUpdateInput.SlackIssueComments, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetSlackIssueComments() *bool { return v.SlackIssueComments }
+
+// GetSlackIssueStatuses returns TeamUpdateInput.SlackIssueStatuses, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetSlackIssueStatuses() *bool { return v.SlackIssueStatuses }
+
+// GetSlackNewIssue returns TeamUpdateInput.SlackNewIssue, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetSlackNewIssue() *bool { return v.SlackNewIssue }
+
+// GetTimezone returns TeamUpdateInput.Timezone, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetTimezone() *string { return v.Timezone }
+
+// GetTriageEnabled returns TeamUpdateInput.TriageEnabled, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetTriageEnabled() *bool { return v.TriageEnabled }
+
+// GetUpcomingCycleCount returns TeamUpdateInput.UpcomingCycleCount, and is useful for accessing the field via an interface.
+func (v *TeamUpdateInput) GetUpcomingCycleCount() *float64 { return v.UpcomingCycleCount }
+
+// TeamUpdateResponse is returned by TeamUpdate on success.
+type TeamUpdateResponse struct {
+	// Updates a team's settings, properties, or configuration. Requires team owner
+	// or workspace admin permissions for most changes.
+	TeamUpdate *TeamUpdateTeamUpdateTeamPayload `json:"teamUpdate"`
+}
+
+// GetTeamUpdate returns TeamUpdateResponse.TeamUpdate, and is useful for accessing the field via an interface.
+func (v *TeamUpdateResponse) GetTeamUpdate() *TeamUpdateTeamUpdateTeamPayload { return v.TeamUpdate }
+
+// TeamUpdateTeamUpdateTeamPayload includes the requested fields of the GraphQL type TeamPayload.
+// The GraphQL type's documentation follows.
+//
+// Team operation response.
+type TeamUpdateTeamUpdateTeamPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The team that was created or updated.
+	Team *TeamUpdateTeamUpdateTeamPayloadTeam `json:"team"`
+}
+
+// GetSuccess returns TeamUpdateTeamUpdateTeamPayload.Success, and is useful for accessing the field via an interface.
+func (v *TeamUpdateTeamUpdateTeamPayload) GetSuccess() bool { return v.Success }
+
+// GetTeam returns TeamUpdateTeamUpdateTeamPayload.Team, and is useful for accessing the field via an interface.
+func (v *TeamUpdateTeamUpdateTeamPayload) GetTeam() *TeamUpdateTeamUpdateTeamPayloadTeam {
+	return v.Team
+}
+
+// TeamUpdateTeamUpdateTeamPayloadTeam includes the requested fields of the GraphQL type Team.
+// The GraphQL type's documentation follows.
+//
+// A team is the primary organizational unit in Linear. Issues belong to teams, and
+// each team has its own workflow states, cycles, labels, and settings. Teams can
+// be public (visible to all workspace members), private (visible only to team
+// members), or restricted (visible only within an enclosing private-team
+// boundary). Teams can also have sub-teams that inherit settings from their parent.
+type TeamUpdateTeamUpdateTeamPayloadTeam struct {
+	TeamDetailFields `json:"-"`
+}
+
+// GetId returns TeamUpdateTeamUpdateTeamPayloadTeam.Id, and is useful for accessing the field via an interface.
+func (v *TeamUpdateTeamUpdateTeamPayloadTeam) GetId() string { return v.TeamDetailFields.Id }
+
+// GetKey returns TeamUpdateTeamUpdateTeamPayloadTeam.Key, and is useful for accessing the field via an interface.
+func (v *TeamUpdateTeamUpdateTeamPayloadTeam) GetKey() string { return v.TeamDetailFields.Key }
+
+// GetName returns TeamUpdateTeamUpdateTeamPayloadTeam.Name, and is useful for accessing the field via an interface.
+func (v *TeamUpdateTeamUpdateTeamPayloadTeam) GetName() string { return v.TeamDetailFields.Name }
+
+// GetDescription returns TeamUpdateTeamUpdateTeamPayloadTeam.Description, and is useful for accessing the field via an interface.
+func (v *TeamUpdateTeamUpdateTeamPayloadTeam) GetDescription() *string {
+	return v.TeamDetailFields.Description
+}
+
+// GetIcon returns TeamUpdateTeamUpdateTeamPayloadTeam.Icon, and is useful for accessing the field via an interface.
+func (v *TeamUpdateTeamUpdateTeamPayloadTeam) GetIcon() *string { return v.TeamDetailFields.Icon }
+
+// GetColor returns TeamUpdateTeamUpdateTeamPayloadTeam.Color, and is useful for accessing the field via an interface.
+func (v *TeamUpdateTeamUpdateTeamPayloadTeam) GetColor() *string { return v.TeamDetailFields.Color }
+
+// GetPrivate returns TeamUpdateTeamUpdateTeamPayloadTeam.Private, and is useful for accessing the field via an interface.
+func (v *TeamUpdateTeamUpdateTeamPayloadTeam) GetPrivate() bool { return v.TeamDetailFields.Private }
+
+// GetIssueCount returns TeamUpdateTeamUpdateTeamPayloadTeam.IssueCount, and is useful for accessing the field via an interface.
+func (v *TeamUpdateTeamUpdateTeamPayloadTeam) GetIssueCount() int {
+	return v.TeamDetailFields.IssueCount
+}
+
+// GetCyclesEnabled returns TeamUpdateTeamUpdateTeamPayloadTeam.CyclesEnabled, and is useful for accessing the field via an interface.
+func (v *TeamUpdateTeamUpdateTeamPayloadTeam) GetCyclesEnabled() bool {
+	return v.TeamDetailFields.CyclesEnabled
+}
+
+// GetCycleStartDay returns TeamUpdateTeamUpdateTeamPayloadTeam.CycleStartDay, and is useful for accessing the field via an interface.
+func (v *TeamUpdateTeamUpdateTeamPayloadTeam) GetCycleStartDay() float64 {
+	return v.TeamDetailFields.CycleStartDay
+}
+
+// GetCycleDuration returns TeamUpdateTeamUpdateTeamPayloadTeam.CycleDuration, and is useful for accessing the field via an interface.
+func (v *TeamUpdateTeamUpdateTeamPayloadTeam) GetCycleDuration() float64 {
+	return v.TeamDetailFields.CycleDuration
+}
+
+// GetUpcomingCycleCount returns TeamUpdateTeamUpdateTeamPayloadTeam.UpcomingCycleCount, and is useful for accessing the field via an interface.
+func (v *TeamUpdateTeamUpdateTeamPayloadTeam) GetUpcomingCycleCount() float64 {
+	return v.TeamDetailFields.UpcomingCycleCount
+}
+
+func (v *TeamUpdateTeamUpdateTeamPayloadTeam) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*TeamUpdateTeamUpdateTeamPayloadTeam
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.TeamUpdateTeamUpdateTeamPayloadTeam = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.TeamDetailFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalTeamUpdateTeamUpdateTeamPayloadTeam struct {
+	Id string `json:"id"`
+
+	Key string `json:"key"`
+
+	Name string `json:"name"`
+
+	Description *string `json:"description"`
+
+	Icon *string `json:"icon"`
+
+	Color *string `json:"color"`
+
+	Private bool `json:"private"`
+
+	IssueCount int `json:"issueCount"`
+
+	CyclesEnabled bool `json:"cyclesEnabled"`
+
+	CycleStartDay float64 `json:"cycleStartDay"`
+
+	CycleDuration float64 `json:"cycleDuration"`
+
+	UpcomingCycleCount float64 `json:"upcomingCycleCount"`
+}
+
+func (v *TeamUpdateTeamUpdateTeamPayloadTeam) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *TeamUpdateTeamUpdateTeamPayloadTeam) __premarshalJSON() (*__premarshalTeamUpdateTeamUpdateTeamPayloadTeam, error) {
+	var retval __premarshalTeamUpdateTeamUpdateTeamPayloadTeam
+
+	retval.Id = v.TeamDetailFields.Id
+	retval.Key = v.TeamDetailFields.Key
+	retval.Name = v.TeamDetailFields.Name
+	retval.Description = v.TeamDetailFields.Description
+	retval.Icon = v.TeamDetailFields.Icon
+	retval.Color = v.TeamDetailFields.Color
+	retval.Private = v.TeamDetailFields.Private
+	retval.IssueCount = v.TeamDetailFields.IssueCount
+	retval.CyclesEnabled = v.TeamDetailFields.CyclesEnabled
+	retval.CycleStartDay = v.TeamDetailFields.CycleStartDay
+	retval.CycleDuration = v.TeamDetailFields.CycleDuration
+	retval.UpcomingCycleCount = v.TeamDetailFields.UpcomingCycleCount
+	return &retval, nil
+}
 
 // The visibility of a team. A team can be public, private, or restricted within an enclosing private-team boundary.
 type TeamVisibility string
@@ -30152,6 +33173,30 @@ func (v *UpdateProjectResponse) GetProjectUpdate() *UpdateProjectProjectUpdatePr
 	return v.ProjectUpdate
 }
 
+// UserChangeRoleResponse is returned by UserChangeRole on success.
+type UserChangeRoleResponse struct {
+	// Changes the workspace role of a user. The requesting user must have a role
+	// equal to or higher than the target role. Requires workspace admin permissions.
+	UserChangeRole *UserChangeRoleUserChangeRoleUserAdminPayload `json:"userChangeRole"`
+}
+
+// GetUserChangeRole returns UserChangeRoleResponse.UserChangeRole, and is useful for accessing the field via an interface.
+func (v *UserChangeRoleResponse) GetUserChangeRole() *UserChangeRoleUserChangeRoleUserAdminPayload {
+	return v.UserChangeRole
+}
+
+// UserChangeRoleUserChangeRoleUserAdminPayload includes the requested fields of the GraphQL type UserAdminPayload.
+// The GraphQL type's documentation follows.
+//
+// User admin operation response.
+type UserChangeRoleUserChangeRoleUserAdminPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+}
+
+// GetSuccess returns UserChangeRoleUserChangeRoleUserAdminPayload.Success, and is useful for accessing the field via an interface.
+func (v *UserChangeRoleUserChangeRoleUserAdminPayload) GetSuccess() bool { return v.Success }
+
 // User filtering options.
 type UserCollectionFilter struct {
 	// Comparator for the user's activity status.
@@ -30424,6 +33469,367 @@ func (v *UserListFields) GetActive() bool { return v.Active }
 
 // GetAdmin returns UserListFields.Admin, and is useful for accessing the field via an interface.
 func (v *UserListFields) GetAdmin() bool { return v.Admin }
+
+// The different permission roles available to users in a workspace.
+type UserRoleType string
+
+const (
+	UserRoleTypeOwner UserRoleType = "owner"
+	UserRoleTypeAdmin UserRoleType = "admin"
+	UserRoleTypeGuest UserRoleType = "guest"
+	UserRoleTypeUser  UserRoleType = "user"
+	UserRoleTypeApp   UserRoleType = "app"
+)
+
+var AllUserRoleType = []UserRoleType{
+	UserRoleTypeOwner,
+	UserRoleTypeAdmin,
+	UserRoleTypeGuest,
+	UserRoleTypeUser,
+	UserRoleTypeApp,
+}
+
+type UserSettingsUpdateInput struct {
+	// [Internal] The user's last seen time for the pulse feed.
+	FeedLastSeenTime *time.Time `json:"feedLastSeenTime"`
+	// [Internal] How often to generate a feed summary.
+	FeedSummarySchedule *FeedSummarySchedule `json:"feedSummarySchedule"`
+	// The user's notification category preferences.
+	NotificationCategoryPreferences *NotificationCategoryPreferencesInput `json:"notificationCategoryPreferences,omitempty"`
+	// The user's notification channel preferences.
+	NotificationChannelPreferences *PartialNotificationChannelPreferencesInput `json:"notificationChannelPreferences,omitempty"`
+	// The user's notification delivery preferences.
+	NotificationDeliveryPreferences *NotificationDeliveryPreferencesInput `json:"notificationDeliveryPreferences,omitempty"`
+	// The user's settings.
+	Settings *map[string]interface{} `json:"settings"`
+	// Whether this user is subscribed to changelog email or not.
+	SubscribedToChangelog *bool `json:"subscribedToChangelog"`
+	// Whether this user is subscribed to DPA emails or not.
+	SubscribedToDPA *bool `json:"subscribedToDPA"`
+	// Whether this user is subscribed to general marketing communications or not.
+	SubscribedToGeneralMarketingCommunications *bool `json:"subscribedToGeneralMarketingCommunications"`
+	// Whether this user is subscribed to invite accepted emails or not.
+	SubscribedToInviteAccepted *bool `json:"subscribedToInviteAccepted"`
+	// Whether this user is subscribed to privacy and legal update emails or not.
+	SubscribedToPrivacyLegalUpdates *bool `json:"subscribedToPrivacyLegalUpdates"`
+	// [Internal] The user's usage warning history.
+	UsageWarningHistory *map[string]interface{} `json:"usageWarningHistory"`
+}
+
+// GetFeedLastSeenTime returns UserSettingsUpdateInput.FeedLastSeenTime, and is useful for accessing the field via an interface.
+func (v *UserSettingsUpdateInput) GetFeedLastSeenTime() *time.Time { return v.FeedLastSeenTime }
+
+// GetFeedSummarySchedule returns UserSettingsUpdateInput.FeedSummarySchedule, and is useful for accessing the field via an interface.
+func (v *UserSettingsUpdateInput) GetFeedSummarySchedule() *FeedSummarySchedule {
+	return v.FeedSummarySchedule
+}
+
+// GetNotificationCategoryPreferences returns UserSettingsUpdateInput.NotificationCategoryPreferences, and is useful for accessing the field via an interface.
+func (v *UserSettingsUpdateInput) GetNotificationCategoryPreferences() *NotificationCategoryPreferencesInput {
+	return v.NotificationCategoryPreferences
+}
+
+// GetNotificationChannelPreferences returns UserSettingsUpdateInput.NotificationChannelPreferences, and is useful for accessing the field via an interface.
+func (v *UserSettingsUpdateInput) GetNotificationChannelPreferences() *PartialNotificationChannelPreferencesInput {
+	return v.NotificationChannelPreferences
+}
+
+// GetNotificationDeliveryPreferences returns UserSettingsUpdateInput.NotificationDeliveryPreferences, and is useful for accessing the field via an interface.
+func (v *UserSettingsUpdateInput) GetNotificationDeliveryPreferences() *NotificationDeliveryPreferencesInput {
+	return v.NotificationDeliveryPreferences
+}
+
+// GetSettings returns UserSettingsUpdateInput.Settings, and is useful for accessing the field via an interface.
+func (v *UserSettingsUpdateInput) GetSettings() *map[string]interface{} { return v.Settings }
+
+// GetSubscribedToChangelog returns UserSettingsUpdateInput.SubscribedToChangelog, and is useful for accessing the field via an interface.
+func (v *UserSettingsUpdateInput) GetSubscribedToChangelog() *bool { return v.SubscribedToChangelog }
+
+// GetSubscribedToDPA returns UserSettingsUpdateInput.SubscribedToDPA, and is useful for accessing the field via an interface.
+func (v *UserSettingsUpdateInput) GetSubscribedToDPA() *bool { return v.SubscribedToDPA }
+
+// GetSubscribedToGeneralMarketingCommunications returns UserSettingsUpdateInput.SubscribedToGeneralMarketingCommunications, and is useful for accessing the field via an interface.
+func (v *UserSettingsUpdateInput) GetSubscribedToGeneralMarketingCommunications() *bool {
+	return v.SubscribedToGeneralMarketingCommunications
+}
+
+// GetSubscribedToInviteAccepted returns UserSettingsUpdateInput.SubscribedToInviteAccepted, and is useful for accessing the field via an interface.
+func (v *UserSettingsUpdateInput) GetSubscribedToInviteAccepted() *bool {
+	return v.SubscribedToInviteAccepted
+}
+
+// GetSubscribedToPrivacyLegalUpdates returns UserSettingsUpdateInput.SubscribedToPrivacyLegalUpdates, and is useful for accessing the field via an interface.
+func (v *UserSettingsUpdateInput) GetSubscribedToPrivacyLegalUpdates() *bool {
+	return v.SubscribedToPrivacyLegalUpdates
+}
+
+// GetUsageWarningHistory returns UserSettingsUpdateInput.UsageWarningHistory, and is useful for accessing the field via an interface.
+func (v *UserSettingsUpdateInput) GetUsageWarningHistory() *map[string]interface{} {
+	return v.UsageWarningHistory
+}
+
+// UserSettingsUpdateResponse is returned by UserSettingsUpdate on success.
+type UserSettingsUpdateResponse struct {
+	// Updates the authenticated user's settings, including notification preferences,
+	// email subscriptions, theme, and other UI preferences.
+	UserSettingsUpdate *UserSettingsUpdateUserSettingsUpdateUserSettingsPayload `json:"userSettingsUpdate"`
+}
+
+// GetUserSettingsUpdate returns UserSettingsUpdateResponse.UserSettingsUpdate, and is useful for accessing the field via an interface.
+func (v *UserSettingsUpdateResponse) GetUserSettingsUpdate() *UserSettingsUpdateUserSettingsUpdateUserSettingsPayload {
+	return v.UserSettingsUpdate
+}
+
+// UserSettingsUpdateUserSettingsUpdateUserSettingsPayload includes the requested fields of the GraphQL type UserSettingsPayload.
+// The GraphQL type's documentation follows.
+//
+// User settings operation response.
+type UserSettingsUpdateUserSettingsUpdateUserSettingsPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+}
+
+// GetSuccess returns UserSettingsUpdateUserSettingsUpdateUserSettingsPayload.Success, and is useful for accessing the field via an interface.
+func (v *UserSettingsUpdateUserSettingsUpdateUserSettingsPayload) GetSuccess() bool { return v.Success }
+
+// UserSuspendResponse is returned by UserSuspend on success.
+type UserSuspendResponse struct {
+	// Suspends a user, deactivating their account and revoking access to the
+	// workspace. The suspended user's sessions are invalidated. Can only be called
+	// by a workspace admin or owner.
+	UserSuspend *UserSuspendUserSuspendUserAdminPayload `json:"userSuspend"`
+}
+
+// GetUserSuspend returns UserSuspendResponse.UserSuspend, and is useful for accessing the field via an interface.
+func (v *UserSuspendResponse) GetUserSuspend() *UserSuspendUserSuspendUserAdminPayload {
+	return v.UserSuspend
+}
+
+// UserSuspendUserSuspendUserAdminPayload includes the requested fields of the GraphQL type UserAdminPayload.
+// The GraphQL type's documentation follows.
+//
+// User admin operation response.
+type UserSuspendUserSuspendUserAdminPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+}
+
+// GetSuccess returns UserSuspendUserSuspendUserAdminPayload.Success, and is useful for accessing the field via an interface.
+func (v *UserSuspendUserSuspendUserAdminPayload) GetSuccess() bool { return v.Success }
+
+// UserUnsuspendResponse is returned by UserUnsuspend on success.
+type UserUnsuspendResponse struct {
+	// Re-activates a suspended user, restoring their access to the workspace. Can only be called by a workspace admin or owner.
+	UserUnsuspend *UserUnsuspendUserUnsuspendUserAdminPayload `json:"userUnsuspend"`
+}
+
+// GetUserUnsuspend returns UserUnsuspendResponse.UserUnsuspend, and is useful for accessing the field via an interface.
+func (v *UserUnsuspendResponse) GetUserUnsuspend() *UserUnsuspendUserUnsuspendUserAdminPayload {
+	return v.UserUnsuspend
+}
+
+// UserUnsuspendUserUnsuspendUserAdminPayload includes the requested fields of the GraphQL type UserAdminPayload.
+// The GraphQL type's documentation follows.
+//
+// User admin operation response.
+type UserUnsuspendUserUnsuspendUserAdminPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+}
+
+// GetSuccess returns UserUnsuspendUserUnsuspendUserAdminPayload.Success, and is useful for accessing the field via an interface.
+func (v *UserUnsuspendUserUnsuspendUserAdminPayload) GetSuccess() bool { return v.Success }
+
+// Input for updating the authenticated user.
+type UserUpdateInput struct {
+	// The avatar image URL of the user.
+	AvatarUrl *string `json:"avatarUrl"`
+	// The user description or a short bio.
+	Description *string `json:"description"`
+	// The display name of the user.
+	DisplayName *string `json:"displayName"`
+	// The name of the user.
+	Name *string `json:"name"`
+	// The emoji part of the user status.
+	StatusEmoji *string `json:"statusEmoji"`
+	// The label part of the user status.
+	StatusLabel *string `json:"statusLabel"`
+	// When the user status should be cleared.
+	StatusUntilAt *time.Time `json:"statusUntilAt"`
+	// The local timezone of the user.
+	Timezone *string `json:"timezone"`
+	// The user's job title.
+	Title *string `json:"title"`
+}
+
+// GetAvatarUrl returns UserUpdateInput.AvatarUrl, and is useful for accessing the field via an interface.
+func (v *UserUpdateInput) GetAvatarUrl() *string { return v.AvatarUrl }
+
+// GetDescription returns UserUpdateInput.Description, and is useful for accessing the field via an interface.
+func (v *UserUpdateInput) GetDescription() *string { return v.Description }
+
+// GetDisplayName returns UserUpdateInput.DisplayName, and is useful for accessing the field via an interface.
+func (v *UserUpdateInput) GetDisplayName() *string { return v.DisplayName }
+
+// GetName returns UserUpdateInput.Name, and is useful for accessing the field via an interface.
+func (v *UserUpdateInput) GetName() *string { return v.Name }
+
+// GetStatusEmoji returns UserUpdateInput.StatusEmoji, and is useful for accessing the field via an interface.
+func (v *UserUpdateInput) GetStatusEmoji() *string { return v.StatusEmoji }
+
+// GetStatusLabel returns UserUpdateInput.StatusLabel, and is useful for accessing the field via an interface.
+func (v *UserUpdateInput) GetStatusLabel() *string { return v.StatusLabel }
+
+// GetStatusUntilAt returns UserUpdateInput.StatusUntilAt, and is useful for accessing the field via an interface.
+func (v *UserUpdateInput) GetStatusUntilAt() *time.Time { return v.StatusUntilAt }
+
+// GetTimezone returns UserUpdateInput.Timezone, and is useful for accessing the field via an interface.
+func (v *UserUpdateInput) GetTimezone() *string { return v.Timezone }
+
+// GetTitle returns UserUpdateInput.Title, and is useful for accessing the field via an interface.
+func (v *UserUpdateInput) GetTitle() *string { return v.Title }
+
+// UserUpdateResponse is returned by UserUpdate on success.
+type UserUpdateResponse struct {
+	// Updates a user's profile information. Users can update their own profile;
+	// workspace admins can update any user's profile. SCIM-managed users may have
+	// restricted name changes.
+	UserUpdate *UserUpdateUserUpdateUserPayload `json:"userUpdate"`
+}
+
+// GetUserUpdate returns UserUpdateResponse.UserUpdate, and is useful for accessing the field via an interface.
+func (v *UserUpdateResponse) GetUserUpdate() *UserUpdateUserUpdateUserPayload { return v.UserUpdate }
+
+// UserUpdateUserUpdateUserPayload includes the requested fields of the GraphQL type UserPayload.
+// The GraphQL type's documentation follows.
+//
+// User operation response.
+type UserUpdateUserUpdateUserPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The user that was created or updated.
+	User *UserUpdateUserUpdateUserPayloadUser `json:"user"`
+}
+
+// GetSuccess returns UserUpdateUserUpdateUserPayload.Success, and is useful for accessing the field via an interface.
+func (v *UserUpdateUserUpdateUserPayload) GetSuccess() bool { return v.Success }
+
+// GetUser returns UserUpdateUserUpdateUserPayload.User, and is useful for accessing the field via an interface.
+func (v *UserUpdateUserUpdateUserPayload) GetUser() *UserUpdateUserUpdateUserPayloadUser {
+	return v.User
+}
+
+// UserUpdateUserUpdateUserPayloadUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
+type UserUpdateUserUpdateUserPayloadUser struct {
+	UserDetailFields `json:"-"`
+}
+
+// GetId returns UserUpdateUserUpdateUserPayloadUser.Id, and is useful for accessing the field via an interface.
+func (v *UserUpdateUserUpdateUserPayloadUser) GetId() string { return v.UserDetailFields.Id }
+
+// GetName returns UserUpdateUserUpdateUserPayloadUser.Name, and is useful for accessing the field via an interface.
+func (v *UserUpdateUserUpdateUserPayloadUser) GetName() string { return v.UserDetailFields.Name }
+
+// GetEmail returns UserUpdateUserUpdateUserPayloadUser.Email, and is useful for accessing the field via an interface.
+func (v *UserUpdateUserUpdateUserPayloadUser) GetEmail() string { return v.UserDetailFields.Email }
+
+// GetAvatarUrl returns UserUpdateUserUpdateUserPayloadUser.AvatarUrl, and is useful for accessing the field via an interface.
+func (v *UserUpdateUserUpdateUserPayloadUser) GetAvatarUrl() *string {
+	return v.UserDetailFields.AvatarUrl
+}
+
+// GetDisplayName returns UserUpdateUserUpdateUserPayloadUser.DisplayName, and is useful for accessing the field via an interface.
+func (v *UserUpdateUserUpdateUserPayloadUser) GetDisplayName() string {
+	return v.UserDetailFields.DisplayName
+}
+
+// GetIsMe returns UserUpdateUserUpdateUserPayloadUser.IsMe, and is useful for accessing the field via an interface.
+func (v *UserUpdateUserUpdateUserPayloadUser) GetIsMe() bool { return v.UserDetailFields.IsMe }
+
+// GetActive returns UserUpdateUserUpdateUserPayloadUser.Active, and is useful for accessing the field via an interface.
+func (v *UserUpdateUserUpdateUserPayloadUser) GetActive() bool { return v.UserDetailFields.Active }
+
+// GetAdmin returns UserUpdateUserUpdateUserPayloadUser.Admin, and is useful for accessing the field via an interface.
+func (v *UserUpdateUserUpdateUserPayloadUser) GetAdmin() bool { return v.UserDetailFields.Admin }
+
+// GetCreatedAt returns UserUpdateUserUpdateUserPayloadUser.CreatedAt, and is useful for accessing the field via an interface.
+func (v *UserUpdateUserUpdateUserPayloadUser) GetCreatedAt() time.Time {
+	return v.UserDetailFields.CreatedAt
+}
+
+func (v *UserUpdateUserUpdateUserPayloadUser) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*UserUpdateUserUpdateUserPayloadUser
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.UserUpdateUserUpdateUserPayloadUser = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.UserDetailFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalUserUpdateUserUpdateUserPayloadUser struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Email string `json:"email"`
+
+	AvatarUrl *string `json:"avatarUrl"`
+
+	DisplayName string `json:"displayName"`
+
+	IsMe bool `json:"isMe"`
+
+	Active bool `json:"active"`
+
+	Admin bool `json:"admin"`
+
+	CreatedAt time.Time `json:"createdAt"`
+}
+
+func (v *UserUpdateUserUpdateUserPayloadUser) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *UserUpdateUserUpdateUserPayloadUser) __premarshalJSON() (*__premarshalUserUpdateUserUpdateUserPayloadUser, error) {
+	var retval __premarshalUserUpdateUserUpdateUserPayloadUser
+
+	retval.Id = v.UserDetailFields.Id
+	retval.Name = v.UserDetailFields.Name
+	retval.Email = v.UserDetailFields.Email
+	retval.AvatarUrl = v.UserDetailFields.AvatarUrl
+	retval.DisplayName = v.UserDetailFields.DisplayName
+	retval.IsMe = v.UserDetailFields.IsMe
+	retval.Active = v.UserDetailFields.Active
+	retval.Admin = v.UserDetailFields.Admin
+	retval.CreatedAt = v.UserDetailFields.CreatedAt
+	return &retval, nil
+}
 
 // WorkflowStateArchiveResponse is returned by WorkflowStateArchive on success.
 type WorkflowStateArchiveResponse struct {
@@ -31402,6 +34808,22 @@ type __GetTeamMembersInput struct {
 // GetKey returns __GetTeamMembersInput.Key, and is useful for accessing the field via an interface.
 func (v *__GetTeamMembersInput) GetKey() string { return v.Key }
 
+// __GetTeamMembershipsInput is used internally by genqlient
+type __GetTeamMembershipsInput struct {
+	Id    string  `json:"id"`
+	First *int    `json:"first"`
+	After *string `json:"after"`
+}
+
+// GetId returns __GetTeamMembershipsInput.Id, and is useful for accessing the field via an interface.
+func (v *__GetTeamMembershipsInput) GetId() string { return v.Id }
+
+// GetFirst returns __GetTeamMembershipsInput.First, and is useful for accessing the field via an interface.
+func (v *__GetTeamMembershipsInput) GetFirst() *int { return v.First }
+
+// GetAfter returns __GetTeamMembershipsInput.After, and is useful for accessing the field via an interface.
+func (v *__GetTeamMembershipsInput) GetAfter() *string { return v.After }
+
 // __GetTeamStatesInput is used internally by genqlient
 type __GetTeamStatesInput struct {
 	Key string `json:"key"`
@@ -31886,6 +35308,18 @@ func (v *__ListIssuesInput) GetAfter() *string { return v.After }
 // GetOrderBy returns __ListIssuesInput.OrderBy, and is useful for accessing the field via an interface.
 func (v *__ListIssuesInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy }
 
+// __ListOrganizationInvitesInput is used internally by genqlient
+type __ListOrganizationInvitesInput struct {
+	First *int    `json:"first"`
+	After *string `json:"after"`
+}
+
+// GetFirst returns __ListOrganizationInvitesInput.First, and is useful for accessing the field via an interface.
+func (v *__ListOrganizationInvitesInput) GetFirst() *int { return v.First }
+
+// GetAfter returns __ListOrganizationInvitesInput.After, and is useful for accessing the field via an interface.
+func (v *__ListOrganizationInvitesInput) GetAfter() *string { return v.After }
+
 // __ListProjectLabelsInput is used internally by genqlient
 type __ListProjectLabelsInput struct {
 	Filter *ProjectLabelFilter `json:"filter,omitempty"`
@@ -31989,6 +35423,30 @@ func (v *__ListUsersInput) GetAfter() *string { return v.After }
 
 // GetOrderBy returns __ListUsersInput.OrderBy, and is useful for accessing the field via an interface.
 func (v *__ListUsersInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy }
+
+// __OrganizationInviteCreateInput is used internally by genqlient
+type __OrganizationInviteCreateInput struct {
+	Input *OrganizationInviteCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __OrganizationInviteCreateInput.Input, and is useful for accessing the field via an interface.
+func (v *__OrganizationInviteCreateInput) GetInput() *OrganizationInviteCreateInput { return v.Input }
+
+// __OrganizationInviteDeleteInput is used internally by genqlient
+type __OrganizationInviteDeleteInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __OrganizationInviteDeleteInput.Id, and is useful for accessing the field via an interface.
+func (v *__OrganizationInviteDeleteInput) GetId() string { return v.Id }
+
+// __OrganizationUpdateInput is used internally by genqlient
+type __OrganizationUpdateInput struct {
+	Input *OrganizationUpdateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __OrganizationUpdateInput.Input, and is useful for accessing the field via an interface.
+func (v *__OrganizationUpdateInput) GetInput() *OrganizationUpdateInput { return v.Input }
 
 // __ProjectAddLabelInput is used internally by genqlient
 type __ProjectAddLabelInput struct {
@@ -32244,6 +35702,14 @@ type __ReactionDeleteInput struct {
 // GetId returns __ReactionDeleteInput.Id, and is useful for accessing the field via an interface.
 func (v *__ReactionDeleteInput) GetId() string { return v.Id }
 
+// __ResendOrganizationInviteInput is used internally by genqlient
+type __ResendOrganizationInviteInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __ResendOrganizationInviteInput.Id, and is useful for accessing the field via an interface.
+func (v *__ResendOrganizationInviteInput) GetId() string { return v.Id }
+
 // __ResolveCommentInput is used internally by genqlient
 type __ResolveCommentInput struct {
 	Id string `json:"id"`
@@ -32291,6 +35757,70 @@ func (v *__SearchIssuesInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy
 
 // GetIncludeArchived returns __SearchIssuesInput.IncludeArchived, and is useful for accessing the field via an interface.
 func (v *__SearchIssuesInput) GetIncludeArchived() *bool { return v.IncludeArchived }
+
+// __TeamCreateInput is used internally by genqlient
+type __TeamCreateInput struct {
+	Input *TeamCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __TeamCreateInput.Input, and is useful for accessing the field via an interface.
+func (v *__TeamCreateInput) GetInput() *TeamCreateInput { return v.Input }
+
+// __TeamDeleteInput is used internally by genqlient
+type __TeamDeleteInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __TeamDeleteInput.Id, and is useful for accessing the field via an interface.
+func (v *__TeamDeleteInput) GetId() string { return v.Id }
+
+// __TeamMembershipCreateInput is used internally by genqlient
+type __TeamMembershipCreateInput struct {
+	Input *TeamMembershipCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __TeamMembershipCreateInput.Input, and is useful for accessing the field via an interface.
+func (v *__TeamMembershipCreateInput) GetInput() *TeamMembershipCreateInput { return v.Input }
+
+// __TeamMembershipDeleteInput is used internally by genqlient
+type __TeamMembershipDeleteInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __TeamMembershipDeleteInput.Id, and is useful for accessing the field via an interface.
+func (v *__TeamMembershipDeleteInput) GetId() string { return v.Id }
+
+// __TeamMembershipUpdateInput is used internally by genqlient
+type __TeamMembershipUpdateInput struct {
+	Id    string                     `json:"id"`
+	Input *TeamMembershipUpdateInput `json:"input,omitempty"`
+}
+
+// GetId returns __TeamMembershipUpdateInput.Id, and is useful for accessing the field via an interface.
+func (v *__TeamMembershipUpdateInput) GetId() string { return v.Id }
+
+// GetInput returns __TeamMembershipUpdateInput.Input, and is useful for accessing the field via an interface.
+func (v *__TeamMembershipUpdateInput) GetInput() *TeamMembershipUpdateInput { return v.Input }
+
+// __TeamUnarchiveInput is used internally by genqlient
+type __TeamUnarchiveInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __TeamUnarchiveInput.Id, and is useful for accessing the field via an interface.
+func (v *__TeamUnarchiveInput) GetId() string { return v.Id }
+
+// __TeamUpdateInput is used internally by genqlient
+type __TeamUpdateInput struct {
+	Id    string           `json:"id"`
+	Input *TeamUpdateInput `json:"input,omitempty"`
+}
+
+// GetId returns __TeamUpdateInput.Id, and is useful for accessing the field via an interface.
+func (v *__TeamUpdateInput) GetId() string { return v.Id }
+
+// GetInput returns __TeamUpdateInput.Input, and is useful for accessing the field via an interface.
+func (v *__TeamUpdateInput) GetInput() *TeamUpdateInput { return v.Input }
 
 // __UnresolveCommentInput is used internally by genqlient
 type __UnresolveCommentInput struct {
@@ -32359,6 +35889,58 @@ func (v *__UpdateProjectInput) GetId() string { return v.Id }
 
 // GetInput returns __UpdateProjectInput.Input, and is useful for accessing the field via an interface.
 func (v *__UpdateProjectInput) GetInput() *ProjectUpdateInput { return v.Input }
+
+// __UserChangeRoleInput is used internally by genqlient
+type __UserChangeRoleInput struct {
+	Id   string       `json:"id"`
+	Role UserRoleType `json:"role"`
+}
+
+// GetId returns __UserChangeRoleInput.Id, and is useful for accessing the field via an interface.
+func (v *__UserChangeRoleInput) GetId() string { return v.Id }
+
+// GetRole returns __UserChangeRoleInput.Role, and is useful for accessing the field via an interface.
+func (v *__UserChangeRoleInput) GetRole() UserRoleType { return v.Role }
+
+// __UserSettingsUpdateInput is used internally by genqlient
+type __UserSettingsUpdateInput struct {
+	Id    string                   `json:"id"`
+	Input *UserSettingsUpdateInput `json:"input,omitempty"`
+}
+
+// GetId returns __UserSettingsUpdateInput.Id, and is useful for accessing the field via an interface.
+func (v *__UserSettingsUpdateInput) GetId() string { return v.Id }
+
+// GetInput returns __UserSettingsUpdateInput.Input, and is useful for accessing the field via an interface.
+func (v *__UserSettingsUpdateInput) GetInput() *UserSettingsUpdateInput { return v.Input }
+
+// __UserSuspendInput is used internally by genqlient
+type __UserSuspendInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __UserSuspendInput.Id, and is useful for accessing the field via an interface.
+func (v *__UserSuspendInput) GetId() string { return v.Id }
+
+// __UserUnsuspendInput is used internally by genqlient
+type __UserUnsuspendInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __UserUnsuspendInput.Id, and is useful for accessing the field via an interface.
+func (v *__UserUnsuspendInput) GetId() string { return v.Id }
+
+// __UserUpdateInput is used internally by genqlient
+type __UserUpdateInput struct {
+	Id    string           `json:"id"`
+	Input *UserUpdateInput `json:"input,omitempty"`
+}
+
+// GetId returns __UserUpdateInput.Id, and is useful for accessing the field via an interface.
+func (v *__UserUpdateInput) GetId() string { return v.Id }
+
+// GetInput returns __UserUpdateInput.Input, and is useful for accessing the field via an interface.
+func (v *__UserUpdateInput) GetInput() *UserUpdateInput { return v.Input }
 
 // __WorkflowStateArchiveInput is used internally by genqlient
 type __WorkflowStateArchiveInput struct {
@@ -34302,6 +37884,44 @@ func GetIssueReactions(
 	return data_, err_
 }
 
+// The query executed by GetOrganization.
+const GetOrganization_Operation = `
+query GetOrganization {
+	organization {
+		... OrganizationFields
+	}
+}
+fragment OrganizationFields on Organization {
+	id
+	name
+	urlKey
+	userCount
+	createdAt
+	updatedAt
+}
+`
+
+func GetOrganization(
+	ctx_ context.Context,
+	client_ graphql.Client,
+) (data_ *GetOrganizationResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetOrganization",
+		Query:  GetOrganization_Operation,
+	}
+
+	data_ = &GetOrganizationResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The query executed by GetProject.
 const GetProject_Operation = `
 query GetProject ($id: String!) {
@@ -34810,6 +38430,63 @@ func GetTeamMembers(
 	return data_, err_
 }
 
+// The query executed by GetTeamMemberships.
+const GetTeamMemberships_Operation = `
+query GetTeamMemberships ($id: String!, $first: Int, $after: String) {
+	team(id: $id) {
+		id
+		memberships(first: $first, after: $after) {
+			nodes {
+				id
+				owner
+				user {
+					id
+					name
+					email
+				}
+			}
+			pageInfo {
+				hasNextPage
+				endCursor
+			}
+		}
+	}
+}
+`
+
+// Query: Get a team's memberships, used to resolve a membership ID from a user
+// (for `team member remove` and `team set-role`). A team membership's "role" is
+// the owner boolean, not an enum. Paginated because the connection defaults to
+// 50 nodes; resolveTeamMembership walks every page.
+func GetTeamMemberships(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	first *int,
+	after *string,
+) (data_ *GetTeamMembershipsResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetTeamMemberships",
+		Query:  GetTeamMemberships_Operation,
+		Variables: &__GetTeamMembershipsInput{
+			Id:    id,
+			First: first,
+			After: after,
+		},
+	}
+
+	data_ = &GetTeamMembershipsResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The query executed by GetTeamStates.
 const GetTeamStates_Operation = `
 query GetTeamStates ($key: String!) {
@@ -34892,6 +38569,39 @@ func GetUserByEmail(
 	}
 
 	data_ = &GetUserByEmailResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by GetUserSettings.
+const GetUserSettings_Operation = `
+query GetUserSettings {
+	userSettings {
+		id
+	}
+}
+`
+
+// Query: the authenticated user's settings. userSettingsUpdate is keyed on the
+// UserSettings ID (not the user ID), and Linear only exposes the viewer's own
+// settings, so `user settings update` is self-scoped.
+func GetUserSettings(
+	ctx_ context.Context,
+	client_ graphql.Client,
+) (data_ *GetUserSettingsResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetUserSettings",
+		Query:  GetUserSettings_Operation,
+	}
+
+	data_ = &GetUserSettingsResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -37185,6 +40895,65 @@ func ListIssues(
 	return data_, err_
 }
 
+// The query executed by ListOrganizationInvites.
+const ListOrganizationInvites_Operation = `
+query ListOrganizationInvites ($first: Int, $after: String) {
+	organizationInvites(first: $first, after: $after) {
+		nodes {
+			... OrganizationInviteFields
+		}
+		pageInfo {
+			hasNextPage
+			endCursor
+		}
+	}
+}
+fragment OrganizationInviteFields on OrganizationInvite {
+	id
+	email
+	role
+	external
+	createdAt
+	acceptedAt
+	expiresAt
+	inviter {
+		name
+		email
+	}
+	invitee {
+		name
+		email
+	}
+}
+`
+
+func ListOrganizationInvites(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	first *int,
+	after *string,
+) (data_ *ListOrganizationInvitesResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ListOrganizationInvites",
+		Query:  ListOrganizationInvites_Operation,
+		Variables: &__ListOrganizationInvitesInput{
+			First: first,
+			After: after,
+		},
+	}
+
+	data_ = &ListOrganizationInvitesResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The query executed by ListProjectLabels.
 const ListProjectLabels_Operation = `
 query ListProjectLabels ($filter: ProjectLabelFilter, $first: Int) {
@@ -37574,6 +41343,140 @@ func ListUsers(
 	}
 
 	data_ = &ListUsersResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by OrganizationInviteCreate.
+const OrganizationInviteCreate_Operation = `
+mutation OrganizationInviteCreate ($input: OrganizationInviteCreateInput!) {
+	organizationInviteCreate(input: $input) {
+		success
+		organizationInvite {
+			... OrganizationInviteFields
+		}
+	}
+}
+fragment OrganizationInviteFields on OrganizationInvite {
+	id
+	email
+	role
+	external
+	createdAt
+	acceptedAt
+	expiresAt
+	inviter {
+		name
+		email
+	}
+	invitee {
+		name
+		email
+	}
+}
+`
+
+func OrganizationInviteCreate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *OrganizationInviteCreateInput,
+) (data_ *OrganizationInviteCreateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "OrganizationInviteCreate",
+		Query:  OrganizationInviteCreate_Operation,
+		Variables: &__OrganizationInviteCreateInput{
+			Input: input,
+		},
+	}
+
+	data_ = &OrganizationInviteCreateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by OrganizationInviteDelete.
+const OrganizationInviteDelete_Operation = `
+mutation OrganizationInviteDelete ($id: String!) {
+	organizationInviteDelete(id: $id) {
+		success
+		entityId
+	}
+}
+`
+
+func OrganizationInviteDelete(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *OrganizationInviteDeleteResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "OrganizationInviteDelete",
+		Query:  OrganizationInviteDelete_Operation,
+		Variables: &__OrganizationInviteDeleteInput{
+			Id: id,
+		},
+	}
+
+	data_ = &OrganizationInviteDeleteResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by OrganizationUpdate.
+const OrganizationUpdate_Operation = `
+mutation OrganizationUpdate ($input: OrganizationUpdateInput!) {
+	organizationUpdate(input: $input) {
+		success
+		organization {
+			... OrganizationFields
+		}
+	}
+}
+fragment OrganizationFields on Organization {
+	id
+	name
+	urlKey
+	userCount
+	createdAt
+	updatedAt
+}
+`
+
+func OrganizationUpdate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *OrganizationUpdateInput,
+) (data_ *OrganizationUpdateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "OrganizationUpdate",
+		Query:  OrganizationUpdate_Operation,
+		Variables: &__OrganizationUpdateInput{
+			Input: input,
+		},
+	}
+
+	data_ = &OrganizationUpdateResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -38863,6 +42766,41 @@ func ReactionDelete(
 	return data_, err_
 }
 
+// The mutation executed by ResendOrganizationInvite.
+const ResendOrganizationInvite_Operation = `
+mutation ResendOrganizationInvite ($id: String!) {
+	resendOrganizationInvite(id: $id) {
+		success
+		entityId
+	}
+}
+`
+
+func ResendOrganizationInvite(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *ResendOrganizationInviteResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ResendOrganizationInvite",
+		Query:  ResendOrganizationInvite_Operation,
+		Variables: &__ResendOrganizationInviteInput{
+			Id: id,
+		},
+	}
+
+	data_ = &ResendOrganizationInviteResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The mutation executed by ResolveComment.
 const ResolveComment_Operation = `
 mutation ResolveComment ($id: String!) {
@@ -39058,6 +42996,302 @@ func SearchIssues(
 	}
 
 	data_ = &SearchIssuesResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by TeamCreate.
+const TeamCreate_Operation = `
+mutation TeamCreate ($input: TeamCreateInput!) {
+	teamCreate(input: $input) {
+		success
+		team {
+			... TeamDetailFields
+		}
+	}
+}
+fragment TeamDetailFields on Team {
+	id
+	key
+	name
+	description
+	icon
+	color
+	private
+	issueCount
+	cyclesEnabled
+	cycleStartDay
+	cycleDuration
+	upcomingCycleCount
+}
+`
+
+// Mutation: Create a team
+func TeamCreate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *TeamCreateInput,
+) (data_ *TeamCreateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "TeamCreate",
+		Query:  TeamCreate_Operation,
+		Variables: &__TeamCreateInput{
+			Input: input,
+		},
+	}
+
+	data_ = &TeamCreateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by TeamDelete.
+const TeamDelete_Operation = `
+mutation TeamDelete ($id: String!) {
+	teamDelete(id: $id) {
+		success
+		entityId
+	}
+}
+`
+
+// Mutation: Delete a team (executes immediately)
+func TeamDelete(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *TeamDeleteResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "TeamDelete",
+		Query:  TeamDelete_Operation,
+		Variables: &__TeamDeleteInput{
+			Id: id,
+		},
+	}
+
+	data_ = &TeamDeleteResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by TeamMembershipCreate.
+const TeamMembershipCreate_Operation = `
+mutation TeamMembershipCreate ($input: TeamMembershipCreateInput!) {
+	teamMembershipCreate(input: $input) {
+		success
+		teamMembership {
+			id
+			owner
+		}
+	}
+}
+`
+
+// Mutation: Add a user to a team
+func TeamMembershipCreate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *TeamMembershipCreateInput,
+) (data_ *TeamMembershipCreateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "TeamMembershipCreate",
+		Query:  TeamMembershipCreate_Operation,
+		Variables: &__TeamMembershipCreateInput{
+			Input: input,
+		},
+	}
+
+	data_ = &TeamMembershipCreateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by TeamMembershipDelete.
+const TeamMembershipDelete_Operation = `
+mutation TeamMembershipDelete ($id: String!) {
+	teamMembershipDelete(id: $id) {
+		success
+		entityId
+	}
+}
+`
+
+// Mutation: Remove a team membership by its ID
+func TeamMembershipDelete(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *TeamMembershipDeleteResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "TeamMembershipDelete",
+		Query:  TeamMembershipDelete_Operation,
+		Variables: &__TeamMembershipDeleteInput{
+			Id: id,
+		},
+	}
+
+	data_ = &TeamMembershipDeleteResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by TeamMembershipUpdate.
+const TeamMembershipUpdate_Operation = `
+mutation TeamMembershipUpdate ($id: String!, $input: TeamMembershipUpdateInput!) {
+	teamMembershipUpdate(id: $id, input: $input) {
+		success
+		teamMembership {
+			id
+			owner
+		}
+	}
+}
+`
+
+// Mutation: Update a team membership (its owner flag)
+func TeamMembershipUpdate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	input *TeamMembershipUpdateInput,
+) (data_ *TeamMembershipUpdateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "TeamMembershipUpdate",
+		Query:  TeamMembershipUpdate_Operation,
+		Variables: &__TeamMembershipUpdateInput{
+			Id:    id,
+			Input: input,
+		},
+	}
+
+	data_ = &TeamMembershipUpdateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by TeamUnarchive.
+const TeamUnarchive_Operation = `
+mutation TeamUnarchive ($id: String!) {
+	teamUnarchive(id: $id) {
+		success
+		entity {
+			id
+		}
+	}
+}
+`
+
+// Mutation: Restore an archived/deleted team
+func TeamUnarchive(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *TeamUnarchiveResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "TeamUnarchive",
+		Query:  TeamUnarchive_Operation,
+		Variables: &__TeamUnarchiveInput{
+			Id: id,
+		},
+	}
+
+	data_ = &TeamUnarchiveResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by TeamUpdate.
+const TeamUpdate_Operation = `
+mutation TeamUpdate ($id: String!, $input: TeamUpdateInput!) {
+	teamUpdate(id: $id, input: $input) {
+		success
+		team {
+			... TeamDetailFields
+		}
+	}
+}
+fragment TeamDetailFields on Team {
+	id
+	key
+	name
+	description
+	icon
+	color
+	private
+	issueCount
+	cyclesEnabled
+	cycleStartDay
+	cycleDuration
+	upcomingCycleCount
+}
+`
+
+// Mutation: Update a team
+func TeamUpdate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	input *TeamUpdateInput,
+) (data_ *TeamUpdateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "TeamUpdate",
+		Query:  TeamUpdate_Operation,
+		Variables: &__TeamUpdateInput{
+			Id:    id,
+			Input: input,
+		},
+	}
+
+	data_ = &TeamUpdateResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -39446,6 +43680,202 @@ func UpdateProject(
 	}
 
 	data_ = &UpdateProjectResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by UserChangeRole.
+const UserChangeRole_Operation = `
+mutation UserChangeRole ($id: String!, $role: UserRoleType!) {
+	userChangeRole(id: $id, role: $role) {
+		success
+	}
+}
+`
+
+// Mutation: Change a user's organization role (owner|admin|guest|user|app).
+// Distinct from team membership ownership; returns success only.
+func UserChangeRole(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	role UserRoleType,
+) (data_ *UserChangeRoleResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "UserChangeRole",
+		Query:  UserChangeRole_Operation,
+		Variables: &__UserChangeRoleInput{
+			Id:   id,
+			Role: role,
+		},
+	}
+
+	data_ = &UserChangeRoleResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by UserSettingsUpdate.
+const UserSettingsUpdate_Operation = `
+mutation UserSettingsUpdate ($id: String!, $input: UserSettingsUpdateInput!) {
+	userSettingsUpdate(id: $id, input: $input) {
+		success
+	}
+}
+`
+
+// Mutation: Update the authenticated user's settings
+func UserSettingsUpdate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	input *UserSettingsUpdateInput,
+) (data_ *UserSettingsUpdateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "UserSettingsUpdate",
+		Query:  UserSettingsUpdate_Operation,
+		Variables: &__UserSettingsUpdateInput{
+			Id:    id,
+			Input: input,
+		},
+	}
+
+	data_ = &UserSettingsUpdateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by UserSuspend.
+const UserSuspend_Operation = `
+mutation UserSuspend ($id: String!) {
+	userSuspend(id: $id) {
+		success
+	}
+}
+`
+
+// Mutation: Suspend a user (executes immediately)
+func UserSuspend(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *UserSuspendResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "UserSuspend",
+		Query:  UserSuspend_Operation,
+		Variables: &__UserSuspendInput{
+			Id: id,
+		},
+	}
+
+	data_ = &UserSuspendResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by UserUnsuspend.
+const UserUnsuspend_Operation = `
+mutation UserUnsuspend ($id: String!) {
+	userUnsuspend(id: $id) {
+		success
+	}
+}
+`
+
+// Mutation: Unsuspend a user
+func UserUnsuspend(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *UserUnsuspendResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "UserUnsuspend",
+		Query:  UserUnsuspend_Operation,
+		Variables: &__UserUnsuspendInput{
+			Id: id,
+		},
+	}
+
+	data_ = &UserUnsuspendResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by UserUpdate.
+const UserUpdate_Operation = `
+mutation UserUpdate ($id: String!, $input: UserUpdateInput!) {
+	userUpdate(id: $id, input: $input) {
+		success
+		user {
+			... UserDetailFields
+		}
+	}
+}
+fragment UserDetailFields on User {
+	id
+	name
+	email
+	avatarUrl
+	displayName
+	isMe
+	active
+	admin
+	createdAt
+}
+`
+
+// Mutation: Update a user's profile
+func UserUpdate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	input *UserUpdateInput,
+) (data_ *UserUpdateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "UserUpdate",
+		Query:  UserUpdate_Operation,
+		Variables: &__UserUpdateInput{
+			Id:    id,
+			Input: input,
+		},
+	}
+
+	data_ = &UserUpdateResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(

@@ -18,6 +18,10 @@ import (
 type mockGraphQLClient struct {
 	// responses maps operation name -> raw JSON to unmarshal into resp.Data.
 	responses map[string]string
+	// responseFuncs maps operation name -> a function of the request variables
+	// returning the raw JSON. Used to vary responses by input (e.g. paginating
+	// on the `after` cursor). Takes precedence over responses.
+	responseFuncs map[string]func(vars map[string]interface{}) string
 	// errors maps operation name -> error to return instead of a response.
 	errors map[string]error
 	// calls records the operation name of every MakeRequest invocation, in order.
@@ -26,8 +30,9 @@ type mockGraphQLClient struct {
 
 func newMockGraphQLClient() *mockGraphQLClient {
 	return &mockGraphQLClient{
-		responses: make(map[string]string),
-		errors:    make(map[string]error),
+		responses:     make(map[string]string),
+		responseFuncs: make(map[string]func(vars map[string]interface{}) string),
+		errors:        make(map[string]error),
 	}
 }
 
@@ -36,6 +41,18 @@ func (m *mockGraphQLClient) MakeRequest(_ context.Context, req *graphql.Request,
 
 	if err, ok := m.errors[req.OpName]; ok {
 		return err
+	}
+
+	if fn, ok := m.responseFuncs[req.OpName]; ok {
+		// Normalize the generated input struct to a map so tests can read
+		// variables (e.g. the `after` cursor) without importing its type.
+		vars := map[string]interface{}{}
+		if req.Variables != nil {
+			if b, err := json.Marshal(req.Variables); err == nil {
+				_ = json.Unmarshal(b, &vars)
+			}
+		}
+		return json.Unmarshal([]byte(fn(vars)), resp.Data)
 	}
 
 	raw, ok := m.responses[req.OpName]
@@ -1141,6 +1158,81 @@ func TestResolveCycle_CacheHit(t *testing.T) {
 	}
 	if client.callCount("ListCycles") != 1 {
 		t.Errorf("expected cache hit to avoid a second ListCycles call, total calls = %d", client.callCount("ListCycles"))
+	}
+}
+
+// --- resolveTeamMembership ---
+//
+// Team and user are passed as UUIDs so resolveTeam/resolveUser short-circuit
+// without API calls, isolating the membership lookup.
+
+func TestResolveTeamMembership_Found(t *testing.T) {
+	client := newMockGraphQLClient()
+	teamID := "550e8400-e29b-41d4-a716-446655440000"
+	userID := "660e8400-e29b-41d4-a716-446655440000"
+	client.responses["GetTeamMemberships"] = `{"team": {"id": "` + teamID + `", "memberships": {"nodes": [
+		{"id": "mem-other", "owner": false, "user": {"id": "770e8400-e29b-41d4-a716-446655440000", "name": "Other", "email": "other@example.com"}},
+		{"id": "mem-mine", "owner": true, "user": {"id": "` + userID + `", "name": "Jane", "email": "jane@example.com"}}
+	], "pageInfo": {"hasNextPage": false, "endCursor": null}}}}`
+	cache := newResolverCache()
+
+	got, err := resolveTeamMembership(context.Background(), client, cache, teamID, userID)
+	if err != nil {
+		t.Fatalf("resolveTeamMembership() error = %v", err)
+	}
+	if got != "mem-mine" {
+		t.Errorf("resolveTeamMembership() = %q, want %q", got, "mem-mine")
+	}
+}
+
+func TestResolveTeamMembership_NotFound(t *testing.T) {
+	client := newMockGraphQLClient()
+	teamID := "550e8400-e29b-41d4-a716-446655440000"
+	userID := "660e8400-e29b-41d4-a716-446655440000"
+	client.responses["GetTeamMemberships"] = `{"team": {"id": "` + teamID + `", "memberships": {"nodes": [
+		{"id": "mem-other", "owner": false, "user": {"id": "770e8400-e29b-41d4-a716-446655440000", "name": "Other", "email": "other@example.com"}}
+	], "pageInfo": {"hasNextPage": false, "endCursor": null}}}}`
+	cache := newResolverCache()
+
+	_, err := resolveTeamMembership(context.Background(), client, cache, teamID, userID)
+	if err == nil {
+		t.Fatal("expected error when the user is not a team member, got nil")
+	}
+	if !strings.Contains(err.Error(), "not a member") {
+		t.Errorf("expected a 'not a member' error, got: %v", err)
+	}
+}
+
+// The membership connection defaults to 50 per page; resolveTeamMembership must
+// page through until it finds the user. This registers a two-page response that
+// only yields the target on page 2, keyed off the `after` cursor.
+func TestResolveTeamMembership_Paginates(t *testing.T) {
+	client := newMockGraphQLClient()
+	teamID := "550e8400-e29b-41d4-a716-446655440000"
+	userID := "660e8400-e29b-41d4-a716-446655440000"
+	client.responseFuncs["GetTeamMemberships"] = func(vars map[string]interface{}) string {
+		if vars["after"] == nil {
+			// Page 1: target absent, more pages available.
+			return `{"team": {"id": "` + teamID + `", "memberships": {"nodes": [
+				{"id": "mem-1", "owner": false, "user": {"id": "770e8400-e29b-41d4-a716-446655440000", "name": "Other", "email": "other@example.com"}}
+			], "pageInfo": {"hasNextPage": true, "endCursor": "cursor-1"}}}}`
+		}
+		// Page 2 (after=cursor-1): target present, no more pages.
+		return `{"team": {"id": "` + teamID + `", "memberships": {"nodes": [
+			{"id": "mem-target", "owner": true, "user": {"id": "` + userID + `", "name": "Jane", "email": "jane@example.com"}}
+		], "pageInfo": {"hasNextPage": false, "endCursor": null}}}}`
+	}
+	cache := newResolverCache()
+
+	got, err := resolveTeamMembership(context.Background(), client, cache, teamID, userID)
+	if err != nil {
+		t.Fatalf("resolveTeamMembership() error = %v", err)
+	}
+	if got != "mem-target" {
+		t.Errorf("resolveTeamMembership() = %q, want %q", got, "mem-target")
+	}
+	if client.callCount("GetTeamMemberships") != 2 {
+		t.Errorf("expected 2 GetTeamMemberships calls (paged), got %d", client.callCount("GetTeamMemberships"))
 	}
 }
 

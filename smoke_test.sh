@@ -201,6 +201,13 @@ run_test "document list (plaintext)" "go run main.go document list --limit 5 -p"
 run_test "document search" "go run main.go document search test --limit 5"
 run_test "document search (json)" "go run main.go document search test --limit 5 -j"
 
+# Test org commands (Tier 3)
+echo -e "\n${YELLOW}Testing org commands...${NC}"
+run_test "org get" "go run main.go org get"
+run_test "org get (json)" "go run main.go org get -j" "\"urlKey\""
+run_test "org get (plaintext)" "go run main.go org get -p" "# "
+run_test "org invite list" "go run main.go org invite list --limit 5"
+
 # Test help commands
 echo -e "\n${YELLOW}Testing help commands...${NC}"
 run_test "help" "go run main.go --help" "Usage:"
@@ -213,6 +220,9 @@ run_test "label help" "go run main.go label --help" "Available Commands:"
 run_test "state help" "go run main.go state --help" "Available Commands:"
 run_test "document help" "go run main.go document --help" "Available Commands:"
 run_test "comment help" "go run main.go comment --help" "resolve"
+run_test "org help" "go run main.go org --help" "Available Commands:"
+run_test "team help (set-role)" "go run main.go team --help" "set-role"
+run_test "user help (suspend)" "go run main.go user --help" "suspend"
 
 # Test unknown command handling
 echo -e "\n${YELLOW}Testing error handling...${NC}"
