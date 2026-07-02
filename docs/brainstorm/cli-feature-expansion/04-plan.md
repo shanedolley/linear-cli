@@ -44,8 +44,9 @@ Total recommended subtasks: 52.
 
 ## Execution status
 
-Tasks 1-11 complete (Tiers 1-5 done); task 12 (docs + final verification)
-remains (authoritative status: `.execution-state.json` and task-master).
+All 12 tasks complete (Tiers 1-5 shipped; docs and final verification done).
+Final gate: `make build` clean, `go vet` clean, all `go test` pass, 126/126
+smoke tests pass, 32 top-level commands registered, SD sandbox clean.
 
 Plan-gate deferrals recorded so far:
 

@@ -799,7 +799,7 @@
         "dependencies": [
           "11"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -837,14 +837,15 @@
         ],
         "complexity": 4,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down into: (1) Update README.md with command reference for all new domains and workflow examples, (2) Update CLAUDE.md and create/extend local instruction files with new patterns (nested groups, resolver conventions, three-mode output), (3) Run final verification - complete smoke suite (~75+ tests), make build, manual documentation accuracy check, cleanup test artifacts."
+        "expansionPrompt": "Break down into: (1) Update README.md with command reference for all new domains and workflow examples, (2) Update CLAUDE.md and create/extend local instruction files with new patterns (nested groups, resolver conventions, three-mode output), (3) Run final verification - complete smoke suite (~75+ tests), make build, manual documentation accuracy check, cleanup test artifacts.",
+        "updatedAt": "2026-07-02T07:42:31.048Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-02T07:28:38.478Z",
+      "lastModified": "2026-07-02T07:42:31.052Z",
       "taskCount": 12,
-      "completedCount": 11,
+      "completedCount": 12,
       "tags": [
         "master"
       ]

@@ -4,10 +4,10 @@
   "branch": "feature/cli-feature-expansion",
   "totalTasks": 12,
   "totalSubtasks": 52,
-  "completed": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+  "completed": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
   "inProgress": null,
-  "milestone": "Tier 5 (task 11) complete: rate-limit (real rateLimitStatus, placeholder removed), audit list/types, search projects/semantic, link add/get/update/remove, sla list (read-only), user external list/get, view prefs create/update/delete, issue relate update, user settings update (added dpa/privacy-legal). Nothing deferred: every Tier 5 op was available on the plan. All 126 smoke tests pass; write CRUD verified in SD sandbox. Task 12 (docs + final verification) remains.",
-  "status": "in_progress",
+  "milestone": "All 12 tasks complete. Task 12 (docs + final verification): README and CLAUDE.md now cover every command domain across Tiers 1-5, with a name-or-ID note and the three output modes; stale 'coming soon' notes for issue archive and project create removed. Final gate green: make build clean, go vet clean, all go test pass, 126/126 smoke tests pass, 32 top-level commands registered, SD sandbox clean (no orphaned artifacts).",
+  "status": "all_tasks_complete",
   "sandbox": { "project": "lincli-sandbox", "team": "SD", "teamId": "d5b746fb-e47d-48c0-a299-ca5ecb6d33f2" },
   "planGate": {
     "task8_tier4a": {
