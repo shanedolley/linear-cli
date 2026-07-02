@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
@@ -21,14 +22,23 @@ var issueCmd = &cobra.Command{
 	Short: "Manage Linear issues",
 	Long: `Create, list, update, and manage Linear issues.
 
+Beyond the basics, issues support lifecycle actions (archive, unarchive,
+delete, subscribe, unsubscribe, reminder, share, unshare), linking, and bulk
+operations (batch-create, batch-update).
+
 Examples:
   lincli issue list --assignee me --state "In Progress"
-  lincli issue ls -a me -s "In Progress"
-  lincli issue list --include-completed  # Show all issues including completed
-  lincli issue list --newer-than 3_weeks_ago  # Show issues from last 3 weeks
+  lincli issue list --include-completed        # Include completed issues
   lincli issue search "login bug" --team ENG
   lincli issue get LIN-123
-  lincli issue create --title "Bug fix" --team ENG`,
+  lincli issue create --title "Bug fix" --team ENG --label Bug --estimate 3
+  lincli issue update LIN-123 --state Done --cycle 12
+  lincli issue archive LIN-123
+  lincli issue subscribe LIN-123
+  lincli issue reminder LIN-123 --at 2026-08-01
+  lincli issue share LIN-123 --user teammate@example.com
+  lincli issue batch-create --file issues.csv
+  lincli issue batch-update ENG-1 ENG-2 --state Done`,
 }
 
 var issueListCmd = &cobra.Command{
@@ -824,6 +834,11 @@ func buildIssueCreateInput(cmd *cobra.Command, teamID string) api.IssueCreateInp
 		input.Priority = &priority
 	}
 
+	if cmd.Flags().Changed("estimate") {
+		estimate, _ := cmd.Flags().GetInt("estimate")
+		input.Estimate = &estimate
+	}
+
 	return input
 }
 
@@ -846,7 +861,40 @@ func buildIssueUpdateInput(cmd *cobra.Command) api.IssueUpdateInput {
 		input.Priority = &priority
 	}
 
+	if cmd.Flags().Changed("estimate") {
+		estimate, _ := cmd.Flags().GetInt("estimate")
+		input.Estimate = &estimate
+	}
+
 	return input
+}
+
+// resolveIssueLabels resolves each --label value to a label ID, returning the
+// ID slice for use as IssueCreateInput.LabelIds / IssueUpdateInput.LabelIds.
+// A resolution failure aborts the command (matching the other flag handlers).
+func resolveIssueLabels(ctx context.Context, client *api.Client, cache *ResolverCache, cmd *cobra.Command, plaintext, jsonOut bool) []string {
+	labels, _ := cmd.Flags().GetStringSlice("label")
+	ids := make([]string, 0, len(labels))
+	for _, label := range labels {
+		id, err := resolveLabel(ctx, client, cache, label)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to find label '%s': %v", label, err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		ids = append(ids, id)
+	}
+	return ids
+}
+
+// resolveParentIssueID resolves a parent issue reference (identifier or UUID)
+// to its UUID via GetIssue, matching how `issue link` resolves parents.
+func resolveParentIssueID(ctx context.Context, client *api.Client, ref string, plaintext, jsonOut bool) string {
+	resp, err := api.GetIssue(ctx, client, ref)
+	if err != nil {
+		output.Error(fmt.Sprintf("Failed to find parent issue '%s': %v", ref, err), plaintext, jsonOut)
+		os.Exit(1)
+	}
+	return resp.Issue.IssueDetailFields.Id
 }
 
 var issueAssignCmd = &cobra.Command{
@@ -904,7 +952,19 @@ var issueCreateCmd = &cobra.Command{
 	Use:     "create",
 	Aliases: []string{"new"},
 	Short:   "Create a new issue",
-	Long:    `Create a new issue in Linear.`,
+	Long: `Create a new issue in Linear. --title and --team are required.
+
+Optional fields resolve human-friendly references to IDs: --assignee (email,
+name, or 'me'), --state, --project, --label (repeatable), --cycle (number or
+name within the team), --parent (issue identifier), and --milestone (which
+requires --project, since a milestone belongs to a project).
+
+Examples:
+  lincli issue create --title "Fix login" --team ENG
+  lincli issue create --title "Fix login" --team ENG --assignee me --priority 1
+  lincli issue create --title "Fix login" --team ENG --label Bug --label Backend --estimate 3
+  lincli issue create --title "Sub-task" --team ENG --parent ENG-100
+  lincli issue create --title "Roadmap item" --team ENG --project "Q3" --milestone "Beta"`,
 	Run: func(cmd *cobra.Command, args []string) {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
@@ -953,6 +1013,77 @@ var issueCreateCmd = &cobra.Command{
 			input.AssigneeId = &viewerID
 		}
 
+		// --assignee (explicit) takes precedence over --assign-me.
+		if cmd.Flags().Changed("assignee") {
+			assignee, _ := cmd.Flags().GetString("assignee")
+			userID, err := resolveUser(ctx, client, cache, assignee)
+			if err != nil {
+				output.Error(err.Error(), plaintext, jsonOut)
+				os.Exit(1)
+			}
+			input.AssigneeId = &userID
+		}
+
+		if cmd.Flags().Changed("state") {
+			stateName, _ := cmd.Flags().GetString("state")
+			stateID, err := resolveWorkflowState(ctx, client, cache, teamID, stateName)
+			if err != nil {
+				output.Error(err.Error(), plaintext, jsonOut)
+				os.Exit(1)
+			}
+			input.StateId = &stateID
+		}
+
+		if dueDate, _ := cmd.Flags().GetString("due-date"); dueDate != "" {
+			input.DueDate = &dueDate
+		}
+
+		if cmd.Flags().Changed("label") {
+			input.LabelIds = resolveIssueLabels(ctx, client, cache, cmd, plaintext, jsonOut)
+		}
+
+		if cmd.Flags().Changed("cycle") {
+			cycle, _ := cmd.Flags().GetString("cycle")
+			cycleID, err := resolveCycle(ctx, client, cache, teamID, cycle)
+			if err != nil {
+				output.Error(err.Error(), plaintext, jsonOut)
+				os.Exit(1)
+			}
+			input.CycleId = &cycleID
+		}
+
+		if cmd.Flags().Changed("parent") {
+			parent, _ := cmd.Flags().GetString("parent")
+			parentID := resolveParentIssueID(ctx, client, parent, plaintext, jsonOut)
+			input.ParentId = &parentID
+		}
+
+		// --project resolves the target project; a milestone (if given) must
+		// belong to it, so it is resolved after the project is known.
+		if cmd.Flags().Changed("project") {
+			projectName, _ := cmd.Flags().GetString("project")
+			projectID, err := resolveProject(ctx, client, cache, projectName)
+			if err != nil {
+				output.Error(err.Error(), plaintext, jsonOut)
+				os.Exit(1)
+			}
+			input.ProjectId = &projectID
+		}
+
+		if cmd.Flags().Changed("milestone") {
+			if input.ProjectId == nil {
+				output.Error("--milestone requires --project (a milestone belongs to a project)", plaintext, jsonOut)
+				os.Exit(1)
+			}
+			milestone, _ := cmd.Flags().GetString("milestone")
+			milestoneID, err := resolveMilestone(ctx, client, cache, *input.ProjectId, milestone)
+			if err != nil {
+				output.Error(err.Error(), plaintext, jsonOut)
+				os.Exit(1)
+			}
+			input.ProjectMilestoneId = &milestoneID
+		}
+
 		// Create issue
 		createResp, err := api.CreateIssue(ctx, client, &input)
 		if err != nil {
@@ -993,7 +1124,11 @@ Examples:
   lincli issue update LIN-123 --due-date "2024-12-31"
   lincli issue update LIN-123 --title "New title" --assignee me --priority 2
   lincli issue update LIN-123 --project "Q1 Roadmap"
-  lincli issue update LIN-123 --project none`,
+  lincli issue update LIN-123 --project none
+  lincli issue update LIN-123 --label Bug --label Backend --estimate 5
+  lincli issue update LIN-123 --cycle 12 --milestone "Beta"
+  lincli issue update LIN-123 --parent ENG-100
+  lincli issue update LIN-123 --parent none`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		plaintext := viper.GetBool("plaintext")
@@ -1017,9 +1152,11 @@ Examples:
 			assignee, _ := cmd.Flags().GetString("assignee")
 			switch assignee {
 			case "unassigned", "":
-				// Set to nil to unassign
-				var nilID *string
-				input.AssigneeId = nilID
+				// Clear the assignee. Use the null sentinel, not a bare nil
+				// pointer: the client strips nil fields, so a nil pointer here
+				// would be a silent no-op (see api.NullSentinel).
+				nullVal := api.NullSentinel
+				input.AssigneeId = &nullVal
 			default:
 				// "me" and email/name lookups are both handled by resolveUser.
 				userID, err := resolveUser(ctx, client, cache, assignee)
@@ -1031,24 +1168,34 @@ Examples:
 			}
 		}
 
-		// Handle state update - uses embedded workflow states from GetIssue
+		// The issue's own record (team, project, embedded states) is needed to
+		// resolve --state, --cycle by number/name, and --milestone by name.
+		// Fetch it at most once and reuse it across those handlers.
+		var issueDetail *api.IssueDetailFields
+		getIssueDetail := func() *api.IssueDetailFields {
+			if issueDetail == nil {
+				issueResp, err := api.GetIssue(ctx, client, args[0])
+				if err != nil {
+					output.Error(fmt.Sprintf("Failed to get issue: %v", err), plaintext, jsonOut)
+					os.Exit(1)
+				}
+				issueDetail = &issueResp.Issue.IssueDetailFields
+			}
+			return issueDetail
+		}
+
+		// Handle state update - uses workflow states embedded in the issue.
 		if cmd.Flags().Changed("state") {
 			stateName, _ := cmd.Flags().GetString("state")
 
-			// Get the issue to access embedded team workflow states (no extra API call)
-			issueResp, err := api.GetIssue(ctx, client, args[0])
-			if err != nil {
-				output.Error(fmt.Sprintf("Failed to get issue: %v", err), plaintext, jsonOut)
-				os.Exit(1)
-			}
-			issue := issueResp.Issue
-			teamKey := issue.IssueDetailFields.Team.Key
+			detail := getIssueDetail()
+			teamKey := detail.Team.Key
 
 			// Seed the resolver cache with the states embedded in the issue
 			// response so resolveWorkflowState matches against them without
 			// making a separate GetTeamStates request.
-			embeddedStates := make([]workflowStateInfo, 0, len(issue.IssueDetailFields.Team.States.Nodes))
-			for _, state := range issue.IssueDetailFields.Team.States.Nodes {
+			embeddedStates := make([]workflowStateInfo, 0, len(detail.Team.States.Nodes))
+			for _, state := range detail.Team.States.Nodes {
 				embeddedStates = append(embeddedStates, workflowStateInfo{id: state.Id, name: state.Name})
 			}
 			cache.states[teamKey] = embeddedStates
@@ -1091,14 +1238,74 @@ Examples:
 			}
 		}
 
+		if cmd.Flags().Changed("label") {
+			input.LabelIds = resolveIssueLabels(ctx, client, cache, cmd, plaintext, jsonOut)
+		}
+
+		// --cycle resolves within the issue's team (unless a UUID is given).
+		// resolveCycle filters by team ID, so pass the issue's team UUID.
+		if cmd.Flags().Changed("cycle") {
+			cycle, _ := cmd.Flags().GetString("cycle")
+			teamID := ""
+			if !isUUID(cycle) {
+				teamID = getIssueDetail().Team.Id
+			}
+			cycleID, err := resolveCycle(ctx, client, cache, teamID, cycle)
+			if err != nil {
+				output.Error(err.Error(), plaintext, jsonOut)
+				os.Exit(1)
+			}
+			input.CycleId = &cycleID
+		}
+
+		// --milestone resolves within the issue's project (unless a UUID is
+		// given). An issue with no project can't resolve a milestone by name.
+		if cmd.Flags().Changed("milestone") {
+			milestone, _ := cmd.Flags().GetString("milestone")
+			if isUUID(milestone) {
+				input.ProjectMilestoneId = &milestone
+			} else {
+				detail := getIssueDetail()
+				if detail.Project == nil {
+					output.Error("Cannot resolve --milestone by name: the issue is not in a project. Pass a milestone UUID instead.", plaintext, jsonOut)
+					os.Exit(1)
+				}
+				milestoneID, err := resolveMilestone(ctx, client, cache, detail.Project.Id, milestone)
+				if err != nil {
+					output.Error(err.Error(), plaintext, jsonOut)
+					os.Exit(1)
+				}
+				input.ProjectMilestoneId = &milestoneID
+			}
+		}
+
+		// --parent sets or clears the parent issue. "none" clears it. Clearing
+		// needs the null sentinel: a bare nil pointer is stripped by the client
+		// and would be a silent no-op (see api.NullSentinel).
+		if cmd.Flags().Changed("parent") {
+			parent, _ := cmd.Flags().GetString("parent")
+			if strings.EqualFold(parent, "none") || parent == "" {
+				nullVal := api.NullSentinel
+				input.ParentId = &nullVal
+			} else {
+				parentID := resolveParentIssueID(ctx, client, parent, plaintext, jsonOut)
+				input.ParentId = &parentID
+			}
+		}
+
 		// Check if any updates were specified (check all pointer fields)
 		hasUpdates := input.Title != nil ||
 			input.Description != nil ||
 			input.Priority != nil ||
+			input.Estimate != nil ||
 			input.AssigneeId != nil ||
 			input.StateId != nil ||
 			input.DueDate != nil ||
-			cmd.Flags().Changed("project")
+			input.LabelIds != nil ||
+			input.CycleId != nil ||
+			input.ProjectMilestoneId != nil ||
+			cmd.Flags().Changed("project") ||
+			cmd.Flags().Changed("parent")
 
 		if !hasUpdates {
 			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
@@ -1121,6 +1328,348 @@ Examples:
 			output.Success(fmt.Sprintf("Updated issue %s", updatedIssue.IssueListFields.Identifier), plaintext, jsonOut)
 		}
 	},
+}
+
+var issueArchiveCmd = &cobra.Command{
+	Use:   "archive [issue-id]",
+	Short: "Archive an issue",
+	Long: `Archive an issue. Use --trash to move it to trash (a soft delete with a
+30-day grace period) instead of a plain archive.`,
+	Args: cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+
+		var trashPtr *bool
+		if trash, _ := cmd.Flags().GetBool("trash"); trash {
+			trashPtr = &trash
+		}
+
+		resp, err := api.IssueArchive(ctx, client, args[0], trashPtr)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to archive issue: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.IssueArchive.Success {
+			output.Error("Failed to archive issue", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if jsonOut {
+			output.JSON(map[string]interface{}{"success": true, "id": args[0]})
+		} else {
+			output.Success(fmt.Sprintf("Archived issue %s", args[0]), plaintext, jsonOut)
+		}
+	},
+}
+
+var issueUnarchiveCmd = &cobra.Command{
+	Use:   "unarchive [issue-id]",
+	Short: "Unarchive an issue",
+	Long:  `Restore a previously archived issue.`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+
+		resp, err := api.IssueUnarchive(ctx, client, args[0])
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to unarchive issue: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.IssueUnarchive.Success {
+			output.Error("Failed to unarchive issue", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if jsonOut {
+			output.JSON(map[string]interface{}{"success": true, "id": args[0]})
+		} else {
+			output.Success(fmt.Sprintf("Unarchived issue %s", args[0]), plaintext, jsonOut)
+		}
+	},
+}
+
+var issueDeleteCmd = &cobra.Command{
+	Use:   "delete [issue-id]",
+	Short: "Delete an issue",
+	Long: `Delete (trash) an issue. This action executes immediately with no
+confirmation prompt. Use --permanent to skip the 30-day grace period (admin
+only).`,
+	Args: cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+
+		var permanentPtr *bool
+		if permanent, _ := cmd.Flags().GetBool("permanent"); permanent {
+			permanentPtr = &permanent
+		}
+
+		resp, err := api.IssueDelete(ctx, client, args[0], permanentPtr)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to delete issue: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.IssueDelete.Success {
+			output.Error("Failed to delete issue", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if jsonOut {
+			output.JSON(map[string]interface{}{"success": true, "id": args[0]})
+		} else {
+			output.Success(fmt.Sprintf("Deleted issue %s", args[0]), plaintext, jsonOut)
+		}
+	},
+}
+
+var issueSubscribeCmd = &cobra.Command{
+	Use:   "subscribe [issue-id]",
+	Short: "Subscribe a user to an issue",
+	Long:  `Subscribe a user to an issue. Defaults to yourself; use --user to subscribe someone else.`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		runIssueSubscription(cmd, args[0], true)
+	},
+}
+
+var issueUnsubscribeCmd = &cobra.Command{
+	Use:   "unsubscribe [issue-id]",
+	Short: "Unsubscribe a user from an issue",
+	Long:  `Unsubscribe a user from an issue. Defaults to yourself; use --user to unsubscribe someone else.`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		runIssueSubscription(cmd, args[0], false)
+	},
+}
+
+// runIssueSubscription handles subscribe/unsubscribe, which share the same
+// shape. --user is optional; when omitted, Linear defaults to the current user.
+func runIssueSubscription(cmd *cobra.Command, issueID string, subscribe bool) {
+	plaintext := viper.GetBool("plaintext")
+	jsonOut := viper.GetBool("json")
+
+	authHeader, err := auth.GetAuthHeader()
+	if err != nil {
+		output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
+		os.Exit(1)
+	}
+
+	client := api.NewClient(authHeader)
+	ctx := context.Background()
+	cache := newResolverCache()
+
+	var userIDPtr *string
+	if user, _ := cmd.Flags().GetString("user"); user != "" {
+		userID, err := resolveUser(ctx, client, cache, user)
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		userIDPtr = &userID
+	}
+
+	var success bool
+	if subscribe {
+		resp, err := api.IssueSubscribe(ctx, client, issueID, userIDPtr)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to subscribe to issue: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		success = resp.IssueSubscribe.Success
+	} else {
+		resp, err := api.IssueUnsubscribe(ctx, client, issueID, userIDPtr)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to unsubscribe from issue: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		success = resp.IssueUnsubscribe.Success
+	}
+
+	verb := "Subscribed to"
+	if !subscribe {
+		verb = "Unsubscribed from"
+	}
+	if !success {
+		output.Error(fmt.Sprintf("Failed to change subscription for issue %s", issueID), plaintext, jsonOut)
+		os.Exit(1)
+	}
+
+	if jsonOut {
+		output.JSON(map[string]interface{}{"success": true, "id": issueID})
+	} else {
+		output.Success(fmt.Sprintf("%s issue %s", verb, issueID), plaintext, jsonOut)
+	}
+}
+
+var issueReminderCmd = &cobra.Command{
+	Use:   "reminder [issue-id]",
+	Short: "Set a reminder on an issue",
+	Long: `Schedule a reminder notification for an issue at a given time.
+
+Examples:
+  lincli issue reminder LIN-123 --at 2026-08-01
+  lincli issue reminder LIN-123 --at 2026-08-01T09:00:00Z`,
+	Args: cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+
+		at, _ := cmd.Flags().GetString("at")
+		if at == "" {
+			output.Error("Reminder time is required (--at)", plaintext, jsonOut)
+			os.Exit(1)
+		}
+		reminderAt, err := parseDateTimeFlag(at)
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		resp, err := api.IssueReminder(ctx, client, args[0], reminderAt)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to set reminder: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if !resp.IssueReminder.Success {
+			output.Error("Failed to set reminder", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if jsonOut {
+			output.JSON(map[string]interface{}{"success": true, "id": args[0], "reminderAt": reminderAt.Format(time.RFC3339)})
+		} else {
+			output.Success(fmt.Sprintf("Set reminder on issue %s for %s", args[0], reminderAt.Format("2006-01-02 15:04")), plaintext, jsonOut)
+		}
+	},
+}
+
+var issueShareCmd = &cobra.Command{
+	Use:   "share [issue-id]",
+	Short: "Share an issue with a user",
+	Long:  `Share an issue with a specific user. --user is required.`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		runIssueShare(cmd, args[0], true)
+	},
+}
+
+var issueUnshareCmd = &cobra.Command{
+	Use:   "unshare [issue-id]",
+	Short: "Stop sharing an issue with a user",
+	Long:  `Stop sharing an issue with a specific user. --user is required.`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		runIssueShare(cmd, args[0], false)
+	},
+}
+
+// runIssueShare handles share/unshare, which both require a target --user.
+func runIssueShare(cmd *cobra.Command, issueID string, share bool) {
+	plaintext := viper.GetBool("plaintext")
+	jsonOut := viper.GetBool("json")
+
+	authHeader, err := auth.GetAuthHeader()
+	if err != nil {
+		output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
+		os.Exit(1)
+	}
+
+	client := api.NewClient(authHeader)
+	ctx := context.Background()
+	cache := newResolverCache()
+
+	user, _ := cmd.Flags().GetString("user")
+	if user == "" {
+		output.Error("A target user is required (--user)", plaintext, jsonOut)
+		os.Exit(1)
+	}
+	userID, err := resolveUser(ctx, client, cache, user)
+	if err != nil {
+		output.Error(err.Error(), plaintext, jsonOut)
+		os.Exit(1)
+	}
+
+	var success bool
+	var shareURL string
+	if share {
+		resp, err := api.IssueShare(ctx, client, issueID, userID)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to share issue: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		success = resp.IssueShare.Success
+		if resp.IssueShare.Issue != nil {
+			shareURL = resp.IssueShare.Issue.IssueListFields.Url
+		}
+	} else {
+		resp, err := api.IssueUnshare(ctx, client, issueID, userID)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to unshare issue: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		success = resp.IssueUnshare.Success
+	}
+
+	verb := "Shared"
+	if !share {
+		verb = "Unshared"
+	}
+	if !success {
+		output.Error(fmt.Sprintf("Failed to change sharing for issue %s", issueID), plaintext, jsonOut)
+		os.Exit(1)
+	}
+
+	if jsonOut {
+		result := map[string]interface{}{"success": true, "id": issueID, "userId": userID}
+		if shareURL != "" {
+			result["url"] = shareURL
+		}
+		output.JSON(result)
+		return
+	}
+
+	output.Success(fmt.Sprintf("%s issue %s with %s", verb, issueID, user), plaintext, jsonOut)
+	if share && shareURL != "" {
+		fmt.Printf("  URL: %s\n", shareURL)
+	}
 }
 
 var issueLinkCmd = &cobra.Command{
@@ -1208,10 +1757,12 @@ func handleParentChildLink(ctx context.Context, client *api.Client, sourceIssue,
 			issueToUpdate = sourceIssue
 		}
 
-		// Set parentId to nil (empty string in Linear API unsets it)
-		var nilParent *string = nil
+		// Clear parentId. Use the null sentinel, not a bare nil pointer: the
+		// client strips nil fields, so a nil pointer here would be a silent
+		// no-op and the parent link would never actually be removed.
+		nullVal := api.NullSentinel
 		input := api.IssueUpdateInput{
-			ParentId: nilParent,
+			ParentId: &nullVal,
 		}
 
 		_, err := api.UpdateIssue(ctx, client, issueToUpdate, &input)
@@ -1452,6 +2003,23 @@ func init() {
 	issueCmd.AddCommand(issueCreateCmd)
 	issueCmd.AddCommand(issueUpdateCmd)
 	issueCmd.AddCommand(issueLinkCmd)
+	issueCmd.AddCommand(issueArchiveCmd)
+	issueCmd.AddCommand(issueUnarchiveCmd)
+	issueCmd.AddCommand(issueDeleteCmd)
+	issueCmd.AddCommand(issueSubscribeCmd)
+	issueCmd.AddCommand(issueUnsubscribeCmd)
+	issueCmd.AddCommand(issueReminderCmd)
+	issueCmd.AddCommand(issueShareCmd)
+	issueCmd.AddCommand(issueUnshareCmd)
+
+	// Issue lifecycle flags
+	issueArchiveCmd.Flags().Bool("trash", false, "Move the issue to trash (soft delete, 30-day grace) instead of a plain archive")
+	issueDeleteCmd.Flags().Bool("permanent", false, "Permanently delete, skipping the 30-day grace period (admin only)")
+	issueSubscribeCmd.Flags().StringP("user", "u", "", "User to subscribe (email, name, or 'me'); defaults to you")
+	issueUnsubscribeCmd.Flags().StringP("user", "u", "", "User to unsubscribe (email, name, or 'me'); defaults to you")
+	issueReminderCmd.Flags().String("at", "", "Reminder time (YYYY-MM-DD or RFC3339, required)")
+	issueShareCmd.Flags().StringP("user", "u", "", "User to share the issue with (email, name, or 'me') (required)")
+	issueUnshareCmd.Flags().StringP("user", "u", "", "User to stop sharing with (email, name, or 'me') (required)")
 
 	// Issue list flags
 	issueListCmd.Flags().StringP("assignee", "a", "", "Filter by assignee (email or 'me')")
@@ -1480,6 +2048,15 @@ func init() {
 	issueCreateCmd.Flags().StringP("team", "t", "", "Team key (required)")
 	issueCreateCmd.Flags().Int("priority", 3, "Priority (0=None, 1=Urgent, 2=High, 3=Normal, 4=Low)")
 	issueCreateCmd.Flags().BoolP("assign-me", "m", false, "Assign to yourself")
+	issueCreateCmd.Flags().StringP("assignee", "a", "", "Assignee (email, name, or 'me')")
+	issueCreateCmd.Flags().StringP("state", "s", "", "State name (e.g., 'Todo', 'In Progress', 'Done')")
+	issueCreateCmd.Flags().String("project", "", "Project name or ID")
+	issueCreateCmd.Flags().String("due-date", "", "Due date (YYYY-MM-DD)")
+	issueCreateCmd.Flags().StringSlice("label", nil, "Label name or ID (repeatable)")
+	issueCreateCmd.Flags().String("cycle", "", "Cycle number, name, or ID (within the team)")
+	issueCreateCmd.Flags().String("milestone", "", "Project milestone name or ID (requires --project)")
+	issueCreateCmd.Flags().Int("estimate", 0, "Estimate (story points)")
+	issueCreateCmd.Flags().String("parent", "", "Parent issue identifier or ID (creates a sub-issue)")
 	_ = issueCreateCmd.MarkFlagRequired("title")
 	_ = issueCreateCmd.MarkFlagRequired("team")
 
@@ -1491,6 +2068,11 @@ func init() {
 	issueUpdateCmd.Flags().Int("priority", -1, "Priority (0=None, 1=Urgent, 2=High, 3=Normal, 4=Low)")
 	issueUpdateCmd.Flags().String("due-date", "", "Due date (YYYY-MM-DD format, or empty to remove)")
 	issueUpdateCmd.Flags().String("project", "", "Project name (or 'none' to remove from project)")
+	issueUpdateCmd.Flags().StringSlice("label", nil, "Label name or ID (repeatable; replaces the issue's labels)")
+	issueUpdateCmd.Flags().String("cycle", "", "Cycle number, name, or ID (within the issue's team)")
+	issueUpdateCmd.Flags().String("milestone", "", "Project milestone name or ID (within the issue's project)")
+	issueUpdateCmd.Flags().Int("estimate", 0, "Estimate (story points)")
+	issueUpdateCmd.Flags().String("parent", "", "Parent issue identifier or ID (or 'none' to clear)")
 
 	// Issue link flags
 	issueLinkCmd.Flags().StringP("type", "t", "", "Relation type: blocks, blocked-by, related, duplicate, parent-of, sub-issue-of (required)")
