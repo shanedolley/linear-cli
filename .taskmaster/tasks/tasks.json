@@ -665,7 +665,7 @@
         "dependencies": [
           "9"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -673,9 +673,10 @@
             "description": "Implement OAuth application management with list, get, create, update, archive commands plus two security-sensitive rotate-secret commands that print the new secret exactly once.",
             "dependencies": [],
             "details": "Create pkg/api/operations/oauthapp.graphql with ListOAuthApplications, GetOAuthApplication, OAuthApplicationCreate, OAuthApplicationUpdate, OAuthApplicationArchive, OAuthApplicationRotateSecret, and OAuthApplicationRotateWebhookSecret operations. Create cmd/oauthapp.go with 'oauth-app' as the command group. Implement list/get with standard output modes (table, JSON, plaintext). For rotate-secret and rotate-webhook-secret: print the new secret value exactly once to stdout (no JSON wrapping for security - user captures it or loses it). Add clear warning message that the secret is shown only once. Run go generate after adding GraphQL operations.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Add smoke tests for oauth-app list and oauth-app list --json. Manual verification: create an OAuth app, update it, rotate both secrets (capture output), verify secrets differ, archive the app. Confirm rotate commands exit 0 and print secret without extra formatting.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-07-02T06:19:17.776Z"
           },
           {
             "id": 2,
@@ -683,9 +684,10 @@
             "description": "Add 'attachment link <issue> <url> --provider <name>' command that dispatches to the appropriate typed mutation based on provider flag, with validation and helpful error messages for unknown providers.",
             "dependencies": [],
             "details": "Add GraphQL mutations to pkg/api/operations/attachments.graphql: AttachmentLinkURL (with input), AttachmentLinkSlack, AttachmentLinkDiscord, AttachmentLinkFront, AttachmentLinkIntercom, AttachmentLinkZendesk, AttachmentLinkJiraIssue, AttachmentLinkGitHubIssue, AttachmentLinkGitHubPR, AttachmentLinkGitLabMR, AttachmentLinkSalesforce. Create linkCmd under attachment with --provider flag (default 'url'). Build provider dispatch map: url, slack, discord, front, intercom, zendesk, jira, github-issue, github-pr, gitlab-mr, salesforce. For unknown provider, exit non-zero with message listing valid providers. The url provider requires additional input fields; others take only issueId and url.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Manual verification: link a URL attachment with default provider, link with --provider slack/github-pr/jira, verify each creates correct attachment type. Test unknown provider (e.g., --provider invalid) exits non-zero with valid providers list. Verify issue ID resolution works with TEAM-123 format.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-07-02T06:19:17.779Z"
           },
           {
             "id": 3,
@@ -695,9 +697,10 @@
               2
             ],
             "details": "Add AttachmentSyncToSlack mutation to pkg/api/operations/attachments.graphql. Create syncToSlackCmd under attachment command group. Takes attachment ID as positional argument. Call the mutation and report success/failure with standard output modes. This is a simple single-mutation command following existing patterns in the codebase.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Manual verification: create an attachment, run sync-to-slack on it, verify command exits 0. Test with invalid attachment ID to confirm error handling. Add smoke test for command help text.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-07-02T06:19:17.781Z"
           },
           {
             "id": 4,
@@ -709,14 +712,16 @@
               3
             ],
             "details": "Create pkg/api/operations/agents.graphql with all agent operations: ListAgentSessions, GetAgentSession, AgentSessionSandbox, AgentSessionCreate, AgentSessionCreateOnIssue, AgentSessionCreateOnComment, AgentSessionUpdate, AgentSessionUpdateExternalUrl, ListAgentActivities, AgentActivityCreate, AgentActivityCreatePrompt, AgentActivitySendQueued, AgentActivityDeleteQueued, ListAgentSkills, AgentSkillCreate, AgentSkillUpdate, AgentSkillDelete. Create cmd/agent.go with three subcommand groups: 'agent session', 'agent activity', 'agent skill'. Session commands need issue/comment ID resolution for create-on-issue/create-on-comment variants. Activity commands take sessionId for list and filtering. This is lowest priority within the PR; confirm the use case before investing significant time.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Add smoke tests for agent session list and agent skill list. Manual verification: create a session, create activity on it, create a skill, update skill, delete skill. Test sandbox query returns expected structure. Verify create-on-issue resolves TEAM-123 format issue IDs.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-07-02T06:19:45.968Z"
           }
         ],
         "complexity": 6,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "Break down into: (1) Create cmd/oauthapp.go with CRUD plus two rotate-secret commands (print once, security-sensitive), (2) Extend cmd/attachment.go with link command that dispatches to typed mutations based on --provider flag with validation, (3) Implement attachment sync-to-slack command, (4) Create cmd/agent.go with session/activity/skill management (build last, confirm use case first)."
+        "expansionPrompt": "Break down into: (1) Create cmd/oauthapp.go with CRUD plus two rotate-secret commands (print once, security-sensitive), (2) Extend cmd/attachment.go with link command that dispatches to typed mutations based on --provider flag with validation, (3) Implement attachment sync-to-slack command, (4) Create cmd/agent.go with session/activity/skill management (build last, confirm use case first).",
+        "updatedAt": "2026-07-02T06:19:45.968Z"
       },
       {
         "id": "11",
@@ -836,9 +841,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-02T05:08:50.304Z",
+      "lastModified": "2026-07-02T06:19:45.969Z",
       "taskCount": 12,
-      "completedCount": 9,
+      "completedCount": 10,
       "tags": [
         "master"
       ]

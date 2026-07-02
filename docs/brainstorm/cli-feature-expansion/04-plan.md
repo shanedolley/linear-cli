@@ -44,7 +44,8 @@ Total recommended subtasks: 52.
 
 ## Execution status
 
-Tasks 1-9 complete; 10-12 remain (authoritative status: `.execution-state.json` and task-master).
+Tasks 1-10 complete (Tier 4 fully done); 11-12 remain (authoritative status:
+`.execution-state.json` and task-master).
 
 Plan-gate deferrals recorded so far:
 
@@ -54,3 +55,7 @@ Plan-gate deferrals recorded so far:
   read-only (list/get); its writes need the Business plan (FORBIDDEN), so
   create/update/delete are deferred. Git automation is write-only, because the
   live API exposes no root query for automation rules.
+- Task 10 (Tier 4c): Attachment link (url/slack/github-issue/github-pr/
+  salesforce) and sync-to-slack shipped. OAuth apps deferred (need the
+  `oauth:create` scope, which personal API keys cannot hold). Agents deferred
+  entirely (writes need an agent-app actor; not usable from a personal-key CLI).

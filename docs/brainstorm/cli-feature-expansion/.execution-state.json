@@ -4,9 +4,9 @@
   "branch": "feature/cli-feature-expansion",
   "totalTasks": 12,
   "totalSubtasks": 52,
-  "completed": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+  "completed": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
   "inProgress": null,
-  "milestone": "Tier 4b (task 9) complete: emoji (list/create/delete), triage (list/get read-only), git state + target-branch (create/update/delete), schedule (full CRUD + upsert-external/refresh). Triage writes deferred (Business-plan-gated); git is write-only (no root query on the live API).",
+  "milestone": "Tier 4c (task 10) complete: attachment link (url/slack/github-issue/github-pr/salesforce) + attachment sync-to-slack. OAuth apps deferred (needs oauth:create scope, unavailable to personal API keys); Agents API deferred entirely (writes need an agent-app actor; user opted to skip). Tier 4 fully done.",
   "status": "in_progress",
   "sandbox": { "project": "lincli-sandbox", "team": "SD", "teamId": "d5b746fb-e47d-48c0-a299-ca5ecb6d33f2" },
   "planGate": {
@@ -21,8 +21,15 @@
       "gitAutomation": "write available (gitAutomationTargetBranchCreate/Delete verified in SD sandbox). NOTE: root gitAutomationStates query is NOT exposed on the live API, so git commands are write-only (create/update/delete), matching the plan.",
       "timeSchedule": "read available (timeSchedules returns empty list, no plan error)",
       "probedAt": "2026-07-02"
+    },
+    "task10_tier4c": {
+      "attachmentLink": "write available (attachmentLinkURL + attachmentLinkGitHubPR verified in SD sandbox). Only url-shaped providers exposed (url/slack/github-issue/github-pr/salesforce); Discord/Zendesk/Jira/GitLab-MR need extra structured ids and Front/Intercom key on a conversationId, so they rely on the default url provider's auto-detection.",
+      "attachmentSyncToSlack": "available (graceful 'Entity not found' on a bogus id; happy path needs a real Slack attachment).",
+      "oauthApps": "DEFERRED - oauthApplications is FORBIDDEN 'Invalid scope: oauth:create required'. Personal API keys cannot hold oauth:create, so no oauth-app command is usable.",
+      "agents": "DEFERRED entirely (user decision). Reads work (agentSessions/agentSkills), but writes need an agent-app actor (appUserId) + untyped JSON payloads; not usable from a personal-key CLI.",
+      "probedAt": "2026-07-02"
     }
   },
   "startedAt": "2026-07-02",
-  "updatedAt": "2026-07-02T16:00:00Z"
+  "updatedAt": "2026-07-02T17:00:00Z"
 }
