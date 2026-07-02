@@ -508,3 +508,22 @@ mutation IssueBatchUpdate($ids: [UUID!]!, $input: IssueUpdateInput!) {
     }
   }
 }
+
+# Update an existing issue relation's type or endpoints (Tier 5). Complements
+# CreateIssueRelation/DeleteIssueRelation; the relation ID comes from the
+# Relations list on `issue get --json`.
+mutation UpdateIssueRelation($id: String!, $input: IssueRelationUpdateInput!) {
+  issueRelationUpdate(id: $id, input: $input) {
+    success
+    issueRelation {
+      id
+      type
+      issue {
+        identifier
+      }
+      relatedIssue {
+        identifier
+      }
+    }
+  }
+}

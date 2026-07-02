@@ -1,0 +1,34 @@
+# Audit log. auditEntries lists workspace audit events (logins, invites,
+# setting changes); auditEntryTypes lists the catalog of event types.
+
+query ListAuditEntries($filter: AuditEntryFilter, $first: Int, $after: String) {
+  auditEntries(filter: $filter, first: $first, after: $after) {
+    nodes {
+      ...AuditEntryFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+query GetAuditEntryTypes {
+  auditEntryTypes {
+    type
+    description
+  }
+}
+
+fragment AuditEntryFields on AuditEntry {
+  id
+  type
+  createdAt
+  ip
+  countryCode
+  actor {
+    id
+    name
+    email
+  }
+}

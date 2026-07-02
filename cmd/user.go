@@ -562,8 +562,18 @@ exposes the current user's own settings, so this always targets you.`,
 			v, _ := cmd.Flags().GetBool("invite-accepted")
 			input.SubscribedToInviteAccepted = &v
 		}
+		if cmd.Flags().Changed("dpa") {
+			v, _ := cmd.Flags().GetBool("dpa")
+			input.SubscribedToDPA = &v
+		}
+		if cmd.Flags().Changed("privacy-legal") {
+			v, _ := cmd.Flags().GetBool("privacy-legal")
+			input.SubscribedToPrivacyLegalUpdates = &v
+		}
 
-		if input.SubscribedToChangelog == nil && input.SubscribedToGeneralMarketingCommunications == nil && input.SubscribedToInviteAccepted == nil {
+		if input.SubscribedToChangelog == nil && input.SubscribedToGeneralMarketingCommunications == nil &&
+			input.SubscribedToInviteAccepted == nil && input.SubscribedToDPA == nil &&
+			input.SubscribedToPrivacyLegalUpdates == nil {
 			output.Error("No updates specified. Use flags to specify what to update.", plaintext, jsonOut)
 			os.Exit(1)
 		}
@@ -639,4 +649,6 @@ func init() {
 	userSettingsUpdateCmd.Flags().Bool("changelog", false, "Subscribe to changelog emails")
 	userSettingsUpdateCmd.Flags().Bool("marketing", false, "Subscribe to general marketing communications")
 	userSettingsUpdateCmd.Flags().Bool("invite-accepted", false, "Subscribe to invite-accepted emails")
+	userSettingsUpdateCmd.Flags().Bool("dpa", false, "Subscribe to data-processing-agreement emails")
+	userSettingsUpdateCmd.Flags().Bool("privacy-legal", false, "Subscribe to privacy and legal update emails")
 }

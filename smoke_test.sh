@@ -304,6 +304,24 @@ run_test "schedule help (upsert/refresh)" "go run main.go schedule --help" "upse
 run_test "attachment help (link/sync-to-slack)" "go run main.go attachment --help" "sync-to-slack"
 run_test "attachment link help (provider)" "go run main.go attachment link --help" "provider"
 
+# Test Tier 5 cross-cutting operations (PR 6)
+echo -e "\n${YELLOW}Testing Tier 5 commands...${NC}"
+run_test "rate-limit" "go run main.go rate-limit" "requests"
+run_test "rate-limit (json)" "go run main.go rate-limit -j" "remainingAmount"
+run_test "audit list" "go run main.go audit list --limit 3"
+run_test "audit types" "go run main.go audit types" "login"
+run_test "audit help (list/types)" "go run main.go audit --help" "types"
+run_test "search help (projects/semantic)" "go run main.go search --help" "semantic"
+run_test "search projects" "go run main.go search projects email --limit 3"
+run_test "search semantic" "go run main.go search semantic test --limit 3"
+run_test "sla list (team)" "go run main.go sla list --team $team_key"
+run_test "link help (add/update/remove)" "go run main.go link --help" "remove"
+run_test "user external list" "go run main.go user external list --limit 3"
+run_test "user external help" "go run main.go user external --help" "Available Commands:"
+run_test "view prefs help" "go run main.go view prefs --help" "Available Commands:"
+run_test "issue relate help (update)" "go run main.go issue relate --help" "update"
+run_test "user settings update help (privacy-legal)" "go run main.go user settings update --help" "privacy-legal"
+
 # Test unknown command handling
 echo -e "\n${YELLOW}Testing error handling...${NC}"
 # This should fail but gracefully

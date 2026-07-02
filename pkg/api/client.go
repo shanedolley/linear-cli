@@ -116,23 +116,6 @@ func (c *Client) Execute(ctx context.Context, query string, variables map[string
 	return nil
 }
 
-// Rate limiting helper
-func (c *Client) GetRateLimit(ctx context.Context) (*RateLimit, error) {
-	// This would query Linear's rate limiting info
-	// For now, we'll return a placeholder
-	return &RateLimit{
-		Limit:     5000,
-		Remaining: 4999,
-		Reset:     time.Now().Add(time.Hour),
-	}, nil
-}
-
-type RateLimit struct {
-	Limit     int       `json:"limit"`
-	Remaining int       `json:"remaining"`
-	Reset     time.Time `json:"reset"`
-}
-
 // NullSentinel is a special value that will be converted to null in the GraphQL request.
 // Use this when you need to explicitly send null to clear a field.
 const NullSentinel = "__LINCLI_NULL__"

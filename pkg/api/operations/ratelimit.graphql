@@ -1,0 +1,17 @@
+# Rate-limit diagnostics. rateLimitStatus reports the authenticated client's
+# real remaining quota and reset timing, per limit type (requests, complexity).
+
+query RateLimitStatus {
+  rateLimitStatus {
+    identifier
+    kind
+    limits {
+      type
+      allowedAmount
+      remainingAmount
+      requestedAmount
+      period
+      reset
+    }
+  }
+}

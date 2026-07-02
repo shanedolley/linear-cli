@@ -73,3 +73,35 @@ mutation CustomViewDelete($id: String!) {
     success
   }
 }
+
+# View preferences. A ViewPreferences object stores per-user or per-workspace
+# display settings (layout, grouping, sorting) for a view, associated with a
+# parent such as a team, project, or custom view. preferences is raw JSON.
+
+mutation ViewPreferencesCreate($input: ViewPreferencesCreateInput!) {
+  viewPreferencesCreate(input: $input) {
+    success
+    viewPreferences {
+      id
+      type
+      viewType
+    }
+  }
+}
+
+mutation ViewPreferencesUpdate($id: String!, $input: ViewPreferencesUpdateInput!) {
+  viewPreferencesUpdate(id: $id, input: $input) {
+    success
+    viewPreferences {
+      id
+      type
+      viewType
+    }
+  }
+}
+
+mutation ViewPreferencesDelete($id: String!) {
+  viewPreferencesDelete(id: $id) {
+    success
+  }
+}

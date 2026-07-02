@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
@@ -330,6 +332,235 @@ var viewDeleteCmd = &cobra.Command{
 	},
 }
 
+// --- view prefs ---
+
+var viewPrefsCmd = &cobra.Command{
+	Use:     "prefs",
+	Aliases: []string{"preferences"},
+	Short:   "Manage view preferences",
+	Long: `Manage view preferences: per-user or per-workspace display settings (layout,
+grouping, sorting) for a view, attached to a parent such as a team, project,
+custom view, or label.
+
+Preferences are a raw JSON object; edit them in the Linear web app to discover
+the shape, then round-trip that JSON here.
+
+Examples:
+  lincli view prefs create --scope user --view-type activeIssues --team ENG --preferences '{"grouping":"assignee"}'
+  lincli view prefs update <id> --preferences '{"grouping":"priority"}'
+  lincli view prefs delete <id>`,
+}
+
+var viewPrefsCreateCmd = &cobra.Command{
+	Use:     "create",
+	Aliases: []string{"new"},
+	Short:   "Create a view preferences object",
+	Long: `Create a view preferences object. --scope (user or organization), --view-type,
+and --preferences (a JSON object) are required. Pass one parent association:
+--team, --project, --custom-view, or --label.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		scopeRaw, _ := cmd.Flags().GetString("scope")
+		scope, err := parseViewPreferencesType(scopeRaw)
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		viewType, _ := cmd.Flags().GetString("view-type")
+		if viewType == "" {
+			output.Error("View type is required (--view-type)", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		prefsRaw, _ := cmd.Flags().GetString("preferences")
+		prefs, err := parseJSONObject(prefsRaw)
+		if err != nil {
+			output.Error(fmt.Sprintf("Invalid --preferences JSON: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if len(prefs) == 0 {
+			output.Error(`--preferences must be a non-empty JSON object, e.g. '{"grouping":"assignee"}'`, plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+		cache := newResolverCache()
+
+		input := &api.ViewPreferencesCreateInput{
+			Type:        scope,
+			ViewType:    api.ViewType(viewType),
+			Preferences: prefs,
+		}
+
+		if team, _ := cmd.Flags().GetString("team"); team != "" {
+			id, err := resolveTeam(ctx, client, cache, team)
+			if err != nil {
+				output.Error(err.Error(), plaintext, jsonOut)
+				os.Exit(1)
+			}
+			input.TeamId = &id
+		}
+		if project, _ := cmd.Flags().GetString("project"); project != "" {
+			id, err := resolveProject(ctx, client, cache, project)
+			if err != nil {
+				output.Error(err.Error(), plaintext, jsonOut)
+				os.Exit(1)
+			}
+			input.ProjectId = &id
+		}
+		if customView, _ := cmd.Flags().GetString("custom-view"); customView != "" {
+			input.CustomViewId = &customView
+		}
+		if label, _ := cmd.Flags().GetString("label"); label != "" {
+			id, err := resolveLabel(ctx, client, cache, label)
+			if err != nil {
+				output.Error(err.Error(), plaintext, jsonOut)
+				os.Exit(1)
+			}
+			input.LabelId = &id
+		}
+
+		resp, err := api.ViewPreferencesCreate(ctx, client, input)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to create view preferences: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if resp.ViewPreferencesCreate == nil || !resp.ViewPreferencesCreate.Success {
+			output.Error("Failed to create view preferences", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if jsonOut {
+			output.JSON(resp.ViewPreferencesCreate.ViewPreferences)
+		} else {
+			output.Success(fmt.Sprintf("Created view preferences %s", resp.ViewPreferencesCreate.ViewPreferences.Id), plaintext, jsonOut)
+		}
+	},
+}
+
+var viewPrefsUpdateCmd = &cobra.Command{
+	Use:   "update <id>",
+	Short: "Update a view preferences object",
+	Long:  `Update a view preferences object's --preferences JSON.`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		if !cmd.Flags().Changed("preferences") {
+			output.Error("No updates specified. Use --preferences.", plaintext, jsonOut)
+			os.Exit(1)
+		}
+		prefsRaw, _ := cmd.Flags().GetString("preferences")
+		prefs, err := parseJSONObject(prefsRaw)
+		if err != nil {
+			output.Error(fmt.Sprintf("Invalid --preferences JSON: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if len(prefs) == 0 {
+			output.Error(`--preferences must be a non-empty JSON object, e.g. '{"grouping":"assignee"}'`, plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		input := &api.ViewPreferencesUpdateInput{Preferences: &prefs}
+
+		resp, err := api.ViewPreferencesUpdate(context.Background(), client, args[0], input)
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to update view preferences: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if resp.ViewPreferencesUpdate == nil || !resp.ViewPreferencesUpdate.Success {
+			output.Error("Failed to update view preferences", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if jsonOut {
+			output.JSON(resp.ViewPreferencesUpdate.ViewPreferences)
+		} else {
+			output.Success(fmt.Sprintf("Updated view preferences %s", args[0]), plaintext, jsonOut)
+		}
+	},
+}
+
+var viewPrefsDeleteCmd = &cobra.Command{
+	Use:     "delete <id>",
+	Aliases: []string{"rm"},
+	Short:   "Delete a view preferences object",
+	Args:    cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		client := api.NewClient(authHeader)
+		resp, err := api.ViewPreferencesDelete(context.Background(), client, args[0])
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to delete view preferences: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if resp.ViewPreferencesDelete == nil || !resp.ViewPreferencesDelete.Success {
+			output.Error("Failed to delete view preferences", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if jsonOut {
+			output.JSON(map[string]interface{}{"success": true, "id": args[0]})
+		} else {
+			output.Success(fmt.Sprintf("Deleted view preferences %s", args[0]), plaintext, jsonOut)
+		}
+	},
+}
+
+// parseViewPreferencesType parses the --scope flag into a ViewPreferencesType:
+// user or organization, matched case-insensitively. An unrecognized value
+// returns an error.
+func parseViewPreferencesType(s string) (api.ViewPreferencesType, error) {
+	switch strings.ToLower(strings.TrimSpace(s)) {
+	case "user":
+		return api.ViewPreferencesTypeUser, nil
+	case "organization":
+		return api.ViewPreferencesTypeOrganization, nil
+	default:
+		return "", fmt.Errorf("invalid scope %q: must be user or organization", s)
+	}
+}
+
+// parseJSONObject parses a JSON object string into a map. An empty string
+// yields an empty object, so a preferences flag can be omitted safely.
+func parseJSONObject(s string) (map[string]interface{}, error) {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return map[string]interface{}{}, nil
+	}
+	var m map[string]interface{}
+	if err := json.Unmarshal([]byte(s), &m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 func init() {
 	rootCmd.AddCommand(viewCmd)
 	viewCmd.AddCommand(viewListCmd)
@@ -337,6 +568,21 @@ func init() {
 	viewCmd.AddCommand(viewCreateCmd)
 	viewCmd.AddCommand(viewUpdateCmd)
 	viewCmd.AddCommand(viewDeleteCmd)
+
+	viewCmd.AddCommand(viewPrefsCmd)
+	viewPrefsCmd.AddCommand(viewPrefsCreateCmd)
+	viewPrefsCmd.AddCommand(viewPrefsUpdateCmd)
+	viewPrefsCmd.AddCommand(viewPrefsDeleteCmd)
+
+	viewPrefsCreateCmd.Flags().String("scope", "", "Preference scope: user or organization (required)")
+	viewPrefsCreateCmd.Flags().String("view-type", "", "View type the preferences apply to, e.g. activeIssues, board (required)")
+	viewPrefsCreateCmd.Flags().String("preferences", "", "Preferences as a JSON object (required)")
+	viewPrefsCreateCmd.Flags().StringP("team", "t", "", "Parent team (key or ID)")
+	viewPrefsCreateCmd.Flags().String("project", "", "Parent project (name or ID)")
+	viewPrefsCreateCmd.Flags().String("custom-view", "", "Parent custom view ID")
+	viewPrefsCreateCmd.Flags().String("label", "", "Parent label (name or ID)")
+
+	viewPrefsUpdateCmd.Flags().String("preferences", "", "New preferences as a JSON object")
 
 	viewListCmd.Flags().IntP("limit", "l", 50, "Maximum number of views to fetch")
 

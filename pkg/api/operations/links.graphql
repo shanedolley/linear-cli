@@ -1,0 +1,48 @@
+# External links. An EntityExternalLink attaches a labelled URL to a parent
+# entity (initiative or project). The parent is set once at create time.
+
+query GetEntityExternalLink($id: String!) {
+  entityExternalLink(id: $id) {
+    ...EntityExternalLinkFields
+  }
+}
+
+mutation EntityExternalLinkCreate($input: EntityExternalLinkCreateInput!) {
+  entityExternalLinkCreate(input: $input) {
+    success
+    entityExternalLink {
+      ...EntityExternalLinkFields
+    }
+  }
+}
+
+mutation EntityExternalLinkUpdate($id: String!, $input: EntityExternalLinkUpdateInput!) {
+  entityExternalLinkUpdate(id: $id, input: $input) {
+    success
+    entityExternalLink {
+      ...EntityExternalLinkFields
+    }
+  }
+}
+
+mutation EntityExternalLinkDelete($id: String!) {
+  entityExternalLinkDelete(id: $id) {
+    success
+  }
+}
+
+fragment EntityExternalLinkFields on EntityExternalLink {
+  id
+  label
+  url
+  sortOrder
+  createdAt
+  project {
+    id
+    name
+  }
+  initiative {
+    id
+    name
+  }
+}

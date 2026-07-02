@@ -1,0 +1,41 @@
+# Global search. searchProjects runs a text search over projects;
+# semanticSearch runs an AI search across issues, projects, initiatives, and
+# documents, returning a typed reference to each match.
+
+query SearchProjects($term: String!, $first: Int, $includeComments: Boolean) {
+  searchProjects(term: $term, first: $first, includeComments: $includeComments) {
+    totalCount
+    nodes {
+      id
+      name
+      description
+      url
+    }
+  }
+}
+
+query SemanticSearch($query: String!, $maxResults: Int, $types: [SemanticSearchResultType!]) {
+  semanticSearch(query: $query, maxResults: $maxResults, types: $types) {
+    results {
+      id
+      type
+      issue {
+        identifier
+        title
+        url
+      }
+      project {
+        name
+        url
+      }
+      initiative {
+        name
+        url
+      }
+      document {
+        title
+        url
+      }
+    }
+  }
+}

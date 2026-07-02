@@ -910,6 +910,137 @@ func (v *AttachmentUpdateResponse) GetAttachmentUpdate() *AttachmentUpdateAttach
 	return v.AttachmentUpdate
 }
 
+// AuditEntryFields includes the GraphQL fields of AuditEntry requested by the fragment AuditEntryFields.
+// The GraphQL type's documentation follows.
+//
+// A workspace audit log entry recording a security or compliance-relevant action.
+// Audit entries capture who performed an action, when, from what IP address and
+// country, and include type-specific metadata. The audit log is partitioned by
+// time for performance and is accessible only to workspace administrators.
+// Examples of audited actions include user authentication events, permission
+// changes, data exports, and workspace setting modifications.
+type AuditEntryFields struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The type of audited action (e.g., user authentication, permission change, data export, setting modification).
+	Type string `json:"type"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The IP address of the actor at the time the audited action was performed. Null if the IP was not captured.
+	Ip *string `json:"ip"`
+	// The ISO 3166-1 alpha-2 country code derived from the request IP address. Null if geo-location could not be determined.
+	CountryCode *string `json:"countryCode"`
+	// The user that caused the audit entry to be created.
+	Actor *AuditEntryFieldsActorUser `json:"actor"`
+}
+
+// GetId returns AuditEntryFields.Id, and is useful for accessing the field via an interface.
+func (v *AuditEntryFields) GetId() string { return v.Id }
+
+// GetType returns AuditEntryFields.Type, and is useful for accessing the field via an interface.
+func (v *AuditEntryFields) GetType() string { return v.Type }
+
+// GetCreatedAt returns AuditEntryFields.CreatedAt, and is useful for accessing the field via an interface.
+func (v *AuditEntryFields) GetCreatedAt() time.Time { return v.CreatedAt }
+
+// GetIp returns AuditEntryFields.Ip, and is useful for accessing the field via an interface.
+func (v *AuditEntryFields) GetIp() *string { return v.Ip }
+
+// GetCountryCode returns AuditEntryFields.CountryCode, and is useful for accessing the field via an interface.
+func (v *AuditEntryFields) GetCountryCode() *string { return v.CountryCode }
+
+// GetActor returns AuditEntryFields.Actor, and is useful for accessing the field via an interface.
+func (v *AuditEntryFields) GetActor() *AuditEntryFieldsActorUser { return v.Actor }
+
+// AuditEntryFieldsActorUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
+type AuditEntryFieldsActorUser struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The user's full name.
+	Name string `json:"name"`
+	// The user's email address.
+	Email string `json:"email"`
+}
+
+// GetId returns AuditEntryFieldsActorUser.Id, and is useful for accessing the field via an interface.
+func (v *AuditEntryFieldsActorUser) GetId() string { return v.Id }
+
+// GetName returns AuditEntryFieldsActorUser.Name, and is useful for accessing the field via an interface.
+func (v *AuditEntryFieldsActorUser) GetName() string { return v.Name }
+
+// GetEmail returns AuditEntryFieldsActorUser.Email, and is useful for accessing the field via an interface.
+func (v *AuditEntryFieldsActorUser) GetEmail() string { return v.Email }
+
+// Audit entry filtering options.
+type AuditEntryFilter struct {
+	// Filters that the audit entry actor must satisfy.
+	Actor *NullableUserFilter `json:"actor,omitempty"`
+	// Compound filters, all of which need to be matched by the issue.
+	And []*AuditEntryFilter `json:"and,omitempty"`
+	// Comparator for the country code.
+	CountryCode *StringComparator `json:"countryCode,omitempty"`
+	// Comparator for the created at date.
+	CreatedAt *DateComparator `json:"createdAt,omitempty"`
+	// Comparator for the audited entity ID stored in metadata.
+	EntityId *StringComparator `json:"entityId,omitempty"`
+	// Comparator for the audited entity identifier stored in metadata.
+	EntityIdentifier *StringComparator `json:"entityIdentifier,omitempty"`
+	// Comparator for the audited entity type stored in metadata.
+	EntityType *StringComparator `json:"entityType,omitempty"`
+	// Comparator for the identifier.
+	Id *IDComparator `json:"id,omitempty"`
+	// Comparator for the IP address.
+	Ip *StringComparator `json:"ip,omitempty"`
+	// Compound filters, one of which need to be matched by the issue.
+	Or []*AuditEntryFilter `json:"or,omitempty"`
+	// Comparator for the type.
+	Type *StringComparator `json:"type,omitempty"`
+	// Comparator for the updated at date.
+	UpdatedAt *DateComparator `json:"updatedAt,omitempty"`
+}
+
+// GetActor returns AuditEntryFilter.Actor, and is useful for accessing the field via an interface.
+func (v *AuditEntryFilter) GetActor() *NullableUserFilter { return v.Actor }
+
+// GetAnd returns AuditEntryFilter.And, and is useful for accessing the field via an interface.
+func (v *AuditEntryFilter) GetAnd() []*AuditEntryFilter { return v.And }
+
+// GetCountryCode returns AuditEntryFilter.CountryCode, and is useful for accessing the field via an interface.
+func (v *AuditEntryFilter) GetCountryCode() *StringComparator { return v.CountryCode }
+
+// GetCreatedAt returns AuditEntryFilter.CreatedAt, and is useful for accessing the field via an interface.
+func (v *AuditEntryFilter) GetCreatedAt() *DateComparator { return v.CreatedAt }
+
+// GetEntityId returns AuditEntryFilter.EntityId, and is useful for accessing the field via an interface.
+func (v *AuditEntryFilter) GetEntityId() *StringComparator { return v.EntityId }
+
+// GetEntityIdentifier returns AuditEntryFilter.EntityIdentifier, and is useful for accessing the field via an interface.
+func (v *AuditEntryFilter) GetEntityIdentifier() *StringComparator { return v.EntityIdentifier }
+
+// GetEntityType returns AuditEntryFilter.EntityType, and is useful for accessing the field via an interface.
+func (v *AuditEntryFilter) GetEntityType() *StringComparator { return v.EntityType }
+
+// GetId returns AuditEntryFilter.Id, and is useful for accessing the field via an interface.
+func (v *AuditEntryFilter) GetId() *IDComparator { return v.Id }
+
+// GetIp returns AuditEntryFilter.Ip, and is useful for accessing the field via an interface.
+func (v *AuditEntryFilter) GetIp() *StringComparator { return v.Ip }
+
+// GetOr returns AuditEntryFilter.Or, and is useful for accessing the field via an interface.
+func (v *AuditEntryFilter) GetOr() []*AuditEntryFilter { return v.Or }
+
+// GetType returns AuditEntryFilter.Type, and is useful for accessing the field via an interface.
+func (v *AuditEntryFilter) GetType() *StringComparator { return v.Type }
+
+// GetUpdatedAt returns AuditEntryFilter.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *AuditEntryFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
 // Comparator for booleans.
 type BooleanComparator struct {
 	// Equals constraint.
@@ -9001,6 +9132,479 @@ func (v *EmojiFieldsCreatorUser) GetId() string { return v.Id }
 // GetName returns EmojiFieldsCreatorUser.Name, and is useful for accessing the field via an interface.
 func (v *EmojiFieldsCreatorUser) GetName() string { return v.Name }
 
+// EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayload includes the requested fields of the GraphQL type EntityExternalLinkPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of an entity external link mutation.
+type EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The link that was created or updated.
+	EntityExternalLink *EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink `json:"entityExternalLink"`
+}
+
+// GetSuccess returns EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayload.Success, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetEntityExternalLink returns EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayload.EntityExternalLink, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayload) GetEntityExternalLink() *EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink {
+	return v.EntityExternalLink
+}
+
+// EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink includes the requested fields of the GraphQL type EntityExternalLink.
+// The GraphQL type's documentation follows.
+//
+// An external link attached to a Linear entity such as an initiative, project,
+// team, release, or cycle. External links provide a way to reference related
+// resources outside of Linear (e.g., documentation, design files, dashboards)
+// directly from the entity's resources section. Each link has a URL, display
+// label, and sort order within its parent entity.
+type EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink struct {
+	EntityExternalLinkFields `json:"-"`
+}
+
+// GetId returns EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink.Id, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink) GetId() string {
+	return v.EntityExternalLinkFields.Id
+}
+
+// GetLabel returns EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink.Label, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink) GetLabel() string {
+	return v.EntityExternalLinkFields.Label
+}
+
+// GetUrl returns EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink.Url, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink) GetUrl() string {
+	return v.EntityExternalLinkFields.Url
+}
+
+// GetSortOrder returns EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink.SortOrder, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink) GetSortOrder() float64 {
+	return v.EntityExternalLinkFields.SortOrder
+}
+
+// GetCreatedAt returns EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink.CreatedAt, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink) GetCreatedAt() time.Time {
+	return v.EntityExternalLinkFields.CreatedAt
+}
+
+// GetProject returns EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink.Project, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink) GetProject() *EntityExternalLinkFieldsProject {
+	return v.EntityExternalLinkFields.Project
+}
+
+// GetInitiative returns EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink.Initiative, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink) GetInitiative() *EntityExternalLinkFieldsInitiative {
+	return v.EntityExternalLinkFields.Initiative
+}
+
+func (v *EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.EntityExternalLinkFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalEntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink struct {
+	Id string `json:"id"`
+
+	Label string `json:"label"`
+
+	Url string `json:"url"`
+
+	SortOrder float64 `json:"sortOrder"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	Project *EntityExternalLinkFieldsProject `json:"project"`
+
+	Initiative *EntityExternalLinkFieldsInitiative `json:"initiative"`
+}
+
+func (v *EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink) __premarshalJSON() (*__premarshalEntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink, error) {
+	var retval __premarshalEntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayloadEntityExternalLink
+
+	retval.Id = v.EntityExternalLinkFields.Id
+	retval.Label = v.EntityExternalLinkFields.Label
+	retval.Url = v.EntityExternalLinkFields.Url
+	retval.SortOrder = v.EntityExternalLinkFields.SortOrder
+	retval.CreatedAt = v.EntityExternalLinkFields.CreatedAt
+	retval.Project = v.EntityExternalLinkFields.Project
+	retval.Initiative = v.EntityExternalLinkFields.Initiative
+	return &retval, nil
+}
+
+// Input for creating a new external link on an entity. A URL, label, and exactly
+// one parent entity (initiative, project, team, release, or cycle) are required.
+type EntityExternalLinkCreateInput struct {
+	// [Internal] The cycle associated with the link.
+	CycleId *string `json:"cycleId"`
+	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
+	Id *string `json:"id"`
+	// The initiative associated with the link.
+	InitiativeId *string `json:"initiativeId"`
+	// The label for the link.
+	Label string `json:"label"`
+	// The project associated with the link.
+	ProjectId *string `json:"projectId"`
+	// The release associated with the link.
+	ReleaseId *string `json:"releaseId"`
+	// [Internal] The resource folder containing the link.
+	ResourceFolderId *string `json:"resourceFolderId"`
+	// The order of the item in the entities resources list.
+	SortOrder *float64 `json:"sortOrder"`
+	// [Internal] The team associated with the link.
+	TeamId *string `json:"teamId"`
+	// The URL of the link.
+	Url string `json:"url"`
+}
+
+// GetCycleId returns EntityExternalLinkCreateInput.CycleId, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkCreateInput) GetCycleId() *string { return v.CycleId }
+
+// GetId returns EntityExternalLinkCreateInput.Id, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkCreateInput) GetId() *string { return v.Id }
+
+// GetInitiativeId returns EntityExternalLinkCreateInput.InitiativeId, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkCreateInput) GetInitiativeId() *string { return v.InitiativeId }
+
+// GetLabel returns EntityExternalLinkCreateInput.Label, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkCreateInput) GetLabel() string { return v.Label }
+
+// GetProjectId returns EntityExternalLinkCreateInput.ProjectId, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkCreateInput) GetProjectId() *string { return v.ProjectId }
+
+// GetReleaseId returns EntityExternalLinkCreateInput.ReleaseId, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkCreateInput) GetReleaseId() *string { return v.ReleaseId }
+
+// GetResourceFolderId returns EntityExternalLinkCreateInput.ResourceFolderId, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkCreateInput) GetResourceFolderId() *string { return v.ResourceFolderId }
+
+// GetSortOrder returns EntityExternalLinkCreateInput.SortOrder, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkCreateInput) GetSortOrder() *float64 { return v.SortOrder }
+
+// GetTeamId returns EntityExternalLinkCreateInput.TeamId, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkCreateInput) GetTeamId() *string { return v.TeamId }
+
+// GetUrl returns EntityExternalLinkCreateInput.Url, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkCreateInput) GetUrl() string { return v.Url }
+
+// EntityExternalLinkCreateResponse is returned by EntityExternalLinkCreate on success.
+type EntityExternalLinkCreateResponse struct {
+	// Creates a new external link on an initiative, project, team, release, or cycle.
+	EntityExternalLinkCreate *EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayload `json:"entityExternalLinkCreate"`
+}
+
+// GetEntityExternalLinkCreate returns EntityExternalLinkCreateResponse.EntityExternalLinkCreate, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkCreateResponse) GetEntityExternalLinkCreate() *EntityExternalLinkCreateEntityExternalLinkCreateEntityExternalLinkPayload {
+	return v.EntityExternalLinkCreate
+}
+
+// EntityExternalLinkDeleteEntityExternalLinkDeleteDeletePayload includes the requested fields of the GraphQL type DeletePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity deletion mutations.
+type EntityExternalLinkDeleteEntityExternalLinkDeleteDeletePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+}
+
+// GetSuccess returns EntityExternalLinkDeleteEntityExternalLinkDeleteDeletePayload.Success, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkDeleteEntityExternalLinkDeleteDeletePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// EntityExternalLinkDeleteResponse is returned by EntityExternalLinkDelete on success.
+type EntityExternalLinkDeleteResponse struct {
+	// Deletes an entity external link.
+	EntityExternalLinkDelete *EntityExternalLinkDeleteEntityExternalLinkDeleteDeletePayload `json:"entityExternalLinkDelete"`
+}
+
+// GetEntityExternalLinkDelete returns EntityExternalLinkDeleteResponse.EntityExternalLinkDelete, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkDeleteResponse) GetEntityExternalLinkDelete() *EntityExternalLinkDeleteEntityExternalLinkDeleteDeletePayload {
+	return v.EntityExternalLinkDelete
+}
+
+// EntityExternalLinkFields includes the GraphQL fields of EntityExternalLink requested by the fragment EntityExternalLinkFields.
+// The GraphQL type's documentation follows.
+//
+// An external link attached to a Linear entity such as an initiative, project,
+// team, release, or cycle. External links provide a way to reference related
+// resources outside of Linear (e.g., documentation, design files, dashboards)
+// directly from the entity's resources section. Each link has a URL, display
+// label, and sort order within its parent entity.
+type EntityExternalLinkFields struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The link's label.
+	Label string `json:"label"`
+	// The link's URL.
+	Url string `json:"url"`
+	// The sort order of this link within the parent entity's resources list. Links
+	// are sorted together with documents and other resources attached to the entity.
+	SortOrder float64 `json:"sortOrder"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The project that the link is associated with.
+	Project *EntityExternalLinkFieldsProject `json:"project"`
+	// The initiative that the link is associated with.
+	Initiative *EntityExternalLinkFieldsInitiative `json:"initiative"`
+}
+
+// GetId returns EntityExternalLinkFields.Id, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkFields) GetId() string { return v.Id }
+
+// GetLabel returns EntityExternalLinkFields.Label, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkFields) GetLabel() string { return v.Label }
+
+// GetUrl returns EntityExternalLinkFields.Url, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkFields) GetUrl() string { return v.Url }
+
+// GetSortOrder returns EntityExternalLinkFields.SortOrder, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkFields) GetSortOrder() float64 { return v.SortOrder }
+
+// GetCreatedAt returns EntityExternalLinkFields.CreatedAt, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkFields) GetCreatedAt() time.Time { return v.CreatedAt }
+
+// GetProject returns EntityExternalLinkFields.Project, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkFields) GetProject() *EntityExternalLinkFieldsProject { return v.Project }
+
+// GetInitiative returns EntityExternalLinkFields.Initiative, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkFields) GetInitiative() *EntityExternalLinkFieldsInitiative {
+	return v.Initiative
+}
+
+// EntityExternalLinkFieldsInitiative includes the requested fields of the GraphQL type Initiative.
+// The GraphQL type's documentation follows.
+//
+// An initiative is a high-level strategic grouping of projects toward a business
+// goal. Initiatives can contain multiple projects, have their own status updates
+// and health tracking, and can be organized hierarchically with parent-child relationships.
+type EntityExternalLinkFieldsInitiative struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the initiative.
+	Name string `json:"name"`
+}
+
+// GetId returns EntityExternalLinkFieldsInitiative.Id, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkFieldsInitiative) GetId() string { return v.Id }
+
+// GetName returns EntityExternalLinkFieldsInitiative.Name, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkFieldsInitiative) GetName() string { return v.Name }
+
+// EntityExternalLinkFieldsProject includes the requested fields of the GraphQL type Project.
+// The GraphQL type's documentation follows.
+//
+// A project is a collection of issues working toward a shared goal. Projects have
+// start and target dates, milestones, status tracking, and progress metrics. They
+// can span multiple teams and be grouped under initiatives.
+type EntityExternalLinkFieldsProject struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the project.
+	Name string `json:"name"`
+}
+
+// GetId returns EntityExternalLinkFieldsProject.Id, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkFieldsProject) GetId() string { return v.Id }
+
+// GetName returns EntityExternalLinkFieldsProject.Name, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkFieldsProject) GetName() string { return v.Name }
+
+// EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayload includes the requested fields of the GraphQL type EntityExternalLinkPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of an entity external link mutation.
+type EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The link that was created or updated.
+	EntityExternalLink *EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink `json:"entityExternalLink"`
+}
+
+// GetSuccess returns EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayload.Success, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetEntityExternalLink returns EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayload.EntityExternalLink, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayload) GetEntityExternalLink() *EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink {
+	return v.EntityExternalLink
+}
+
+// EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink includes the requested fields of the GraphQL type EntityExternalLink.
+// The GraphQL type's documentation follows.
+//
+// An external link attached to a Linear entity such as an initiative, project,
+// team, release, or cycle. External links provide a way to reference related
+// resources outside of Linear (e.g., documentation, design files, dashboards)
+// directly from the entity's resources section. Each link has a URL, display
+// label, and sort order within its parent entity.
+type EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink struct {
+	EntityExternalLinkFields `json:"-"`
+}
+
+// GetId returns EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink.Id, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink) GetId() string {
+	return v.EntityExternalLinkFields.Id
+}
+
+// GetLabel returns EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink.Label, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink) GetLabel() string {
+	return v.EntityExternalLinkFields.Label
+}
+
+// GetUrl returns EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink.Url, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink) GetUrl() string {
+	return v.EntityExternalLinkFields.Url
+}
+
+// GetSortOrder returns EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink.SortOrder, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink) GetSortOrder() float64 {
+	return v.EntityExternalLinkFields.SortOrder
+}
+
+// GetCreatedAt returns EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink.CreatedAt, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink) GetCreatedAt() time.Time {
+	return v.EntityExternalLinkFields.CreatedAt
+}
+
+// GetProject returns EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink.Project, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink) GetProject() *EntityExternalLinkFieldsProject {
+	return v.EntityExternalLinkFields.Project
+}
+
+// GetInitiative returns EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink.Initiative, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink) GetInitiative() *EntityExternalLinkFieldsInitiative {
+	return v.EntityExternalLinkFields.Initiative
+}
+
+func (v *EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.EntityExternalLinkFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalEntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink struct {
+	Id string `json:"id"`
+
+	Label string `json:"label"`
+
+	Url string `json:"url"`
+
+	SortOrder float64 `json:"sortOrder"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	Project *EntityExternalLinkFieldsProject `json:"project"`
+
+	Initiative *EntityExternalLinkFieldsInitiative `json:"initiative"`
+}
+
+func (v *EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink) __premarshalJSON() (*__premarshalEntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink, error) {
+	var retval __premarshalEntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayloadEntityExternalLink
+
+	retval.Id = v.EntityExternalLinkFields.Id
+	retval.Label = v.EntityExternalLinkFields.Label
+	retval.Url = v.EntityExternalLinkFields.Url
+	retval.SortOrder = v.EntityExternalLinkFields.SortOrder
+	retval.CreatedAt = v.EntityExternalLinkFields.CreatedAt
+	retval.Project = v.EntityExternalLinkFields.Project
+	retval.Initiative = v.EntityExternalLinkFields.Initiative
+	return &retval, nil
+}
+
+// Input for updating an existing external link. All fields are optional; only provided fields will be updated.
+type EntityExternalLinkUpdateInput struct {
+	// The label for the link.
+	Label *string `json:"label"`
+	// [Internal] The resource folder containing the link.
+	ResourceFolderId *string `json:"resourceFolderId"`
+	// The order of the item in the entities resources list.
+	SortOrder *float64 `json:"sortOrder"`
+	// The URL of the link.
+	Url *string `json:"url"`
+}
+
+// GetLabel returns EntityExternalLinkUpdateInput.Label, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkUpdateInput) GetLabel() *string { return v.Label }
+
+// GetResourceFolderId returns EntityExternalLinkUpdateInput.ResourceFolderId, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkUpdateInput) GetResourceFolderId() *string { return v.ResourceFolderId }
+
+// GetSortOrder returns EntityExternalLinkUpdateInput.SortOrder, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkUpdateInput) GetSortOrder() *float64 { return v.SortOrder }
+
+// GetUrl returns EntityExternalLinkUpdateInput.Url, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkUpdateInput) GetUrl() *string { return v.Url }
+
+// EntityExternalLinkUpdateResponse is returned by EntityExternalLinkUpdate on success.
+type EntityExternalLinkUpdateResponse struct {
+	// Updates an existing entity external link's URL, label, or sort order.
+	EntityExternalLinkUpdate *EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayload `json:"entityExternalLinkUpdate"`
+}
+
+// GetEntityExternalLinkUpdate returns EntityExternalLinkUpdateResponse.EntityExternalLinkUpdate, and is useful for accessing the field via an interface.
+func (v *EntityExternalLinkUpdateResponse) GetEntityExternalLinkUpdate() *EntityExternalLinkUpdateEntityExternalLinkUpdateEntityExternalLinkPayload {
+	return v.EntityExternalLinkUpdate
+}
+
 // Comparator for estimates.
 type EstimateComparator struct {
 	// Compound filters, one of which need to be matched by the estimate.
@@ -9059,6 +9663,54 @@ func (v *EstimateComparator) GetNull() *bool { return v.Null }
 
 // GetOr returns EstimateComparator.Or, and is useful for accessing the field via an interface.
 func (v *EstimateComparator) GetOr() []*NullableNumberComparator { return v.Or }
+
+// ExternalUserFields includes the GraphQL fields of ExternalUser requested by the fragment ExternalUserFields.
+// The GraphQL type's documentation follows.
+//
+// An external user who interacts with Linear through an integrated external
+// service (such as Slack, Jira, GitHub, GitLab, Salesforce, or Microsoft Teams)
+// but does not have a Linear account. External users can create issues, post
+// comments, and add reactions from their respective platforms. They are identified
+// by service-specific user IDs and may optionally have an email address. External
+// users are scoped to a single workspace.
+type ExternalUserFields struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The external user's full name.
+	Name string `json:"name"`
+	// The external user's display name. Unique within each workspace. Can match the display name of an actual user.
+	DisplayName string `json:"displayName"`
+	// The external user's email address.
+	Email *string `json:"email"`
+	// A URL to the external user's avatar image. Null if no avatar is available from the external service.
+	AvatarUrl *string `json:"avatarUrl"`
+	// The last time the external user was seen interacting with Linear through their
+	// external service. Defaults to the creation time and is updated on subsequent interactions.
+	LastSeen *time.Time `json:"lastSeen"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+}
+
+// GetId returns ExternalUserFields.Id, and is useful for accessing the field via an interface.
+func (v *ExternalUserFields) GetId() string { return v.Id }
+
+// GetName returns ExternalUserFields.Name, and is useful for accessing the field via an interface.
+func (v *ExternalUserFields) GetName() string { return v.Name }
+
+// GetDisplayName returns ExternalUserFields.DisplayName, and is useful for accessing the field via an interface.
+func (v *ExternalUserFields) GetDisplayName() string { return v.DisplayName }
+
+// GetEmail returns ExternalUserFields.Email, and is useful for accessing the field via an interface.
+func (v *ExternalUserFields) GetEmail() *string { return v.Email }
+
+// GetAvatarUrl returns ExternalUserFields.AvatarUrl, and is useful for accessing the field via an interface.
+func (v *ExternalUserFields) GetAvatarUrl() *string { return v.AvatarUrl }
+
+// GetLastSeen returns ExternalUserFields.LastSeen, and is useful for accessing the field via an interface.
+func (v *ExternalUserFields) GetLastSeen() *time.Time { return v.LastSeen }
+
+// GetCreatedAt returns ExternalUserFields.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ExternalUserFields) GetCreatedAt() time.Time { return v.CreatedAt }
 
 // FavoriteCreateFavoriteCreateFavoritePayload includes the requested fields of the GraphQL type FavoritePayload.
 // The GraphQL type's documentation follows.
@@ -10100,6 +10752,33 @@ var AllFrequencyResolutionType = []FrequencyResolutionType{
 	FrequencyResolutionTypeWeekly,
 }
 
+// GetAuditEntryTypesAuditEntryTypesAuditEntryType includes the requested fields of the GraphQL type AuditEntryType.
+type GetAuditEntryTypesAuditEntryTypesAuditEntryType struct {
+	// The audit entry type.
+	Type string `json:"type"`
+	// Description of the audit entry type.
+	Description string `json:"description"`
+}
+
+// GetType returns GetAuditEntryTypesAuditEntryTypesAuditEntryType.Type, and is useful for accessing the field via an interface.
+func (v *GetAuditEntryTypesAuditEntryTypesAuditEntryType) GetType() string { return v.Type }
+
+// GetDescription returns GetAuditEntryTypesAuditEntryTypesAuditEntryType.Description, and is useful for accessing the field via an interface.
+func (v *GetAuditEntryTypesAuditEntryTypesAuditEntryType) GetDescription() string {
+	return v.Description
+}
+
+// GetAuditEntryTypesResponse is returned by GetAuditEntryTypes on success.
+type GetAuditEntryTypesResponse struct {
+	// List of audit entry types.
+	AuditEntryTypes []*GetAuditEntryTypesAuditEntryTypesAuditEntryType `json:"auditEntryTypes"`
+}
+
+// GetAuditEntryTypes returns GetAuditEntryTypesResponse.AuditEntryTypes, and is useful for accessing the field via an interface.
+func (v *GetAuditEntryTypesResponse) GetAuditEntryTypes() []*GetAuditEntryTypesAuditEntryTypesAuditEntryType {
+	return v.AuditEntryTypes
+}
+
 // GetCommentReactionsComment includes the requested fields of the GraphQL type Comment.
 // The GraphQL type's documentation follows.
 //
@@ -11001,6 +11680,235 @@ type GetEmojiResponse struct {
 
 // GetEmoji returns GetEmojiResponse.Emoji, and is useful for accessing the field via an interface.
 func (v *GetEmojiResponse) GetEmoji() *GetEmojiEmoji { return v.Emoji }
+
+// GetEntityExternalLinkEntityExternalLink includes the requested fields of the GraphQL type EntityExternalLink.
+// The GraphQL type's documentation follows.
+//
+// An external link attached to a Linear entity such as an initiative, project,
+// team, release, or cycle. External links provide a way to reference related
+// resources outside of Linear (e.g., documentation, design files, dashboards)
+// directly from the entity's resources section. Each link has a URL, display
+// label, and sort order within its parent entity.
+type GetEntityExternalLinkEntityExternalLink struct {
+	EntityExternalLinkFields `json:"-"`
+}
+
+// GetId returns GetEntityExternalLinkEntityExternalLink.Id, and is useful for accessing the field via an interface.
+func (v *GetEntityExternalLinkEntityExternalLink) GetId() string {
+	return v.EntityExternalLinkFields.Id
+}
+
+// GetLabel returns GetEntityExternalLinkEntityExternalLink.Label, and is useful for accessing the field via an interface.
+func (v *GetEntityExternalLinkEntityExternalLink) GetLabel() string {
+	return v.EntityExternalLinkFields.Label
+}
+
+// GetUrl returns GetEntityExternalLinkEntityExternalLink.Url, and is useful for accessing the field via an interface.
+func (v *GetEntityExternalLinkEntityExternalLink) GetUrl() string {
+	return v.EntityExternalLinkFields.Url
+}
+
+// GetSortOrder returns GetEntityExternalLinkEntityExternalLink.SortOrder, and is useful for accessing the field via an interface.
+func (v *GetEntityExternalLinkEntityExternalLink) GetSortOrder() float64 {
+	return v.EntityExternalLinkFields.SortOrder
+}
+
+// GetCreatedAt returns GetEntityExternalLinkEntityExternalLink.CreatedAt, and is useful for accessing the field via an interface.
+func (v *GetEntityExternalLinkEntityExternalLink) GetCreatedAt() time.Time {
+	return v.EntityExternalLinkFields.CreatedAt
+}
+
+// GetProject returns GetEntityExternalLinkEntityExternalLink.Project, and is useful for accessing the field via an interface.
+func (v *GetEntityExternalLinkEntityExternalLink) GetProject() *EntityExternalLinkFieldsProject {
+	return v.EntityExternalLinkFields.Project
+}
+
+// GetInitiative returns GetEntityExternalLinkEntityExternalLink.Initiative, and is useful for accessing the field via an interface.
+func (v *GetEntityExternalLinkEntityExternalLink) GetInitiative() *EntityExternalLinkFieldsInitiative {
+	return v.EntityExternalLinkFields.Initiative
+}
+
+func (v *GetEntityExternalLinkEntityExternalLink) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*GetEntityExternalLinkEntityExternalLink
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.GetEntityExternalLinkEntityExternalLink = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.EntityExternalLinkFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalGetEntityExternalLinkEntityExternalLink struct {
+	Id string `json:"id"`
+
+	Label string `json:"label"`
+
+	Url string `json:"url"`
+
+	SortOrder float64 `json:"sortOrder"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	Project *EntityExternalLinkFieldsProject `json:"project"`
+
+	Initiative *EntityExternalLinkFieldsInitiative `json:"initiative"`
+}
+
+func (v *GetEntityExternalLinkEntityExternalLink) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *GetEntityExternalLinkEntityExternalLink) __premarshalJSON() (*__premarshalGetEntityExternalLinkEntityExternalLink, error) {
+	var retval __premarshalGetEntityExternalLinkEntityExternalLink
+
+	retval.Id = v.EntityExternalLinkFields.Id
+	retval.Label = v.EntityExternalLinkFields.Label
+	retval.Url = v.EntityExternalLinkFields.Url
+	retval.SortOrder = v.EntityExternalLinkFields.SortOrder
+	retval.CreatedAt = v.EntityExternalLinkFields.CreatedAt
+	retval.Project = v.EntityExternalLinkFields.Project
+	retval.Initiative = v.EntityExternalLinkFields.Initiative
+	return &retval, nil
+}
+
+// GetEntityExternalLinkResponse is returned by GetEntityExternalLink on success.
+type GetEntityExternalLinkResponse struct {
+	// Retrieves a single entity external link by its identifier.
+	EntityExternalLink *GetEntityExternalLinkEntityExternalLink `json:"entityExternalLink"`
+}
+
+// GetEntityExternalLink returns GetEntityExternalLinkResponse.EntityExternalLink, and is useful for accessing the field via an interface.
+func (v *GetEntityExternalLinkResponse) GetEntityExternalLink() *GetEntityExternalLinkEntityExternalLink {
+	return v.EntityExternalLink
+}
+
+// GetExternalUserExternalUser includes the requested fields of the GraphQL type ExternalUser.
+// The GraphQL type's documentation follows.
+//
+// An external user who interacts with Linear through an integrated external
+// service (such as Slack, Jira, GitHub, GitLab, Salesforce, or Microsoft Teams)
+// but does not have a Linear account. External users can create issues, post
+// comments, and add reactions from their respective platforms. They are identified
+// by service-specific user IDs and may optionally have an email address. External
+// users are scoped to a single workspace.
+type GetExternalUserExternalUser struct {
+	ExternalUserFields `json:"-"`
+}
+
+// GetId returns GetExternalUserExternalUser.Id, and is useful for accessing the field via an interface.
+func (v *GetExternalUserExternalUser) GetId() string { return v.ExternalUserFields.Id }
+
+// GetName returns GetExternalUserExternalUser.Name, and is useful for accessing the field via an interface.
+func (v *GetExternalUserExternalUser) GetName() string { return v.ExternalUserFields.Name }
+
+// GetDisplayName returns GetExternalUserExternalUser.DisplayName, and is useful for accessing the field via an interface.
+func (v *GetExternalUserExternalUser) GetDisplayName() string {
+	return v.ExternalUserFields.DisplayName
+}
+
+// GetEmail returns GetExternalUserExternalUser.Email, and is useful for accessing the field via an interface.
+func (v *GetExternalUserExternalUser) GetEmail() *string { return v.ExternalUserFields.Email }
+
+// GetAvatarUrl returns GetExternalUserExternalUser.AvatarUrl, and is useful for accessing the field via an interface.
+func (v *GetExternalUserExternalUser) GetAvatarUrl() *string { return v.ExternalUserFields.AvatarUrl }
+
+// GetLastSeen returns GetExternalUserExternalUser.LastSeen, and is useful for accessing the field via an interface.
+func (v *GetExternalUserExternalUser) GetLastSeen() *time.Time { return v.ExternalUserFields.LastSeen }
+
+// GetCreatedAt returns GetExternalUserExternalUser.CreatedAt, and is useful for accessing the field via an interface.
+func (v *GetExternalUserExternalUser) GetCreatedAt() time.Time { return v.ExternalUserFields.CreatedAt }
+
+func (v *GetExternalUserExternalUser) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*GetExternalUserExternalUser
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.GetExternalUserExternalUser = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.ExternalUserFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalGetExternalUserExternalUser struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	DisplayName string `json:"displayName"`
+
+	Email *string `json:"email"`
+
+	AvatarUrl *string `json:"avatarUrl"`
+
+	LastSeen *time.Time `json:"lastSeen"`
+
+	CreatedAt time.Time `json:"createdAt"`
+}
+
+func (v *GetExternalUserExternalUser) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *GetExternalUserExternalUser) __premarshalJSON() (*__premarshalGetExternalUserExternalUser, error) {
+	var retval __premarshalGetExternalUserExternalUser
+
+	retval.Id = v.ExternalUserFields.Id
+	retval.Name = v.ExternalUserFields.Name
+	retval.DisplayName = v.ExternalUserFields.DisplayName
+	retval.Email = v.ExternalUserFields.Email
+	retval.AvatarUrl = v.ExternalUserFields.AvatarUrl
+	retval.LastSeen = v.ExternalUserFields.LastSeen
+	retval.CreatedAt = v.ExternalUserFields.CreatedAt
+	return &retval, nil
+}
+
+// GetExternalUserResponse is returned by GetExternalUser on success.
+type GetExternalUserResponse struct {
+	// Retrieves a single external user by their identifier.
+	ExternalUser *GetExternalUserExternalUser `json:"externalUser"`
+}
+
+// GetExternalUser returns GetExternalUserResponse.ExternalUser, and is useful for accessing the field via an interface.
+func (v *GetExternalUserResponse) GetExternalUser() *GetExternalUserExternalUser {
+	return v.ExternalUser
+}
 
 // GetFavoriteFavorite includes the requested fields of the GraphQL type Favorite.
 // The GraphQL type's documentation follows.
@@ -24501,6 +25409,25 @@ var AllIssueRelationType = []IssueRelationType{
 	IssueRelationTypeSimilar,
 }
 
+// Input for updating an existing issue relation. All fields are optional; only provided fields will be updated.
+type IssueRelationUpdateInput struct {
+	// The identifier of the issue that is related to another issue. Can be a UUID or issue identifier (e.g., 'LIN-123').
+	IssueId *string `json:"issueId"`
+	// The identifier of the related issue. Can be a UUID or issue identifier (e.g., 'LIN-123').
+	RelatedIssueId *string `json:"relatedIssueId"`
+	// The type of relation of the issue to the related issue.
+	Type *string `json:"type"`
+}
+
+// GetIssueId returns IssueRelationUpdateInput.IssueId, and is useful for accessing the field via an interface.
+func (v *IssueRelationUpdateInput) GetIssueId() *string { return v.IssueId }
+
+// GetRelatedIssueId returns IssueRelationUpdateInput.RelatedIssueId, and is useful for accessing the field via an interface.
+func (v *IssueRelationUpdateInput) GetRelatedIssueId() *string { return v.RelatedIssueId }
+
+// GetType returns IssueRelationUpdateInput.Type, and is useful for accessing the field via an interface.
+func (v *IssueRelationUpdateInput) GetType() *string { return v.Type }
+
 // IssueReminderIssueReminderIssuePayload includes the requested fields of the GraphQL type IssuePayload.
 // The GraphQL type's documentation follows.
 //
@@ -26259,6 +27186,153 @@ type ListAttachmentsResponse struct {
 // GetIssue returns ListAttachmentsResponse.Issue, and is useful for accessing the field via an interface.
 func (v *ListAttachmentsResponse) GetIssue() *ListAttachmentsIssue { return v.Issue }
 
+// ListAuditEntriesAuditEntriesAuditEntryConnection includes the requested fields of the GraphQL type AuditEntryConnection.
+type ListAuditEntriesAuditEntriesAuditEntryConnection struct {
+	Nodes    []*ListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry `json:"nodes"`
+	PageInfo *ListAuditEntriesAuditEntriesAuditEntryConnectionPageInfo          `json:"pageInfo"`
+}
+
+// GetNodes returns ListAuditEntriesAuditEntriesAuditEntryConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ListAuditEntriesAuditEntriesAuditEntryConnection) GetNodes() []*ListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry {
+	return v.Nodes
+}
+
+// GetPageInfo returns ListAuditEntriesAuditEntriesAuditEntryConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *ListAuditEntriesAuditEntriesAuditEntryConnection) GetPageInfo() *ListAuditEntriesAuditEntriesAuditEntryConnectionPageInfo {
+	return v.PageInfo
+}
+
+// ListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry includes the requested fields of the GraphQL type AuditEntry.
+// The GraphQL type's documentation follows.
+//
+// A workspace audit log entry recording a security or compliance-relevant action.
+// Audit entries capture who performed an action, when, from what IP address and
+// country, and include type-specific metadata. The audit log is partitioned by
+// time for performance and is accessible only to workspace administrators.
+// Examples of audited actions include user authentication events, permission
+// changes, data exports, and workspace setting modifications.
+type ListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry struct {
+	AuditEntryFields `json:"-"`
+}
+
+// GetId returns ListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry.Id, and is useful for accessing the field via an interface.
+func (v *ListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry) GetId() string {
+	return v.AuditEntryFields.Id
+}
+
+// GetType returns ListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry.Type, and is useful for accessing the field via an interface.
+func (v *ListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry) GetType() string {
+	return v.AuditEntryFields.Type
+}
+
+// GetCreatedAt returns ListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry) GetCreatedAt() time.Time {
+	return v.AuditEntryFields.CreatedAt
+}
+
+// GetIp returns ListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry.Ip, and is useful for accessing the field via an interface.
+func (v *ListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry) GetIp() *string {
+	return v.AuditEntryFields.Ip
+}
+
+// GetCountryCode returns ListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry.CountryCode, and is useful for accessing the field via an interface.
+func (v *ListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry) GetCountryCode() *string {
+	return v.AuditEntryFields.CountryCode
+}
+
+// GetActor returns ListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry.Actor, and is useful for accessing the field via an interface.
+func (v *ListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry) GetActor() *AuditEntryFieldsActorUser {
+	return v.AuditEntryFields.Actor
+}
+
+func (v *ListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AuditEntryFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry struct {
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	Ip *string `json:"ip"`
+
+	CountryCode *string `json:"countryCode"`
+
+	Actor *AuditEntryFieldsActorUser `json:"actor"`
+}
+
+func (v *ListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry) __premarshalJSON() (*__premarshalListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry, error) {
+	var retval __premarshalListAuditEntriesAuditEntriesAuditEntryConnectionNodesAuditEntry
+
+	retval.Id = v.AuditEntryFields.Id
+	retval.Type = v.AuditEntryFields.Type
+	retval.CreatedAt = v.AuditEntryFields.CreatedAt
+	retval.Ip = v.AuditEntryFields.Ip
+	retval.CountryCode = v.AuditEntryFields.CountryCode
+	retval.Actor = v.AuditEntryFields.Actor
+	return &retval, nil
+}
+
+// ListAuditEntriesAuditEntriesAuditEntryConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+type ListAuditEntriesAuditEntriesAuditEntryConnectionPageInfo struct {
+	// Indicates if there are more results when paginating forward.
+	HasNextPage bool `json:"hasNextPage"`
+	// Cursor representing the last result in the paginated results.
+	EndCursor *string `json:"endCursor"`
+}
+
+// GetHasNextPage returns ListAuditEntriesAuditEntriesAuditEntryConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *ListAuditEntriesAuditEntriesAuditEntryConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// GetEndCursor returns ListAuditEntriesAuditEntriesAuditEntryConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *ListAuditEntriesAuditEntriesAuditEntryConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// ListAuditEntriesResponse is returned by ListAuditEntries on success.
+type ListAuditEntriesResponse struct {
+	// All audit log entries.
+	AuditEntries *ListAuditEntriesAuditEntriesAuditEntryConnection `json:"auditEntries"`
+}
+
+// GetAuditEntries returns ListAuditEntriesResponse.AuditEntries, and is useful for accessing the field via an interface.
+func (v *ListAuditEntriesResponse) GetAuditEntries() *ListAuditEntriesAuditEntriesAuditEntryConnection {
+	return v.AuditEntries
+}
+
 // ListCommentsIssue includes the requested fields of the GraphQL type Issue.
 // The GraphQL type's documentation follows.
 //
@@ -27733,6 +28807,163 @@ type ListEmojisResponse struct {
 
 // GetEmojis returns ListEmojisResponse.Emojis, and is useful for accessing the field via an interface.
 func (v *ListEmojisResponse) GetEmojis() *ListEmojisEmojisEmojiConnection { return v.Emojis }
+
+// ListExternalUsersExternalUsersExternalUserConnection includes the requested fields of the GraphQL type ExternalUserConnection.
+type ListExternalUsersExternalUsersExternalUserConnection struct {
+	Nodes    []*ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser `json:"nodes"`
+	PageInfo *ListExternalUsersExternalUsersExternalUserConnectionPageInfo            `json:"pageInfo"`
+}
+
+// GetNodes returns ListExternalUsersExternalUsersExternalUserConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ListExternalUsersExternalUsersExternalUserConnection) GetNodes() []*ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser {
+	return v.Nodes
+}
+
+// GetPageInfo returns ListExternalUsersExternalUsersExternalUserConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *ListExternalUsersExternalUsersExternalUserConnection) GetPageInfo() *ListExternalUsersExternalUsersExternalUserConnectionPageInfo {
+	return v.PageInfo
+}
+
+// ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser includes the requested fields of the GraphQL type ExternalUser.
+// The GraphQL type's documentation follows.
+//
+// An external user who interacts with Linear through an integrated external
+// service (such as Slack, Jira, GitHub, GitLab, Salesforce, or Microsoft Teams)
+// but does not have a Linear account. External users can create issues, post
+// comments, and add reactions from their respective platforms. They are identified
+// by service-specific user IDs and may optionally have an email address. External
+// users are scoped to a single workspace.
+type ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser struct {
+	ExternalUserFields `json:"-"`
+}
+
+// GetId returns ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser.Id, and is useful for accessing the field via an interface.
+func (v *ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser) GetId() string {
+	return v.ExternalUserFields.Id
+}
+
+// GetName returns ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser.Name, and is useful for accessing the field via an interface.
+func (v *ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser) GetName() string {
+	return v.ExternalUserFields.Name
+}
+
+// GetDisplayName returns ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser.DisplayName, and is useful for accessing the field via an interface.
+func (v *ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser) GetDisplayName() string {
+	return v.ExternalUserFields.DisplayName
+}
+
+// GetEmail returns ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser.Email, and is useful for accessing the field via an interface.
+func (v *ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser) GetEmail() *string {
+	return v.ExternalUserFields.Email
+}
+
+// GetAvatarUrl returns ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser.AvatarUrl, and is useful for accessing the field via an interface.
+func (v *ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser) GetAvatarUrl() *string {
+	return v.ExternalUserFields.AvatarUrl
+}
+
+// GetLastSeen returns ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser.LastSeen, and is useful for accessing the field via an interface.
+func (v *ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser) GetLastSeen() *time.Time {
+	return v.ExternalUserFields.LastSeen
+}
+
+// GetCreatedAt returns ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser) GetCreatedAt() time.Time {
+	return v.ExternalUserFields.CreatedAt
+}
+
+func (v *ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.ExternalUserFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	DisplayName string `json:"displayName"`
+
+	Email *string `json:"email"`
+
+	AvatarUrl *string `json:"avatarUrl"`
+
+	LastSeen *time.Time `json:"lastSeen"`
+
+	CreatedAt time.Time `json:"createdAt"`
+}
+
+func (v *ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser) __premarshalJSON() (*__premarshalListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser, error) {
+	var retval __premarshalListExternalUsersExternalUsersExternalUserConnectionNodesExternalUser
+
+	retval.Id = v.ExternalUserFields.Id
+	retval.Name = v.ExternalUserFields.Name
+	retval.DisplayName = v.ExternalUserFields.DisplayName
+	retval.Email = v.ExternalUserFields.Email
+	retval.AvatarUrl = v.ExternalUserFields.AvatarUrl
+	retval.LastSeen = v.ExternalUserFields.LastSeen
+	retval.CreatedAt = v.ExternalUserFields.CreatedAt
+	return &retval, nil
+}
+
+// ListExternalUsersExternalUsersExternalUserConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+type ListExternalUsersExternalUsersExternalUserConnectionPageInfo struct {
+	// Indicates if there are more results when paginating forward.
+	HasNextPage bool `json:"hasNextPage"`
+	// Cursor representing the last result in the paginated results.
+	EndCursor *string `json:"endCursor"`
+}
+
+// GetHasNextPage returns ListExternalUsersExternalUsersExternalUserConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *ListExternalUsersExternalUsersExternalUserConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// GetEndCursor returns ListExternalUsersExternalUsersExternalUserConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *ListExternalUsersExternalUsersExternalUserConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// ListExternalUsersResponse is returned by ListExternalUsers on success.
+type ListExternalUsersResponse struct {
+	// All external users for the organization. External users are people who
+	// interact with Linear through integrated services (Slack, Jira, GitHub, etc.)
+	// without having a Linear account.
+	ExternalUsers *ListExternalUsersExternalUsersExternalUserConnection `json:"externalUsers"`
+}
+
+// GetExternalUsers returns ListExternalUsersResponse.ExternalUsers, and is useful for accessing the field via an interface.
+func (v *ListExternalUsersResponse) GetExternalUsers() *ListExternalUsersExternalUsersExternalUserConnection {
+	return v.ExternalUsers
+}
 
 // ListFavoritesFavoritesFavoriteConnection includes the requested fields of the GraphQL type FavoriteConnection.
 type ListFavoritesFavoritesFavoriteConnection struct {
@@ -31783,6 +33014,53 @@ type ListProjectsResponse struct {
 // GetProjects returns ListProjectsResponse.Projects, and is useful for accessing the field via an interface.
 func (v *ListProjectsResponse) GetProjects() *ListProjectsProjectsProjectConnection {
 	return v.Projects
+}
+
+// ListSlaConfigurationsResponse is returned by ListSlaConfigurations on success.
+type ListSlaConfigurationsResponse struct {
+	// Active SLA configurations that can apply to the requested team.
+	SlaConfigurations []*ListSlaConfigurationsSlaConfigurationsSlaConfiguration `json:"slaConfigurations"`
+}
+
+// GetSlaConfigurations returns ListSlaConfigurationsResponse.SlaConfigurations, and is useful for accessing the field via an interface.
+func (v *ListSlaConfigurationsResponse) GetSlaConfigurations() []*ListSlaConfigurationsSlaConfigurationsSlaConfiguration {
+	return v.SlaConfigurations
+}
+
+// ListSlaConfigurationsSlaConfigurationsSlaConfiguration includes the requested fields of the GraphQL type SlaConfiguration.
+// The GraphQL type's documentation follows.
+//
+// An active SLA rule that can apply to a team.
+type ListSlaConfigurationsSlaConfigurationsSlaConfiguration struct {
+	// The identifier of the SLA rule.
+	Id string `json:"id"`
+	// The name of the SLA rule.
+	Name string `json:"name"`
+	// The SLA value configured by the rule, expressed in milliseconds or business days depending on the day-count type.
+	Sla *float64 `json:"sla"`
+	// The SLA type used when the rule sets an SLA.
+	SlaType *SLADayCountType `json:"slaType"`
+	// Whether the rule removes an SLA instead of setting one.
+	RemovesSla bool `json:"removesSla"`
+}
+
+// GetId returns ListSlaConfigurationsSlaConfigurationsSlaConfiguration.Id, and is useful for accessing the field via an interface.
+func (v *ListSlaConfigurationsSlaConfigurationsSlaConfiguration) GetId() string { return v.Id }
+
+// GetName returns ListSlaConfigurationsSlaConfigurationsSlaConfiguration.Name, and is useful for accessing the field via an interface.
+func (v *ListSlaConfigurationsSlaConfigurationsSlaConfiguration) GetName() string { return v.Name }
+
+// GetSla returns ListSlaConfigurationsSlaConfigurationsSlaConfiguration.Sla, and is useful for accessing the field via an interface.
+func (v *ListSlaConfigurationsSlaConfigurationsSlaConfiguration) GetSla() *float64 { return v.Sla }
+
+// GetSlaType returns ListSlaConfigurationsSlaConfigurationsSlaConfiguration.SlaType, and is useful for accessing the field via an interface.
+func (v *ListSlaConfigurationsSlaConfigurationsSlaConfiguration) GetSlaType() *SLADayCountType {
+	return v.SlaType
+}
+
+// GetRemovesSla returns ListSlaConfigurationsSlaConfigurationsSlaConfiguration.RemovesSla, and is useful for accessing the field via an interface.
+func (v *ListSlaConfigurationsSlaConfigurationsSlaConfiguration) GetRemovesSla() bool {
+	return v.RemovesSla
 }
 
 // ListTeamsResponse is returned by ListTeams on success.
@@ -46256,6 +47534,91 @@ func (v *ProjectUpdatesFilter) GetOr() []*ProjectUpdatesFilter { return v.Or }
 // GetUpdatedAt returns ProjectUpdatesFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *ProjectUpdatesFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
 
+// RateLimitStatusRateLimitStatusRateLimitPayload includes the requested fields of the GraphQL type RateLimitPayload.
+// The GraphQL type's documentation follows.
+//
+// The current rate limit status for the authenticated entity.
+type RateLimitStatusRateLimitStatusRateLimitPayload struct {
+	// The identifier being rate limited, typically the API key or user ID.
+	Identifier *string `json:"identifier"`
+	// The category of rate limit applied to this request, such as API complexity or request count.
+	Kind string `json:"kind"`
+	// The current state of each rate limit type, including remaining quota and reset timing.
+	Limits []*RateLimitStatusRateLimitStatusRateLimitPayloadLimitsRateLimitResultPayload `json:"limits"`
+}
+
+// GetIdentifier returns RateLimitStatusRateLimitStatusRateLimitPayload.Identifier, and is useful for accessing the field via an interface.
+func (v *RateLimitStatusRateLimitStatusRateLimitPayload) GetIdentifier() *string { return v.Identifier }
+
+// GetKind returns RateLimitStatusRateLimitStatusRateLimitPayload.Kind, and is useful for accessing the field via an interface.
+func (v *RateLimitStatusRateLimitStatusRateLimitPayload) GetKind() string { return v.Kind }
+
+// GetLimits returns RateLimitStatusRateLimitStatusRateLimitPayload.Limits, and is useful for accessing the field via an interface.
+func (v *RateLimitStatusRateLimitStatusRateLimitPayload) GetLimits() []*RateLimitStatusRateLimitStatusRateLimitPayloadLimitsRateLimitResultPayload {
+	return v.Limits
+}
+
+// RateLimitStatusRateLimitStatusRateLimitPayloadLimitsRateLimitResultPayload includes the requested fields of the GraphQL type RateLimitResultPayload.
+// The GraphQL type's documentation follows.
+//
+// The state of a specific rate limit type, including remaining quota and reset timing.
+type RateLimitStatusRateLimitStatusRateLimitPayloadLimitsRateLimitResultPayload struct {
+	// The specific type of rate limit being tracked, such as query complexity or mutation count.
+	Type string `json:"type"`
+	// The total allowed quantity for this type of limit.
+	AllowedAmount float64 `json:"allowedAmount"`
+	// The remaining quantity for this type of limit after this request.
+	RemainingAmount float64 `json:"remainingAmount"`
+	// The requested quantity for this type of limit.
+	RequestedAmount float64 `json:"requestedAmount"`
+	// The duration in milliseconds of the rate limit window. After this period elapses, the limit is fully replenished.
+	Period float64 `json:"period"`
+	// The UNIX timestamp (in milliseconds) at which the rate limit will be fully replenished.
+	Reset float64 `json:"reset"`
+}
+
+// GetType returns RateLimitStatusRateLimitStatusRateLimitPayloadLimitsRateLimitResultPayload.Type, and is useful for accessing the field via an interface.
+func (v *RateLimitStatusRateLimitStatusRateLimitPayloadLimitsRateLimitResultPayload) GetType() string {
+	return v.Type
+}
+
+// GetAllowedAmount returns RateLimitStatusRateLimitStatusRateLimitPayloadLimitsRateLimitResultPayload.AllowedAmount, and is useful for accessing the field via an interface.
+func (v *RateLimitStatusRateLimitStatusRateLimitPayloadLimitsRateLimitResultPayload) GetAllowedAmount() float64 {
+	return v.AllowedAmount
+}
+
+// GetRemainingAmount returns RateLimitStatusRateLimitStatusRateLimitPayloadLimitsRateLimitResultPayload.RemainingAmount, and is useful for accessing the field via an interface.
+func (v *RateLimitStatusRateLimitStatusRateLimitPayloadLimitsRateLimitResultPayload) GetRemainingAmount() float64 {
+	return v.RemainingAmount
+}
+
+// GetRequestedAmount returns RateLimitStatusRateLimitStatusRateLimitPayloadLimitsRateLimitResultPayload.RequestedAmount, and is useful for accessing the field via an interface.
+func (v *RateLimitStatusRateLimitStatusRateLimitPayloadLimitsRateLimitResultPayload) GetRequestedAmount() float64 {
+	return v.RequestedAmount
+}
+
+// GetPeriod returns RateLimitStatusRateLimitStatusRateLimitPayloadLimitsRateLimitResultPayload.Period, and is useful for accessing the field via an interface.
+func (v *RateLimitStatusRateLimitStatusRateLimitPayloadLimitsRateLimitResultPayload) GetPeriod() float64 {
+	return v.Period
+}
+
+// GetReset returns RateLimitStatusRateLimitStatusRateLimitPayloadLimitsRateLimitResultPayload.Reset, and is useful for accessing the field via an interface.
+func (v *RateLimitStatusRateLimitStatusRateLimitPayloadLimitsRateLimitResultPayload) GetReset() float64 {
+	return v.Reset
+}
+
+// RateLimitStatusResponse is returned by RateLimitStatus on success.
+type RateLimitStatusResponse struct {
+	// The current rate limit status for the authenticated client, including
+	// remaining quota and reset timing for each limit type.
+	RateLimitStatus *RateLimitStatusRateLimitStatusRateLimitPayload `json:"rateLimitStatus"`
+}
+
+// GetRateLimitStatus returns RateLimitStatusResponse.RateLimitStatus, and is useful for accessing the field via an interface.
+func (v *RateLimitStatusResponse) GetRateLimitStatus() *RateLimitStatusRateLimitStatusRateLimitPayload {
+	return v.RateLimitStatus
+}
+
 // Reaction filtering options.
 type ReactionCollectionFilter struct {
 	// Compound filters, all of which need to be matched by the reaction.
@@ -47659,6 +49022,267 @@ func (v *SearchIssuesSearchIssuesIssueSearchPayloadPageInfo) GetHasNextPage() bo
 // GetEndCursor returns SearchIssuesSearchIssuesIssueSearchPayloadPageInfo.EndCursor, and is useful for accessing the field via an interface.
 func (v *SearchIssuesSearchIssuesIssueSearchPayloadPageInfo) GetEndCursor() *string {
 	return v.EndCursor
+}
+
+// SearchProjectsResponse is returned by SearchProjects on success.
+type SearchProjectsResponse struct {
+	// Search projects by text query using full-text and vector search. Results are
+	// ranked by relevance unless an orderBy parameter is specified. Rate-limited to
+	// 30 requests per minute.
+	SearchProjects *SearchProjectsSearchProjectsProjectSearchPayload `json:"searchProjects"`
+}
+
+// GetSearchProjects returns SearchProjectsResponse.SearchProjects, and is useful for accessing the field via an interface.
+func (v *SearchProjectsResponse) GetSearchProjects() *SearchProjectsSearchProjectsProjectSearchPayload {
+	return v.SearchProjects
+}
+
+// SearchProjectsSearchProjectsProjectSearchPayload includes the requested fields of the GraphQL type ProjectSearchPayload.
+type SearchProjectsSearchProjectsProjectSearchPayload struct {
+	// Total number of matching results before pagination is applied.
+	TotalCount float64                                                                     `json:"totalCount"`
+	Nodes      []*SearchProjectsSearchProjectsProjectSearchPayloadNodesProjectSearchResult `json:"nodes"`
+}
+
+// GetTotalCount returns SearchProjectsSearchProjectsProjectSearchPayload.TotalCount, and is useful for accessing the field via an interface.
+func (v *SearchProjectsSearchProjectsProjectSearchPayload) GetTotalCount() float64 {
+	return v.TotalCount
+}
+
+// GetNodes returns SearchProjectsSearchProjectsProjectSearchPayload.Nodes, and is useful for accessing the field via an interface.
+func (v *SearchProjectsSearchProjectsProjectSearchPayload) GetNodes() []*SearchProjectsSearchProjectsProjectSearchPayloadNodesProjectSearchResult {
+	return v.Nodes
+}
+
+// SearchProjectsSearchProjectsProjectSearchPayloadNodesProjectSearchResult includes the requested fields of the GraphQL type ProjectSearchResult.
+type SearchProjectsSearchProjectsProjectSearchPayloadNodesProjectSearchResult struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the project.
+	Name string `json:"name"`
+	// The short description of the project.
+	Description string `json:"description"`
+	// Project URL.
+	Url string `json:"url"`
+}
+
+// GetId returns SearchProjectsSearchProjectsProjectSearchPayloadNodesProjectSearchResult.Id, and is useful for accessing the field via an interface.
+func (v *SearchProjectsSearchProjectsProjectSearchPayloadNodesProjectSearchResult) GetId() string {
+	return v.Id
+}
+
+// GetName returns SearchProjectsSearchProjectsProjectSearchPayloadNodesProjectSearchResult.Name, and is useful for accessing the field via an interface.
+func (v *SearchProjectsSearchProjectsProjectSearchPayloadNodesProjectSearchResult) GetName() string {
+	return v.Name
+}
+
+// GetDescription returns SearchProjectsSearchProjectsProjectSearchPayloadNodesProjectSearchResult.Description, and is useful for accessing the field via an interface.
+func (v *SearchProjectsSearchProjectsProjectSearchPayloadNodesProjectSearchResult) GetDescription() string {
+	return v.Description
+}
+
+// GetUrl returns SearchProjectsSearchProjectsProjectSearchPayloadNodesProjectSearchResult.Url, and is useful for accessing the field via an interface.
+func (v *SearchProjectsSearchProjectsProjectSearchPayloadNodesProjectSearchResult) GetUrl() string {
+	return v.Url
+}
+
+// SemanticSearchResponse is returned by SemanticSearch on success.
+type SemanticSearchResponse struct {
+	// Search for issues, projects, initiatives, and documents using natural
+	// language. Uses vector-based semantic search with optional full-text search and
+	// reranking. Results can be filtered by type and by entity-specific filters.
+	// Rate-limited to 30 requests per minute.
+	SemanticSearch *SemanticSearchSemanticSearchSemanticSearchPayload `json:"semanticSearch"`
+}
+
+// GetSemanticSearch returns SemanticSearchResponse.SemanticSearch, and is useful for accessing the field via an interface.
+func (v *SemanticSearchResponse) GetSemanticSearch() *SemanticSearchSemanticSearchSemanticSearchPayload {
+	return v.SemanticSearch
+}
+
+// The type of the semantic search result.
+type SemanticSearchResultType string
+
+const (
+	SemanticSearchResultTypeIssue      SemanticSearchResultType = "issue"
+	SemanticSearchResultTypeProject    SemanticSearchResultType = "project"
+	SemanticSearchResultTypeInitiative SemanticSearchResultType = "initiative"
+	SemanticSearchResultTypeDocument   SemanticSearchResultType = "document"
+)
+
+var AllSemanticSearchResultType = []SemanticSearchResultType{
+	SemanticSearchResultTypeIssue,
+	SemanticSearchResultTypeProject,
+	SemanticSearchResultTypeInitiative,
+	SemanticSearchResultTypeDocument,
+}
+
+// SemanticSearchSemanticSearchSemanticSearchPayload includes the requested fields of the GraphQL type SemanticSearchPayload.
+// The GraphQL type's documentation follows.
+//
+// The payload returned by the semantic search query, containing the list of matching results.
+type SemanticSearchSemanticSearchSemanticSearchPayload struct {
+	// The list of matching search results, ordered by relevance score.
+	Results []*SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResult `json:"results"`
+}
+
+// GetResults returns SemanticSearchSemanticSearchSemanticSearchPayload.Results, and is useful for accessing the field via an interface.
+func (v *SemanticSearchSemanticSearchSemanticSearchPayload) GetResults() []*SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResult {
+	return v.Results
+}
+
+// SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResult includes the requested fields of the GraphQL type SemanticSearchResult.
+// The GraphQL type's documentation follows.
+//
+// A reference to an entity returned by semantic search, containing its type and
+// ID. Resolve the specific entity using the type-specific field resolvers (issue,
+// project, initiative, document).
+type SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResult struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The type of the semantic search result.
+	Type SemanticSearchResultType `json:"type"`
+	// The issue entity, if this search result is of type Issue. Null for other result types.
+	Issue *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultIssue `json:"issue"`
+	// The project entity, if this search result is of type Project. Null for other result types.
+	Project *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultProject `json:"project"`
+	// The initiative entity, if this search result is of type Initiative. Null for other result types.
+	Initiative *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultInitiative `json:"initiative"`
+	// The document entity, if this search result is of type Document. Null for other result types.
+	Document *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultDocument `json:"document"`
+}
+
+// GetId returns SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResult.Id, and is useful for accessing the field via an interface.
+func (v *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResult) GetId() string {
+	return v.Id
+}
+
+// GetType returns SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResult.Type, and is useful for accessing the field via an interface.
+func (v *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResult) GetType() SemanticSearchResultType {
+	return v.Type
+}
+
+// GetIssue returns SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResult.Issue, and is useful for accessing the field via an interface.
+func (v *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResult) GetIssue() *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultIssue {
+	return v.Issue
+}
+
+// GetProject returns SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResult.Project, and is useful for accessing the field via an interface.
+func (v *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResult) GetProject() *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultProject {
+	return v.Project
+}
+
+// GetInitiative returns SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResult.Initiative, and is useful for accessing the field via an interface.
+func (v *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResult) GetInitiative() *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultInitiative {
+	return v.Initiative
+}
+
+// GetDocument returns SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResult.Document, and is useful for accessing the field via an interface.
+func (v *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResult) GetDocument() *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultDocument {
+	return v.Document
+}
+
+// SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultDocument includes the requested fields of the GraphQL type Document.
+// The GraphQL type's documentation follows.
+//
+// A rich-text document that lives within a project, initiative, team, issue,
+// release, or cycle. Documents support collaborative editing via ProseMirror/Yjs
+// and store their content in a separate DocumentContent entity. Each document is
+// associated with exactly one parent entity.
+type SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultDocument struct {
+	// The title of the document. An empty string indicates an untitled document.
+	Title string `json:"title"`
+	// The canonical url for the document.
+	Url string `json:"url"`
+}
+
+// GetTitle returns SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultDocument.Title, and is useful for accessing the field via an interface.
+func (v *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultDocument) GetTitle() string {
+	return v.Title
+}
+
+// GetUrl returns SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultDocument.Url, and is useful for accessing the field via an interface.
+func (v *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultDocument) GetUrl() string {
+	return v.Url
+}
+
+// SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultInitiative includes the requested fields of the GraphQL type Initiative.
+// The GraphQL type's documentation follows.
+//
+// An initiative is a high-level strategic grouping of projects toward a business
+// goal. Initiatives can contain multiple projects, have their own status updates
+// and health tracking, and can be organized hierarchically with parent-child relationships.
+type SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultInitiative struct {
+	// The name of the initiative.
+	Name string `json:"name"`
+	// Initiative URL.
+	Url string `json:"url"`
+}
+
+// GetName returns SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultInitiative.Name, and is useful for accessing the field via an interface.
+func (v *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultInitiative) GetName() string {
+	return v.Name
+}
+
+// GetUrl returns SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultInitiative.Url, and is useful for accessing the field via an interface.
+func (v *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultInitiative) GetUrl() string {
+	return v.Url
+}
+
+// SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultIssue includes the requested fields of the GraphQL type Issue.
+// The GraphQL type's documentation follows.
+//
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
+type SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultIssue struct {
+	// Issue's human readable identifier (e.g. ENG-123).
+	Identifier string `json:"identifier"`
+	// The issue's title. This is the primary human-readable summary of the work item.
+	Title string `json:"title"`
+	// Issue URL.
+	Url string `json:"url"`
+}
+
+// GetIdentifier returns SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultIssue.Identifier, and is useful for accessing the field via an interface.
+func (v *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultIssue) GetIdentifier() string {
+	return v.Identifier
+}
+
+// GetTitle returns SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultIssue.Title, and is useful for accessing the field via an interface.
+func (v *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultIssue) GetTitle() string {
+	return v.Title
+}
+
+// GetUrl returns SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultIssue.Url, and is useful for accessing the field via an interface.
+func (v *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultIssue) GetUrl() string {
+	return v.Url
+}
+
+// SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultProject includes the requested fields of the GraphQL type Project.
+// The GraphQL type's documentation follows.
+//
+// A project is a collection of issues working toward a shared goal. Projects have
+// start and target dates, milestones, status tracking, and progress metrics. They
+// can span multiple teams and be grouped under initiatives.
+type SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultProject struct {
+	// The name of the project.
+	Name string `json:"name"`
+	// Project URL.
+	Url string `json:"url"`
+}
+
+// GetName returns SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultProject.Name, and is useful for accessing the field via an interface.
+func (v *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultProject) GetName() string {
+	return v.Name
+}
+
+// GetUrl returns SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultProject.Url, and is useful for accessing the field via an interface.
+func (v *SemanticSearchSemanticSearchSemanticSearchPayloadResultsSemanticSearchResultProject) GetUrl() string {
+	return v.Url
 }
 
 type SlaStatus string
@@ -51851,6 +53475,116 @@ func (v *UpdateIssueIssueUpdateIssuePayloadIssue) __premarshalJSON() (*__premars
 	return &retval, nil
 }
 
+// UpdateIssueRelationIssueRelationUpdateIssueRelationPayload includes the requested fields of the GraphQL type IssueRelationPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of an issue relation mutation, containing the created or updated issue relation and a success indicator.
+type UpdateIssueRelationIssueRelationUpdateIssueRelationPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The issue relation that was created or updated.
+	IssueRelation *UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelation `json:"issueRelation"`
+}
+
+// GetSuccess returns UpdateIssueRelationIssueRelationUpdateIssueRelationPayload.Success, and is useful for accessing the field via an interface.
+func (v *UpdateIssueRelationIssueRelationUpdateIssueRelationPayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetIssueRelation returns UpdateIssueRelationIssueRelationUpdateIssueRelationPayload.IssueRelation, and is useful for accessing the field via an interface.
+func (v *UpdateIssueRelationIssueRelationUpdateIssueRelationPayload) GetIssueRelation() *UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelation {
+	return v.IssueRelation
+}
+
+// UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelation includes the requested fields of the GraphQL type IssueRelation.
+// The GraphQL type's documentation follows.
+//
+// A relation between two issues. Issue relations represent directional
+// relationships such as blocking, being blocked by, relating to, or duplicating
+// another issue. Each relation connects a source issue to a related issue with a
+// specific type describing the nature of the relationship.
+type UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelation struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The type of relationship between the source issue and the related issue.
+	// Possible values include blocks, duplicate, and related.
+	Type string `json:"type"`
+	// The source issue whose relationship is being described. This is the issue from which the relation originates.
+	Issue *UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelationIssue `json:"issue"`
+	// The target issue that the source issue is related to. The relation type
+	// describes how the source issue relates to this issue.
+	RelatedIssue *UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelationRelatedIssue `json:"relatedIssue"`
+}
+
+// GetId returns UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelation.Id, and is useful for accessing the field via an interface.
+func (v *UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelation) GetId() string {
+	return v.Id
+}
+
+// GetType returns UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelation.Type, and is useful for accessing the field via an interface.
+func (v *UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelation) GetType() string {
+	return v.Type
+}
+
+// GetIssue returns UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelation.Issue, and is useful for accessing the field via an interface.
+func (v *UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelation) GetIssue() *UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelationIssue {
+	return v.Issue
+}
+
+// GetRelatedIssue returns UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelation.RelatedIssue, and is useful for accessing the field via an interface.
+func (v *UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelation) GetRelatedIssue() *UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelationRelatedIssue {
+	return v.RelatedIssue
+}
+
+// UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelationIssue includes the requested fields of the GraphQL type Issue.
+// The GraphQL type's documentation follows.
+//
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
+type UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelationIssue struct {
+	// Issue's human readable identifier (e.g. ENG-123).
+	Identifier string `json:"identifier"`
+}
+
+// GetIdentifier returns UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelationIssue.Identifier, and is useful for accessing the field via an interface.
+func (v *UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelationIssue) GetIdentifier() string {
+	return v.Identifier
+}
+
+// UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelationRelatedIssue includes the requested fields of the GraphQL type Issue.
+// The GraphQL type's documentation follows.
+//
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
+type UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelationRelatedIssue struct {
+	// Issue's human readable identifier (e.g. ENG-123).
+	Identifier string `json:"identifier"`
+}
+
+// GetIdentifier returns UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelationRelatedIssue.Identifier, and is useful for accessing the field via an interface.
+func (v *UpdateIssueRelationIssueRelationUpdateIssueRelationPayloadIssueRelationRelatedIssue) GetIdentifier() string {
+	return v.Identifier
+}
+
+// UpdateIssueRelationResponse is returned by UpdateIssueRelation on success.
+type UpdateIssueRelationResponse struct {
+	// Updates an issue relation.
+	IssueRelationUpdate *UpdateIssueRelationIssueRelationUpdateIssueRelationPayload `json:"issueRelationUpdate"`
+}
+
+// GetIssueRelationUpdate returns UpdateIssueRelationResponse.IssueRelationUpdate, and is useful for accessing the field via an interface.
+func (v *UpdateIssueRelationResponse) GetIssueRelationUpdate() *UpdateIssueRelationIssueRelationUpdateIssueRelationPayload {
+	return v.IssueRelationUpdate
+}
+
 // UpdateIssueResponse is returned by UpdateIssue on success.
 type UpdateIssueResponse struct {
 	// Updates an issue.
@@ -52705,6 +54439,409 @@ func (v *UserUpdateUserUpdateUserPayloadUser) __premarshalJSON() (*__premarshalU
 	retval.Admin = v.UserDetailFields.Admin
 	retval.CreatedAt = v.UserDetailFields.CreatedAt
 	return &retval, nil
+}
+
+// Input for creating view preferences.
+type ViewPreferencesCreateInput struct {
+	// The custom view these view preferences are associated with.
+	CustomViewId *string `json:"customViewId"`
+	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
+	Id *string `json:"id"`
+	// [Internal] The initiative these view preferences are associated with.
+	InitiativeId *string `json:"initiativeId"`
+	// The initiative label these view preferences are associated with.
+	InitiativeLabelId *string `json:"initiativeLabelId"`
+	// The default parameters for the insight on that view.
+	Insights *map[string]interface{} `json:"insights"`
+	// The label these view preferences are associated with.
+	LabelId *string `json:"labelId"`
+	// View preferences object.
+	Preferences map[string]interface{} `json:"preferences"`
+	// The project these view preferences are associated with.
+	ProjectId *string `json:"projectId"`
+	// The project label these view preferences are associated with.
+	ProjectLabelId *string `json:"projectLabelId"`
+	// The release pipeline these view preferences are associated with.
+	ReleasePipelineId *string `json:"releasePipelineId"`
+	// The team these view preferences are associated with.
+	TeamId *string `json:"teamId"`
+	// The type of view preferences (either user or workspace level preferences).
+	Type ViewPreferencesType `json:"type"`
+	// The user profile these view preferences are associated with.
+	UserId *string `json:"userId"`
+	// The view type of the view preferences are associated with.
+	ViewType ViewType `json:"viewType"`
+}
+
+// GetCustomViewId returns ViewPreferencesCreateInput.CustomViewId, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesCreateInput) GetCustomViewId() *string { return v.CustomViewId }
+
+// GetId returns ViewPreferencesCreateInput.Id, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesCreateInput) GetId() *string { return v.Id }
+
+// GetInitiativeId returns ViewPreferencesCreateInput.InitiativeId, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesCreateInput) GetInitiativeId() *string { return v.InitiativeId }
+
+// GetInitiativeLabelId returns ViewPreferencesCreateInput.InitiativeLabelId, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesCreateInput) GetInitiativeLabelId() *string { return v.InitiativeLabelId }
+
+// GetInsights returns ViewPreferencesCreateInput.Insights, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesCreateInput) GetInsights() *map[string]interface{} { return v.Insights }
+
+// GetLabelId returns ViewPreferencesCreateInput.LabelId, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesCreateInput) GetLabelId() *string { return v.LabelId }
+
+// GetPreferences returns ViewPreferencesCreateInput.Preferences, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesCreateInput) GetPreferences() map[string]interface{} { return v.Preferences }
+
+// GetProjectId returns ViewPreferencesCreateInput.ProjectId, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesCreateInput) GetProjectId() *string { return v.ProjectId }
+
+// GetProjectLabelId returns ViewPreferencesCreateInput.ProjectLabelId, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesCreateInput) GetProjectLabelId() *string { return v.ProjectLabelId }
+
+// GetReleasePipelineId returns ViewPreferencesCreateInput.ReleasePipelineId, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesCreateInput) GetReleasePipelineId() *string { return v.ReleasePipelineId }
+
+// GetTeamId returns ViewPreferencesCreateInput.TeamId, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesCreateInput) GetTeamId() *string { return v.TeamId }
+
+// GetType returns ViewPreferencesCreateInput.Type, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesCreateInput) GetType() ViewPreferencesType { return v.Type }
+
+// GetUserId returns ViewPreferencesCreateInput.UserId, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesCreateInput) GetUserId() *string { return v.UserId }
+
+// GetViewType returns ViewPreferencesCreateInput.ViewType, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesCreateInput) GetViewType() ViewType { return v.ViewType }
+
+// ViewPreferencesCreateResponse is returned by ViewPreferencesCreate on success.
+type ViewPreferencesCreateResponse struct {
+	// Creates a new view preferences object. If conflicting preferences already
+	// exist for the same view type and scope, the existing preferences are replaced.
+	ViewPreferencesCreate *ViewPreferencesCreateViewPreferencesCreateViewPreferencesPayload `json:"viewPreferencesCreate"`
+}
+
+// GetViewPreferencesCreate returns ViewPreferencesCreateResponse.ViewPreferencesCreate, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesCreateResponse) GetViewPreferencesCreate() *ViewPreferencesCreateViewPreferencesCreateViewPreferencesPayload {
+	return v.ViewPreferencesCreate
+}
+
+// ViewPreferencesCreateViewPreferencesCreateViewPreferencesPayload includes the requested fields of the GraphQL type ViewPreferencesPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a view preferences mutation.
+type ViewPreferencesCreateViewPreferencesCreateViewPreferencesPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The view preferences entity being mutated.
+	ViewPreferences *ViewPreferencesCreateViewPreferencesCreateViewPreferencesPayloadViewPreferences `json:"viewPreferences"`
+}
+
+// GetSuccess returns ViewPreferencesCreateViewPreferencesCreateViewPreferencesPayload.Success, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesCreateViewPreferencesCreateViewPreferencesPayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetViewPreferences returns ViewPreferencesCreateViewPreferencesCreateViewPreferencesPayload.ViewPreferences, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesCreateViewPreferencesCreateViewPreferencesPayload) GetViewPreferences() *ViewPreferencesCreateViewPreferencesCreateViewPreferencesPayloadViewPreferences {
+	return v.ViewPreferences
+}
+
+// ViewPreferencesCreateViewPreferencesCreateViewPreferencesPayloadViewPreferences includes the requested fields of the GraphQL type ViewPreferences.
+// The GraphQL type's documentation follows.
+//
+// The display preferences for a view, controlling layout mode (list, board,
+// spreadsheet), grouping, sorting, column visibility, and other visual settings.
+// View preferences exist at two levels: organization-wide defaults and per-user
+// overrides. The effective preferences are computed by merging both layers, with
+// user preferences taking priority.
+type ViewPreferencesCreateViewPreferencesCreateViewPreferencesPayloadViewPreferences struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The type of view preferences: "organization" for workspace-wide defaults or "user" for personal overrides.
+	Type string `json:"type"`
+	// The type of view these preferences apply to, such as board, cycle, project, customView, myIssues, etc.
+	ViewType string `json:"viewType"`
+}
+
+// GetId returns ViewPreferencesCreateViewPreferencesCreateViewPreferencesPayloadViewPreferences.Id, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesCreateViewPreferencesCreateViewPreferencesPayloadViewPreferences) GetId() string {
+	return v.Id
+}
+
+// GetType returns ViewPreferencesCreateViewPreferencesCreateViewPreferencesPayloadViewPreferences.Type, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesCreateViewPreferencesCreateViewPreferencesPayloadViewPreferences) GetType() string {
+	return v.Type
+}
+
+// GetViewType returns ViewPreferencesCreateViewPreferencesCreateViewPreferencesPayloadViewPreferences.ViewType, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesCreateViewPreferencesCreateViewPreferencesPayloadViewPreferences) GetViewType() string {
+	return v.ViewType
+}
+
+// ViewPreferencesDeleteResponse is returned by ViewPreferencesDelete on success.
+type ViewPreferencesDeleteResponse struct {
+	// Deletes a view preferences object. If the preferences do not exist, the
+	// operation is treated as a successful idempotent deletion.
+	ViewPreferencesDelete *ViewPreferencesDeleteViewPreferencesDeleteDeletePayload `json:"viewPreferencesDelete"`
+}
+
+// GetViewPreferencesDelete returns ViewPreferencesDeleteResponse.ViewPreferencesDelete, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesDeleteResponse) GetViewPreferencesDelete() *ViewPreferencesDeleteViewPreferencesDeleteDeletePayload {
+	return v.ViewPreferencesDelete
+}
+
+// ViewPreferencesDeleteViewPreferencesDeleteDeletePayload includes the requested fields of the GraphQL type DeletePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity deletion mutations.
+type ViewPreferencesDeleteViewPreferencesDeleteDeletePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+}
+
+// GetSuccess returns ViewPreferencesDeleteViewPreferencesDeleteDeletePayload.Success, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesDeleteViewPreferencesDeleteDeletePayload) GetSuccess() bool { return v.Success }
+
+// The type of view preferences (either user or workspace level preferences).
+type ViewPreferencesType string
+
+const (
+	ViewPreferencesTypeOrganization ViewPreferencesType = "organization"
+	ViewPreferencesTypeUser         ViewPreferencesType = "user"
+)
+
+var AllViewPreferencesType = []ViewPreferencesType{
+	ViewPreferencesTypeOrganization,
+	ViewPreferencesTypeUser,
+}
+
+// Input for updating view preferences.
+type ViewPreferencesUpdateInput struct {
+	// The default parameters for the insight on that view.
+	Insights *map[string]interface{} `json:"insights"`
+	// View preferences.
+	Preferences *map[string]interface{} `json:"preferences"`
+}
+
+// GetInsights returns ViewPreferencesUpdateInput.Insights, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesUpdateInput) GetInsights() *map[string]interface{} { return v.Insights }
+
+// GetPreferences returns ViewPreferencesUpdateInput.Preferences, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesUpdateInput) GetPreferences() *map[string]interface{} { return v.Preferences }
+
+// ViewPreferencesUpdateResponse is returned by ViewPreferencesUpdate on success.
+type ViewPreferencesUpdateResponse struct {
+	// Updates an existing view preferences object. For user-type preferences, only the owning user can update them.
+	ViewPreferencesUpdate *ViewPreferencesUpdateViewPreferencesUpdateViewPreferencesPayload `json:"viewPreferencesUpdate"`
+}
+
+// GetViewPreferencesUpdate returns ViewPreferencesUpdateResponse.ViewPreferencesUpdate, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesUpdateResponse) GetViewPreferencesUpdate() *ViewPreferencesUpdateViewPreferencesUpdateViewPreferencesPayload {
+	return v.ViewPreferencesUpdate
+}
+
+// ViewPreferencesUpdateViewPreferencesUpdateViewPreferencesPayload includes the requested fields of the GraphQL type ViewPreferencesPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a view preferences mutation.
+type ViewPreferencesUpdateViewPreferencesUpdateViewPreferencesPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The view preferences entity being mutated.
+	ViewPreferences *ViewPreferencesUpdateViewPreferencesUpdateViewPreferencesPayloadViewPreferences `json:"viewPreferences"`
+}
+
+// GetSuccess returns ViewPreferencesUpdateViewPreferencesUpdateViewPreferencesPayload.Success, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesUpdateViewPreferencesUpdateViewPreferencesPayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetViewPreferences returns ViewPreferencesUpdateViewPreferencesUpdateViewPreferencesPayload.ViewPreferences, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesUpdateViewPreferencesUpdateViewPreferencesPayload) GetViewPreferences() *ViewPreferencesUpdateViewPreferencesUpdateViewPreferencesPayloadViewPreferences {
+	return v.ViewPreferences
+}
+
+// ViewPreferencesUpdateViewPreferencesUpdateViewPreferencesPayloadViewPreferences includes the requested fields of the GraphQL type ViewPreferences.
+// The GraphQL type's documentation follows.
+//
+// The display preferences for a view, controlling layout mode (list, board,
+// spreadsheet), grouping, sorting, column visibility, and other visual settings.
+// View preferences exist at two levels: organization-wide defaults and per-user
+// overrides. The effective preferences are computed by merging both layers, with
+// user preferences taking priority.
+type ViewPreferencesUpdateViewPreferencesUpdateViewPreferencesPayloadViewPreferences struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The type of view preferences: "organization" for workspace-wide defaults or "user" for personal overrides.
+	Type string `json:"type"`
+	// The type of view these preferences apply to, such as board, cycle, project, customView, myIssues, etc.
+	ViewType string `json:"viewType"`
+}
+
+// GetId returns ViewPreferencesUpdateViewPreferencesUpdateViewPreferencesPayloadViewPreferences.Id, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesUpdateViewPreferencesUpdateViewPreferencesPayloadViewPreferences) GetId() string {
+	return v.Id
+}
+
+// GetType returns ViewPreferencesUpdateViewPreferencesUpdateViewPreferencesPayloadViewPreferences.Type, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesUpdateViewPreferencesUpdateViewPreferencesPayloadViewPreferences) GetType() string {
+	return v.Type
+}
+
+// GetViewType returns ViewPreferencesUpdateViewPreferencesUpdateViewPreferencesPayloadViewPreferences.ViewType, and is useful for accessing the field via an interface.
+func (v *ViewPreferencesUpdateViewPreferencesUpdateViewPreferencesPayloadViewPreferences) GetViewType() string {
+	return v.ViewType
+}
+
+// The client view this custom view is targeting.
+type ViewType string
+
+const (
+	ViewTypeInbox                            ViewType = "inbox"
+	ViewTypeInboxpriority                    ViewType = "inboxPriority"
+	ViewTypeInboxother                       ViewType = "inboxOther"
+	ViewTypeMyissues                         ViewType = "myIssues"
+	ViewTypeMyissuescreatedbyme              ViewType = "myIssuesCreatedByMe"
+	ViewTypeMyissuessubscribedto             ViewType = "myIssuesSubscribedTo"
+	ViewTypeMyissuesactivity                 ViewType = "myIssuesActivity"
+	ViewTypeMyissuessharedwithme             ViewType = "myIssuesSharedWithMe"
+	ViewTypeUserprofile                      ViewType = "userProfile"
+	ViewTypeUserprofilecreatedbyuser         ViewType = "userProfileCreatedByUser"
+	ViewTypeBoard                            ViewType = "board"
+	ViewTypeCompletedcycle                   ViewType = "completedCycle"
+	ViewTypeCycle                            ViewType = "cycle"
+	ViewTypeRelease                          ViewType = "release"
+	ViewTypeReleaseoverviewissues            ViewType = "releaseOverviewIssues"
+	ViewTypeContinuouspipelinereleases       ViewType = "continuousPipelineReleases"
+	ViewTypeScheduledpipelinereleases        ViewType = "scheduledPipelineReleases"
+	ViewTypeProject                          ViewType = "project"
+	ViewTypeProjectdocuments                 ViewType = "projectDocuments"
+	ViewTypeLabel                            ViewType = "label"
+	ViewTypeTriage                           ViewType = "triage"
+	ViewTypeActiveissues                     ViewType = "activeIssues"
+	ViewTypeBacklog                          ViewType = "backlog"
+	ViewTypeSubissues                        ViewType = "subIssues"
+	ViewTypeAllissues                        ViewType = "allIssues"
+	ViewTypeDashboards                       ViewType = "dashboards"
+	ViewTypeCustomview                       ViewType = "customView"
+	ViewTypeCustomviews                      ViewType = "customViews"
+	ViewTypeInitiative                       ViewType = "initiative"
+	ViewTypeInitiativeoverview               ViewType = "initiativeOverview"
+	ViewTypeInitiativeoverviewsubinitiatives ViewType = "initiativeOverviewSubInitiatives"
+	ViewTypeInitiatives                      ViewType = "initiatives"
+	ViewTypeInitiativesall                   ViewType = "initiativesAll"
+	ViewTypeInitiativesplanned               ViewType = "initiativesPlanned"
+	ViewTypeInitiativesproposed              ViewType = "initiativesProposed"
+	ViewTypeInitiativescompleted             ViewType = "initiativesCompleted"
+	ViewTypeInitiativescanceled              ViewType = "initiativesCanceled"
+	ViewTypeProjects                         ViewType = "projects"
+	ViewTypeProjectsall                      ViewType = "projectsAll"
+	ViewTypeProjectsbacklog                  ViewType = "projectsBacklog"
+	ViewTypeProjectsclosed                   ViewType = "projectsClosed"
+	ViewTypeProjectlabel                     ViewType = "projectLabel"
+	ViewTypeInitiativelabel                  ViewType = "initiativeLabel"
+	ViewTypeSearch                           ViewType = "search"
+	ViewTypeSplitsearch                      ViewType = "splitSearch"
+	ViewTypeTeams                            ViewType = "teams"
+	ViewTypeArchive                          ViewType = "archive"
+	ViewTypeQuickview                        ViewType = "quickView"
+	ViewTypeIssueidentifiers                 ViewType = "issueIdentifiers"
+	ViewTypeCustomers                        ViewType = "customers"
+	ViewTypeCustomer                         ViewType = "customer"
+	ViewTypeEmbeddedcustomerneeds            ViewType = "embeddedCustomerNeeds"
+	ViewTypeProjectcustomerneeds             ViewType = "projectCustomerNeeds"
+	ViewTypeReviews                          ViewType = "reviews"
+	ViewTypeMyreviews                        ViewType = "myReviews"
+	ViewTypeCreatedreviews                   ViewType = "createdReviews"
+	ViewTypeAgents                           ViewType = "agents"
+	ViewTypeFocus                            ViewType = "focus"
+	ViewTypeFeedall                          ViewType = "feedAll"
+	ViewTypeFeedcreated                      ViewType = "feedCreated"
+	ViewTypeFeedfollowing                    ViewType = "feedFollowing"
+	ViewTypeFeedpopular                      ViewType = "feedPopular"
+	ViewTypeWorkspacemembers                 ViewType = "workspaceMembers"
+	ViewTypeReleasepipelines                 ViewType = "releasePipelines"
+	ViewTypeAutomations                      ViewType = "automations"
+	ViewTypeRoadmapall                       ViewType = "roadmapAll"
+	ViewTypeRoadmap                          ViewType = "roadmap"
+	ViewTypeRoadmaps                         ViewType = "roadmaps"
+	ViewTypeRoadmapclosed                    ViewType = "roadmapClosed"
+	ViewTypeRoadmapbacklog                   ViewType = "roadmapBacklog"
+)
+
+var AllViewType = []ViewType{
+	ViewTypeInbox,
+	ViewTypeInboxpriority,
+	ViewTypeInboxother,
+	ViewTypeMyissues,
+	ViewTypeMyissuescreatedbyme,
+	ViewTypeMyissuessubscribedto,
+	ViewTypeMyissuesactivity,
+	ViewTypeMyissuessharedwithme,
+	ViewTypeUserprofile,
+	ViewTypeUserprofilecreatedbyuser,
+	ViewTypeBoard,
+	ViewTypeCompletedcycle,
+	ViewTypeCycle,
+	ViewTypeRelease,
+	ViewTypeReleaseoverviewissues,
+	ViewTypeContinuouspipelinereleases,
+	ViewTypeScheduledpipelinereleases,
+	ViewTypeProject,
+	ViewTypeProjectdocuments,
+	ViewTypeLabel,
+	ViewTypeTriage,
+	ViewTypeActiveissues,
+	ViewTypeBacklog,
+	ViewTypeSubissues,
+	ViewTypeAllissues,
+	ViewTypeDashboards,
+	ViewTypeCustomview,
+	ViewTypeCustomviews,
+	ViewTypeInitiative,
+	ViewTypeInitiativeoverview,
+	ViewTypeInitiativeoverviewsubinitiatives,
+	ViewTypeInitiatives,
+	ViewTypeInitiativesall,
+	ViewTypeInitiativesplanned,
+	ViewTypeInitiativesproposed,
+	ViewTypeInitiativescompleted,
+	ViewTypeInitiativescanceled,
+	ViewTypeProjects,
+	ViewTypeProjectsall,
+	ViewTypeProjectsbacklog,
+	ViewTypeProjectsclosed,
+	ViewTypeProjectlabel,
+	ViewTypeInitiativelabel,
+	ViewTypeSearch,
+	ViewTypeSplitsearch,
+	ViewTypeTeams,
+	ViewTypeArchive,
+	ViewTypeQuickview,
+	ViewTypeIssueidentifiers,
+	ViewTypeCustomers,
+	ViewTypeCustomer,
+	ViewTypeEmbeddedcustomerneeds,
+	ViewTypeProjectcustomerneeds,
+	ViewTypeReviews,
+	ViewTypeMyreviews,
+	ViewTypeCreatedreviews,
+	ViewTypeAgents,
+	ViewTypeFocus,
+	ViewTypeFeedall,
+	ViewTypeFeedcreated,
+	ViewTypeFeedfollowing,
+	ViewTypeFeedpopular,
+	ViewTypeWorkspacemembers,
+	ViewTypeReleasepipelines,
+	ViewTypeAutomations,
+	ViewTypeRoadmapall,
+	ViewTypeRoadmap,
+	ViewTypeRoadmaps,
+	ViewTypeRoadmapclosed,
+	ViewTypeRoadmapbacklog,
 }
 
 // Input for creating a new webhook.
@@ -54405,6 +56542,34 @@ type __EmojiDeleteInput struct {
 // GetId returns __EmojiDeleteInput.Id, and is useful for accessing the field via an interface.
 func (v *__EmojiDeleteInput) GetId() string { return v.Id }
 
+// __EntityExternalLinkCreateInput is used internally by genqlient
+type __EntityExternalLinkCreateInput struct {
+	Input *EntityExternalLinkCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __EntityExternalLinkCreateInput.Input, and is useful for accessing the field via an interface.
+func (v *__EntityExternalLinkCreateInput) GetInput() *EntityExternalLinkCreateInput { return v.Input }
+
+// __EntityExternalLinkDeleteInput is used internally by genqlient
+type __EntityExternalLinkDeleteInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __EntityExternalLinkDeleteInput.Id, and is useful for accessing the field via an interface.
+func (v *__EntityExternalLinkDeleteInput) GetId() string { return v.Id }
+
+// __EntityExternalLinkUpdateInput is used internally by genqlient
+type __EntityExternalLinkUpdateInput struct {
+	Id    string                         `json:"id"`
+	Input *EntityExternalLinkUpdateInput `json:"input,omitempty"`
+}
+
+// GetId returns __EntityExternalLinkUpdateInput.Id, and is useful for accessing the field via an interface.
+func (v *__EntityExternalLinkUpdateInput) GetId() string { return v.Id }
+
+// GetInput returns __EntityExternalLinkUpdateInput.Input, and is useful for accessing the field via an interface.
+func (v *__EntityExternalLinkUpdateInput) GetInput() *EntityExternalLinkUpdateInput { return v.Input }
+
 // __FavoriteCreateInput is used internally by genqlient
 type __FavoriteCreateInput struct {
 	Input *FavoriteCreateInput `json:"input,omitempty"`
@@ -54504,6 +56669,22 @@ type __GetEmojiInput struct {
 
 // GetId returns __GetEmojiInput.Id, and is useful for accessing the field via an interface.
 func (v *__GetEmojiInput) GetId() string { return v.Id }
+
+// __GetEntityExternalLinkInput is used internally by genqlient
+type __GetEntityExternalLinkInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __GetEntityExternalLinkInput.Id, and is useful for accessing the field via an interface.
+func (v *__GetEntityExternalLinkInput) GetId() string { return v.Id }
+
+// __GetExternalUserInput is used internally by genqlient
+type __GetExternalUserInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __GetExternalUserInput.Id, and is useful for accessing the field via an interface.
+func (v *__GetExternalUserInput) GetId() string { return v.Id }
 
 // __GetFavoriteInput is used internally by genqlient
 type __GetFavoriteInput struct {
@@ -55061,6 +57242,22 @@ func (v *__ListAttachmentsInput) GetAfter() *string { return v.After }
 // GetOrderBy returns __ListAttachmentsInput.OrderBy, and is useful for accessing the field via an interface.
 func (v *__ListAttachmentsInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy }
 
+// __ListAuditEntriesInput is used internally by genqlient
+type __ListAuditEntriesInput struct {
+	Filter *AuditEntryFilter `json:"filter,omitempty"`
+	First  *int              `json:"first"`
+	After  *string           `json:"after"`
+}
+
+// GetFilter returns __ListAuditEntriesInput.Filter, and is useful for accessing the field via an interface.
+func (v *__ListAuditEntriesInput) GetFilter() *AuditEntryFilter { return v.Filter }
+
+// GetFirst returns __ListAuditEntriesInput.First, and is useful for accessing the field via an interface.
+func (v *__ListAuditEntriesInput) GetFirst() *int { return v.First }
+
+// GetAfter returns __ListAuditEntriesInput.After, and is useful for accessing the field via an interface.
+func (v *__ListAuditEntriesInput) GetAfter() *string { return v.After }
+
 // __ListCommentsInput is used internally by genqlient
 type __ListCommentsInput struct {
 	Id      string             `json:"id"`
@@ -55228,6 +57425,18 @@ func (v *__ListEmojisInput) GetAfter() *string { return v.After }
 
 // GetOrderBy returns __ListEmojisInput.OrderBy, and is useful for accessing the field via an interface.
 func (v *__ListEmojisInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy }
+
+// __ListExternalUsersInput is used internally by genqlient
+type __ListExternalUsersInput struct {
+	First *int    `json:"first"`
+	After *string `json:"after"`
+}
+
+// GetFirst returns __ListExternalUsersInput.First, and is useful for accessing the field via an interface.
+func (v *__ListExternalUsersInput) GetFirst() *int { return v.First }
+
+// GetAfter returns __ListExternalUsersInput.After, and is useful for accessing the field via an interface.
+func (v *__ListExternalUsersInput) GetAfter() *string { return v.After }
 
 // __ListFavoritesInput is used internally by genqlient
 type __ListFavoritesInput struct {
@@ -55448,6 +57657,14 @@ func (v *__ListProjectsInput) GetAfter() *string { return v.After }
 
 // GetOrderBy returns __ListProjectsInput.OrderBy, and is useful for accessing the field via an interface.
 func (v *__ListProjectsInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy }
+
+// __ListSlaConfigurationsInput is used internally by genqlient
+type __ListSlaConfigurationsInput struct {
+	TeamId string `json:"teamId"`
+}
+
+// GetTeamId returns __ListSlaConfigurationsInput.TeamId, and is useful for accessing the field via an interface.
+func (v *__ListSlaConfigurationsInput) GetTeamId() string { return v.TeamId }
 
 // __ListTeamsInput is used internally by genqlient
 type __ListTeamsInput struct {
@@ -55947,6 +58164,38 @@ func (v *__SearchIssuesInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy
 // GetIncludeArchived returns __SearchIssuesInput.IncludeArchived, and is useful for accessing the field via an interface.
 func (v *__SearchIssuesInput) GetIncludeArchived() *bool { return v.IncludeArchived }
 
+// __SearchProjectsInput is used internally by genqlient
+type __SearchProjectsInput struct {
+	Term            string `json:"term"`
+	First           *int   `json:"first"`
+	IncludeComments *bool  `json:"includeComments"`
+}
+
+// GetTerm returns __SearchProjectsInput.Term, and is useful for accessing the field via an interface.
+func (v *__SearchProjectsInput) GetTerm() string { return v.Term }
+
+// GetFirst returns __SearchProjectsInput.First, and is useful for accessing the field via an interface.
+func (v *__SearchProjectsInput) GetFirst() *int { return v.First }
+
+// GetIncludeComments returns __SearchProjectsInput.IncludeComments, and is useful for accessing the field via an interface.
+func (v *__SearchProjectsInput) GetIncludeComments() *bool { return v.IncludeComments }
+
+// __SemanticSearchInput is used internally by genqlient
+type __SemanticSearchInput struct {
+	Query      string                     `json:"query"`
+	MaxResults *int                       `json:"maxResults"`
+	Types      []SemanticSearchResultType `json:"types"`
+}
+
+// GetQuery returns __SemanticSearchInput.Query, and is useful for accessing the field via an interface.
+func (v *__SemanticSearchInput) GetQuery() string { return v.Query }
+
+// GetMaxResults returns __SemanticSearchInput.MaxResults, and is useful for accessing the field via an interface.
+func (v *__SemanticSearchInput) GetMaxResults() *int { return v.MaxResults }
+
+// GetTypes returns __SemanticSearchInput.Types, and is useful for accessing the field via an interface.
+func (v *__SemanticSearchInput) GetTypes() []SemanticSearchResultType { return v.Types }
+
 // __TeamCreateInput is used internally by genqlient
 type __TeamCreateInput struct {
 	Input *TeamCreateInput `json:"input,omitempty"`
@@ -56143,6 +58392,18 @@ func (v *__UpdateIssueInput) GetId() string { return v.Id }
 // GetInput returns __UpdateIssueInput.Input, and is useful for accessing the field via an interface.
 func (v *__UpdateIssueInput) GetInput() *IssueUpdateInput { return v.Input }
 
+// __UpdateIssueRelationInput is used internally by genqlient
+type __UpdateIssueRelationInput struct {
+	Id    string                    `json:"id"`
+	Input *IssueRelationUpdateInput `json:"input,omitempty"`
+}
+
+// GetId returns __UpdateIssueRelationInput.Id, and is useful for accessing the field via an interface.
+func (v *__UpdateIssueRelationInput) GetId() string { return v.Id }
+
+// GetInput returns __UpdateIssueRelationInput.Input, and is useful for accessing the field via an interface.
+func (v *__UpdateIssueRelationInput) GetInput() *IssueRelationUpdateInput { return v.Input }
+
 // __UpdateProjectInput is used internally by genqlient
 type __UpdateProjectInput struct {
 	Id    string              `json:"id"`
@@ -56206,6 +58467,34 @@ func (v *__UserUpdateInput) GetId() string { return v.Id }
 
 // GetInput returns __UserUpdateInput.Input, and is useful for accessing the field via an interface.
 func (v *__UserUpdateInput) GetInput() *UserUpdateInput { return v.Input }
+
+// __ViewPreferencesCreateInput is used internally by genqlient
+type __ViewPreferencesCreateInput struct {
+	Input *ViewPreferencesCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __ViewPreferencesCreateInput.Input, and is useful for accessing the field via an interface.
+func (v *__ViewPreferencesCreateInput) GetInput() *ViewPreferencesCreateInput { return v.Input }
+
+// __ViewPreferencesDeleteInput is used internally by genqlient
+type __ViewPreferencesDeleteInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __ViewPreferencesDeleteInput.Id, and is useful for accessing the field via an interface.
+func (v *__ViewPreferencesDeleteInput) GetId() string { return v.Id }
+
+// __ViewPreferencesUpdateInput is used internally by genqlient
+type __ViewPreferencesUpdateInput struct {
+	Id    string                      `json:"id"`
+	Input *ViewPreferencesUpdateInput `json:"input,omitempty"`
+}
+
+// GetId returns __ViewPreferencesUpdateInput.Id, and is useful for accessing the field via an interface.
+func (v *__ViewPreferencesUpdateInput) GetId() string { return v.Id }
+
+// GetInput returns __ViewPreferencesUpdateInput.Input, and is useful for accessing the field via an interface.
+func (v *__ViewPreferencesUpdateInput) GetInput() *ViewPreferencesUpdateInput { return v.Input }
 
 // __WebhookCreateInput is used internally by genqlient
 type __WebhookCreateInput struct {
@@ -58741,6 +61030,146 @@ func EmojiDelete(
 	return data_, err_
 }
 
+// The mutation executed by EntityExternalLinkCreate.
+const EntityExternalLinkCreate_Operation = `
+mutation EntityExternalLinkCreate ($input: EntityExternalLinkCreateInput!) {
+	entityExternalLinkCreate(input: $input) {
+		success
+		entityExternalLink {
+			... EntityExternalLinkFields
+		}
+	}
+}
+fragment EntityExternalLinkFields on EntityExternalLink {
+	id
+	label
+	url
+	sortOrder
+	createdAt
+	project {
+		id
+		name
+	}
+	initiative {
+		id
+		name
+	}
+}
+`
+
+func EntityExternalLinkCreate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *EntityExternalLinkCreateInput,
+) (data_ *EntityExternalLinkCreateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "EntityExternalLinkCreate",
+		Query:  EntityExternalLinkCreate_Operation,
+		Variables: &__EntityExternalLinkCreateInput{
+			Input: input,
+		},
+	}
+
+	data_ = &EntityExternalLinkCreateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by EntityExternalLinkDelete.
+const EntityExternalLinkDelete_Operation = `
+mutation EntityExternalLinkDelete ($id: String!) {
+	entityExternalLinkDelete(id: $id) {
+		success
+	}
+}
+`
+
+func EntityExternalLinkDelete(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *EntityExternalLinkDeleteResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "EntityExternalLinkDelete",
+		Query:  EntityExternalLinkDelete_Operation,
+		Variables: &__EntityExternalLinkDeleteInput{
+			Id: id,
+		},
+	}
+
+	data_ = &EntityExternalLinkDeleteResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by EntityExternalLinkUpdate.
+const EntityExternalLinkUpdate_Operation = `
+mutation EntityExternalLinkUpdate ($id: String!, $input: EntityExternalLinkUpdateInput!) {
+	entityExternalLinkUpdate(id: $id, input: $input) {
+		success
+		entityExternalLink {
+			... EntityExternalLinkFields
+		}
+	}
+}
+fragment EntityExternalLinkFields on EntityExternalLink {
+	id
+	label
+	url
+	sortOrder
+	createdAt
+	project {
+		id
+		name
+	}
+	initiative {
+		id
+		name
+	}
+}
+`
+
+func EntityExternalLinkUpdate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	input *EntityExternalLinkUpdateInput,
+) (data_ *EntityExternalLinkUpdateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "EntityExternalLinkUpdate",
+		Query:  EntityExternalLinkUpdate_Operation,
+		Variables: &__EntityExternalLinkUpdateInput{
+			Id:    id,
+			Input: input,
+		},
+	}
+
+	data_ = &EntityExternalLinkUpdateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The mutation executed by FavoriteCreate.
 const FavoriteCreate_Operation = `
 mutation FavoriteCreate ($input: FavoriteCreateInput!) {
@@ -58977,6 +61406,37 @@ func FileUpload(
 	}
 
 	data_ = &FileUploadResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by GetAuditEntryTypes.
+const GetAuditEntryTypes_Operation = `
+query GetAuditEntryTypes {
+	auditEntryTypes {
+		type
+		description
+	}
+}
+`
+
+func GetAuditEntryTypes(
+	ctx_ context.Context,
+	client_ graphql.Client,
+) (data_ *GetAuditEntryTypesResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetAuditEntryTypes",
+		Query:  GetAuditEntryTypes_Operation,
+	}
+
+	data_ = &GetAuditEntryTypesResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -59360,6 +61820,98 @@ func GetEmoji(
 	}
 
 	data_ = &GetEmojiResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by GetEntityExternalLink.
+const GetEntityExternalLink_Operation = `
+query GetEntityExternalLink ($id: String!) {
+	entityExternalLink(id: $id) {
+		... EntityExternalLinkFields
+	}
+}
+fragment EntityExternalLinkFields on EntityExternalLink {
+	id
+	label
+	url
+	sortOrder
+	createdAt
+	project {
+		id
+		name
+	}
+	initiative {
+		id
+		name
+	}
+}
+`
+
+func GetEntityExternalLink(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *GetEntityExternalLinkResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetEntityExternalLink",
+		Query:  GetEntityExternalLink_Operation,
+		Variables: &__GetEntityExternalLinkInput{
+			Id: id,
+		},
+	}
+
+	data_ = &GetEntityExternalLinkResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by GetExternalUser.
+const GetExternalUser_Operation = `
+query GetExternalUser ($id: String!) {
+	externalUser(id: $id) {
+		... ExternalUserFields
+	}
+}
+fragment ExternalUserFields on ExternalUser {
+	id
+	name
+	displayName
+	email
+	avatarUrl
+	lastSeen
+	createdAt
+}
+`
+
+func GetExternalUser(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *GetExternalUserResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetExternalUser",
+		Query:  GetExternalUser_Operation,
+		Variables: &__GetExternalUserInput{
+			Id: id,
+		},
+	}
+
+	data_ = &GetExternalUserResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -63008,6 +65560,62 @@ func ListAttachments(
 	return data_, err_
 }
 
+// The query executed by ListAuditEntries.
+const ListAuditEntries_Operation = `
+query ListAuditEntries ($filter: AuditEntryFilter, $first: Int, $after: String) {
+	auditEntries(filter: $filter, first: $first, after: $after) {
+		nodes {
+			... AuditEntryFields
+		}
+		pageInfo {
+			hasNextPage
+			endCursor
+		}
+	}
+}
+fragment AuditEntryFields on AuditEntry {
+	id
+	type
+	createdAt
+	ip
+	countryCode
+	actor {
+		id
+		name
+		email
+	}
+}
+`
+
+func ListAuditEntries(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter *AuditEntryFilter,
+	first *int,
+	after *string,
+) (data_ *ListAuditEntriesResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ListAuditEntries",
+		Query:  ListAuditEntries_Operation,
+		Variables: &__ListAuditEntriesInput{
+			Filter: filter,
+			First:  first,
+			After:  after,
+		},
+	}
+
+	data_ = &ListAuditEntriesResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The query executed by ListComments.
 const ListComments_Operation = `
 query ListComments ($id: String!, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
@@ -63554,6 +66162,57 @@ func ListEmojis(
 	}
 
 	data_ = &ListEmojisResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by ListExternalUsers.
+const ListExternalUsers_Operation = `
+query ListExternalUsers ($first: Int, $after: String) {
+	externalUsers(first: $first, after: $after) {
+		nodes {
+			... ExternalUserFields
+		}
+		pageInfo {
+			hasNextPage
+			endCursor
+		}
+	}
+}
+fragment ExternalUserFields on ExternalUser {
+	id
+	name
+	displayName
+	email
+	avatarUrl
+	lastSeen
+	createdAt
+}
+`
+
+func ListExternalUsers(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	first *int,
+	after *string,
+) (data_ *ListExternalUsersResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ListExternalUsers",
+		Query:  ListExternalUsers_Operation,
+		Variables: &__ListExternalUsersInput{
+			First: first,
+			After: after,
+		},
+	}
+
+	data_ = &ListExternalUsersResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -64430,6 +67089,44 @@ func ListProjects(
 	}
 
 	data_ = &ListProjectsResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by ListSlaConfigurations.
+const ListSlaConfigurations_Operation = `
+query ListSlaConfigurations ($teamId: String!) {
+	slaConfigurations(teamId: $teamId) {
+		id
+		name
+		sla
+		slaType
+		removesSla
+	}
+}
+`
+
+func ListSlaConfigurations(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	teamId string,
+) (data_ *ListSlaConfigurationsResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ListSlaConfigurations",
+		Query:  ListSlaConfigurations_Operation,
+		Variables: &__ListSlaConfigurationsInput{
+			TeamId: teamId,
+		},
+	}
+
+	data_ = &ListSlaConfigurationsResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -66467,6 +69164,45 @@ func ProjectUpdateUpdate(
 	return data_, err_
 }
 
+// The query executed by RateLimitStatus.
+const RateLimitStatus_Operation = `
+query RateLimitStatus {
+	rateLimitStatus {
+		identifier
+		kind
+		limits {
+			type
+			allowedAmount
+			remainingAmount
+			requestedAmount
+			period
+			reset
+		}
+	}
+}
+`
+
+func RateLimitStatus(
+	ctx_ context.Context,
+	client_ graphql.Client,
+) (data_ *RateLimitStatusResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "RateLimitStatus",
+		Query:  RateLimitStatus_Operation,
+	}
+
+	data_ = &RateLimitStatusResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The mutation executed by ReactionCreate.
 const ReactionCreate_Operation = `
 mutation ReactionCreate ($input: ReactionCreateInput!) {
@@ -66772,6 +69508,108 @@ func SearchIssues(
 	}
 
 	data_ = &SearchIssuesResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by SearchProjects.
+const SearchProjects_Operation = `
+query SearchProjects ($term: String!, $first: Int, $includeComments: Boolean) {
+	searchProjects(term: $term, first: $first, includeComments: $includeComments) {
+		totalCount
+		nodes {
+			id
+			name
+			description
+			url
+		}
+	}
+}
+`
+
+func SearchProjects(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	term string,
+	first *int,
+	includeComments *bool,
+) (data_ *SearchProjectsResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "SearchProjects",
+		Query:  SearchProjects_Operation,
+		Variables: &__SearchProjectsInput{
+			Term:            term,
+			First:           first,
+			IncludeComments: includeComments,
+		},
+	}
+
+	data_ = &SearchProjectsResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by SemanticSearch.
+const SemanticSearch_Operation = `
+query SemanticSearch ($query: String!, $maxResults: Int, $types: [SemanticSearchResultType!]) {
+	semanticSearch(query: $query, maxResults: $maxResults, types: $types) {
+		results {
+			id
+			type
+			issue {
+				identifier
+				title
+				url
+			}
+			project {
+				name
+				url
+			}
+			initiative {
+				name
+				url
+			}
+			document {
+				title
+				url
+			}
+		}
+	}
+}
+`
+
+func SemanticSearch(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	query string,
+	maxResults *int,
+	types []SemanticSearchResultType,
+) (data_ *SemanticSearchResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "SemanticSearch",
+		Query:  SemanticSearch_Operation,
+		Variables: &__SemanticSearchInput{
+			Query:      query,
+			MaxResults: maxResults,
+			Types:      types,
+		},
+	}
+
+	data_ = &SemanticSearchResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -67808,6 +70646,55 @@ func UpdateIssue(
 	return data_, err_
 }
 
+// The mutation executed by UpdateIssueRelation.
+const UpdateIssueRelation_Operation = `
+mutation UpdateIssueRelation ($id: String!, $input: IssueRelationUpdateInput!) {
+	issueRelationUpdate(id: $id, input: $input) {
+		success
+		issueRelation {
+			id
+			type
+			issue {
+				identifier
+			}
+			relatedIssue {
+				identifier
+			}
+		}
+	}
+}
+`
+
+// Update an existing issue relation's type or endpoints (Tier 5). Complements
+// CreateIssueRelation/DeleteIssueRelation; the relation ID comes from the
+// Relations list on `issue get --json`.
+func UpdateIssueRelation(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	input *IssueRelationUpdateInput,
+) (data_ *UpdateIssueRelationResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "UpdateIssueRelation",
+		Query:  UpdateIssueRelation_Operation,
+		Variables: &__UpdateIssueRelationInput{
+			Id:    id,
+			Input: input,
+		},
+	}
+
+	data_ = &UpdateIssueRelationResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The mutation executed by UpdateProject.
 const UpdateProject_Operation = `
 mutation UpdateProject ($id: String!, $input: ProjectUpdateInput!) {
@@ -68061,6 +70948,120 @@ func UserUpdate(
 	}
 
 	data_ = &UserUpdateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by ViewPreferencesCreate.
+const ViewPreferencesCreate_Operation = `
+mutation ViewPreferencesCreate ($input: ViewPreferencesCreateInput!) {
+	viewPreferencesCreate(input: $input) {
+		success
+		viewPreferences {
+			id
+			type
+			viewType
+		}
+	}
+}
+`
+
+func ViewPreferencesCreate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *ViewPreferencesCreateInput,
+) (data_ *ViewPreferencesCreateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ViewPreferencesCreate",
+		Query:  ViewPreferencesCreate_Operation,
+		Variables: &__ViewPreferencesCreateInput{
+			Input: input,
+		},
+	}
+
+	data_ = &ViewPreferencesCreateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by ViewPreferencesDelete.
+const ViewPreferencesDelete_Operation = `
+mutation ViewPreferencesDelete ($id: String!) {
+	viewPreferencesDelete(id: $id) {
+		success
+	}
+}
+`
+
+func ViewPreferencesDelete(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *ViewPreferencesDeleteResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ViewPreferencesDelete",
+		Query:  ViewPreferencesDelete_Operation,
+		Variables: &__ViewPreferencesDeleteInput{
+			Id: id,
+		},
+	}
+
+	data_ = &ViewPreferencesDeleteResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by ViewPreferencesUpdate.
+const ViewPreferencesUpdate_Operation = `
+mutation ViewPreferencesUpdate ($id: String!, $input: ViewPreferencesUpdateInput!) {
+	viewPreferencesUpdate(id: $id, input: $input) {
+		success
+		viewPreferences {
+			id
+			type
+			viewType
+		}
+	}
+}
+`
+
+func ViewPreferencesUpdate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	input *ViewPreferencesUpdateInput,
+) (data_ *ViewPreferencesUpdateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ViewPreferencesUpdate",
+		Query:  ViewPreferencesUpdate_Operation,
+		Variables: &__ViewPreferencesUpdateInput{
+			Id:    id,
+			Input: input,
+		},
+	}
+
+	data_ = &ViewPreferencesUpdateResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
