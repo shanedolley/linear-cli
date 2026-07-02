@@ -208,6 +208,28 @@ run_test "org get (json)" "go run main.go org get -j" "\"urlKey\""
 run_test "org get (plaintext)" "go run main.go org get -p" "# "
 run_test "org invite list" "go run main.go org invite list --limit 5"
 
+# Test favorite, view, notification, webhook, template commands (Tier 3 - PR 4)
+echo -e "\n${YELLOW}Testing favorite commands...${NC}"
+run_test "favorite list" "go run main.go favorite list --limit 5"
+run_test "favorite list (json)" "go run main.go favorite list --limit 5 -j"
+
+echo -e "\n${YELLOW}Testing view commands...${NC}"
+run_test "view list" "go run main.go view list --limit 5"
+run_test "view list (json)" "go run main.go view list --limit 5 -j"
+
+echo -e "\n${YELLOW}Testing notification commands...${NC}"
+run_test "notification list" "go run main.go notification list --limit 5"
+run_test "notification list (json)" "go run main.go notification list --limit 5 -j" "unreadCount"
+
+echo -e "\n${YELLOW}Testing webhook commands...${NC}"
+run_test "webhook list" "go run main.go webhook list --limit 5"
+run_test "webhook list (json)" "go run main.go webhook list --limit 5 -j"
+
+echo -e "\n${YELLOW}Testing template commands...${NC}"
+run_test "template list" "go run main.go template list"
+run_test "template list (json)" "go run main.go template list -j"
+run_test "template list (type filter)" "go run main.go template list --type issue"
+
 # Test help commands
 echo -e "\n${YELLOW}Testing help commands...${NC}"
 run_test "help" "go run main.go --help" "Usage:"
@@ -223,6 +245,12 @@ run_test "comment help" "go run main.go comment --help" "resolve"
 run_test "org help" "go run main.go org --help" "Available Commands:"
 run_test "team help (set-role)" "go run main.go team --help" "set-role"
 run_test "user help (suspend)" "go run main.go user --help" "suspend"
+run_test "favorite help" "go run main.go favorite --help" "Available Commands:"
+run_test "view help" "go run main.go view --help" "Available Commands:"
+run_test "notification help" "go run main.go notification --help" "Available Commands:"
+run_test "webhook help (rotate-secret)" "go run main.go webhook --help" "rotate-secret"
+run_test "template help" "go run main.go template --help" "Available Commands:"
+run_test "issue create help (template)" "go run main.go issue create --help" "template"
 
 # Test unknown command handling
 echo -e "\n${YELLOW}Testing error handling...${NC}"

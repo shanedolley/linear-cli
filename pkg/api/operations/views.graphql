@@ -1,0 +1,75 @@
+# Custom view operations (Tier 3).
+#
+# Custom views are saved, filtered lists of issues/projects/initiatives. lincli
+# covers the view lifecycle (list/get/create/update/delete). The filter payload
+# (filterData) is a JSONObject; create/update accept a raw JSON filter so the
+# CLI stays a thin pass-through rather than reimplementing Linear's filter DSL.
+
+fragment CustomViewFields on CustomView {
+  id
+  name
+  description
+  icon
+  color
+  shared
+  modelName
+  createdAt
+  updatedAt
+  creator {
+    id
+    name
+    email
+  }
+  owner {
+    id
+    name
+  }
+  team {
+    id
+    key
+    name
+  }
+}
+
+query ListCustomViews($filter: CustomViewFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
+  customViews(filter: $filter, first: $first, after: $after, orderBy: $orderBy) {
+    nodes {
+      ...CustomViewFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+query GetCustomView($id: String!) {
+  customView(id: $id) {
+    ...CustomViewFields
+    filterData
+  }
+}
+
+mutation CustomViewCreate($input: CustomViewCreateInput!) {
+  customViewCreate(input: $input) {
+    success
+    customView {
+      ...CustomViewFields
+    }
+  }
+}
+
+mutation CustomViewUpdate($id: String!, $input: CustomViewUpdateInput!) {
+  customViewUpdate(id: $id, input: $input) {
+    success
+    customView {
+      ...CustomViewFields
+    }
+  }
+}
+
+mutation CustomViewDelete($id: String!) {
+  customViewDelete(id: $id) {
+    success
+  }
+}

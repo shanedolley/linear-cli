@@ -1,0 +1,107 @@
+# Notification operations (Tier 3).
+#
+# Notification is a GraphQL interface (IssueNotification, ProjectNotification,
+# and so on); the fragment selects only interface-level fields so genqlient
+# generates a single consumable type. The batch mutations (markReadAll,
+# markUnreadAll, archiveAll, snoozeAll) all take a NotificationEntityInput to
+# scope the action; an empty input targets the caller's whole inbox. Notification
+# subscriptions are deactivated via update (active=false), not the deprecated
+# delete.
+
+fragment NotificationFields on Notification {
+  id
+  type
+  title
+  subtitle
+  inboxUrl
+  readAt
+  snoozedUntilAt
+  createdAt
+  actor {
+    id
+    name
+    email
+  }
+}
+
+query ListNotifications($filter: NotificationFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
+  notifications(filter: $filter, first: $first, after: $after, orderBy: $orderBy) {
+    nodes {
+      ...NotificationFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+query GetNotification($id: String!) {
+  notification(id: $id) {
+    ...NotificationFields
+  }
+}
+
+query NotificationsUnreadCount {
+  notificationsUnreadCount
+}
+
+mutation NotificationMarkReadAll($input: NotificationEntityInput!, $readAt: DateTime!) {
+  notificationMarkReadAll(input: $input, readAt: $readAt) {
+    success
+  }
+}
+
+mutation NotificationMarkUnreadAll($input: NotificationEntityInput!) {
+  notificationMarkUnreadAll(input: $input) {
+    success
+  }
+}
+
+mutation NotificationArchive($id: String!) {
+  notificationArchive(id: $id) {
+    success
+  }
+}
+
+mutation NotificationArchiveAll($input: NotificationEntityInput!) {
+  notificationArchiveAll(input: $input) {
+    success
+  }
+}
+
+mutation NotificationSnoozeAll($input: NotificationEntityInput!, $snoozedUntilAt: DateTime!) {
+  notificationSnoozeAll(input: $input, snoozedUntilAt: $snoozedUntilAt) {
+    success
+  }
+}
+
+# Single-notification update, used by `notification snooze <id>`.
+mutation NotificationUpdate($id: String!, $input: NotificationUpdateInput!) {
+  notificationUpdate(id: $id, input: $input) {
+    success
+    notification {
+      ...NotificationFields
+    }
+  }
+}
+
+mutation NotificationSubscriptionCreate($input: NotificationSubscriptionCreateInput!) {
+  notificationSubscriptionCreate(input: $input) {
+    success
+    notificationSubscription {
+      id
+      active
+    }
+  }
+}
+
+mutation NotificationSubscriptionUpdate($id: String!, $input: NotificationSubscriptionUpdateInput!) {
+  notificationSubscriptionUpdate(id: $id, input: $input) {
+    success
+    notificationSubscription {
+      id
+      active
+    }
+  }
+}

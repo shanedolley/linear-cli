@@ -1,0 +1,78 @@
+# Webhook operations (Tier 3).
+#
+# Webhooks POST workspace events to a target URL that Linear fetches
+# server-side, so `webhook create` validates the URL locally first (rejecting
+# localhost/loopback/link-local/private ranges; see cmd/webhook.go). The secret
+# is write-only on create and revealed once by `webhook rotate-secret`.
+
+fragment WebhookFields on Webhook {
+  id
+  label
+  url
+  enabled
+  allPublicTeams
+  resourceTypes
+  createdAt
+  updatedAt
+  creator {
+    id
+    name
+    email
+  }
+  team {
+    id
+    key
+    name
+  }
+}
+
+query ListWebhooks($first: Int, $after: String, $orderBy: PaginationOrderBy) {
+  webhooks(first: $first, after: $after, orderBy: $orderBy) {
+    nodes {
+      ...WebhookFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+query GetWebhook($id: String!) {
+  webhook(id: $id) {
+    ...WebhookFields
+  }
+}
+
+mutation WebhookCreate($input: WebhookCreateInput!) {
+  webhookCreate(input: $input) {
+    success
+    webhook {
+      ...WebhookFields
+    }
+  }
+}
+
+mutation WebhookUpdate($id: String!, $input: WebhookUpdateInput!) {
+  webhookUpdate(id: $id, input: $input) {
+    success
+    webhook {
+      ...WebhookFields
+    }
+  }
+}
+
+mutation WebhookDelete($id: String!) {
+  webhookDelete(id: $id) {
+    success
+  }
+}
+
+# Rotates the signing secret and returns the new value once. The caller is
+# responsible for capturing it (accepted risk, design Section 3.6).
+mutation WebhookRotateSecret($id: String!) {
+  webhookRotateSecret(id: $id) {
+    success
+    secret
+  }
+}

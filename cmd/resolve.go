@@ -74,6 +74,11 @@ type ResolverCache struct {
 	// are scoped to a team and referenced by number or name, so the team ID is
 	// part of the key.
 	cycles map[string]string
+
+	// templates caches resolved template IDs, keyed by "type:lower(name)".
+	// Templates are matched by name within a type (issue or project), so the
+	// type is part of the key.
+	templates map[string]string
 }
 
 // newResolverCache creates an empty ResolverCache. Call this once per
@@ -92,6 +97,7 @@ func newResolverCache() *ResolverCache {
 		projectLabels:    make(map[string]string),
 		milestones:       make(map[string][]milestoneInfo),
 		cycles:           make(map[string]string),
+		templates:        make(map[string]string),
 	}
 }
 
@@ -639,4 +645,51 @@ func resolveCycle(ctx context.Context, client graphql.Client, cache *ResolverCac
 	id := nodes[0].CycleListFields.Id
 	cache.cycles[cacheKey] = id
 	return id, nil
+}
+
+// resolveTemplate resolves a template name or UUID to a template ID, scoped to
+// a template type ("issue" or "project"). The `templates` query returns the
+// whole workspace list with no server-side filter, so matching is done here:
+// case-insensitive on name, restricted to the given type. A name matching more
+// than one template of that type returns an error listing the candidates; a
+// name matching none returns a "not found" error.
+func resolveTemplate(ctx context.Context, client graphql.Client, cache *ResolverCache, templateType, nameOrID string) (string, error) {
+	if isUUID(nameOrID) {
+		return nameOrID, nil
+	}
+
+	cacheKey := templateType + ":" + strings.ToLower(nameOrID)
+	if id, ok := cache.templates[cacheKey]; ok {
+		return id, nil
+	}
+
+	resp, err := api.ListTemplates(ctx, client)
+	if err != nil {
+		return "", fmt.Errorf("failed to list templates: %w", err)
+	}
+
+	var matches []struct{ id, name string }
+	for _, node := range resp.Templates {
+		f := node.TemplateFields
+		if !strings.EqualFold(f.Type, templateType) {
+			continue
+		}
+		if strings.EqualFold(f.Name, nameOrID) {
+			matches = append(matches, struct{ id, name string }{f.Id, f.Name})
+		}
+	}
+
+	if len(matches) == 0 {
+		return "", fmt.Errorf("%s template not found: %s", templateType, nameOrID)
+	}
+	if len(matches) > 1 {
+		candidates := make([]string, 0, len(matches))
+		for _, m := range matches {
+			candidates = append(candidates, fmt.Sprintf("%s (%s)", m.name, m.id))
+		}
+		return "", fmt.Errorf("Multiple matches for '%s': %s", nameOrID, strings.Join(candidates, ", "))
+	}
+
+	cache.templates[cacheKey] = matches[0].id
+	return matches[0].id, nil
 }

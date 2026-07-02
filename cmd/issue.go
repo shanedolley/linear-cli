@@ -1084,6 +1084,18 @@ Examples:
 			input.ProjectMilestoneId = &milestoneID
 		}
 
+		// --template applies an issue template's pre-filled attributes. It is
+		// resolved by name within the "issue" template type (or passed as an ID).
+		if cmd.Flags().Changed("template") {
+			template, _ := cmd.Flags().GetString("template")
+			templateID, err := resolveTemplate(ctx, client, cache, "issue", template)
+			if err != nil {
+				output.Error(err.Error(), plaintext, jsonOut)
+				os.Exit(1)
+			}
+			input.TemplateId = &templateID
+		}
+
 		// Create issue
 		createResp, err := api.CreateIssue(ctx, client, &input)
 		if err != nil {
@@ -2073,6 +2085,7 @@ func init() {
 	issueCreateCmd.Flags().String("milestone", "", "Project milestone name or ID (requires --project)")
 	issueCreateCmd.Flags().Int("estimate", 0, "Estimate (story points)")
 	issueCreateCmd.Flags().String("parent", "", "Parent issue identifier or ID (creates a sub-issue)")
+	issueCreateCmd.Flags().String("template", "", "Issue template name or ID to apply")
 	_ = issueCreateCmd.MarkFlagRequired("title")
 	_ = issueCreateCmd.MarkFlagRequired("team")
 

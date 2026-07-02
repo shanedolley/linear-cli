@@ -773,6 +773,18 @@ var projectCreateCmd = &cobra.Command{
 			input.StatusId = &statusID
 		}
 
+		// --template applies a project template's pre-filled attributes. It is
+		// resolved by name within the "project" template type (or passed as an ID).
+		if cmd.Flags().Changed("template") {
+			template, _ := cmd.Flags().GetString("template")
+			templateID, err := resolveTemplate(ctx, client, cache, "project", template)
+			if err != nil {
+				output.Error(err.Error(), plaintext, jsonOut)
+				os.Exit(1)
+			}
+			input.TemplateId = &templateID
+		}
+
 		createResp, err := api.CreateProject(ctx, client, &input)
 		if err != nil {
 			output.Error(fmt.Sprintf("Failed to create project: %v", err), plaintext, jsonOut)
@@ -3255,6 +3267,7 @@ func init() {
 	projectCreateCmd.Flags().String("start-date", "", "Planned start date (YYYY-MM-DD)")
 	projectCreateCmd.Flags().String("target-date", "", "Planned target date (YYYY-MM-DD)")
 	projectCreateCmd.Flags().String("status", "", "Project status name or ID")
+	projectCreateCmd.Flags().String("template", "", "Project template name or ID to apply")
 	_ = projectCreateCmd.MarkFlagRequired("name")
 	_ = projectCreateCmd.MarkFlagRequired("team")
 
