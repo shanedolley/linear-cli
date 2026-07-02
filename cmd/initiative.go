@@ -263,6 +263,9 @@ var initiativeGetCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("Failed to get initiative: %v", err)
 		}
+		if resp.Initiative == nil {
+			return fmt.Errorf("initiative %q not found", initiativeID)
+		}
 		f := resp.Initiative.InitiativeDetailFields
 
 		// Labels are fetched as a separate, best-effort request rather than

@@ -184,6 +184,9 @@ func resolveEmoji(ctx context.Context, client graphql.Client, nameOrID string) (
 	if err != nil {
 		return "", fmt.Errorf("Emoji not found: %s", nameOrID)
 	}
+	if resp.Emoji == nil {
+		return "", fmt.Errorf("Emoji not found: %s", nameOrID)
+	}
 	return resp.Emoji.EmojiFields.Id, nil
 }
 

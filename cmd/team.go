@@ -164,6 +164,9 @@ var teamGetCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("Failed to get team: %v", err)
 		}
+		if resp.Team == nil {
+			return fmt.Errorf("team %q not found", teamKey)
+		}
 		team := resp.Team.TeamDetailFields
 
 		// Handle output

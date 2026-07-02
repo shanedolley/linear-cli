@@ -112,6 +112,9 @@ var triageGetCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("Failed to get triage responsibility: %v", err)
 		}
+		if resp.TriageResponsibility == nil {
+			return fmt.Errorf("triage responsibility %q not found", args[0])
+		}
 		f := resp.TriageResponsibility.TriageResponsibilityFields
 
 		if jsonOut {

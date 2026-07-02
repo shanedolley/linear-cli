@@ -143,6 +143,9 @@ var scheduleGetCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("Failed to get schedule: %v", err)
 		}
+		if resp.TimeSchedule == nil {
+			return fmt.Errorf("schedule %q not found", id)
+		}
 		f := resp.TimeSchedule.TimeScheduleFields
 
 		if jsonOut {

@@ -102,6 +102,9 @@ var userExternalGetCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("Failed to get external user: %v", err)
 		}
+		if resp.ExternalUser == nil {
+			return fmt.Errorf("external user %q not found", args[0])
+		}
 		f := resp.ExternalUser.ExternalUserFields
 
 		if jsonOut {

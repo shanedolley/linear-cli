@@ -295,6 +295,9 @@ var projectGetCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("Failed to get project: %v", err)
 		}
+		if resp.Project == nil {
+			return fmt.Errorf("project %q not found", projectID)
+		}
 		project := resp.Project
 
 		// Handle output

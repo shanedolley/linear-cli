@@ -47,3 +47,44 @@ func TestStateGetHandler_NotFoundIsCleanError(t *testing.T) {
 		t.Fatal("expected a not-found error, got nil")
 	}
 }
+
+// The following guard the H1 regression: Linear returns a null node (not an
+// error) for a reference that matches nothing, so a `get` handler that
+// dereferences resp.<Entity> without a nil check panics on a mistyped or
+// deleted id. Each handler must instead return a clean "not found" error.
+
+func TestIssueGetHandler_NotFoundIsCleanError(t *testing.T) {
+	mock := newMockGraphQLClient()
+	mock.responses["GetIssue"] = `{"issue": null}`
+	withMockClient(t, mock)
+
+	err := issueGetCmd.RunE(issueGetCmd, []string{"ENG-999"})
+	if err == nil {
+		t.Fatal("expected a not-found error, got nil")
+	}
+	if mock.callCount("GetIssue") != 1 {
+		t.Errorf("handler did not call the injected client: GetIssue count = %d, want 1", mock.callCount("GetIssue"))
+	}
+}
+
+func TestTriageGetHandler_NotFoundIsCleanError(t *testing.T) {
+	mock := newMockGraphQLClient()
+	mock.responses["GetTriageResponsibility"] = `{"triageResponsibility": null}`
+	withMockClient(t, mock)
+
+	err := triageGetCmd.RunE(triageGetCmd, []string{"missing"})
+	if err == nil {
+		t.Fatal("expected a not-found error, got nil")
+	}
+}
+
+func TestUserExternalGetHandler_NotFoundIsCleanError(t *testing.T) {
+	mock := newMockGraphQLClient()
+	mock.responses["GetExternalUser"] = `{"externalUser": null}`
+	withMockClient(t, mock)
+
+	err := userExternalGetCmd.RunE(userExternalGetCmd, []string{"missing"})
+	if err == nil {
+		t.Fatal("expected a not-found error, got nil")
+	}
+}

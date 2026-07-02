@@ -345,6 +345,9 @@ var issueGetCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("Failed to fetch issue: %v", err)
 		}
+		if resp.Issue == nil {
+			return fmt.Errorf("issue %q not found", args[0])
+		}
 		issue := resp.Issue
 
 		if jsonOut {
@@ -1166,6 +1169,9 @@ Examples:
 				if err != nil {
 					return nil, fmt.Errorf("Failed to get issue: %v", err)
 				}
+				if issueResp.Issue == nil {
+					return nil, fmt.Errorf("issue %q not found", args[0])
+				}
 				issueDetail = &issueResp.Issue.IssueDetailFields
 			}
 			return issueDetail, nil
@@ -1791,6 +1797,10 @@ func handleParentChildLink(ctx context.Context, client graphql.Client, sourceIss
 		output.Error(fmt.Sprintf("Failed to get parent issue: %v", err), plaintext, jsonOut)
 		os.Exit(1)
 	}
+	if parentResp.Issue == nil {
+		output.Error(fmt.Sprintf("Parent issue %q not found", parentIssue), plaintext, jsonOut)
+		os.Exit(1)
+	}
 	parentID := parentResp.Issue.IssueDetailFields.Id
 
 	// Update child issue with parentId
@@ -1830,11 +1840,19 @@ func handleRelationLink(ctx context.Context, client graphql.Client, sourceIssue,
 		output.Error(fmt.Sprintf("Failed to get source issue: %v", err), plaintext, jsonOut)
 		os.Exit(1)
 	}
+	if sourceResp.Issue == nil {
+		output.Error(fmt.Sprintf("Source issue %q not found", sourceIssue), plaintext, jsonOut)
+		os.Exit(1)
+	}
 	sourceID := sourceResp.Issue.IssueDetailFields.Id
 
 	targetResp, err := api.GetIssue(ctx, client, targetIssue)
 	if err != nil {
 		output.Error(fmt.Sprintf("Failed to get target issue: %v", err), plaintext, jsonOut)
+		os.Exit(1)
+	}
+	if targetResp.Issue == nil {
+		output.Error(fmt.Sprintf("Target issue %q not found", targetIssue), plaintext, jsonOut)
 		os.Exit(1)
 	}
 	targetID := targetResp.Issue.IssueDetailFields.Id

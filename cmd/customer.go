@@ -136,6 +136,9 @@ var customerGetCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("Failed to get customer: %v", err)
 		}
+		if resp.Customer == nil {
+			return fmt.Errorf("customer %q not found", id)
+		}
 		f := resp.Customer.CustomerFields
 
 		if jsonOut {
