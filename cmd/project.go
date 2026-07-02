@@ -2721,7 +2721,7 @@ Examples:
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
-		relTypeFlag, _ := cmd.Flags().GetString("type")
+		relTypeFlag := preferFlag(cmd, "relation", "type")
 		if relTypeFlag == "" {
 			relTypeFlag = "dependency"
 		}
@@ -2849,7 +2849,7 @@ resolveProjectStatus).
 
 Examples:
   lincli project status list
-  lincli project status create --name "In Review" --type started
+  lincli project status create --name "In Review" --status-type started
   lincli project status update STATUS-ID --color "#f2c94c"
   lincli project status archive STATUS-ID`,
 }
@@ -2932,9 +2932,9 @@ var projectStatusCreateCmd = &cobra.Command{
 			output.Error("Name is required (--name)", plaintext, jsonOut)
 			os.Exit(1)
 		}
-		typeStr, _ := cmd.Flags().GetString("type")
+		typeStr := preferFlag(cmd, "status-type", "type")
 		if typeStr == "" {
-			output.Error(fmt.Sprintf("Type is required (--type). Valid values: %s", strings.Join(projectStatusTypeValues, ", ")), plaintext, jsonOut)
+			output.Error(fmt.Sprintf("Type is required (--status-type). Valid values: %s", strings.Join(projectStatusTypeValues, ", ")), plaintext, jsonOut)
 			os.Exit(1)
 		}
 		statusType, err := parseProjectStatusType(typeStr)
@@ -3016,8 +3016,8 @@ var projectStatusUpdateCmd = &cobra.Command{
 			name, _ := cmd.Flags().GetString("name")
 			input.Name = &name
 		}
-		if cmd.Flags().Changed("type") {
-			typeStr, _ := cmd.Flags().GetString("type")
+		if cmd.Flags().Changed("status-type") || cmd.Flags().Changed("type") {
+			typeStr := preferFlag(cmd, "status-type", "type")
 			statusType, err := parseProjectStatusType(typeStr)
 			if err != nil {
 				output.Error(err.Error(), plaintext, jsonOut)
@@ -3359,7 +3359,9 @@ func init() {
 	// Relations
 	projectCmd.AddCommand(projectRelateCmd)
 	projectCmd.AddCommand(projectUnrelateCmd)
-	projectRelateCmd.Flags().String("type", "dependency", fmt.Sprintf("Relation type: %s", strings.Join(projectRelationTypeValues, ", ")))
+	projectRelateCmd.Flags().String("relation", "dependency", fmt.Sprintf("Relation type: %s", strings.Join(projectRelationTypeValues, ", ")))
+	projectRelateCmd.Flags().String("type", "", "Deprecated alias for --relation")
+	_ = projectRelateCmd.Flags().MarkHidden("type")
 
 	// Statuses
 	projectCmd.AddCommand(projectStatusCmd)
@@ -3372,16 +3374,19 @@ func init() {
 
 	// Status create command flags
 	projectStatusCreateCmd.Flags().String("name", "", "Status name (required)")
-	projectStatusCreateCmd.Flags().String("type", "", fmt.Sprintf("Status type (required): %s", strings.Join(projectStatusTypeValues, ", ")))
+	projectStatusCreateCmd.Flags().String("status-type", "", fmt.Sprintf("Status type (required): %s", strings.Join(projectStatusTypeValues, ", ")))
+	projectStatusCreateCmd.Flags().String("type", "", "Deprecated alias for --status-type")
+	_ = projectStatusCreateCmd.Flags().MarkHidden("type")
 	projectStatusCreateCmd.Flags().String("color", "#bec2c8", "Status color as a HEX string")
 	projectStatusCreateCmd.Flags().Float64("position", 0, "Position within the workspace's project flow")
 	projectStatusCreateCmd.Flags().StringP("description", "d", "", "Status description")
 	_ = projectStatusCreateCmd.MarkFlagRequired("name")
-	_ = projectStatusCreateCmd.MarkFlagRequired("type")
 
 	// Status update command flags
 	projectStatusUpdateCmd.Flags().String("name", "", "New status name")
-	projectStatusUpdateCmd.Flags().String("type", "", fmt.Sprintf("New status type: %s", strings.Join(projectStatusTypeValues, ", ")))
+	projectStatusUpdateCmd.Flags().String("status-type", "", fmt.Sprintf("New status type: %s", strings.Join(projectStatusTypeValues, ", ")))
+	projectStatusUpdateCmd.Flags().String("type", "", "Deprecated alias for --status-type")
+	_ = projectStatusUpdateCmd.Flags().MarkHidden("type")
 	projectStatusUpdateCmd.Flags().String("color", "", "New status color as a HEX string")
 	projectStatusUpdateCmd.Flags().Float64("position", 0, "New position within the workspace's project flow")
 	projectStatusUpdateCmd.Flags().StringP("description", "d", "", "New description")

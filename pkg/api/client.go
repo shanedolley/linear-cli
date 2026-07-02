@@ -62,60 +62,6 @@ func NewClientWithURL(baseURL, authHeader string) *Client {
 	}
 }
 
-// Execute performs a GraphQL request
-func (c *Client) Execute(ctx context.Context, query string, variables map[string]interface{}, result interface{}) error {
-	reqBody := GraphQLRequest{
-		Query:     query,
-		Variables: variables,
-	}
-
-	jsonBody, err := json.Marshal(reqBody)
-	if err != nil {
-		return fmt.Errorf("failed to marshal request: %w", err)
-	}
-
-	req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL, bytes.NewBuffer(jsonBody))
-	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", c.authHeader)
-	req.Header.Set("User-Agent", "lincli/0.1.0")
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return fmt.Errorf("request failed: %w", err)
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("failed to read response: %w", err)
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
-	}
-
-	var gqlResp GraphQLResponse
-	if err := json.Unmarshal(body, &gqlResp); err != nil {
-		return fmt.Errorf("failed to parse response: %w", err)
-	}
-
-	if len(gqlResp.Errors) > 0 {
-		return fmt.Errorf("GraphQL errors: %v", gqlResp.Errors)
-	}
-
-	if result != nil {
-		if err := json.Unmarshal(gqlResp.Data, result); err != nil {
-			return fmt.Errorf("failed to unmarshal data: %w", err)
-		}
-	}
-
-	return nil
-}
-
 // NullSentinel is a special value that will be converted to null in the GraphQL request.
 // Use this when you need to explicitly send null to clear a field.
 const NullSentinel = "__LINCLI_NULL__"
@@ -162,12 +108,8 @@ func stripNulls(m map[string]interface{}) map[string]interface{} {
 
 // MakeRequest implements the graphql.Client interface required by genqlient
 func (c *Client) MakeRequest(ctx context.Context, req *graphql.Request, resp *graphql.Response) error {
-	// Build the GraphQL request body
-	// We need to strip null values from variables because Linear's API doesn't like them
-	type graphQLRequest struct {
-		Query     string                 `json:"query"`
-		Variables map[string]interface{} `json:"variables,omitempty"`
-	}
+	// Build the GraphQL request body.
+	// We strip null values from variables because Linear's API rejects them.
 
 	// Convert variables to map and strip nulls
 	var variables map[string]interface{}
@@ -183,7 +125,7 @@ func (c *Client) MakeRequest(ctx context.Context, req *graphql.Request, resp *gr
 		variables = stripNulls(variables)
 	}
 
-	reqBody := graphQLRequest{
+	reqBody := GraphQLRequest{
 		Query:     req.Query,
 		Variables: variables,
 	}

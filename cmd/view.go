@@ -356,8 +356,11 @@ var viewPrefsCreateCmd = &cobra.Command{
 	Aliases: []string{"new"},
 	Short:   "Create a view preferences object",
 	Long: `Create a view preferences object. --scope (user or organization), --view-type,
-and --preferences (a JSON object) are required. Pass one parent association:
---team, --project, --custom-view, or --label.`,
+and --preferences (a JSON object) are required. Pass at least one parent
+association: --team, --project, --custom-view, or --label.
+
+--preferences must be a non-empty JSON object; the CLI cannot send an empty
+{} (the client drops empty objects before the request).`,
 	Run: func(cmd *cobra.Command, args []string) {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
@@ -428,6 +431,11 @@ and --preferences (a JSON object) are required. Pass one parent association:
 				os.Exit(1)
 			}
 			input.LabelId = &id
+		}
+
+		if input.TeamId == nil && input.ProjectId == nil && input.CustomViewId == nil && input.LabelId == nil {
+			output.Error("A parent is required: pass --team, --project, --custom-view, or --label", plaintext, jsonOut)
+			os.Exit(1)
 		}
 
 		resp, err := api.ViewPreferencesCreate(ctx, client, input)
@@ -548,7 +556,8 @@ func parseViewPreferencesType(s string) (api.ViewPreferencesType, error) {
 }
 
 // parseJSONObject parses a JSON object string into a map. An empty string
-// yields an empty object, so a preferences flag can be omitted safely.
+// yields an empty map, which the view-prefs callers reject: the client's
+// stripNulls drops empty objects, so an empty preferences value cannot be sent.
 func parseJSONObject(s string) (map[string]interface{}, error) {
 	s = strings.TrimSpace(s)
 	if s == "" {

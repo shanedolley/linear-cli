@@ -37,7 +37,7 @@ Linear has no hard delete for states - use 'state archive' instead.
 Examples:
   lincli state list ENG                    # List a team's workflow states
   lincli state get STATE-ID
-  lincli state create --team ENG --name "In Review" --type started --color "#F2C94C"
+  lincli state create --team ENG --name "In Review" --state-type started --color "#F2C94C"
   lincli state update STATE-ID --name "Code Review"
   lincli state archive STATE-ID`,
 }
@@ -172,7 +172,7 @@ var stateCreateCmd = &cobra.Command{
 	Use:     "create",
 	Aliases: []string{"new"},
 	Short:   "Create a new workflow state",
-	Long:    `Create a new workflow state for a team. --name, --type, and --color are required.`,
+	Long:    `Create a new workflow state for a team. --name, --state-type, and --color are required.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
@@ -189,7 +189,7 @@ var stateCreateCmd = &cobra.Command{
 
 		team, _ := cmd.Flags().GetString("team")
 		name, _ := cmd.Flags().GetString("name")
-		stateType, _ := cmd.Flags().GetString("type")
+		stateType := preferFlag(cmd, "state-type", "type")
 		stateColor, _ := cmd.Flags().GetString("color")
 
 		switch {
@@ -200,14 +200,14 @@ var stateCreateCmd = &cobra.Command{
 			output.Error("Name is required (--name)", plaintext, jsonOut)
 			os.Exit(1)
 		case stateType == "":
-			output.Error("Type is required (--type)", plaintext, jsonOut)
+			output.Error("Type is required (--state-type)", plaintext, jsonOut)
 			os.Exit(1)
 		case stateColor == "":
 			output.Error("Color is required (--color)", plaintext, jsonOut)
 			os.Exit(1)
 		}
 		if !isValidStateType(stateType) {
-			output.Error(fmt.Sprintf("Invalid --type '%s'. Valid values: backlog, unstarted, started, completed, canceled", stateType), plaintext, jsonOut)
+			output.Error(fmt.Sprintf("Invalid --state-type '%s'. Valid values: backlog, unstarted, started, completed, canceled", stateType), plaintext, jsonOut)
 			os.Exit(1)
 		}
 
@@ -360,7 +360,9 @@ func init() {
 
 	stateCreateCmd.Flags().StringP("team", "t", "", "Team key (required)")
 	stateCreateCmd.Flags().String("name", "", "State name (required)")
-	stateCreateCmd.Flags().String("type", "", "State type: backlog, unstarted, started, completed, canceled (required)")
+	stateCreateCmd.Flags().String("state-type", "", "State type: backlog, unstarted, started, completed, canceled (required)")
+	stateCreateCmd.Flags().String("type", "", "Deprecated alias for --state-type")
+	_ = stateCreateCmd.Flags().MarkHidden("type")
 	stateCreateCmd.Flags().String("color", "", "State color as a HEX string, e.g. #F2C94C (required)")
 	stateCreateCmd.Flags().StringP("description", "d", "", "State description")
 	stateCreateCmd.Flags().Float64("position", 0, "Ordering position within the team's workflow")

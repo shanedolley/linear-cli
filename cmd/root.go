@@ -30,6 +30,18 @@ func derefStr(s *string) string {
 	return *s
 }
 
+// preferFlag returns the primary flag's value when the user set it, and the
+// deprecated alias's value otherwise. It lets a renamed string flag keep its
+// old name working (registered hidden) without advertising it.
+func preferFlag(cmd *cobra.Command, primary, alias string) string {
+	if cmd.Flags().Changed(primary) {
+		v, _ := cmd.Flags().GetString(primary)
+		return v
+	}
+	v, _ := cmd.Flags().GetString(alias)
+	return v
+}
+
 // generateHeader creates a nice header box with proper Unicode box drawing
 func generateHeader() string {
 	lines := []string{
