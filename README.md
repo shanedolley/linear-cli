@@ -29,6 +29,12 @@ A comprehensive command-line interface for Linear's API, built with agents in mi
   - 50MB file size limit with retry logic
   - List, update, and delete attachments
 - 🔗 **Webhooks**: Configure and manage webhooks
+- 🧭 **Planning**: Initiatives, cycles, labels, and workflow states with full CRUD
+- 📚 **Knowledge Base**: Documents, custom views, issue templates, and favorites
+- 🏢 **Customer CRM**: Track customers, needs, statuses, and tiers
+- 🔔 **Notifications & Automation**: Inbox management, Git branch automation, and on-call schedules
+- 🔍 **Diagnostics & Search**: Audit log, full-text and semantic search, SLA rules, and live rate-limit budget
+- 🏛️ **Organization & Access**: Workspace settings, invites, external users, and team roles
 - 🎨 **Multiple Output Formats**: Table, plaintext, and JSON output
 - ⚡ **Performance**: Fast and lightweight CLI tool
 - 🔄 **Flexible Sorting**: Sort lists by Linear's default order, creation date, or update date
@@ -228,6 +234,10 @@ lincli attachment delete <attachment-id>
 - `--help, -h`: Show help
 - `--version, -v`: Show version
 
+### Name-or-ID Resolution
+
+Most commands accept a human-readable reference instead of a UUID: a team key, a project or initiative name, a user email, a cycle number, or a label name. lincli resolves the reference with one extra lookup; a UUID skips that lookup. Team keys are uppercase (e.g., `ENG`). User references are always email addresses.
+
 ### Authentication Commands
 ```bash
 lincli auth               # Interactive authentication
@@ -281,8 +291,13 @@ lincli issue edit <issue-id> [flags]    # Alias
   --priority int           Priority (0=None, 1=Urgent, 2=High, 3=Normal, 4=Low)
   --due-date string        Due date (YYYY-MM-DD format, or empty to remove)
 
-# Archive issue (coming soon)
+# Archive issue
 lincli issue archive <issue-id>
+lincli issue archive <issue-id> --trash  # Move to trash (30-day grace) instead of a plain archive
+
+# Issue also supports batch-create, batch-update, delete, link, react, relate,
+# share, unshare, subscribe, unsubscribe, and reminder. Run `lincli issue --help`
+# for the full list.
 ```
 
 ### Team Commands
@@ -307,6 +322,9 @@ lincli team members <team-key>
 
 # Examples:
 lincli team members ENG     # Lists all Engineering team members
+
+# Team also supports create, delete, update, unarchive, member (add/remove),
+# and set-role. Run `lincli team --help` for the full list.
 ```
 
 ### Project Commands
@@ -326,8 +344,21 @@ lincli project ls [flags]     # Alias
 lincli project get <project-id>
 lincli project show <project-id>  # Alias
 
-# Create project (coming soon)
+# Create project
 lincli project create [flags]
+# Flags:
+  --name string             Project name (required)
+  -t, --team string         Team key, name, or ID (required)
+  -d, --description string  Project description
+  --lead string             Lead email, name, 'me', or user ID
+
+# Examples:
+lincli project create --name "Q3 Launch" --team ENG
+lincli project create --name "Redesign" --team DESIGN --lead me
+
+# Project also supports member, milestone, label, status, relate, unrelate,
+# reassign-status, update-post, and update-reminder. Run `lincli project --help`
+# for the full list.
 ```
 
 ### User Commands
@@ -354,6 +385,10 @@ lincli user get jane.doe@company.com
 
 # Show current authenticated user
 lincli user me              # Shows your profile with admin status
+
+# User also supports external (list/get), settings (update), set-role,
+# suspend, and unsuspend. See Org & Users below. Run `lincli user --help`
+# for the full list.
 ```
 
 ### Comment Commands
@@ -378,6 +413,9 @@ lincli comment new <issue-id> -b "Comment text"    # Alias
 lincli comment create LIN-123 --body "I've started working on this"
 lincli comment add LIN-123 -b "Fixed in commit abc123"
 lincli comment create LIN-456 --body "@john please review this PR"
+
+# Comment also supports edit, delete, react, resolve, and unresolve. Run
+# `lincli comment --help` for the full list.
 ```
 
 ### Attachment Commands
@@ -440,6 +478,191 @@ lincli attachment delete <attachment-id>
 
 # Examples:
 lincli attachment delete abc123
+
+# Attachment also supports link (attach a Slack thread, GitHub PR, or
+# Salesforce record) and sync-to-slack. Run `lincli attachment --help` for
+# the full list.
+```
+
+### Planning: Initiatives, Cycles, Labels & States
+
+#### Initiative Commands
+Track company-wide initiatives that group related projects.
+```bash
+lincli initiative list
+lincli initiative create --name "Q3 Platform Overhaul" --owner jane@company.com
+lincli initiative project add "Q3 Platform Overhaul" "API Redesign"
+```
+
+#### Cycle Commands
+Manage a team's sprints.
+```bash
+lincli cycle list --team ENG
+lincli cycle create --team ENG --starts-at 2025-08-01 --ends-at 2025-08-14
+lincli cycle start-now <cycle-id>
+```
+
+#### Label Commands
+Create and manage workspace or team labels.
+```bash
+lincli label list --team ENG
+lincli label create --name "Bug" --color "#EB5757" --team ENG
+lincli label retire <label-id>
+```
+
+#### State Commands
+Manage a team's workflow states.
+```bash
+lincli state list ENG
+lincli state create --team ENG --name "Blocked" --type started --color "#F2C94C"
+```
+
+### Knowledge: Documents, Views, Templates & Favorites
+
+#### Document Commands
+Create and search documents attached to a project or initiative.
+```bash
+lincli document list --project "API Redesign"
+lincli document create --title "Design Doc" --project "API Redesign"
+lincli document search "onboarding"
+```
+
+#### View Commands
+Manage custom views and their saved display preferences.
+```bash
+lincli view list
+lincli view create --name "My Sprint Board" --team ENG
+lincli view prefs create --scope user --view-type board --preferences '{"grouping":"assignee"}' --team ENG
+```
+
+#### Template Commands
+Manage reusable issue and project templates.
+```bash
+lincli template list --type issue
+lincli template create --name "Bug Report" --type issue --data '{"title":"Bug: "}'
+```
+
+#### Favorite Commands
+Pin issues, projects, and other entities to your sidebar.
+```bash
+lincli favorite list
+lincli favorite add LIN-123 --entity issue
+lincli favorite remove <favorite-id>
+```
+
+### Collaboration: Notifications & Webhooks
+
+Comment commands are documented above under [Comment Commands](#comment-commands). This section covers notifications and webhooks.
+
+#### Notification Commands
+Manage your notification inbox.
+```bash
+lincli notification list
+lincli notification read-all
+lincli notification snooze <notification-id> --until 2025-08-01
+```
+
+#### Webhook Commands
+Configure outbound webhooks for workspace events.
+```bash
+lincli webhook list
+lincli webhook create --url https://hooks.example.com/linear --resource-types Issue,Comment
+lincli webhook rotate-secret <webhook-id>
+```
+
+### CRM: Customers
+
+#### Customer Commands
+Track customers, their needs, statuses, and tiers for customer-facing teams.
+```bash
+lincli customer list
+lincli customer create --name "Acme Corp" --tier Enterprise
+lincli customer need create --customer "Acme Corp" --body "Needs SSO" --issue LIN-123
+```
+
+### Ops: Emoji, Triage, Git Automation & Schedules
+
+#### Emoji Commands
+Manage custom workspace emoji.
+```bash
+lincli emoji list
+lincli emoji create --name party-parrot --file parrot.gif
+```
+
+#### Triage Commands
+View triage responsibilities (read-only).
+```bash
+lincli triage list
+lincli triage get <id>
+```
+
+#### Git Commands
+Configure Git branch automation: workflow-state transitions and target-branch rules.
+```bash
+lincli git state create --team ENG --event start --state "In Progress"
+lincli git target-branch create --team ENG --branch main
+```
+
+#### Schedule Commands
+Manage on-call time schedules.
+```bash
+lincli schedule list
+lincli schedule create --name "ENG On-Call" --entry "2025-08-01T00:00:00Z|2025-08-08T00:00:00Z|jane@company.com"
+```
+
+### Diagnostics & Search: Audit, Search, Links, SLA & Rate Limit
+
+#### Audit Commands
+List workspace audit log entries (read-only).
+```bash
+lincli audit list
+lincli audit list --type <event-type>  # See 'lincli audit types' for valid values
+lincli audit types
+```
+
+#### Search Commands
+Search projects by text, or run Linear's AI (semantic) search across issues, projects, initiatives, and documents.
+```bash
+lincli search projects "redesign"
+lincli search semantic "onboarding regressions"
+lincli search semantic "q3 goals" --types project,initiative
+```
+
+#### Link Commands
+Manage external links on initiatives and projects.
+```bash
+lincli link add --project "API Redesign" --url "https://figma.com/file/xyz" --label "Design"
+lincli link remove <link-id>
+```
+
+#### SLA Commands
+List a team's SLA rules (read-only). This is a Business-plan feature; it returns an empty list on other plans.
+```bash
+lincli sla list --team ENG
+```
+
+#### Rate Limit
+Show your live API rate-limit budget.
+```bash
+lincli rate-limit
+```
+
+### Org & Users: Organization, Invites & External Users
+
+#### Organization Commands
+View and update workspace-level settings and manage invites.
+```bash
+lincli org get
+lincli org invite list
+lincli org invite create --email new.hire@company.com --role user
+```
+
+#### User Commands (additional)
+Beyond `user list/get/me`, manage roles, suspension, external users, and your own email settings.
+```bash
+lincli user set-role jane@company.com --role admin
+lincli user external list
+lincli user settings update --marketing=false
 ```
 
 ## 🎨 Output Formats

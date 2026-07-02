@@ -49,10 +49,16 @@ lincli issue list --limit 5  # Quick functionality check
 - Team keys: uppercase (e.g., "ENG"), not display names
 - User lookups: use email addresses
 - Rate limit: 5,000 req/hour
+- All ~24 command domains (initiative, cycle, label, state, document, view, template, favorite, notification, webhook, customer, emoji, triage, git, schedule, audit, search, link, sla, org, and more) are first-class commands; run `lincli --help` for the full list
+- Use name-or-ID: a name (team key, project/initiative name, user email, cycle number, label name) resolves via one extra lookup; a UUID skips it
+- `rate-limit` reports the live remaining budget, not just the static 5,000/hour ceiling
+- Read-only domains: `triage`, `audit`, `sla`, and `user external` (no write commands)
 
 ## Adding Commands
 
 See `cmd/CLAUDE.local.md` for command patterns. See `pkg/api/CLAUDE.local.md` for GraphQL patterns.
+
+Nested command groups (e.g. `initiative project`, `project milestone`, `git state`, `view prefs`, `user external`) follow a `<parent> <child> <verb>` shape and use domain-specific kind flags (`--relation`, `--provider`, `--entity`), never a shared `--type`.
 
 ## Priority Values
 
