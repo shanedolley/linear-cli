@@ -245,7 +245,7 @@
           "2",
           "3"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -318,7 +318,8 @@
         ],
         "complexity": 8,
         "recommendedSubtasks": 6,
-        "expansionPrompt": "Break down into: (1) Create cmd/cycle.go with list/get/create/update/archive and shift/start-now commands plus cycles.graphql, (2) Create cmd/label.go with full CRUD and retire/restore operations plus labels.graphql, (3) Create cmd/state.go with get/create/update/archive operations plus states.graphql, (4) Add issue archive/unarchive/delete/subscribe/share commands to cmd/issue.go, (5) Extend buildIssueCreateInput/buildIssueUpdateInput with --label/--cycle/--milestone/--estimate/--parent flags, (6) Implement issue batch-create and batch-update commands with resolver caching and rate-limit retry logic."
+        "expansionPrompt": "Break down into: (1) Create cmd/cycle.go with list/get/create/update/archive and shift/start-now commands plus cycles.graphql, (2) Create cmd/label.go with full CRUD and retire/restore operations plus labels.graphql, (3) Create cmd/state.go with get/create/update/archive operations plus states.graphql, (4) Add issue archive/unarchive/delete/subscribe/share commands to cmd/issue.go, (5) Extend buildIssueCreateInput/buildIssueUpdateInput with --label/--cycle/--milestone/--estimate/--parent flags, (6) Implement issue batch-create and batch-update commands with resolver caching and rate-limit retry logic.",
+        "updatedAt": "2026-07-02T01:32:40.830Z"
       },
       {
         "id": "5",
@@ -810,9 +811,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-02T00:25:44.307Z",
+      "lastModified": "2026-07-02T01:32:40.831Z",
       "taskCount": 12,
-      "completedCount": 3,
+      "completedCount": 4,
       "tags": [
         "master"
       ]
