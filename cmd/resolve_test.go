@@ -1036,6 +1036,114 @@ func TestResolveMilestone_CacheHit(t *testing.T) {
 	}
 }
 
+// --- resolveCycle ---
+
+func TestResolveCycle_UUIDPassthrough(t *testing.T) {
+	client := newMockGraphQLClient()
+	cache := newResolverCache()
+
+	id := "550e8400-e29b-41d4-a716-446655440000"
+	got, err := resolveCycle(context.Background(), client, cache, "team-uuid-1", id)
+	if err != nil {
+		t.Fatalf("resolveCycle() error = %v", err)
+	}
+	if got != id {
+		t.Errorf("resolveCycle() = %q, want %q", got, id)
+	}
+	if len(client.calls) != 0 {
+		t.Errorf("expected no API calls for UUID passthrough, got %v", client.calls)
+	}
+}
+
+func TestResolveCycle_ByNumber(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListCycles"] = `{"cycles": {"nodes": [{"id": "cycle-uuid-1", "number": 12, "team": {"id": "team-uuid-1", "key": "ENG"}}]}}`
+	cache := newResolverCache()
+
+	got, err := resolveCycle(context.Background(), client, cache, "team-uuid-1", "12")
+	if err != nil {
+		t.Fatalf("resolveCycle() error = %v", err)
+	}
+	if got != "cycle-uuid-1" {
+		t.Errorf("resolveCycle() = %q, want %q", got, "cycle-uuid-1")
+	}
+	if client.callCount("ListCycles") != 1 {
+		t.Errorf("expected exactly 1 ListCycles call, got %d", client.callCount("ListCycles"))
+	}
+}
+
+func TestResolveCycle_ByName(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListCycles"] = `{"cycles": {"nodes": [{"id": "cycle-uuid-2", "number": 5, "name": "Sprint 5", "team": {"id": "team-uuid-1", "key": "ENG"}}]}}`
+	cache := newResolverCache()
+
+	got, err := resolveCycle(context.Background(), client, cache, "team-uuid-1", "Sprint 5")
+	if err != nil {
+		t.Fatalf("resolveCycle() error = %v", err)
+	}
+	if got != "cycle-uuid-2" {
+		t.Errorf("resolveCycle() = %q, want %q", got, "cycle-uuid-2")
+	}
+}
+
+func TestResolveCycle_Ambiguous(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListCycles"] = `{"cycles": {"nodes": [
+		{"id": "cycle-uuid-1", "number": 12, "team": {"id": "team-uuid-1", "key": "ENG"}},
+		{"id": "cycle-uuid-2", "number": 12, "team": {"id": "team-uuid-1", "key": "ENG"}}
+	]}}`
+	cache := newResolverCache()
+
+	_, err := resolveCycle(context.Background(), client, cache, "team-uuid-1", "12")
+	if err == nil {
+		t.Fatal("expected an ambiguous match error, got nil")
+	}
+	if !strings.Contains(err.Error(), "Multiple matches") {
+		t.Errorf("expected ambiguous error message, got: %v", err)
+	}
+	if !strings.Contains(err.Error(), "cycle-uuid-1") || !strings.Contains(err.Error(), "cycle-uuid-2") {
+		t.Errorf("expected error to list both candidate ids, got: %v", err)
+	}
+}
+
+func TestResolveCycle_NotFound(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListCycles"] = `{"cycles": {"nodes": []}}`
+	cache := newResolverCache()
+
+	_, err := resolveCycle(context.Background(), client, cache, "team-uuid-1", "99")
+	if err == nil {
+		t.Fatal("expected error for unknown cycle, got nil")
+	}
+	if !strings.Contains(err.Error(), "99") {
+		t.Errorf("expected error to mention the cycle reference, got: %v", err)
+	}
+}
+
+func TestResolveCycle_CacheHit(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListCycles"] = `{"cycles": {"nodes": [{"id": "cycle-uuid-1", "number": 12, "team": {"id": "team-uuid-1", "key": "ENG"}}]}}`
+	cache := newResolverCache()
+
+	if _, err := resolveCycle(context.Background(), client, cache, "team-uuid-1", "12"); err != nil {
+		t.Fatalf("first resolveCycle() error = %v", err)
+	}
+	if client.callCount("ListCycles") != 1 {
+		t.Fatalf("expected exactly 1 ListCycles call after first resolve, got %d", client.callCount("ListCycles"))
+	}
+
+	got, err := resolveCycle(context.Background(), client, cache, "team-uuid-1", "12")
+	if err != nil {
+		t.Fatalf("second resolveCycle() error = %v", err)
+	}
+	if got != "cycle-uuid-1" {
+		t.Errorf("resolveCycle() = %q, want %q", got, "cycle-uuid-1")
+	}
+	if client.callCount("ListCycles") != 1 {
+		t.Errorf("expected cache hit to avoid a second ListCycles call, total calls = %d", client.callCount("ListCycles"))
+	}
+}
+
 // Sanity check that our mock actually satisfies genqlient's graphql.Client
 // interface, since that's what makes it usable with the generated api.* functions.
 var _ graphql.Client = (*mockGraphQLClient)(nil)

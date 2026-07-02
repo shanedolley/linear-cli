@@ -346,15 +346,8 @@ mutation InitiativeRemoveLabel($id: String!, $labelId: String!) {
 # (issue label add/remove commands). Not used by the initiative label
 # commands above - those resolve against the separate InitiativeLabel
 # catalog via ListInitiativeLabels instead (see header note).
-query ListIssueLabels($filter: IssueLabelFilter, $first: Int) {
-  issueLabels(filter: $filter, first: $first) {
-    nodes {
-      id
-      name
-      color
-    }
-  }
-}
+# ListIssueLabels moved to labels.graphql (Tier 2) so every issue-label
+# operation is defined in one place. resolveLabel still uses it.
 
 # --- Initiative relations (parent/child hierarchy) ---
 

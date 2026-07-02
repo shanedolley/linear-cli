@@ -1,0 +1,84 @@
+# Issue label operations (Tier 2).
+#
+# IssueLabel is the issue/team label catalog. It is distinct from the
+# InitiativeLabel and ProjectLabel catalogs (see initiatives.graphql /
+# projects.graphql), which have their own id spaces.
+#
+# ListIssueLabels lives here (not in initiatives.graphql) so every issue-label
+# operation is defined in one place. It is used both by `label list` and by
+# resolveLabel (cmd/resolve.go), which reads only .Id/.Name.
+
+fragment LabelListFields on IssueLabel {
+  id
+  name
+  color
+  description
+  isGroup
+  parent {
+    id
+    name
+  }
+  team {
+    id
+    key
+  }
+}
+
+query ListIssueLabels($filter: IssueLabelFilter, $first: Int) {
+  issueLabels(filter: $filter, first: $first) {
+    nodes {
+      ...LabelListFields
+    }
+  }
+}
+
+query GetIssueLabel($id: String!) {
+  issueLabel(id: $id) {
+    ...LabelListFields
+  }
+}
+
+mutation IssueLabelCreate($input: IssueLabelCreateInput!) {
+  issueLabelCreate(input: $input) {
+    success
+    issueLabel {
+      ...LabelListFields
+    }
+  }
+}
+
+mutation IssueLabelUpdate($id: String!, $input: IssueLabelUpdateInput!) {
+  issueLabelUpdate(id: $id, input: $input) {
+    success
+    issueLabel {
+      ...LabelListFields
+    }
+  }
+}
+
+mutation IssueLabelDelete($id: String!) {
+  issueLabelDelete(id: $id) {
+    success
+    entityId
+  }
+}
+
+# Retire: label stays visible but cannot be applied to new issues. Existing
+# issues keep it. Reversible via IssueLabelRestore.
+mutation IssueLabelRetire($id: String!) {
+  issueLabelRetire(id: $id) {
+    success
+    issueLabel {
+      ...LabelListFields
+    }
+  }
+}
+
+mutation IssueLabelRestore($id: String!) {
+  issueLabelRestore(id: $id) {
+    success
+    issueLabel {
+      ...LabelListFields
+    }
+  }
+}

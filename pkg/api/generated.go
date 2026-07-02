@@ -2222,6 +2222,469 @@ func (v *CustomerTierFilter) GetPosition() *NumberComparator { return v.Position
 // GetUpdatedAt returns CustomerTierFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *CustomerTierFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
 
+// CycleArchiveCycleArchiveCycleArchivePayload includes the requested fields of the GraphQL type CycleArchivePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity archive mutations.
+type CycleArchiveCycleArchiveCycleArchivePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The archived/unarchived entity. Null if entity was deleted.
+	Entity *CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle `json:"entity"`
+}
+
+// GetSuccess returns CycleArchiveCycleArchiveCycleArchivePayload.Success, and is useful for accessing the field via an interface.
+func (v *CycleArchiveCycleArchiveCycleArchivePayload) GetSuccess() bool { return v.Success }
+
+// GetEntity returns CycleArchiveCycleArchiveCycleArchivePayload.Entity, and is useful for accessing the field via an interface.
+func (v *CycleArchiveCycleArchiveCycleArchivePayload) GetEntity() *CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle {
+	return v.Entity
+}
+
+// CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle includes the requested fields of the GraphQL type Cycle.
+// The GraphQL type's documentation follows.
+//
+// A time-boxed iteration (similar to a sprint) used for planning and tracking
+// work. Cycles belong to a team and have defined start and end dates. Issues are
+// assigned to cycles for time-based planning, and progress is tracked via
+// completed, in-progress, and total scope. Cycles are automatically completed when
+// their end date passes, and uncompleted issues can be carried over to the next cycle.
+type CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle struct {
+	CycleListFields `json:"-"`
+}
+
+// GetId returns CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle.Id, and is useful for accessing the field via an interface.
+func (v *CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle) GetId() string {
+	return v.CycleListFields.Id
+}
+
+// GetNumber returns CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle.Number, and is useful for accessing the field via an interface.
+func (v *CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle) GetNumber() float64 {
+	return v.CycleListFields.Number
+}
+
+// GetName returns CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle.Name, and is useful for accessing the field via an interface.
+func (v *CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle) GetName() *string {
+	return v.CycleListFields.Name
+}
+
+// GetDescription returns CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle.Description, and is useful for accessing the field via an interface.
+func (v *CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle) GetDescription() *string {
+	return v.CycleListFields.Description
+}
+
+// GetStartsAt returns CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle.StartsAt, and is useful for accessing the field via an interface.
+func (v *CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle) GetStartsAt() time.Time {
+	return v.CycleListFields.StartsAt
+}
+
+// GetEndsAt returns CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle.EndsAt, and is useful for accessing the field via an interface.
+func (v *CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle) GetEndsAt() time.Time {
+	return v.CycleListFields.EndsAt
+}
+
+// GetProgress returns CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle.Progress, and is useful for accessing the field via an interface.
+func (v *CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle) GetProgress() float64 {
+	return v.CycleListFields.Progress
+}
+
+// GetCompletedAt returns CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle.CompletedAt, and is useful for accessing the field via an interface.
+func (v *CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle) GetCompletedAt() *time.Time {
+	return v.CycleListFields.CompletedAt
+}
+
+// GetTeam returns CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle.Team, and is useful for accessing the field via an interface.
+func (v *CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle) GetTeam() *CycleListFieldsTeam {
+	return v.CycleListFields.Team
+}
+
+func (v *CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.CycleListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCycleArchiveCycleArchiveCycleArchivePayloadEntityCycle struct {
+	Id string `json:"id"`
+
+	Number float64 `json:"number"`
+
+	Name *string `json:"name"`
+
+	Description *string `json:"description"`
+
+	StartsAt time.Time `json:"startsAt"`
+
+	EndsAt time.Time `json:"endsAt"`
+
+	Progress float64 `json:"progress"`
+
+	CompletedAt *time.Time `json:"completedAt"`
+
+	Team *CycleListFieldsTeam `json:"team"`
+}
+
+func (v *CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CycleArchiveCycleArchiveCycleArchivePayloadEntityCycle) __premarshalJSON() (*__premarshalCycleArchiveCycleArchiveCycleArchivePayloadEntityCycle, error) {
+	var retval __premarshalCycleArchiveCycleArchiveCycleArchivePayloadEntityCycle
+
+	retval.Id = v.CycleListFields.Id
+	retval.Number = v.CycleListFields.Number
+	retval.Name = v.CycleListFields.Name
+	retval.Description = v.CycleListFields.Description
+	retval.StartsAt = v.CycleListFields.StartsAt
+	retval.EndsAt = v.CycleListFields.EndsAt
+	retval.Progress = v.CycleListFields.Progress
+	retval.CompletedAt = v.CycleListFields.CompletedAt
+	retval.Team = v.CycleListFields.Team
+	return &retval, nil
+}
+
+// CycleArchiveResponse is returned by CycleArchive on success.
+type CycleArchiveResponse struct {
+	// Archives a cycle. All issues currently assigned to the cycle are unlinked from it before archiving.
+	CycleArchive *CycleArchiveCycleArchiveCycleArchivePayload `json:"cycleArchive"`
+}
+
+// GetCycleArchive returns CycleArchiveResponse.CycleArchive, and is useful for accessing the field via an interface.
+func (v *CycleArchiveResponse) GetCycleArchive() *CycleArchiveCycleArchiveCycleArchivePayload {
+	return v.CycleArchive
+}
+
+// CycleCreateCycleCreateCyclePayload includes the requested fields of the GraphQL type CyclePayload.
+// The GraphQL type's documentation follows.
+//
+// The payload returned by cycle mutations.
+type CycleCreateCycleCreateCyclePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The cycle that was created or updated.
+	Cycle *CycleCreateCycleCreateCyclePayloadCycle `json:"cycle"`
+}
+
+// GetSuccess returns CycleCreateCycleCreateCyclePayload.Success, and is useful for accessing the field via an interface.
+func (v *CycleCreateCycleCreateCyclePayload) GetSuccess() bool { return v.Success }
+
+// GetCycle returns CycleCreateCycleCreateCyclePayload.Cycle, and is useful for accessing the field via an interface.
+func (v *CycleCreateCycleCreateCyclePayload) GetCycle() *CycleCreateCycleCreateCyclePayloadCycle {
+	return v.Cycle
+}
+
+// CycleCreateCycleCreateCyclePayloadCycle includes the requested fields of the GraphQL type Cycle.
+// The GraphQL type's documentation follows.
+//
+// A time-boxed iteration (similar to a sprint) used for planning and tracking
+// work. Cycles belong to a team and have defined start and end dates. Issues are
+// assigned to cycles for time-based planning, and progress is tracked via
+// completed, in-progress, and total scope. Cycles are automatically completed when
+// their end date passes, and uncompleted issues can be carried over to the next cycle.
+type CycleCreateCycleCreateCyclePayloadCycle struct {
+	CycleListFields `json:"-"`
+}
+
+// GetId returns CycleCreateCycleCreateCyclePayloadCycle.Id, and is useful for accessing the field via an interface.
+func (v *CycleCreateCycleCreateCyclePayloadCycle) GetId() string { return v.CycleListFields.Id }
+
+// GetNumber returns CycleCreateCycleCreateCyclePayloadCycle.Number, and is useful for accessing the field via an interface.
+func (v *CycleCreateCycleCreateCyclePayloadCycle) GetNumber() float64 {
+	return v.CycleListFields.Number
+}
+
+// GetName returns CycleCreateCycleCreateCyclePayloadCycle.Name, and is useful for accessing the field via an interface.
+func (v *CycleCreateCycleCreateCyclePayloadCycle) GetName() *string { return v.CycleListFields.Name }
+
+// GetDescription returns CycleCreateCycleCreateCyclePayloadCycle.Description, and is useful for accessing the field via an interface.
+func (v *CycleCreateCycleCreateCyclePayloadCycle) GetDescription() *string {
+	return v.CycleListFields.Description
+}
+
+// GetStartsAt returns CycleCreateCycleCreateCyclePayloadCycle.StartsAt, and is useful for accessing the field via an interface.
+func (v *CycleCreateCycleCreateCyclePayloadCycle) GetStartsAt() time.Time {
+	return v.CycleListFields.StartsAt
+}
+
+// GetEndsAt returns CycleCreateCycleCreateCyclePayloadCycle.EndsAt, and is useful for accessing the field via an interface.
+func (v *CycleCreateCycleCreateCyclePayloadCycle) GetEndsAt() time.Time {
+	return v.CycleListFields.EndsAt
+}
+
+// GetProgress returns CycleCreateCycleCreateCyclePayloadCycle.Progress, and is useful for accessing the field via an interface.
+func (v *CycleCreateCycleCreateCyclePayloadCycle) GetProgress() float64 {
+	return v.CycleListFields.Progress
+}
+
+// GetCompletedAt returns CycleCreateCycleCreateCyclePayloadCycle.CompletedAt, and is useful for accessing the field via an interface.
+func (v *CycleCreateCycleCreateCyclePayloadCycle) GetCompletedAt() *time.Time {
+	return v.CycleListFields.CompletedAt
+}
+
+// GetTeam returns CycleCreateCycleCreateCyclePayloadCycle.Team, and is useful for accessing the field via an interface.
+func (v *CycleCreateCycleCreateCyclePayloadCycle) GetTeam() *CycleListFieldsTeam {
+	return v.CycleListFields.Team
+}
+
+func (v *CycleCreateCycleCreateCyclePayloadCycle) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CycleCreateCycleCreateCyclePayloadCycle
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CycleCreateCycleCreateCyclePayloadCycle = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.CycleListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCycleCreateCycleCreateCyclePayloadCycle struct {
+	Id string `json:"id"`
+
+	Number float64 `json:"number"`
+
+	Name *string `json:"name"`
+
+	Description *string `json:"description"`
+
+	StartsAt time.Time `json:"startsAt"`
+
+	EndsAt time.Time `json:"endsAt"`
+
+	Progress float64 `json:"progress"`
+
+	CompletedAt *time.Time `json:"completedAt"`
+
+	Team *CycleListFieldsTeam `json:"team"`
+}
+
+func (v *CycleCreateCycleCreateCyclePayloadCycle) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CycleCreateCycleCreateCyclePayloadCycle) __premarshalJSON() (*__premarshalCycleCreateCycleCreateCyclePayloadCycle, error) {
+	var retval __premarshalCycleCreateCycleCreateCyclePayloadCycle
+
+	retval.Id = v.CycleListFields.Id
+	retval.Number = v.CycleListFields.Number
+	retval.Name = v.CycleListFields.Name
+	retval.Description = v.CycleListFields.Description
+	retval.StartsAt = v.CycleListFields.StartsAt
+	retval.EndsAt = v.CycleListFields.EndsAt
+	retval.Progress = v.CycleListFields.Progress
+	retval.CompletedAt = v.CycleListFields.CompletedAt
+	retval.Team = v.CycleListFields.Team
+	return &retval, nil
+}
+
+// Input for creating a new cycle.
+type CycleCreateInput struct {
+	// The completion time of the cycle. If null, the cycle hasn't been completed.
+	CompletedAt *time.Time `json:"completedAt"`
+	// The description of the cycle.
+	Description *string `json:"description"`
+	// The end time of the cycle.
+	EndsAt time.Time `json:"endsAt"`
+	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
+	Id *string `json:"id"`
+	// The custom name of the cycle.
+	Name *string `json:"name"`
+	// The start time of the cycle.
+	StartsAt time.Time `json:"startsAt"`
+	// The team to associate the cycle with.
+	TeamId string `json:"teamId"`
+}
+
+// GetCompletedAt returns CycleCreateInput.CompletedAt, and is useful for accessing the field via an interface.
+func (v *CycleCreateInput) GetCompletedAt() *time.Time { return v.CompletedAt }
+
+// GetDescription returns CycleCreateInput.Description, and is useful for accessing the field via an interface.
+func (v *CycleCreateInput) GetDescription() *string { return v.Description }
+
+// GetEndsAt returns CycleCreateInput.EndsAt, and is useful for accessing the field via an interface.
+func (v *CycleCreateInput) GetEndsAt() time.Time { return v.EndsAt }
+
+// GetId returns CycleCreateInput.Id, and is useful for accessing the field via an interface.
+func (v *CycleCreateInput) GetId() *string { return v.Id }
+
+// GetName returns CycleCreateInput.Name, and is useful for accessing the field via an interface.
+func (v *CycleCreateInput) GetName() *string { return v.Name }
+
+// GetStartsAt returns CycleCreateInput.StartsAt, and is useful for accessing the field via an interface.
+func (v *CycleCreateInput) GetStartsAt() time.Time { return v.StartsAt }
+
+// GetTeamId returns CycleCreateInput.TeamId, and is useful for accessing the field via an interface.
+func (v *CycleCreateInput) GetTeamId() string { return v.TeamId }
+
+// CycleCreateResponse is returned by CycleCreate on success.
+type CycleCreateResponse struct {
+	// Creates a new cycle.
+	CycleCreate *CycleCreateCycleCreateCyclePayload `json:"cycleCreate"`
+}
+
+// GetCycleCreate returns CycleCreateResponse.CycleCreate, and is useful for accessing the field via an interface.
+func (v *CycleCreateResponse) GetCycleCreate() *CycleCreateCycleCreateCyclePayload {
+	return v.CycleCreate
+}
+
+// CycleDetailFields adds the scope/progress history arrays used by `cycle get`.
+// These are burndown series (JSON arrays of numbers), heavier than the list
+// view, so they are only fetched for a single cycle.
+type CycleDetailFields struct {
+	CycleListFields `json:"-"`
+	// The total number of estimation points (scope) in the cycle after each day. Used for scope-based burndown charts.
+	ScopeHistory []float64 `json:"scopeHistory"`
+	// [Internal] The detailed progress history of the cycle, including per-status breakdowns over time.
+	ProgressHistory map[string]interface{} `json:"progressHistory"`
+}
+
+// GetScopeHistory returns CycleDetailFields.ScopeHistory, and is useful for accessing the field via an interface.
+func (v *CycleDetailFields) GetScopeHistory() []float64 { return v.ScopeHistory }
+
+// GetProgressHistory returns CycleDetailFields.ProgressHistory, and is useful for accessing the field via an interface.
+func (v *CycleDetailFields) GetProgressHistory() map[string]interface{} { return v.ProgressHistory }
+
+// GetId returns CycleDetailFields.Id, and is useful for accessing the field via an interface.
+func (v *CycleDetailFields) GetId() string { return v.CycleListFields.Id }
+
+// GetNumber returns CycleDetailFields.Number, and is useful for accessing the field via an interface.
+func (v *CycleDetailFields) GetNumber() float64 { return v.CycleListFields.Number }
+
+// GetName returns CycleDetailFields.Name, and is useful for accessing the field via an interface.
+func (v *CycleDetailFields) GetName() *string { return v.CycleListFields.Name }
+
+// GetDescription returns CycleDetailFields.Description, and is useful for accessing the field via an interface.
+func (v *CycleDetailFields) GetDescription() *string { return v.CycleListFields.Description }
+
+// GetStartsAt returns CycleDetailFields.StartsAt, and is useful for accessing the field via an interface.
+func (v *CycleDetailFields) GetStartsAt() time.Time { return v.CycleListFields.StartsAt }
+
+// GetEndsAt returns CycleDetailFields.EndsAt, and is useful for accessing the field via an interface.
+func (v *CycleDetailFields) GetEndsAt() time.Time { return v.CycleListFields.EndsAt }
+
+// GetProgress returns CycleDetailFields.Progress, and is useful for accessing the field via an interface.
+func (v *CycleDetailFields) GetProgress() float64 { return v.CycleListFields.Progress }
+
+// GetCompletedAt returns CycleDetailFields.CompletedAt, and is useful for accessing the field via an interface.
+func (v *CycleDetailFields) GetCompletedAt() *time.Time { return v.CycleListFields.CompletedAt }
+
+// GetTeam returns CycleDetailFields.Team, and is useful for accessing the field via an interface.
+func (v *CycleDetailFields) GetTeam() *CycleListFieldsTeam { return v.CycleListFields.Team }
+
+func (v *CycleDetailFields) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CycleDetailFields
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CycleDetailFields = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.CycleListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCycleDetailFields struct {
+	ScopeHistory []float64 `json:"scopeHistory"`
+
+	ProgressHistory map[string]interface{} `json:"progressHistory"`
+
+	Id string `json:"id"`
+
+	Number float64 `json:"number"`
+
+	Name *string `json:"name"`
+
+	Description *string `json:"description"`
+
+	StartsAt time.Time `json:"startsAt"`
+
+	EndsAt time.Time `json:"endsAt"`
+
+	Progress float64 `json:"progress"`
+
+	CompletedAt *time.Time `json:"completedAt"`
+
+	Team *CycleListFieldsTeam `json:"team"`
+}
+
+func (v *CycleDetailFields) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CycleDetailFields) __premarshalJSON() (*__premarshalCycleDetailFields, error) {
+	var retval __premarshalCycleDetailFields
+
+	retval.ScopeHistory = v.ScopeHistory
+	retval.ProgressHistory = v.ProgressHistory
+	retval.Id = v.CycleListFields.Id
+	retval.Number = v.CycleListFields.Number
+	retval.Name = v.CycleListFields.Name
+	retval.Description = v.CycleListFields.Description
+	retval.StartsAt = v.CycleListFields.StartsAt
+	retval.EndsAt = v.CycleListFields.EndsAt
+	retval.Progress = v.CycleListFields.Progress
+	retval.CompletedAt = v.CycleListFields.CompletedAt
+	retval.Team = v.CycleListFields.Team
+	return &retval, nil
+}
+
 // Cycle filtering options.
 type CycleFilter struct {
 	// Compound filters, all of which need to be matched by the cycle.
@@ -2321,6 +2784,90 @@ func (v *CycleFilter) GetTeam() *TeamFilter { return v.Team }
 // GetUpdatedAt returns CycleFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *CycleFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
 
+// CycleListFields includes the GraphQL fields of Cycle requested by the fragment CycleListFields.
+// The GraphQL type's documentation follows.
+//
+// A time-boxed iteration (similar to a sprint) used for planning and tracking
+// work. Cycles belong to a team and have defined start and end dates. Issues are
+// assigned to cycles for time-based planning, and progress is tracked via
+// completed, in-progress, and total scope. Cycles are automatically completed when
+// their end date passes, and uncompleted issues can be carried over to the next cycle.
+type CycleListFields struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The auto-incrementing number of the cycle, unique within its team. This value
+	// is assigned automatically by the database and cannot be set on creation.
+	Number float64 `json:"number"`
+	// The custom name of the cycle. If not set, the cycle is displayed using its number (e.g., "Cycle 5").
+	Name *string `json:"name"`
+	// The description of the cycle.
+	Description *string `json:"description"`
+	// The start date and time of the cycle.
+	StartsAt time.Time `json:"startsAt"`
+	// The end date and time of the cycle. When a cycle is completed prematurely,
+	// this is updated to match the completion time. When cycles are disabled, both
+	// endsAt and completedAt are set to the current time.
+	EndsAt time.Time `json:"endsAt"`
+	// The overall progress of the cycle as a number between 0 and 1. Calculated as
+	// (completed estimate points + 0.25 * in-progress estimate points) / total
+	// estimate points. Returns 0 if no estimate points exist.
+	Progress float64 `json:"progress"`
+	// The completion time of the cycle. If null, the cycle has not been completed
+	// yet. A cycle is completed either when its end date passes or when it is
+	// manually completed early.
+	CompletedAt *time.Time `json:"completedAt"`
+	// The team that the cycle belongs to. Each cycle is scoped to exactly one team.
+	Team *CycleListFieldsTeam `json:"team"`
+}
+
+// GetId returns CycleListFields.Id, and is useful for accessing the field via an interface.
+func (v *CycleListFields) GetId() string { return v.Id }
+
+// GetNumber returns CycleListFields.Number, and is useful for accessing the field via an interface.
+func (v *CycleListFields) GetNumber() float64 { return v.Number }
+
+// GetName returns CycleListFields.Name, and is useful for accessing the field via an interface.
+func (v *CycleListFields) GetName() *string { return v.Name }
+
+// GetDescription returns CycleListFields.Description, and is useful for accessing the field via an interface.
+func (v *CycleListFields) GetDescription() *string { return v.Description }
+
+// GetStartsAt returns CycleListFields.StartsAt, and is useful for accessing the field via an interface.
+func (v *CycleListFields) GetStartsAt() time.Time { return v.StartsAt }
+
+// GetEndsAt returns CycleListFields.EndsAt, and is useful for accessing the field via an interface.
+func (v *CycleListFields) GetEndsAt() time.Time { return v.EndsAt }
+
+// GetProgress returns CycleListFields.Progress, and is useful for accessing the field via an interface.
+func (v *CycleListFields) GetProgress() float64 { return v.Progress }
+
+// GetCompletedAt returns CycleListFields.CompletedAt, and is useful for accessing the field via an interface.
+func (v *CycleListFields) GetCompletedAt() *time.Time { return v.CompletedAt }
+
+// GetTeam returns CycleListFields.Team, and is useful for accessing the field via an interface.
+func (v *CycleListFields) GetTeam() *CycleListFieldsTeam { return v.Team }
+
+// CycleListFieldsTeam includes the requested fields of the GraphQL type Team.
+// The GraphQL type's documentation follows.
+//
+// A team is the primary organizational unit in Linear. Issues belong to teams, and
+// each team has its own workflow states, cycles, labels, and settings. Teams can
+// be public (visible to all workspace members), private (visible only to team
+// members), or restricted (visible only within an enclosing private-team
+// boundary). Teams can also have sub-teams that inherit settings from their parent.
+type CycleListFieldsTeam struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The team's unique key, used as a prefix in issue identifiers (e.g., 'ENG' in 'ENG-123') and in URLs.
+	Key string `json:"key"`
+}
+
+// GetId returns CycleListFieldsTeam.Id, and is useful for accessing the field via an interface.
+func (v *CycleListFieldsTeam) GetId() string { return v.Id }
+
+// GetKey returns CycleListFieldsTeam.Key, and is useful for accessing the field via an interface.
+func (v *CycleListFieldsTeam) GetKey() string { return v.Key }
+
 type CyclePeriod string
 
 const (
@@ -2363,6 +2910,512 @@ func (v *CyclePeriodComparator) GetNin() []CyclePeriod { return v.Nin }
 
 // GetNull returns CyclePeriodComparator.Null, and is useful for accessing the field via an interface.
 func (v *CyclePeriodComparator) GetNull() *bool { return v.Null }
+
+// CycleShiftAllCycleShiftAllCyclePayload includes the requested fields of the GraphQL type CyclePayload.
+// The GraphQL type's documentation follows.
+//
+// The payload returned by cycle mutations.
+type CycleShiftAllCycleShiftAllCyclePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The cycle that was created or updated.
+	Cycle *CycleShiftAllCycleShiftAllCyclePayloadCycle `json:"cycle"`
+}
+
+// GetSuccess returns CycleShiftAllCycleShiftAllCyclePayload.Success, and is useful for accessing the field via an interface.
+func (v *CycleShiftAllCycleShiftAllCyclePayload) GetSuccess() bool { return v.Success }
+
+// GetCycle returns CycleShiftAllCycleShiftAllCyclePayload.Cycle, and is useful for accessing the field via an interface.
+func (v *CycleShiftAllCycleShiftAllCyclePayload) GetCycle() *CycleShiftAllCycleShiftAllCyclePayloadCycle {
+	return v.Cycle
+}
+
+// CycleShiftAllCycleShiftAllCyclePayloadCycle includes the requested fields of the GraphQL type Cycle.
+// The GraphQL type's documentation follows.
+//
+// A time-boxed iteration (similar to a sprint) used for planning and tracking
+// work. Cycles belong to a team and have defined start and end dates. Issues are
+// assigned to cycles for time-based planning, and progress is tracked via
+// completed, in-progress, and total scope. Cycles are automatically completed when
+// their end date passes, and uncompleted issues can be carried over to the next cycle.
+type CycleShiftAllCycleShiftAllCyclePayloadCycle struct {
+	CycleListFields `json:"-"`
+}
+
+// GetId returns CycleShiftAllCycleShiftAllCyclePayloadCycle.Id, and is useful for accessing the field via an interface.
+func (v *CycleShiftAllCycleShiftAllCyclePayloadCycle) GetId() string { return v.CycleListFields.Id }
+
+// GetNumber returns CycleShiftAllCycleShiftAllCyclePayloadCycle.Number, and is useful for accessing the field via an interface.
+func (v *CycleShiftAllCycleShiftAllCyclePayloadCycle) GetNumber() float64 {
+	return v.CycleListFields.Number
+}
+
+// GetName returns CycleShiftAllCycleShiftAllCyclePayloadCycle.Name, and is useful for accessing the field via an interface.
+func (v *CycleShiftAllCycleShiftAllCyclePayloadCycle) GetName() *string {
+	return v.CycleListFields.Name
+}
+
+// GetDescription returns CycleShiftAllCycleShiftAllCyclePayloadCycle.Description, and is useful for accessing the field via an interface.
+func (v *CycleShiftAllCycleShiftAllCyclePayloadCycle) GetDescription() *string {
+	return v.CycleListFields.Description
+}
+
+// GetStartsAt returns CycleShiftAllCycleShiftAllCyclePayloadCycle.StartsAt, and is useful for accessing the field via an interface.
+func (v *CycleShiftAllCycleShiftAllCyclePayloadCycle) GetStartsAt() time.Time {
+	return v.CycleListFields.StartsAt
+}
+
+// GetEndsAt returns CycleShiftAllCycleShiftAllCyclePayloadCycle.EndsAt, and is useful for accessing the field via an interface.
+func (v *CycleShiftAllCycleShiftAllCyclePayloadCycle) GetEndsAt() time.Time {
+	return v.CycleListFields.EndsAt
+}
+
+// GetProgress returns CycleShiftAllCycleShiftAllCyclePayloadCycle.Progress, and is useful for accessing the field via an interface.
+func (v *CycleShiftAllCycleShiftAllCyclePayloadCycle) GetProgress() float64 {
+	return v.CycleListFields.Progress
+}
+
+// GetCompletedAt returns CycleShiftAllCycleShiftAllCyclePayloadCycle.CompletedAt, and is useful for accessing the field via an interface.
+func (v *CycleShiftAllCycleShiftAllCyclePayloadCycle) GetCompletedAt() *time.Time {
+	return v.CycleListFields.CompletedAt
+}
+
+// GetTeam returns CycleShiftAllCycleShiftAllCyclePayloadCycle.Team, and is useful for accessing the field via an interface.
+func (v *CycleShiftAllCycleShiftAllCyclePayloadCycle) GetTeam() *CycleListFieldsTeam {
+	return v.CycleListFields.Team
+}
+
+func (v *CycleShiftAllCycleShiftAllCyclePayloadCycle) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CycleShiftAllCycleShiftAllCyclePayloadCycle
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CycleShiftAllCycleShiftAllCyclePayloadCycle = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.CycleListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCycleShiftAllCycleShiftAllCyclePayloadCycle struct {
+	Id string `json:"id"`
+
+	Number float64 `json:"number"`
+
+	Name *string `json:"name"`
+
+	Description *string `json:"description"`
+
+	StartsAt time.Time `json:"startsAt"`
+
+	EndsAt time.Time `json:"endsAt"`
+
+	Progress float64 `json:"progress"`
+
+	CompletedAt *time.Time `json:"completedAt"`
+
+	Team *CycleListFieldsTeam `json:"team"`
+}
+
+func (v *CycleShiftAllCycleShiftAllCyclePayloadCycle) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CycleShiftAllCycleShiftAllCyclePayloadCycle) __premarshalJSON() (*__premarshalCycleShiftAllCycleShiftAllCyclePayloadCycle, error) {
+	var retval __premarshalCycleShiftAllCycleShiftAllCyclePayloadCycle
+
+	retval.Id = v.CycleListFields.Id
+	retval.Number = v.CycleListFields.Number
+	retval.Name = v.CycleListFields.Name
+	retval.Description = v.CycleListFields.Description
+	retval.StartsAt = v.CycleListFields.StartsAt
+	retval.EndsAt = v.CycleListFields.EndsAt
+	retval.Progress = v.CycleListFields.Progress
+	retval.CompletedAt = v.CycleListFields.CompletedAt
+	retval.Team = v.CycleListFields.Team
+	return &retval, nil
+}
+
+// Input for shifting all cycles from a certain cycle onwards by a certain number of days.
+type CycleShiftAllInput struct {
+	// The number of days to shift the cycles by.
+	DaysToShift float64 `json:"daysToShift"`
+	// The cycle ID at which to start the shift.
+	Id string `json:"id"`
+}
+
+// GetDaysToShift returns CycleShiftAllInput.DaysToShift, and is useful for accessing the field via an interface.
+func (v *CycleShiftAllInput) GetDaysToShift() float64 { return v.DaysToShift }
+
+// GetId returns CycleShiftAllInput.Id, and is useful for accessing the field via an interface.
+func (v *CycleShiftAllInput) GetId() string { return v.Id }
+
+// CycleShiftAllResponse is returned by CycleShiftAll on success.
+type CycleShiftAllResponse struct {
+	// Shifts all cycles starts and ends by a certain number of days, starting from the provided cycle onwards.
+	CycleShiftAll *CycleShiftAllCycleShiftAllCyclePayload `json:"cycleShiftAll"`
+}
+
+// GetCycleShiftAll returns CycleShiftAllResponse.CycleShiftAll, and is useful for accessing the field via an interface.
+func (v *CycleShiftAllResponse) GetCycleShiftAll() *CycleShiftAllCycleShiftAllCyclePayload {
+	return v.CycleShiftAll
+}
+
+// CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayload includes the requested fields of the GraphQL type CyclePayload.
+// The GraphQL type's documentation follows.
+//
+// The payload returned by cycle mutations.
+type CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The cycle that was created or updated.
+	Cycle *CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle `json:"cycle"`
+}
+
+// GetSuccess returns CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayload.Success, and is useful for accessing the field via an interface.
+func (v *CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetCycle returns CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayload.Cycle, and is useful for accessing the field via an interface.
+func (v *CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayload) GetCycle() *CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle {
+	return v.Cycle
+}
+
+// CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle includes the requested fields of the GraphQL type Cycle.
+// The GraphQL type's documentation follows.
+//
+// A time-boxed iteration (similar to a sprint) used for planning and tracking
+// work. Cycles belong to a team and have defined start and end dates. Issues are
+// assigned to cycles for time-based planning, and progress is tracked via
+// completed, in-progress, and total scope. Cycles are automatically completed when
+// their end date passes, and uncompleted issues can be carried over to the next cycle.
+type CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle struct {
+	CycleListFields `json:"-"`
+}
+
+// GetId returns CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle.Id, and is useful for accessing the field via an interface.
+func (v *CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle) GetId() string {
+	return v.CycleListFields.Id
+}
+
+// GetNumber returns CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle.Number, and is useful for accessing the field via an interface.
+func (v *CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle) GetNumber() float64 {
+	return v.CycleListFields.Number
+}
+
+// GetName returns CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle.Name, and is useful for accessing the field via an interface.
+func (v *CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle) GetName() *string {
+	return v.CycleListFields.Name
+}
+
+// GetDescription returns CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle.Description, and is useful for accessing the field via an interface.
+func (v *CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle) GetDescription() *string {
+	return v.CycleListFields.Description
+}
+
+// GetStartsAt returns CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle.StartsAt, and is useful for accessing the field via an interface.
+func (v *CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle) GetStartsAt() time.Time {
+	return v.CycleListFields.StartsAt
+}
+
+// GetEndsAt returns CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle.EndsAt, and is useful for accessing the field via an interface.
+func (v *CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle) GetEndsAt() time.Time {
+	return v.CycleListFields.EndsAt
+}
+
+// GetProgress returns CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle.Progress, and is useful for accessing the field via an interface.
+func (v *CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle) GetProgress() float64 {
+	return v.CycleListFields.Progress
+}
+
+// GetCompletedAt returns CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle.CompletedAt, and is useful for accessing the field via an interface.
+func (v *CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle) GetCompletedAt() *time.Time {
+	return v.CycleListFields.CompletedAt
+}
+
+// GetTeam returns CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle.Team, and is useful for accessing the field via an interface.
+func (v *CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle) GetTeam() *CycleListFieldsTeam {
+	return v.CycleListFields.Team
+}
+
+func (v *CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.CycleListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle struct {
+	Id string `json:"id"`
+
+	Number float64 `json:"number"`
+
+	Name *string `json:"name"`
+
+	Description *string `json:"description"`
+
+	StartsAt time.Time `json:"startsAt"`
+
+	EndsAt time.Time `json:"endsAt"`
+
+	Progress float64 `json:"progress"`
+
+	CompletedAt *time.Time `json:"completedAt"`
+
+	Team *CycleListFieldsTeam `json:"team"`
+}
+
+func (v *CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle) __premarshalJSON() (*__premarshalCycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle, error) {
+	var retval __premarshalCycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayloadCycle
+
+	retval.Id = v.CycleListFields.Id
+	retval.Number = v.CycleListFields.Number
+	retval.Name = v.CycleListFields.Name
+	retval.Description = v.CycleListFields.Description
+	retval.StartsAt = v.CycleListFields.StartsAt
+	retval.EndsAt = v.CycleListFields.EndsAt
+	retval.Progress = v.CycleListFields.Progress
+	retval.CompletedAt = v.CycleListFields.CompletedAt
+	retval.Team = v.CycleListFields.Team
+	return &retval, nil
+}
+
+// CycleStartUpcomingCycleTodayResponse is returned by CycleStartUpcomingCycleToday on success.
+type CycleStartUpcomingCycleTodayResponse struct {
+	// Starts the upcoming cycle as of midnight today. Completes the previous cycle
+	// if it has not yet ended. Only the next upcoming (not yet started) cycle for
+	// the team can be started.
+	CycleStartUpcomingCycleToday *CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayload `json:"cycleStartUpcomingCycleToday"`
+}
+
+// GetCycleStartUpcomingCycleToday returns CycleStartUpcomingCycleTodayResponse.CycleStartUpcomingCycleToday, and is useful for accessing the field via an interface.
+func (v *CycleStartUpcomingCycleTodayResponse) GetCycleStartUpcomingCycleToday() *CycleStartUpcomingCycleTodayCycleStartUpcomingCycleTodayCyclePayload {
+	return v.CycleStartUpcomingCycleToday
+}
+
+// CycleUpdateCycleUpdateCyclePayload includes the requested fields of the GraphQL type CyclePayload.
+// The GraphQL type's documentation follows.
+//
+// The payload returned by cycle mutations.
+type CycleUpdateCycleUpdateCyclePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The cycle that was created or updated.
+	Cycle *CycleUpdateCycleUpdateCyclePayloadCycle `json:"cycle"`
+}
+
+// GetSuccess returns CycleUpdateCycleUpdateCyclePayload.Success, and is useful for accessing the field via an interface.
+func (v *CycleUpdateCycleUpdateCyclePayload) GetSuccess() bool { return v.Success }
+
+// GetCycle returns CycleUpdateCycleUpdateCyclePayload.Cycle, and is useful for accessing the field via an interface.
+func (v *CycleUpdateCycleUpdateCyclePayload) GetCycle() *CycleUpdateCycleUpdateCyclePayloadCycle {
+	return v.Cycle
+}
+
+// CycleUpdateCycleUpdateCyclePayloadCycle includes the requested fields of the GraphQL type Cycle.
+// The GraphQL type's documentation follows.
+//
+// A time-boxed iteration (similar to a sprint) used for planning and tracking
+// work. Cycles belong to a team and have defined start and end dates. Issues are
+// assigned to cycles for time-based planning, and progress is tracked via
+// completed, in-progress, and total scope. Cycles are automatically completed when
+// their end date passes, and uncompleted issues can be carried over to the next cycle.
+type CycleUpdateCycleUpdateCyclePayloadCycle struct {
+	CycleListFields `json:"-"`
+}
+
+// GetId returns CycleUpdateCycleUpdateCyclePayloadCycle.Id, and is useful for accessing the field via an interface.
+func (v *CycleUpdateCycleUpdateCyclePayloadCycle) GetId() string { return v.CycleListFields.Id }
+
+// GetNumber returns CycleUpdateCycleUpdateCyclePayloadCycle.Number, and is useful for accessing the field via an interface.
+func (v *CycleUpdateCycleUpdateCyclePayloadCycle) GetNumber() float64 {
+	return v.CycleListFields.Number
+}
+
+// GetName returns CycleUpdateCycleUpdateCyclePayloadCycle.Name, and is useful for accessing the field via an interface.
+func (v *CycleUpdateCycleUpdateCyclePayloadCycle) GetName() *string { return v.CycleListFields.Name }
+
+// GetDescription returns CycleUpdateCycleUpdateCyclePayloadCycle.Description, and is useful for accessing the field via an interface.
+func (v *CycleUpdateCycleUpdateCyclePayloadCycle) GetDescription() *string {
+	return v.CycleListFields.Description
+}
+
+// GetStartsAt returns CycleUpdateCycleUpdateCyclePayloadCycle.StartsAt, and is useful for accessing the field via an interface.
+func (v *CycleUpdateCycleUpdateCyclePayloadCycle) GetStartsAt() time.Time {
+	return v.CycleListFields.StartsAt
+}
+
+// GetEndsAt returns CycleUpdateCycleUpdateCyclePayloadCycle.EndsAt, and is useful for accessing the field via an interface.
+func (v *CycleUpdateCycleUpdateCyclePayloadCycle) GetEndsAt() time.Time {
+	return v.CycleListFields.EndsAt
+}
+
+// GetProgress returns CycleUpdateCycleUpdateCyclePayloadCycle.Progress, and is useful for accessing the field via an interface.
+func (v *CycleUpdateCycleUpdateCyclePayloadCycle) GetProgress() float64 {
+	return v.CycleListFields.Progress
+}
+
+// GetCompletedAt returns CycleUpdateCycleUpdateCyclePayloadCycle.CompletedAt, and is useful for accessing the field via an interface.
+func (v *CycleUpdateCycleUpdateCyclePayloadCycle) GetCompletedAt() *time.Time {
+	return v.CycleListFields.CompletedAt
+}
+
+// GetTeam returns CycleUpdateCycleUpdateCyclePayloadCycle.Team, and is useful for accessing the field via an interface.
+func (v *CycleUpdateCycleUpdateCyclePayloadCycle) GetTeam() *CycleListFieldsTeam {
+	return v.CycleListFields.Team
+}
+
+func (v *CycleUpdateCycleUpdateCyclePayloadCycle) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*CycleUpdateCycleUpdateCyclePayloadCycle
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.CycleUpdateCycleUpdateCyclePayloadCycle = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.CycleListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalCycleUpdateCycleUpdateCyclePayloadCycle struct {
+	Id string `json:"id"`
+
+	Number float64 `json:"number"`
+
+	Name *string `json:"name"`
+
+	Description *string `json:"description"`
+
+	StartsAt time.Time `json:"startsAt"`
+
+	EndsAt time.Time `json:"endsAt"`
+
+	Progress float64 `json:"progress"`
+
+	CompletedAt *time.Time `json:"completedAt"`
+
+	Team *CycleListFieldsTeam `json:"team"`
+}
+
+func (v *CycleUpdateCycleUpdateCyclePayloadCycle) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *CycleUpdateCycleUpdateCyclePayloadCycle) __premarshalJSON() (*__premarshalCycleUpdateCycleUpdateCyclePayloadCycle, error) {
+	var retval __premarshalCycleUpdateCycleUpdateCyclePayloadCycle
+
+	retval.Id = v.CycleListFields.Id
+	retval.Number = v.CycleListFields.Number
+	retval.Name = v.CycleListFields.Name
+	retval.Description = v.CycleListFields.Description
+	retval.StartsAt = v.CycleListFields.StartsAt
+	retval.EndsAt = v.CycleListFields.EndsAt
+	retval.Progress = v.CycleListFields.Progress
+	retval.CompletedAt = v.CycleListFields.CompletedAt
+	retval.Team = v.CycleListFields.Team
+	return &retval, nil
+}
+
+// Input for updating an existing cycle.
+type CycleUpdateInput struct {
+	// The completion time of the cycle. If null, the cycle hasn't been completed.
+	CompletedAt *time.Time `json:"completedAt"`
+	// The description of the cycle.
+	Description *string `json:"description"`
+	// The end time of the cycle.
+	EndsAt *time.Time `json:"endsAt"`
+	// The custom name of the cycle.
+	Name *string `json:"name"`
+	// The start time of the cycle.
+	StartsAt *time.Time `json:"startsAt"`
+}
+
+// GetCompletedAt returns CycleUpdateInput.CompletedAt, and is useful for accessing the field via an interface.
+func (v *CycleUpdateInput) GetCompletedAt() *time.Time { return v.CompletedAt }
+
+// GetDescription returns CycleUpdateInput.Description, and is useful for accessing the field via an interface.
+func (v *CycleUpdateInput) GetDescription() *string { return v.Description }
+
+// GetEndsAt returns CycleUpdateInput.EndsAt, and is useful for accessing the field via an interface.
+func (v *CycleUpdateInput) GetEndsAt() *time.Time { return v.EndsAt }
+
+// GetName returns CycleUpdateInput.Name, and is useful for accessing the field via an interface.
+func (v *CycleUpdateInput) GetName() *string { return v.Name }
+
+// GetStartsAt returns CycleUpdateInput.StartsAt, and is useful for accessing the field via an interface.
+func (v *CycleUpdateInput) GetStartsAt() *time.Time { return v.StartsAt }
+
+// CycleUpdateResponse is returned by CycleUpdate on success.
+type CycleUpdateResponse struct {
+	// Updates a cycle.
+	CycleUpdate *CycleUpdateCycleUpdateCyclePayload `json:"cycleUpdate"`
+}
+
+// GetCycleUpdate returns CycleUpdateResponse.CycleUpdate, and is useful for accessing the field via an interface.
+func (v *CycleUpdateResponse) GetCycleUpdate() *CycleUpdateCycleUpdateCyclePayload {
+	return v.CycleUpdate
+}
 
 // Comparator for dates.
 type DateComparator struct {
@@ -2684,6 +3737,142 @@ var AllFrequencyResolutionType = []FrequencyResolutionType{
 	FrequencyResolutionTypeDaily,
 	FrequencyResolutionTypeWeekly,
 }
+
+// GetCycleCycle includes the requested fields of the GraphQL type Cycle.
+// The GraphQL type's documentation follows.
+//
+// A time-boxed iteration (similar to a sprint) used for planning and tracking
+// work. Cycles belong to a team and have defined start and end dates. Issues are
+// assigned to cycles for time-based planning, and progress is tracked via
+// completed, in-progress, and total scope. Cycles are automatically completed when
+// their end date passes, and uncompleted issues can be carried over to the next cycle.
+type GetCycleCycle struct {
+	CycleDetailFields `json:"-"`
+}
+
+// GetScopeHistory returns GetCycleCycle.ScopeHistory, and is useful for accessing the field via an interface.
+func (v *GetCycleCycle) GetScopeHistory() []float64 { return v.CycleDetailFields.ScopeHistory }
+
+// GetProgressHistory returns GetCycleCycle.ProgressHistory, and is useful for accessing the field via an interface.
+func (v *GetCycleCycle) GetProgressHistory() map[string]interface{} {
+	return v.CycleDetailFields.ProgressHistory
+}
+
+// GetId returns GetCycleCycle.Id, and is useful for accessing the field via an interface.
+func (v *GetCycleCycle) GetId() string { return v.CycleDetailFields.CycleListFields.Id }
+
+// GetNumber returns GetCycleCycle.Number, and is useful for accessing the field via an interface.
+func (v *GetCycleCycle) GetNumber() float64 { return v.CycleDetailFields.CycleListFields.Number }
+
+// GetName returns GetCycleCycle.Name, and is useful for accessing the field via an interface.
+func (v *GetCycleCycle) GetName() *string { return v.CycleDetailFields.CycleListFields.Name }
+
+// GetDescription returns GetCycleCycle.Description, and is useful for accessing the field via an interface.
+func (v *GetCycleCycle) GetDescription() *string {
+	return v.CycleDetailFields.CycleListFields.Description
+}
+
+// GetStartsAt returns GetCycleCycle.StartsAt, and is useful for accessing the field via an interface.
+func (v *GetCycleCycle) GetStartsAt() time.Time { return v.CycleDetailFields.CycleListFields.StartsAt }
+
+// GetEndsAt returns GetCycleCycle.EndsAt, and is useful for accessing the field via an interface.
+func (v *GetCycleCycle) GetEndsAt() time.Time { return v.CycleDetailFields.CycleListFields.EndsAt }
+
+// GetProgress returns GetCycleCycle.Progress, and is useful for accessing the field via an interface.
+func (v *GetCycleCycle) GetProgress() float64 { return v.CycleDetailFields.CycleListFields.Progress }
+
+// GetCompletedAt returns GetCycleCycle.CompletedAt, and is useful for accessing the field via an interface.
+func (v *GetCycleCycle) GetCompletedAt() *time.Time {
+	return v.CycleDetailFields.CycleListFields.CompletedAt
+}
+
+// GetTeam returns GetCycleCycle.Team, and is useful for accessing the field via an interface.
+func (v *GetCycleCycle) GetTeam() *CycleListFieldsTeam {
+	return v.CycleDetailFields.CycleListFields.Team
+}
+
+func (v *GetCycleCycle) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*GetCycleCycle
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.GetCycleCycle = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.CycleDetailFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalGetCycleCycle struct {
+	ScopeHistory []float64 `json:"scopeHistory"`
+
+	ProgressHistory map[string]interface{} `json:"progressHistory"`
+
+	Id string `json:"id"`
+
+	Number float64 `json:"number"`
+
+	Name *string `json:"name"`
+
+	Description *string `json:"description"`
+
+	StartsAt time.Time `json:"startsAt"`
+
+	EndsAt time.Time `json:"endsAt"`
+
+	Progress float64 `json:"progress"`
+
+	CompletedAt *time.Time `json:"completedAt"`
+
+	Team *CycleListFieldsTeam `json:"team"`
+}
+
+func (v *GetCycleCycle) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *GetCycleCycle) __premarshalJSON() (*__premarshalGetCycleCycle, error) {
+	var retval __premarshalGetCycleCycle
+
+	retval.ScopeHistory = v.CycleDetailFields.ScopeHistory
+	retval.ProgressHistory = v.CycleDetailFields.ProgressHistory
+	retval.Id = v.CycleDetailFields.CycleListFields.Id
+	retval.Number = v.CycleDetailFields.CycleListFields.Number
+	retval.Name = v.CycleDetailFields.CycleListFields.Name
+	retval.Description = v.CycleDetailFields.CycleListFields.Description
+	retval.StartsAt = v.CycleDetailFields.CycleListFields.StartsAt
+	retval.EndsAt = v.CycleDetailFields.CycleListFields.EndsAt
+	retval.Progress = v.CycleDetailFields.CycleListFields.Progress
+	retval.CompletedAt = v.CycleDetailFields.CycleListFields.CompletedAt
+	retval.Team = v.CycleDetailFields.CycleListFields.Team
+	return &retval, nil
+}
+
+// GetCycleResponse is returned by GetCycle on success.
+type GetCycleResponse struct {
+	// One specific cycle, looked up by ID or slug.
+	Cycle *GetCycleCycle `json:"cycle"`
+}
+
+// GetCycle returns GetCycleResponse.Cycle, and is useful for accessing the field via an interface.
+func (v *GetCycleResponse) GetCycle() *GetCycleCycle { return v.Cycle }
 
 // GetInitiativeInitiative includes the requested fields of the GraphQL type Initiative.
 // The GraphQL type's documentation follows.
@@ -3466,6 +4655,112 @@ func (v *GetIssueIssue) __premarshalJSON() (*__premarshalGetIssueIssue, error) {
 	retval.ExternalUserCreator = v.IssueDetailFields.ExternalUserCreator
 	return &retval, nil
 }
+
+// GetIssueLabelIssueLabel includes the requested fields of the GraphQL type IssueLabel.
+// The GraphQL type's documentation follows.
+//
+// Labels that can be associated with issues. Labels help categorize and filter
+// issues across a workspace. They can be workspace-level (shared across all teams)
+// or team-scoped. Labels have a color for visual identification and can be
+// organized hierarchically into groups, where a parent label acts as a group
+// containing child labels. Labels may also be inherited from parent teams to sub-teams.
+type GetIssueLabelIssueLabel struct {
+	LabelListFields `json:"-"`
+}
+
+// GetId returns GetIssueLabelIssueLabel.Id, and is useful for accessing the field via an interface.
+func (v *GetIssueLabelIssueLabel) GetId() string { return v.LabelListFields.Id }
+
+// GetName returns GetIssueLabelIssueLabel.Name, and is useful for accessing the field via an interface.
+func (v *GetIssueLabelIssueLabel) GetName() string { return v.LabelListFields.Name }
+
+// GetColor returns GetIssueLabelIssueLabel.Color, and is useful for accessing the field via an interface.
+func (v *GetIssueLabelIssueLabel) GetColor() string { return v.LabelListFields.Color }
+
+// GetDescription returns GetIssueLabelIssueLabel.Description, and is useful for accessing the field via an interface.
+func (v *GetIssueLabelIssueLabel) GetDescription() *string { return v.LabelListFields.Description }
+
+// GetIsGroup returns GetIssueLabelIssueLabel.IsGroup, and is useful for accessing the field via an interface.
+func (v *GetIssueLabelIssueLabel) GetIsGroup() bool { return v.LabelListFields.IsGroup }
+
+// GetParent returns GetIssueLabelIssueLabel.Parent, and is useful for accessing the field via an interface.
+func (v *GetIssueLabelIssueLabel) GetParent() *LabelListFieldsParentIssueLabel {
+	return v.LabelListFields.Parent
+}
+
+// GetTeam returns GetIssueLabelIssueLabel.Team, and is useful for accessing the field via an interface.
+func (v *GetIssueLabelIssueLabel) GetTeam() *LabelListFieldsTeam { return v.LabelListFields.Team }
+
+func (v *GetIssueLabelIssueLabel) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*GetIssueLabelIssueLabel
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.GetIssueLabelIssueLabel = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.LabelListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalGetIssueLabelIssueLabel struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Color string `json:"color"`
+
+	Description *string `json:"description"`
+
+	IsGroup bool `json:"isGroup"`
+
+	Parent *LabelListFieldsParentIssueLabel `json:"parent"`
+
+	Team *LabelListFieldsTeam `json:"team"`
+}
+
+func (v *GetIssueLabelIssueLabel) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *GetIssueLabelIssueLabel) __premarshalJSON() (*__premarshalGetIssueLabelIssueLabel, error) {
+	var retval __premarshalGetIssueLabelIssueLabel
+
+	retval.Id = v.LabelListFields.Id
+	retval.Name = v.LabelListFields.Name
+	retval.Color = v.LabelListFields.Color
+	retval.Description = v.LabelListFields.Description
+	retval.IsGroup = v.LabelListFields.IsGroup
+	retval.Parent = v.LabelListFields.Parent
+	retval.Team = v.LabelListFields.Team
+	return &retval, nil
+}
+
+// GetIssueLabelResponse is returned by GetIssueLabel on success.
+type GetIssueLabelResponse struct {
+	// One specific label, looked up by its unique identifier.
+	IssueLabel *GetIssueLabelIssueLabel `json:"issueLabel"`
+}
+
+// GetIssueLabel returns GetIssueLabelResponse.IssueLabel, and is useful for accessing the field via an interface.
+func (v *GetIssueLabelResponse) GetIssueLabel() *GetIssueLabelIssueLabel { return v.IssueLabel }
 
 // GetIssueResponse is returned by GetIssue on success.
 type GetIssueResponse struct {
@@ -4979,6 +6274,118 @@ func (v *GetViewerViewerUser) __premarshalJSON() (*__premarshalGetViewerViewerUs
 	retval.Active = v.UserDetailFields.Active
 	retval.Admin = v.UserDetailFields.Admin
 	retval.CreatedAt = v.UserDetailFields.CreatedAt
+	return &retval, nil
+}
+
+// GetWorkflowStateResponse is returned by GetWorkflowState on success.
+type GetWorkflowStateResponse struct {
+	// One specific workflow state (issue status), looked up by its unique identifier.
+	WorkflowState *GetWorkflowStateWorkflowState `json:"workflowState"`
+}
+
+// GetWorkflowState returns GetWorkflowStateResponse.WorkflowState, and is useful for accessing the field via an interface.
+func (v *GetWorkflowStateResponse) GetWorkflowState() *GetWorkflowStateWorkflowState {
+	return v.WorkflowState
+}
+
+// GetWorkflowStateWorkflowState includes the requested fields of the GraphQL type WorkflowState.
+// The GraphQL type's documentation follows.
+//
+// A state in a team's workflow, representing an issue status such as Triage,
+// Backlog, Todo, In Progress, In Review, Done, or Canceled. Each team has its own
+// set of workflow states that define the progression of issues through the team's
+// process. Workflow states have a type that categorizes them (triage, backlog,
+// unstarted, started, completed, canceled), a position that determines their
+// display order, and a color for visual identification. States can be inherited
+// from parent teams to sub-teams.
+type GetWorkflowStateWorkflowState struct {
+	WorkflowStateFields `json:"-"`
+}
+
+// GetId returns GetWorkflowStateWorkflowState.Id, and is useful for accessing the field via an interface.
+func (v *GetWorkflowStateWorkflowState) GetId() string { return v.WorkflowStateFields.Id }
+
+// GetName returns GetWorkflowStateWorkflowState.Name, and is useful for accessing the field via an interface.
+func (v *GetWorkflowStateWorkflowState) GetName() string { return v.WorkflowStateFields.Name }
+
+// GetType returns GetWorkflowStateWorkflowState.Type, and is useful for accessing the field via an interface.
+func (v *GetWorkflowStateWorkflowState) GetType() string { return v.WorkflowStateFields.Type }
+
+// GetColor returns GetWorkflowStateWorkflowState.Color, and is useful for accessing the field via an interface.
+func (v *GetWorkflowStateWorkflowState) GetColor() string { return v.WorkflowStateFields.Color }
+
+// GetDescription returns GetWorkflowStateWorkflowState.Description, and is useful for accessing the field via an interface.
+func (v *GetWorkflowStateWorkflowState) GetDescription() *string {
+	return v.WorkflowStateFields.Description
+}
+
+// GetPosition returns GetWorkflowStateWorkflowState.Position, and is useful for accessing the field via an interface.
+func (v *GetWorkflowStateWorkflowState) GetPosition() float64 { return v.WorkflowStateFields.Position }
+
+// GetTeam returns GetWorkflowStateWorkflowState.Team, and is useful for accessing the field via an interface.
+func (v *GetWorkflowStateWorkflowState) GetTeam() *WorkflowStateFieldsTeam {
+	return v.WorkflowStateFields.Team
+}
+
+func (v *GetWorkflowStateWorkflowState) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*GetWorkflowStateWorkflowState
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.GetWorkflowStateWorkflowState = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.WorkflowStateFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalGetWorkflowStateWorkflowState struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Type string `json:"type"`
+
+	Color string `json:"color"`
+
+	Description *string `json:"description"`
+
+	Position float64 `json:"position"`
+
+	Team *WorkflowStateFieldsTeam `json:"team"`
+}
+
+func (v *GetWorkflowStateWorkflowState) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *GetWorkflowStateWorkflowState) __premarshalJSON() (*__premarshalGetWorkflowStateWorkflowState, error) {
+	var retval __premarshalGetWorkflowStateWorkflowState
+
+	retval.Id = v.WorkflowStateFields.Id
+	retval.Name = v.WorkflowStateFields.Name
+	retval.Type = v.WorkflowStateFields.Type
+	retval.Color = v.WorkflowStateFields.Color
+	retval.Description = v.WorkflowStateFields.Description
+	retval.Position = v.WorkflowStateFields.Position
+	retval.Team = v.WorkflowStateFields.Team
 	return &retval, nil
 }
 
@@ -7679,6 +9086,603 @@ var AllIntegrationService = []IntegrationService{
 	IntegrationServiceMicrosoftteamsprojectpost,
 }
 
+// IssueArchiveIssueArchiveIssueArchivePayload includes the requested fields of the GraphQL type IssueArchivePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity archive mutations.
+type IssueArchiveIssueArchiveIssueArchivePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The archived/unarchived entity. Null if entity was deleted.
+	Entity *IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue `json:"entity"`
+}
+
+// GetSuccess returns IssueArchiveIssueArchiveIssueArchivePayload.Success, and is useful for accessing the field via an interface.
+func (v *IssueArchiveIssueArchiveIssueArchivePayload) GetSuccess() bool { return v.Success }
+
+// GetEntity returns IssueArchiveIssueArchiveIssueArchivePayload.Entity, and is useful for accessing the field via an interface.
+func (v *IssueArchiveIssueArchiveIssueArchivePayload) GetEntity() *IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue {
+	return v.Entity
+}
+
+// IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue includes the requested fields of the GraphQL type Issue.
+// The GraphQL type's documentation follows.
+//
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
+type IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue struct {
+	IssueListFields `json:"-"`
+}
+
+// GetId returns IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue.Id, and is useful for accessing the field via an interface.
+func (v *IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue) GetId() string {
+	return v.IssueListFields.Id
+}
+
+// GetIdentifier returns IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue.Identifier, and is useful for accessing the field via an interface.
+func (v *IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue) GetIdentifier() string {
+	return v.IssueListFields.Identifier
+}
+
+// GetTitle returns IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue.Title, and is useful for accessing the field via an interface.
+func (v *IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue) GetTitle() string {
+	return v.IssueListFields.Title
+}
+
+// GetDescription returns IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue.Description, and is useful for accessing the field via an interface.
+func (v *IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue) GetDescription() *string {
+	return v.IssueListFields.Description
+}
+
+// GetPriority returns IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue.Priority, and is useful for accessing the field via an interface.
+func (v *IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue) GetPriority() float64 {
+	return v.IssueListFields.Priority
+}
+
+// GetEstimate returns IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue.Estimate, and is useful for accessing the field via an interface.
+func (v *IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue) GetEstimate() *float64 {
+	return v.IssueListFields.Estimate
+}
+
+// GetCreatedAt returns IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue.CreatedAt, and is useful for accessing the field via an interface.
+func (v *IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue) GetCreatedAt() time.Time {
+	return v.IssueListFields.CreatedAt
+}
+
+// GetUpdatedAt returns IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue) GetUpdatedAt() time.Time {
+	return v.IssueListFields.UpdatedAt
+}
+
+// GetDueDate returns IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue.DueDate, and is useful for accessing the field via an interface.
+func (v *IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue) GetDueDate() *string {
+	return v.IssueListFields.DueDate
+}
+
+// GetUrl returns IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue.Url, and is useful for accessing the field via an interface.
+func (v *IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue) GetUrl() string {
+	return v.IssueListFields.Url
+}
+
+// GetState returns IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue.State, and is useful for accessing the field via an interface.
+func (v *IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue) GetState() *IssueListFieldsStateWorkflowState {
+	return v.IssueListFields.State
+}
+
+// GetAssignee returns IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue.Assignee, and is useful for accessing the field via an interface.
+func (v *IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue) GetAssignee() *IssueListFieldsAssigneeUser {
+	return v.IssueListFields.Assignee
+}
+
+// GetTeam returns IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue.Team, and is useful for accessing the field via an interface.
+func (v *IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue) GetTeam() *IssueListFieldsTeam {
+	return v.IssueListFields.Team
+}
+
+// GetLabels returns IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue.Labels, and is useful for accessing the field via an interface.
+func (v *IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue) GetLabels() *IssueListFieldsLabelsIssueLabelConnection {
+	return v.IssueListFields.Labels
+}
+
+func (v *IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.IssueListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIssueArchiveIssueArchiveIssueArchivePayloadEntityIssue struct {
+	Id string `json:"id"`
+
+	Identifier string `json:"identifier"`
+
+	Title string `json:"title"`
+
+	Description *string `json:"description"`
+
+	Priority float64 `json:"priority"`
+
+	Estimate *float64 `json:"estimate"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	DueDate *string `json:"dueDate"`
+
+	Url string `json:"url"`
+
+	State *IssueListFieldsStateWorkflowState `json:"state"`
+
+	Assignee *IssueListFieldsAssigneeUser `json:"assignee"`
+
+	Team *IssueListFieldsTeam `json:"team"`
+
+	Labels *IssueListFieldsLabelsIssueLabelConnection `json:"labels"`
+}
+
+func (v *IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IssueArchiveIssueArchiveIssueArchivePayloadEntityIssue) __premarshalJSON() (*__premarshalIssueArchiveIssueArchiveIssueArchivePayloadEntityIssue, error) {
+	var retval __premarshalIssueArchiveIssueArchiveIssueArchivePayloadEntityIssue
+
+	retval.Id = v.IssueListFields.Id
+	retval.Identifier = v.IssueListFields.Identifier
+	retval.Title = v.IssueListFields.Title
+	retval.Description = v.IssueListFields.Description
+	retval.Priority = v.IssueListFields.Priority
+	retval.Estimate = v.IssueListFields.Estimate
+	retval.CreatedAt = v.IssueListFields.CreatedAt
+	retval.UpdatedAt = v.IssueListFields.UpdatedAt
+	retval.DueDate = v.IssueListFields.DueDate
+	retval.Url = v.IssueListFields.Url
+	retval.State = v.IssueListFields.State
+	retval.Assignee = v.IssueListFields.Assignee
+	retval.Team = v.IssueListFields.Team
+	retval.Labels = v.IssueListFields.Labels
+	return &retval, nil
+}
+
+// IssueArchiveResponse is returned by IssueArchive on success.
+type IssueArchiveResponse struct {
+	// Archives an issue.
+	IssueArchive *IssueArchiveIssueArchiveIssueArchivePayload `json:"issueArchive"`
+}
+
+// GetIssueArchive returns IssueArchiveResponse.IssueArchive, and is useful for accessing the field via an interface.
+func (v *IssueArchiveResponse) GetIssueArchive() *IssueArchiveIssueArchiveIssueArchivePayload {
+	return v.IssueArchive
+}
+
+// Input for creating multiple issues at once in a batch operation. Up to 50 issues can be created in a single batch.
+type IssueBatchCreateInput struct {
+	// The issues to create.
+	Issues []*IssueCreateInput `json:"issues,omitempty"`
+}
+
+// GetIssues returns IssueBatchCreateInput.Issues, and is useful for accessing the field via an interface.
+func (v *IssueBatchCreateInput) GetIssues() []*IssueCreateInput { return v.Issues }
+
+// IssueBatchCreateIssueBatchCreateIssueBatchPayload includes the requested fields of the GraphQL type IssueBatchPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a batch issue mutation, containing the updated issues and a success indicator.
+type IssueBatchCreateIssueBatchCreateIssueBatchPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The issues that were updated.
+	Issues []*IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue `json:"issues"`
+}
+
+// GetSuccess returns IssueBatchCreateIssueBatchCreateIssueBatchPayload.Success, and is useful for accessing the field via an interface.
+func (v *IssueBatchCreateIssueBatchCreateIssueBatchPayload) GetSuccess() bool { return v.Success }
+
+// GetIssues returns IssueBatchCreateIssueBatchCreateIssueBatchPayload.Issues, and is useful for accessing the field via an interface.
+func (v *IssueBatchCreateIssueBatchCreateIssueBatchPayload) GetIssues() []*IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue {
+	return v.Issues
+}
+
+// IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue includes the requested fields of the GraphQL type Issue.
+// The GraphQL type's documentation follows.
+//
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
+type IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue struct {
+	IssueListFields `json:"-"`
+}
+
+// GetId returns IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue.Id, and is useful for accessing the field via an interface.
+func (v *IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue) GetId() string {
+	return v.IssueListFields.Id
+}
+
+// GetIdentifier returns IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue.Identifier, and is useful for accessing the field via an interface.
+func (v *IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue) GetIdentifier() string {
+	return v.IssueListFields.Identifier
+}
+
+// GetTitle returns IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue.Title, and is useful for accessing the field via an interface.
+func (v *IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue) GetTitle() string {
+	return v.IssueListFields.Title
+}
+
+// GetDescription returns IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue.Description, and is useful for accessing the field via an interface.
+func (v *IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue) GetDescription() *string {
+	return v.IssueListFields.Description
+}
+
+// GetPriority returns IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue.Priority, and is useful for accessing the field via an interface.
+func (v *IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue) GetPriority() float64 {
+	return v.IssueListFields.Priority
+}
+
+// GetEstimate returns IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue.Estimate, and is useful for accessing the field via an interface.
+func (v *IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue) GetEstimate() *float64 {
+	return v.IssueListFields.Estimate
+}
+
+// GetCreatedAt returns IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue.CreatedAt, and is useful for accessing the field via an interface.
+func (v *IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue) GetCreatedAt() time.Time {
+	return v.IssueListFields.CreatedAt
+}
+
+// GetUpdatedAt returns IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue) GetUpdatedAt() time.Time {
+	return v.IssueListFields.UpdatedAt
+}
+
+// GetDueDate returns IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue.DueDate, and is useful for accessing the field via an interface.
+func (v *IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue) GetDueDate() *string {
+	return v.IssueListFields.DueDate
+}
+
+// GetUrl returns IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue.Url, and is useful for accessing the field via an interface.
+func (v *IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue) GetUrl() string {
+	return v.IssueListFields.Url
+}
+
+// GetState returns IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue.State, and is useful for accessing the field via an interface.
+func (v *IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue) GetState() *IssueListFieldsStateWorkflowState {
+	return v.IssueListFields.State
+}
+
+// GetAssignee returns IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue.Assignee, and is useful for accessing the field via an interface.
+func (v *IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue) GetAssignee() *IssueListFieldsAssigneeUser {
+	return v.IssueListFields.Assignee
+}
+
+// GetTeam returns IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue.Team, and is useful for accessing the field via an interface.
+func (v *IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue) GetTeam() *IssueListFieldsTeam {
+	return v.IssueListFields.Team
+}
+
+// GetLabels returns IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue.Labels, and is useful for accessing the field via an interface.
+func (v *IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue) GetLabels() *IssueListFieldsLabelsIssueLabelConnection {
+	return v.IssueListFields.Labels
+}
+
+func (v *IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.IssueListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue struct {
+	Id string `json:"id"`
+
+	Identifier string `json:"identifier"`
+
+	Title string `json:"title"`
+
+	Description *string `json:"description"`
+
+	Priority float64 `json:"priority"`
+
+	Estimate *float64 `json:"estimate"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	DueDate *string `json:"dueDate"`
+
+	Url string `json:"url"`
+
+	State *IssueListFieldsStateWorkflowState `json:"state"`
+
+	Assignee *IssueListFieldsAssigneeUser `json:"assignee"`
+
+	Team *IssueListFieldsTeam `json:"team"`
+
+	Labels *IssueListFieldsLabelsIssueLabelConnection `json:"labels"`
+}
+
+func (v *IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue) __premarshalJSON() (*__premarshalIssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue, error) {
+	var retval __premarshalIssueBatchCreateIssueBatchCreateIssueBatchPayloadIssuesIssue
+
+	retval.Id = v.IssueListFields.Id
+	retval.Identifier = v.IssueListFields.Identifier
+	retval.Title = v.IssueListFields.Title
+	retval.Description = v.IssueListFields.Description
+	retval.Priority = v.IssueListFields.Priority
+	retval.Estimate = v.IssueListFields.Estimate
+	retval.CreatedAt = v.IssueListFields.CreatedAt
+	retval.UpdatedAt = v.IssueListFields.UpdatedAt
+	retval.DueDate = v.IssueListFields.DueDate
+	retval.Url = v.IssueListFields.Url
+	retval.State = v.IssueListFields.State
+	retval.Assignee = v.IssueListFields.Assignee
+	retval.Team = v.IssueListFields.Team
+	retval.Labels = v.IssueListFields.Labels
+	return &retval, nil
+}
+
+// IssueBatchCreateResponse is returned by IssueBatchCreate on success.
+type IssueBatchCreateResponse struct {
+	// Creates a list of issues in one transaction.
+	IssueBatchCreate *IssueBatchCreateIssueBatchCreateIssueBatchPayload `json:"issueBatchCreate"`
+}
+
+// GetIssueBatchCreate returns IssueBatchCreateResponse.IssueBatchCreate, and is useful for accessing the field via an interface.
+func (v *IssueBatchCreateResponse) GetIssueBatchCreate() *IssueBatchCreateIssueBatchCreateIssueBatchPayload {
+	return v.IssueBatchCreate
+}
+
+// IssueBatchUpdateIssueBatchUpdateIssueBatchPayload includes the requested fields of the GraphQL type IssueBatchPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a batch issue mutation, containing the updated issues and a success indicator.
+type IssueBatchUpdateIssueBatchUpdateIssueBatchPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The issues that were updated.
+	Issues []*IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue `json:"issues"`
+}
+
+// GetSuccess returns IssueBatchUpdateIssueBatchUpdateIssueBatchPayload.Success, and is useful for accessing the field via an interface.
+func (v *IssueBatchUpdateIssueBatchUpdateIssueBatchPayload) GetSuccess() bool { return v.Success }
+
+// GetIssues returns IssueBatchUpdateIssueBatchUpdateIssueBatchPayload.Issues, and is useful for accessing the field via an interface.
+func (v *IssueBatchUpdateIssueBatchUpdateIssueBatchPayload) GetIssues() []*IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue {
+	return v.Issues
+}
+
+// IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue includes the requested fields of the GraphQL type Issue.
+// The GraphQL type's documentation follows.
+//
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
+type IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue struct {
+	IssueListFields `json:"-"`
+}
+
+// GetId returns IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue.Id, and is useful for accessing the field via an interface.
+func (v *IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue) GetId() string {
+	return v.IssueListFields.Id
+}
+
+// GetIdentifier returns IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue.Identifier, and is useful for accessing the field via an interface.
+func (v *IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue) GetIdentifier() string {
+	return v.IssueListFields.Identifier
+}
+
+// GetTitle returns IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue.Title, and is useful for accessing the field via an interface.
+func (v *IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue) GetTitle() string {
+	return v.IssueListFields.Title
+}
+
+// GetDescription returns IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue.Description, and is useful for accessing the field via an interface.
+func (v *IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue) GetDescription() *string {
+	return v.IssueListFields.Description
+}
+
+// GetPriority returns IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue.Priority, and is useful for accessing the field via an interface.
+func (v *IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue) GetPriority() float64 {
+	return v.IssueListFields.Priority
+}
+
+// GetEstimate returns IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue.Estimate, and is useful for accessing the field via an interface.
+func (v *IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue) GetEstimate() *float64 {
+	return v.IssueListFields.Estimate
+}
+
+// GetCreatedAt returns IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue.CreatedAt, and is useful for accessing the field via an interface.
+func (v *IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue) GetCreatedAt() time.Time {
+	return v.IssueListFields.CreatedAt
+}
+
+// GetUpdatedAt returns IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue) GetUpdatedAt() time.Time {
+	return v.IssueListFields.UpdatedAt
+}
+
+// GetDueDate returns IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue.DueDate, and is useful for accessing the field via an interface.
+func (v *IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue) GetDueDate() *string {
+	return v.IssueListFields.DueDate
+}
+
+// GetUrl returns IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue.Url, and is useful for accessing the field via an interface.
+func (v *IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue) GetUrl() string {
+	return v.IssueListFields.Url
+}
+
+// GetState returns IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue.State, and is useful for accessing the field via an interface.
+func (v *IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue) GetState() *IssueListFieldsStateWorkflowState {
+	return v.IssueListFields.State
+}
+
+// GetAssignee returns IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue.Assignee, and is useful for accessing the field via an interface.
+func (v *IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue) GetAssignee() *IssueListFieldsAssigneeUser {
+	return v.IssueListFields.Assignee
+}
+
+// GetTeam returns IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue.Team, and is useful for accessing the field via an interface.
+func (v *IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue) GetTeam() *IssueListFieldsTeam {
+	return v.IssueListFields.Team
+}
+
+// GetLabels returns IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue.Labels, and is useful for accessing the field via an interface.
+func (v *IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue) GetLabels() *IssueListFieldsLabelsIssueLabelConnection {
+	return v.IssueListFields.Labels
+}
+
+func (v *IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.IssueListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue struct {
+	Id string `json:"id"`
+
+	Identifier string `json:"identifier"`
+
+	Title string `json:"title"`
+
+	Description *string `json:"description"`
+
+	Priority float64 `json:"priority"`
+
+	Estimate *float64 `json:"estimate"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	DueDate *string `json:"dueDate"`
+
+	Url string `json:"url"`
+
+	State *IssueListFieldsStateWorkflowState `json:"state"`
+
+	Assignee *IssueListFieldsAssigneeUser `json:"assignee"`
+
+	Team *IssueListFieldsTeam `json:"team"`
+
+	Labels *IssueListFieldsLabelsIssueLabelConnection `json:"labels"`
+}
+
+func (v *IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue) __premarshalJSON() (*__premarshalIssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue, error) {
+	var retval __premarshalIssueBatchUpdateIssueBatchUpdateIssueBatchPayloadIssuesIssue
+
+	retval.Id = v.IssueListFields.Id
+	retval.Identifier = v.IssueListFields.Identifier
+	retval.Title = v.IssueListFields.Title
+	retval.Description = v.IssueListFields.Description
+	retval.Priority = v.IssueListFields.Priority
+	retval.Estimate = v.IssueListFields.Estimate
+	retval.CreatedAt = v.IssueListFields.CreatedAt
+	retval.UpdatedAt = v.IssueListFields.UpdatedAt
+	retval.DueDate = v.IssueListFields.DueDate
+	retval.Url = v.IssueListFields.Url
+	retval.State = v.IssueListFields.State
+	retval.Assignee = v.IssueListFields.Assignee
+	retval.Team = v.IssueListFields.Team
+	retval.Labels = v.IssueListFields.Labels
+	return &retval, nil
+}
+
+// IssueBatchUpdateResponse is returned by IssueBatchUpdate on success.
+type IssueBatchUpdateResponse struct {
+	// Updates multiple issues at once.
+	IssueBatchUpdate *IssueBatchUpdateIssueBatchUpdateIssueBatchPayload `json:"issueBatchUpdate"`
+}
+
+// GetIssueBatchUpdate returns IssueBatchUpdateResponse.IssueBatchUpdate, and is useful for accessing the field via an interface.
+func (v *IssueBatchUpdateResponse) GetIssueBatchUpdate() *IssueBatchUpdateIssueBatchUpdateIssueBatchPayload {
+	return v.IssueBatchUpdate
+}
+
 // Issue filtering options.
 type IssueCollectionFilter struct {
 	// [Internal] Comparator for the issue's accumulatedStateUpdatedAt date.
@@ -8295,6 +10299,202 @@ func (v *IssueCreateInput) GetTitle() *string { return v.Title }
 
 // GetUseDefaultTemplate returns IssueCreateInput.UseDefaultTemplate, and is useful for accessing the field via an interface.
 func (v *IssueCreateInput) GetUseDefaultTemplate() *bool { return v.UseDefaultTemplate }
+
+// IssueDeleteIssueDeleteIssueArchivePayload includes the requested fields of the GraphQL type IssueArchivePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity archive mutations.
+type IssueDeleteIssueDeleteIssueArchivePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The archived/unarchived entity. Null if entity was deleted.
+	Entity *IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue `json:"entity"`
+}
+
+// GetSuccess returns IssueDeleteIssueDeleteIssueArchivePayload.Success, and is useful for accessing the field via an interface.
+func (v *IssueDeleteIssueDeleteIssueArchivePayload) GetSuccess() bool { return v.Success }
+
+// GetEntity returns IssueDeleteIssueDeleteIssueArchivePayload.Entity, and is useful for accessing the field via an interface.
+func (v *IssueDeleteIssueDeleteIssueArchivePayload) GetEntity() *IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue {
+	return v.Entity
+}
+
+// IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue includes the requested fields of the GraphQL type Issue.
+// The GraphQL type's documentation follows.
+//
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
+type IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue struct {
+	IssueListFields `json:"-"`
+}
+
+// GetId returns IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue.Id, and is useful for accessing the field via an interface.
+func (v *IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue) GetId() string {
+	return v.IssueListFields.Id
+}
+
+// GetIdentifier returns IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue.Identifier, and is useful for accessing the field via an interface.
+func (v *IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue) GetIdentifier() string {
+	return v.IssueListFields.Identifier
+}
+
+// GetTitle returns IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue.Title, and is useful for accessing the field via an interface.
+func (v *IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue) GetTitle() string {
+	return v.IssueListFields.Title
+}
+
+// GetDescription returns IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue.Description, and is useful for accessing the field via an interface.
+func (v *IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue) GetDescription() *string {
+	return v.IssueListFields.Description
+}
+
+// GetPriority returns IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue.Priority, and is useful for accessing the field via an interface.
+func (v *IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue) GetPriority() float64 {
+	return v.IssueListFields.Priority
+}
+
+// GetEstimate returns IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue.Estimate, and is useful for accessing the field via an interface.
+func (v *IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue) GetEstimate() *float64 {
+	return v.IssueListFields.Estimate
+}
+
+// GetCreatedAt returns IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue.CreatedAt, and is useful for accessing the field via an interface.
+func (v *IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue) GetCreatedAt() time.Time {
+	return v.IssueListFields.CreatedAt
+}
+
+// GetUpdatedAt returns IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue) GetUpdatedAt() time.Time {
+	return v.IssueListFields.UpdatedAt
+}
+
+// GetDueDate returns IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue.DueDate, and is useful for accessing the field via an interface.
+func (v *IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue) GetDueDate() *string {
+	return v.IssueListFields.DueDate
+}
+
+// GetUrl returns IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue.Url, and is useful for accessing the field via an interface.
+func (v *IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue) GetUrl() string {
+	return v.IssueListFields.Url
+}
+
+// GetState returns IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue.State, and is useful for accessing the field via an interface.
+func (v *IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue) GetState() *IssueListFieldsStateWorkflowState {
+	return v.IssueListFields.State
+}
+
+// GetAssignee returns IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue.Assignee, and is useful for accessing the field via an interface.
+func (v *IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue) GetAssignee() *IssueListFieldsAssigneeUser {
+	return v.IssueListFields.Assignee
+}
+
+// GetTeam returns IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue.Team, and is useful for accessing the field via an interface.
+func (v *IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue) GetTeam() *IssueListFieldsTeam {
+	return v.IssueListFields.Team
+}
+
+// GetLabels returns IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue.Labels, and is useful for accessing the field via an interface.
+func (v *IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue) GetLabels() *IssueListFieldsLabelsIssueLabelConnection {
+	return v.IssueListFields.Labels
+}
+
+func (v *IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.IssueListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIssueDeleteIssueDeleteIssueArchivePayloadEntityIssue struct {
+	Id string `json:"id"`
+
+	Identifier string `json:"identifier"`
+
+	Title string `json:"title"`
+
+	Description *string `json:"description"`
+
+	Priority float64 `json:"priority"`
+
+	Estimate *float64 `json:"estimate"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	DueDate *string `json:"dueDate"`
+
+	Url string `json:"url"`
+
+	State *IssueListFieldsStateWorkflowState `json:"state"`
+
+	Assignee *IssueListFieldsAssigneeUser `json:"assignee"`
+
+	Team *IssueListFieldsTeam `json:"team"`
+
+	Labels *IssueListFieldsLabelsIssueLabelConnection `json:"labels"`
+}
+
+func (v *IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IssueDeleteIssueDeleteIssueArchivePayloadEntityIssue) __premarshalJSON() (*__premarshalIssueDeleteIssueDeleteIssueArchivePayloadEntityIssue, error) {
+	var retval __premarshalIssueDeleteIssueDeleteIssueArchivePayloadEntityIssue
+
+	retval.Id = v.IssueListFields.Id
+	retval.Identifier = v.IssueListFields.Identifier
+	retval.Title = v.IssueListFields.Title
+	retval.Description = v.IssueListFields.Description
+	retval.Priority = v.IssueListFields.Priority
+	retval.Estimate = v.IssueListFields.Estimate
+	retval.CreatedAt = v.IssueListFields.CreatedAt
+	retval.UpdatedAt = v.IssueListFields.UpdatedAt
+	retval.DueDate = v.IssueListFields.DueDate
+	retval.Url = v.IssueListFields.Url
+	retval.State = v.IssueListFields.State
+	retval.Assignee = v.IssueListFields.Assignee
+	retval.Team = v.IssueListFields.Team
+	retval.Labels = v.IssueListFields.Labels
+	return &retval, nil
+}
+
+// IssueDeleteResponse is returned by IssueDelete on success.
+type IssueDeleteResponse struct {
+	// Deletes (trashes) an issue.
+	IssueDelete *IssueDeleteIssueDeleteIssueArchivePayload `json:"issueDelete"`
+}
+
+// GetIssueDelete returns IssueDeleteResponse.IssueDelete, and is useful for accessing the field via an interface.
+func (v *IssueDeleteResponse) GetIssueDelete() *IssueDeleteIssueDeleteIssueArchivePayload {
+	return v.IssueDelete
+}
 
 // Fragment for detailed issue fields used in single issue view
 type IssueDetailFields struct {
@@ -10507,6 +12707,218 @@ func (v *IssueLabelCollectionFilter) GetTeam() *NullableTeamFilter { return v.Te
 // GetUpdatedAt returns IssueLabelCollectionFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *IssueLabelCollectionFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
 
+// Input for creating a new label. A name is required. If no team is specified, the
+// label is created as a workspace-level label available to all teams.
+type IssueLabelCreateInput struct {
+	// The color of the label.
+	Color *string `json:"color"`
+	// The description of the label.
+	Description *string `json:"description"`
+	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
+	Id *string `json:"id"`
+	// Whether the label is a group.
+	IsGroup *bool `json:"isGroup"`
+	// The name of the label.
+	Name string `json:"name"`
+	// The identifier of the parent label.
+	ParentId *string `json:"parentId"`
+	// The time at which the label was retired. Set to null to restore a retired label.
+	RetiredAt *time.Time `json:"retiredAt"`
+	// The team associated with the label. If not given, the label will be associated with the entire workspace.
+	TeamId *string `json:"teamId"`
+}
+
+// GetColor returns IssueLabelCreateInput.Color, and is useful for accessing the field via an interface.
+func (v *IssueLabelCreateInput) GetColor() *string { return v.Color }
+
+// GetDescription returns IssueLabelCreateInput.Description, and is useful for accessing the field via an interface.
+func (v *IssueLabelCreateInput) GetDescription() *string { return v.Description }
+
+// GetId returns IssueLabelCreateInput.Id, and is useful for accessing the field via an interface.
+func (v *IssueLabelCreateInput) GetId() *string { return v.Id }
+
+// GetIsGroup returns IssueLabelCreateInput.IsGroup, and is useful for accessing the field via an interface.
+func (v *IssueLabelCreateInput) GetIsGroup() *bool { return v.IsGroup }
+
+// GetName returns IssueLabelCreateInput.Name, and is useful for accessing the field via an interface.
+func (v *IssueLabelCreateInput) GetName() string { return v.Name }
+
+// GetParentId returns IssueLabelCreateInput.ParentId, and is useful for accessing the field via an interface.
+func (v *IssueLabelCreateInput) GetParentId() *string { return v.ParentId }
+
+// GetRetiredAt returns IssueLabelCreateInput.RetiredAt, and is useful for accessing the field via an interface.
+func (v *IssueLabelCreateInput) GetRetiredAt() *time.Time { return v.RetiredAt }
+
+// GetTeamId returns IssueLabelCreateInput.TeamId, and is useful for accessing the field via an interface.
+func (v *IssueLabelCreateInput) GetTeamId() *string { return v.TeamId }
+
+// IssueLabelCreateIssueLabelCreateIssueLabelPayload includes the requested fields of the GraphQL type IssueLabelPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a label mutation, containing the created or updated label and a success indicator.
+type IssueLabelCreateIssueLabelCreateIssueLabelPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The label that was created or updated.
+	IssueLabel *IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel `json:"issueLabel"`
+}
+
+// GetSuccess returns IssueLabelCreateIssueLabelCreateIssueLabelPayload.Success, and is useful for accessing the field via an interface.
+func (v *IssueLabelCreateIssueLabelCreateIssueLabelPayload) GetSuccess() bool { return v.Success }
+
+// GetIssueLabel returns IssueLabelCreateIssueLabelCreateIssueLabelPayload.IssueLabel, and is useful for accessing the field via an interface.
+func (v *IssueLabelCreateIssueLabelCreateIssueLabelPayload) GetIssueLabel() *IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel {
+	return v.IssueLabel
+}
+
+// IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel includes the requested fields of the GraphQL type IssueLabel.
+// The GraphQL type's documentation follows.
+//
+// Labels that can be associated with issues. Labels help categorize and filter
+// issues across a workspace. They can be workspace-level (shared across all teams)
+// or team-scoped. Labels have a color for visual identification and can be
+// organized hierarchically into groups, where a parent label acts as a group
+// containing child labels. Labels may also be inherited from parent teams to sub-teams.
+type IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel struct {
+	LabelListFields `json:"-"`
+}
+
+// GetId returns IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel.Id, and is useful for accessing the field via an interface.
+func (v *IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel) GetId() string {
+	return v.LabelListFields.Id
+}
+
+// GetName returns IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel.Name, and is useful for accessing the field via an interface.
+func (v *IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel) GetName() string {
+	return v.LabelListFields.Name
+}
+
+// GetColor returns IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel.Color, and is useful for accessing the field via an interface.
+func (v *IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel) GetColor() string {
+	return v.LabelListFields.Color
+}
+
+// GetDescription returns IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel.Description, and is useful for accessing the field via an interface.
+func (v *IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel) GetDescription() *string {
+	return v.LabelListFields.Description
+}
+
+// GetIsGroup returns IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel.IsGroup, and is useful for accessing the field via an interface.
+func (v *IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel) GetIsGroup() bool {
+	return v.LabelListFields.IsGroup
+}
+
+// GetParent returns IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel.Parent, and is useful for accessing the field via an interface.
+func (v *IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel) GetParent() *LabelListFieldsParentIssueLabel {
+	return v.LabelListFields.Parent
+}
+
+// GetTeam returns IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel.Team, and is useful for accessing the field via an interface.
+func (v *IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel) GetTeam() *LabelListFieldsTeam {
+	return v.LabelListFields.Team
+}
+
+func (v *IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.LabelListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Color string `json:"color"`
+
+	Description *string `json:"description"`
+
+	IsGroup bool `json:"isGroup"`
+
+	Parent *LabelListFieldsParentIssueLabel `json:"parent"`
+
+	Team *LabelListFieldsTeam `json:"team"`
+}
+
+func (v *IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel) __premarshalJSON() (*__premarshalIssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel, error) {
+	var retval __premarshalIssueLabelCreateIssueLabelCreateIssueLabelPayloadIssueLabel
+
+	retval.Id = v.LabelListFields.Id
+	retval.Name = v.LabelListFields.Name
+	retval.Color = v.LabelListFields.Color
+	retval.Description = v.LabelListFields.Description
+	retval.IsGroup = v.LabelListFields.IsGroup
+	retval.Parent = v.LabelListFields.Parent
+	retval.Team = v.LabelListFields.Team
+	return &retval, nil
+}
+
+// IssueLabelCreateResponse is returned by IssueLabelCreate on success.
+type IssueLabelCreateResponse struct {
+	// Creates a new label.
+	IssueLabelCreate *IssueLabelCreateIssueLabelCreateIssueLabelPayload `json:"issueLabelCreate"`
+}
+
+// GetIssueLabelCreate returns IssueLabelCreateResponse.IssueLabelCreate, and is useful for accessing the field via an interface.
+func (v *IssueLabelCreateResponse) GetIssueLabelCreate() *IssueLabelCreateIssueLabelCreateIssueLabelPayload {
+	return v.IssueLabelCreate
+}
+
+// IssueLabelDeleteIssueLabelDeleteDeletePayload includes the requested fields of the GraphQL type DeletePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity deletion mutations.
+type IssueLabelDeleteIssueLabelDeleteDeletePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The identifier of the deleted entity.
+	EntityId string `json:"entityId"`
+}
+
+// GetSuccess returns IssueLabelDeleteIssueLabelDeleteDeletePayload.Success, and is useful for accessing the field via an interface.
+func (v *IssueLabelDeleteIssueLabelDeleteDeletePayload) GetSuccess() bool { return v.Success }
+
+// GetEntityId returns IssueLabelDeleteIssueLabelDeleteDeletePayload.EntityId, and is useful for accessing the field via an interface.
+func (v *IssueLabelDeleteIssueLabelDeleteDeletePayload) GetEntityId() string { return v.EntityId }
+
+// IssueLabelDeleteResponse is returned by IssueLabelDelete on success.
+type IssueLabelDeleteResponse struct {
+	// Deletes an issue label.
+	IssueLabelDelete *IssueLabelDeleteIssueLabelDeleteDeletePayload `json:"issueLabelDelete"`
+}
+
+// GetIssueLabelDelete returns IssueLabelDeleteResponse.IssueLabelDelete, and is useful for accessing the field via an interface.
+func (v *IssueLabelDeleteResponse) GetIssueLabelDelete() *IssueLabelDeleteIssueLabelDeleteDeletePayload {
+	return v.IssueLabelDelete
+}
+
 // Issue label filtering options.
 type IssueLabelFilter struct {
 	// Compound filters, all of which need to be matched by the label.
@@ -10560,6 +12972,458 @@ func (v *IssueLabelFilter) GetTeam() *NullableTeamFilter { return v.Team }
 
 // GetUpdatedAt returns IssueLabelFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *IssueLabelFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
+// IssueLabelRestoreIssueLabelRestoreIssueLabelPayload includes the requested fields of the GraphQL type IssueLabelPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a label mutation, containing the created or updated label and a success indicator.
+type IssueLabelRestoreIssueLabelRestoreIssueLabelPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The label that was created or updated.
+	IssueLabel *IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel `json:"issueLabel"`
+}
+
+// GetSuccess returns IssueLabelRestoreIssueLabelRestoreIssueLabelPayload.Success, and is useful for accessing the field via an interface.
+func (v *IssueLabelRestoreIssueLabelRestoreIssueLabelPayload) GetSuccess() bool { return v.Success }
+
+// GetIssueLabel returns IssueLabelRestoreIssueLabelRestoreIssueLabelPayload.IssueLabel, and is useful for accessing the field via an interface.
+func (v *IssueLabelRestoreIssueLabelRestoreIssueLabelPayload) GetIssueLabel() *IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel {
+	return v.IssueLabel
+}
+
+// IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel includes the requested fields of the GraphQL type IssueLabel.
+// The GraphQL type's documentation follows.
+//
+// Labels that can be associated with issues. Labels help categorize and filter
+// issues across a workspace. They can be workspace-level (shared across all teams)
+// or team-scoped. Labels have a color for visual identification and can be
+// organized hierarchically into groups, where a parent label acts as a group
+// containing child labels. Labels may also be inherited from parent teams to sub-teams.
+type IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel struct {
+	LabelListFields `json:"-"`
+}
+
+// GetId returns IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel.Id, and is useful for accessing the field via an interface.
+func (v *IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel) GetId() string {
+	return v.LabelListFields.Id
+}
+
+// GetName returns IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel.Name, and is useful for accessing the field via an interface.
+func (v *IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel) GetName() string {
+	return v.LabelListFields.Name
+}
+
+// GetColor returns IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel.Color, and is useful for accessing the field via an interface.
+func (v *IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel) GetColor() string {
+	return v.LabelListFields.Color
+}
+
+// GetDescription returns IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel.Description, and is useful for accessing the field via an interface.
+func (v *IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel) GetDescription() *string {
+	return v.LabelListFields.Description
+}
+
+// GetIsGroup returns IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel.IsGroup, and is useful for accessing the field via an interface.
+func (v *IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel) GetIsGroup() bool {
+	return v.LabelListFields.IsGroup
+}
+
+// GetParent returns IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel.Parent, and is useful for accessing the field via an interface.
+func (v *IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel) GetParent() *LabelListFieldsParentIssueLabel {
+	return v.LabelListFields.Parent
+}
+
+// GetTeam returns IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel.Team, and is useful for accessing the field via an interface.
+func (v *IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel) GetTeam() *LabelListFieldsTeam {
+	return v.LabelListFields.Team
+}
+
+func (v *IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.LabelListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Color string `json:"color"`
+
+	Description *string `json:"description"`
+
+	IsGroup bool `json:"isGroup"`
+
+	Parent *LabelListFieldsParentIssueLabel `json:"parent"`
+
+	Team *LabelListFieldsTeam `json:"team"`
+}
+
+func (v *IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel) __premarshalJSON() (*__premarshalIssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel, error) {
+	var retval __premarshalIssueLabelRestoreIssueLabelRestoreIssueLabelPayloadIssueLabel
+
+	retval.Id = v.LabelListFields.Id
+	retval.Name = v.LabelListFields.Name
+	retval.Color = v.LabelListFields.Color
+	retval.Description = v.LabelListFields.Description
+	retval.IsGroup = v.LabelListFields.IsGroup
+	retval.Parent = v.LabelListFields.Parent
+	retval.Team = v.LabelListFields.Team
+	return &retval, nil
+}
+
+// IssueLabelRestoreResponse is returned by IssueLabelRestore on success.
+type IssueLabelRestoreResponse struct {
+	// Restores a previously retired label, making it available for use again.
+	IssueLabelRestore *IssueLabelRestoreIssueLabelRestoreIssueLabelPayload `json:"issueLabelRestore"`
+}
+
+// GetIssueLabelRestore returns IssueLabelRestoreResponse.IssueLabelRestore, and is useful for accessing the field via an interface.
+func (v *IssueLabelRestoreResponse) GetIssueLabelRestore() *IssueLabelRestoreIssueLabelRestoreIssueLabelPayload {
+	return v.IssueLabelRestore
+}
+
+// IssueLabelRetireIssueLabelRetireIssueLabelPayload includes the requested fields of the GraphQL type IssueLabelPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a label mutation, containing the created or updated label and a success indicator.
+type IssueLabelRetireIssueLabelRetireIssueLabelPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The label that was created or updated.
+	IssueLabel *IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel `json:"issueLabel"`
+}
+
+// GetSuccess returns IssueLabelRetireIssueLabelRetireIssueLabelPayload.Success, and is useful for accessing the field via an interface.
+func (v *IssueLabelRetireIssueLabelRetireIssueLabelPayload) GetSuccess() bool { return v.Success }
+
+// GetIssueLabel returns IssueLabelRetireIssueLabelRetireIssueLabelPayload.IssueLabel, and is useful for accessing the field via an interface.
+func (v *IssueLabelRetireIssueLabelRetireIssueLabelPayload) GetIssueLabel() *IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel {
+	return v.IssueLabel
+}
+
+// IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel includes the requested fields of the GraphQL type IssueLabel.
+// The GraphQL type's documentation follows.
+//
+// Labels that can be associated with issues. Labels help categorize and filter
+// issues across a workspace. They can be workspace-level (shared across all teams)
+// or team-scoped. Labels have a color for visual identification and can be
+// organized hierarchically into groups, where a parent label acts as a group
+// containing child labels. Labels may also be inherited from parent teams to sub-teams.
+type IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel struct {
+	LabelListFields `json:"-"`
+}
+
+// GetId returns IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel.Id, and is useful for accessing the field via an interface.
+func (v *IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel) GetId() string {
+	return v.LabelListFields.Id
+}
+
+// GetName returns IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel.Name, and is useful for accessing the field via an interface.
+func (v *IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel) GetName() string {
+	return v.LabelListFields.Name
+}
+
+// GetColor returns IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel.Color, and is useful for accessing the field via an interface.
+func (v *IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel) GetColor() string {
+	return v.LabelListFields.Color
+}
+
+// GetDescription returns IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel.Description, and is useful for accessing the field via an interface.
+func (v *IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel) GetDescription() *string {
+	return v.LabelListFields.Description
+}
+
+// GetIsGroup returns IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel.IsGroup, and is useful for accessing the field via an interface.
+func (v *IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel) GetIsGroup() bool {
+	return v.LabelListFields.IsGroup
+}
+
+// GetParent returns IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel.Parent, and is useful for accessing the field via an interface.
+func (v *IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel) GetParent() *LabelListFieldsParentIssueLabel {
+	return v.LabelListFields.Parent
+}
+
+// GetTeam returns IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel.Team, and is useful for accessing the field via an interface.
+func (v *IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel) GetTeam() *LabelListFieldsTeam {
+	return v.LabelListFields.Team
+}
+
+func (v *IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.LabelListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Color string `json:"color"`
+
+	Description *string `json:"description"`
+
+	IsGroup bool `json:"isGroup"`
+
+	Parent *LabelListFieldsParentIssueLabel `json:"parent"`
+
+	Team *LabelListFieldsTeam `json:"team"`
+}
+
+func (v *IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel) __premarshalJSON() (*__premarshalIssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel, error) {
+	var retval __premarshalIssueLabelRetireIssueLabelRetireIssueLabelPayloadIssueLabel
+
+	retval.Id = v.LabelListFields.Id
+	retval.Name = v.LabelListFields.Name
+	retval.Color = v.LabelListFields.Color
+	retval.Description = v.LabelListFields.Description
+	retval.IsGroup = v.LabelListFields.IsGroup
+	retval.Parent = v.LabelListFields.Parent
+	retval.Team = v.LabelListFields.Team
+	return &retval, nil
+}
+
+// IssueLabelRetireResponse is returned by IssueLabelRetire on success.
+type IssueLabelRetireResponse struct {
+	// Retires a label. Retired labels are still visible but cannot be applied to new
+	// issues. Existing issues with the label are not affected.
+	IssueLabelRetire *IssueLabelRetireIssueLabelRetireIssueLabelPayload `json:"issueLabelRetire"`
+}
+
+// GetIssueLabelRetire returns IssueLabelRetireResponse.IssueLabelRetire, and is useful for accessing the field via an interface.
+func (v *IssueLabelRetireResponse) GetIssueLabelRetire() *IssueLabelRetireIssueLabelRetireIssueLabelPayload {
+	return v.IssueLabelRetire
+}
+
+// Input for updating an existing label. All fields are optional; only provided fields will be updated.
+type IssueLabelUpdateInput struct {
+	// The color of the label.
+	Color *string `json:"color"`
+	// The description of the label.
+	Description *string `json:"description"`
+	// Whether the label is a group.
+	IsGroup *bool `json:"isGroup"`
+	// The name of the label.
+	Name *string `json:"name"`
+	// The identifier of the parent label.
+	ParentId *string `json:"parentId"`
+	// The time at which the label was retired. Set to null to restore a retired label.
+	RetiredAt *time.Time `json:"retiredAt"`
+}
+
+// GetColor returns IssueLabelUpdateInput.Color, and is useful for accessing the field via an interface.
+func (v *IssueLabelUpdateInput) GetColor() *string { return v.Color }
+
+// GetDescription returns IssueLabelUpdateInput.Description, and is useful for accessing the field via an interface.
+func (v *IssueLabelUpdateInput) GetDescription() *string { return v.Description }
+
+// GetIsGroup returns IssueLabelUpdateInput.IsGroup, and is useful for accessing the field via an interface.
+func (v *IssueLabelUpdateInput) GetIsGroup() *bool { return v.IsGroup }
+
+// GetName returns IssueLabelUpdateInput.Name, and is useful for accessing the field via an interface.
+func (v *IssueLabelUpdateInput) GetName() *string { return v.Name }
+
+// GetParentId returns IssueLabelUpdateInput.ParentId, and is useful for accessing the field via an interface.
+func (v *IssueLabelUpdateInput) GetParentId() *string { return v.ParentId }
+
+// GetRetiredAt returns IssueLabelUpdateInput.RetiredAt, and is useful for accessing the field via an interface.
+func (v *IssueLabelUpdateInput) GetRetiredAt() *time.Time { return v.RetiredAt }
+
+// IssueLabelUpdateIssueLabelUpdateIssueLabelPayload includes the requested fields of the GraphQL type IssueLabelPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a label mutation, containing the created or updated label and a success indicator.
+type IssueLabelUpdateIssueLabelUpdateIssueLabelPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The label that was created or updated.
+	IssueLabel *IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel `json:"issueLabel"`
+}
+
+// GetSuccess returns IssueLabelUpdateIssueLabelUpdateIssueLabelPayload.Success, and is useful for accessing the field via an interface.
+func (v *IssueLabelUpdateIssueLabelUpdateIssueLabelPayload) GetSuccess() bool { return v.Success }
+
+// GetIssueLabel returns IssueLabelUpdateIssueLabelUpdateIssueLabelPayload.IssueLabel, and is useful for accessing the field via an interface.
+func (v *IssueLabelUpdateIssueLabelUpdateIssueLabelPayload) GetIssueLabel() *IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel {
+	return v.IssueLabel
+}
+
+// IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel includes the requested fields of the GraphQL type IssueLabel.
+// The GraphQL type's documentation follows.
+//
+// Labels that can be associated with issues. Labels help categorize and filter
+// issues across a workspace. They can be workspace-level (shared across all teams)
+// or team-scoped. Labels have a color for visual identification and can be
+// organized hierarchically into groups, where a parent label acts as a group
+// containing child labels. Labels may also be inherited from parent teams to sub-teams.
+type IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel struct {
+	LabelListFields `json:"-"`
+}
+
+// GetId returns IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel.Id, and is useful for accessing the field via an interface.
+func (v *IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel) GetId() string {
+	return v.LabelListFields.Id
+}
+
+// GetName returns IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel.Name, and is useful for accessing the field via an interface.
+func (v *IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel) GetName() string {
+	return v.LabelListFields.Name
+}
+
+// GetColor returns IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel.Color, and is useful for accessing the field via an interface.
+func (v *IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel) GetColor() string {
+	return v.LabelListFields.Color
+}
+
+// GetDescription returns IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel.Description, and is useful for accessing the field via an interface.
+func (v *IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel) GetDescription() *string {
+	return v.LabelListFields.Description
+}
+
+// GetIsGroup returns IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel.IsGroup, and is useful for accessing the field via an interface.
+func (v *IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel) GetIsGroup() bool {
+	return v.LabelListFields.IsGroup
+}
+
+// GetParent returns IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel.Parent, and is useful for accessing the field via an interface.
+func (v *IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel) GetParent() *LabelListFieldsParentIssueLabel {
+	return v.LabelListFields.Parent
+}
+
+// GetTeam returns IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel.Team, and is useful for accessing the field via an interface.
+func (v *IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel) GetTeam() *LabelListFieldsTeam {
+	return v.LabelListFields.Team
+}
+
+func (v *IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.LabelListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Color string `json:"color"`
+
+	Description *string `json:"description"`
+
+	IsGroup bool `json:"isGroup"`
+
+	Parent *LabelListFieldsParentIssueLabel `json:"parent"`
+
+	Team *LabelListFieldsTeam `json:"team"`
+}
+
+func (v *IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel) __premarshalJSON() (*__premarshalIssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel, error) {
+	var retval __premarshalIssueLabelUpdateIssueLabelUpdateIssueLabelPayloadIssueLabel
+
+	retval.Id = v.LabelListFields.Id
+	retval.Name = v.LabelListFields.Name
+	retval.Color = v.LabelListFields.Color
+	retval.Description = v.LabelListFields.Description
+	retval.IsGroup = v.LabelListFields.IsGroup
+	retval.Parent = v.LabelListFields.Parent
+	retval.Team = v.LabelListFields.Team
+	return &retval, nil
+}
+
+// IssueLabelUpdateResponse is returned by IssueLabelUpdate on success.
+type IssueLabelUpdateResponse struct {
+	// Updates a label.
+	IssueLabelUpdate *IssueLabelUpdateIssueLabelUpdateIssueLabelPayload `json:"issueLabelUpdate"`
+}
+
+// GetIssueLabelUpdate returns IssueLabelUpdateResponse.IssueLabelUpdate, and is useful for accessing the field via an interface.
+func (v *IssueLabelUpdateResponse) GetIssueLabelUpdate() *IssueLabelUpdateIssueLabelUpdateIssueLabelPayload {
+	return v.IssueLabelUpdate
+}
 
 // Fragment for basic issue fields used in list views
 type IssueListFields struct {
@@ -10804,6 +13668,581 @@ var AllIssueRelationType = []IssueRelationType{
 	IssueRelationTypeSimilar,
 }
 
+// IssueReminderIssueReminderIssuePayload includes the requested fields of the GraphQL type IssuePayload.
+// The GraphQL type's documentation follows.
+//
+// The result of an issue mutation, containing the created or updated issue and a success indicator.
+type IssueReminderIssueReminderIssuePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The issue that was created or updated.
+	Issue *IssueReminderIssueReminderIssuePayloadIssue `json:"issue"`
+}
+
+// GetSuccess returns IssueReminderIssueReminderIssuePayload.Success, and is useful for accessing the field via an interface.
+func (v *IssueReminderIssueReminderIssuePayload) GetSuccess() bool { return v.Success }
+
+// GetIssue returns IssueReminderIssueReminderIssuePayload.Issue, and is useful for accessing the field via an interface.
+func (v *IssueReminderIssueReminderIssuePayload) GetIssue() *IssueReminderIssueReminderIssuePayloadIssue {
+	return v.Issue
+}
+
+// IssueReminderIssueReminderIssuePayloadIssue includes the requested fields of the GraphQL type Issue.
+// The GraphQL type's documentation follows.
+//
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
+type IssueReminderIssueReminderIssuePayloadIssue struct {
+	IssueListFields `json:"-"`
+}
+
+// GetId returns IssueReminderIssueReminderIssuePayloadIssue.Id, and is useful for accessing the field via an interface.
+func (v *IssueReminderIssueReminderIssuePayloadIssue) GetId() string { return v.IssueListFields.Id }
+
+// GetIdentifier returns IssueReminderIssueReminderIssuePayloadIssue.Identifier, and is useful for accessing the field via an interface.
+func (v *IssueReminderIssueReminderIssuePayloadIssue) GetIdentifier() string {
+	return v.IssueListFields.Identifier
+}
+
+// GetTitle returns IssueReminderIssueReminderIssuePayloadIssue.Title, and is useful for accessing the field via an interface.
+func (v *IssueReminderIssueReminderIssuePayloadIssue) GetTitle() string {
+	return v.IssueListFields.Title
+}
+
+// GetDescription returns IssueReminderIssueReminderIssuePayloadIssue.Description, and is useful for accessing the field via an interface.
+func (v *IssueReminderIssueReminderIssuePayloadIssue) GetDescription() *string {
+	return v.IssueListFields.Description
+}
+
+// GetPriority returns IssueReminderIssueReminderIssuePayloadIssue.Priority, and is useful for accessing the field via an interface.
+func (v *IssueReminderIssueReminderIssuePayloadIssue) GetPriority() float64 {
+	return v.IssueListFields.Priority
+}
+
+// GetEstimate returns IssueReminderIssueReminderIssuePayloadIssue.Estimate, and is useful for accessing the field via an interface.
+func (v *IssueReminderIssueReminderIssuePayloadIssue) GetEstimate() *float64 {
+	return v.IssueListFields.Estimate
+}
+
+// GetCreatedAt returns IssueReminderIssueReminderIssuePayloadIssue.CreatedAt, and is useful for accessing the field via an interface.
+func (v *IssueReminderIssueReminderIssuePayloadIssue) GetCreatedAt() time.Time {
+	return v.IssueListFields.CreatedAt
+}
+
+// GetUpdatedAt returns IssueReminderIssueReminderIssuePayloadIssue.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *IssueReminderIssueReminderIssuePayloadIssue) GetUpdatedAt() time.Time {
+	return v.IssueListFields.UpdatedAt
+}
+
+// GetDueDate returns IssueReminderIssueReminderIssuePayloadIssue.DueDate, and is useful for accessing the field via an interface.
+func (v *IssueReminderIssueReminderIssuePayloadIssue) GetDueDate() *string {
+	return v.IssueListFields.DueDate
+}
+
+// GetUrl returns IssueReminderIssueReminderIssuePayloadIssue.Url, and is useful for accessing the field via an interface.
+func (v *IssueReminderIssueReminderIssuePayloadIssue) GetUrl() string { return v.IssueListFields.Url }
+
+// GetState returns IssueReminderIssueReminderIssuePayloadIssue.State, and is useful for accessing the field via an interface.
+func (v *IssueReminderIssueReminderIssuePayloadIssue) GetState() *IssueListFieldsStateWorkflowState {
+	return v.IssueListFields.State
+}
+
+// GetAssignee returns IssueReminderIssueReminderIssuePayloadIssue.Assignee, and is useful for accessing the field via an interface.
+func (v *IssueReminderIssueReminderIssuePayloadIssue) GetAssignee() *IssueListFieldsAssigneeUser {
+	return v.IssueListFields.Assignee
+}
+
+// GetTeam returns IssueReminderIssueReminderIssuePayloadIssue.Team, and is useful for accessing the field via an interface.
+func (v *IssueReminderIssueReminderIssuePayloadIssue) GetTeam() *IssueListFieldsTeam {
+	return v.IssueListFields.Team
+}
+
+// GetLabels returns IssueReminderIssueReminderIssuePayloadIssue.Labels, and is useful for accessing the field via an interface.
+func (v *IssueReminderIssueReminderIssuePayloadIssue) GetLabels() *IssueListFieldsLabelsIssueLabelConnection {
+	return v.IssueListFields.Labels
+}
+
+func (v *IssueReminderIssueReminderIssuePayloadIssue) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IssueReminderIssueReminderIssuePayloadIssue
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IssueReminderIssueReminderIssuePayloadIssue = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.IssueListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIssueReminderIssueReminderIssuePayloadIssue struct {
+	Id string `json:"id"`
+
+	Identifier string `json:"identifier"`
+
+	Title string `json:"title"`
+
+	Description *string `json:"description"`
+
+	Priority float64 `json:"priority"`
+
+	Estimate *float64 `json:"estimate"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	DueDate *string `json:"dueDate"`
+
+	Url string `json:"url"`
+
+	State *IssueListFieldsStateWorkflowState `json:"state"`
+
+	Assignee *IssueListFieldsAssigneeUser `json:"assignee"`
+
+	Team *IssueListFieldsTeam `json:"team"`
+
+	Labels *IssueListFieldsLabelsIssueLabelConnection `json:"labels"`
+}
+
+func (v *IssueReminderIssueReminderIssuePayloadIssue) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IssueReminderIssueReminderIssuePayloadIssue) __premarshalJSON() (*__premarshalIssueReminderIssueReminderIssuePayloadIssue, error) {
+	var retval __premarshalIssueReminderIssueReminderIssuePayloadIssue
+
+	retval.Id = v.IssueListFields.Id
+	retval.Identifier = v.IssueListFields.Identifier
+	retval.Title = v.IssueListFields.Title
+	retval.Description = v.IssueListFields.Description
+	retval.Priority = v.IssueListFields.Priority
+	retval.Estimate = v.IssueListFields.Estimate
+	retval.CreatedAt = v.IssueListFields.CreatedAt
+	retval.UpdatedAt = v.IssueListFields.UpdatedAt
+	retval.DueDate = v.IssueListFields.DueDate
+	retval.Url = v.IssueListFields.Url
+	retval.State = v.IssueListFields.State
+	retval.Assignee = v.IssueListFields.Assignee
+	retval.Team = v.IssueListFields.Team
+	retval.Labels = v.IssueListFields.Labels
+	return &retval, nil
+}
+
+// IssueReminderResponse is returned by IssueReminder on success.
+type IssueReminderResponse struct {
+	// Adds an issue reminder. Will cause a notification to be sent when the issue reminder time is reached.
+	IssueReminder *IssueReminderIssueReminderIssuePayload `json:"issueReminder"`
+}
+
+// GetIssueReminder returns IssueReminderResponse.IssueReminder, and is useful for accessing the field via an interface.
+func (v *IssueReminderResponse) GetIssueReminder() *IssueReminderIssueReminderIssuePayload {
+	return v.IssueReminder
+}
+
+// IssueShareIssueShareIssuePayload includes the requested fields of the GraphQL type IssuePayload.
+// The GraphQL type's documentation follows.
+//
+// The result of an issue mutation, containing the created or updated issue and a success indicator.
+type IssueShareIssueShareIssuePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The issue that was created or updated.
+	Issue *IssueShareIssueShareIssuePayloadIssue `json:"issue"`
+}
+
+// GetSuccess returns IssueShareIssueShareIssuePayload.Success, and is useful for accessing the field via an interface.
+func (v *IssueShareIssueShareIssuePayload) GetSuccess() bool { return v.Success }
+
+// GetIssue returns IssueShareIssueShareIssuePayload.Issue, and is useful for accessing the field via an interface.
+func (v *IssueShareIssueShareIssuePayload) GetIssue() *IssueShareIssueShareIssuePayloadIssue {
+	return v.Issue
+}
+
+// IssueShareIssueShareIssuePayloadIssue includes the requested fields of the GraphQL type Issue.
+// The GraphQL type's documentation follows.
+//
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
+type IssueShareIssueShareIssuePayloadIssue struct {
+	IssueListFields `json:"-"`
+}
+
+// GetId returns IssueShareIssueShareIssuePayloadIssue.Id, and is useful for accessing the field via an interface.
+func (v *IssueShareIssueShareIssuePayloadIssue) GetId() string { return v.IssueListFields.Id }
+
+// GetIdentifier returns IssueShareIssueShareIssuePayloadIssue.Identifier, and is useful for accessing the field via an interface.
+func (v *IssueShareIssueShareIssuePayloadIssue) GetIdentifier() string {
+	return v.IssueListFields.Identifier
+}
+
+// GetTitle returns IssueShareIssueShareIssuePayloadIssue.Title, and is useful for accessing the field via an interface.
+func (v *IssueShareIssueShareIssuePayloadIssue) GetTitle() string { return v.IssueListFields.Title }
+
+// GetDescription returns IssueShareIssueShareIssuePayloadIssue.Description, and is useful for accessing the field via an interface.
+func (v *IssueShareIssueShareIssuePayloadIssue) GetDescription() *string {
+	return v.IssueListFields.Description
+}
+
+// GetPriority returns IssueShareIssueShareIssuePayloadIssue.Priority, and is useful for accessing the field via an interface.
+func (v *IssueShareIssueShareIssuePayloadIssue) GetPriority() float64 {
+	return v.IssueListFields.Priority
+}
+
+// GetEstimate returns IssueShareIssueShareIssuePayloadIssue.Estimate, and is useful for accessing the field via an interface.
+func (v *IssueShareIssueShareIssuePayloadIssue) GetEstimate() *float64 {
+	return v.IssueListFields.Estimate
+}
+
+// GetCreatedAt returns IssueShareIssueShareIssuePayloadIssue.CreatedAt, and is useful for accessing the field via an interface.
+func (v *IssueShareIssueShareIssuePayloadIssue) GetCreatedAt() time.Time {
+	return v.IssueListFields.CreatedAt
+}
+
+// GetUpdatedAt returns IssueShareIssueShareIssuePayloadIssue.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *IssueShareIssueShareIssuePayloadIssue) GetUpdatedAt() time.Time {
+	return v.IssueListFields.UpdatedAt
+}
+
+// GetDueDate returns IssueShareIssueShareIssuePayloadIssue.DueDate, and is useful for accessing the field via an interface.
+func (v *IssueShareIssueShareIssuePayloadIssue) GetDueDate() *string {
+	return v.IssueListFields.DueDate
+}
+
+// GetUrl returns IssueShareIssueShareIssuePayloadIssue.Url, and is useful for accessing the field via an interface.
+func (v *IssueShareIssueShareIssuePayloadIssue) GetUrl() string { return v.IssueListFields.Url }
+
+// GetState returns IssueShareIssueShareIssuePayloadIssue.State, and is useful for accessing the field via an interface.
+func (v *IssueShareIssueShareIssuePayloadIssue) GetState() *IssueListFieldsStateWorkflowState {
+	return v.IssueListFields.State
+}
+
+// GetAssignee returns IssueShareIssueShareIssuePayloadIssue.Assignee, and is useful for accessing the field via an interface.
+func (v *IssueShareIssueShareIssuePayloadIssue) GetAssignee() *IssueListFieldsAssigneeUser {
+	return v.IssueListFields.Assignee
+}
+
+// GetTeam returns IssueShareIssueShareIssuePayloadIssue.Team, and is useful for accessing the field via an interface.
+func (v *IssueShareIssueShareIssuePayloadIssue) GetTeam() *IssueListFieldsTeam {
+	return v.IssueListFields.Team
+}
+
+// GetLabels returns IssueShareIssueShareIssuePayloadIssue.Labels, and is useful for accessing the field via an interface.
+func (v *IssueShareIssueShareIssuePayloadIssue) GetLabels() *IssueListFieldsLabelsIssueLabelConnection {
+	return v.IssueListFields.Labels
+}
+
+func (v *IssueShareIssueShareIssuePayloadIssue) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IssueShareIssueShareIssuePayloadIssue
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IssueShareIssueShareIssuePayloadIssue = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.IssueListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIssueShareIssueShareIssuePayloadIssue struct {
+	Id string `json:"id"`
+
+	Identifier string `json:"identifier"`
+
+	Title string `json:"title"`
+
+	Description *string `json:"description"`
+
+	Priority float64 `json:"priority"`
+
+	Estimate *float64 `json:"estimate"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	DueDate *string `json:"dueDate"`
+
+	Url string `json:"url"`
+
+	State *IssueListFieldsStateWorkflowState `json:"state"`
+
+	Assignee *IssueListFieldsAssigneeUser `json:"assignee"`
+
+	Team *IssueListFieldsTeam `json:"team"`
+
+	Labels *IssueListFieldsLabelsIssueLabelConnection `json:"labels"`
+}
+
+func (v *IssueShareIssueShareIssuePayloadIssue) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IssueShareIssueShareIssuePayloadIssue) __premarshalJSON() (*__premarshalIssueShareIssueShareIssuePayloadIssue, error) {
+	var retval __premarshalIssueShareIssueShareIssuePayloadIssue
+
+	retval.Id = v.IssueListFields.Id
+	retval.Identifier = v.IssueListFields.Identifier
+	retval.Title = v.IssueListFields.Title
+	retval.Description = v.IssueListFields.Description
+	retval.Priority = v.IssueListFields.Priority
+	retval.Estimate = v.IssueListFields.Estimate
+	retval.CreatedAt = v.IssueListFields.CreatedAt
+	retval.UpdatedAt = v.IssueListFields.UpdatedAt
+	retval.DueDate = v.IssueListFields.DueDate
+	retval.Url = v.IssueListFields.Url
+	retval.State = v.IssueListFields.State
+	retval.Assignee = v.IssueListFields.Assignee
+	retval.Team = v.IssueListFields.Team
+	retval.Labels = v.IssueListFields.Labels
+	return &retval, nil
+}
+
+// IssueShareResponse is returned by IssueShare on success.
+type IssueShareResponse struct {
+	// Shares an issue with a user who would not otherwise be able to access it. The
+	// viewer must have native access to the issue's full sub-issue tree and
+	// permission to share issues in the issue's team. Issues that inherit sharing
+	// from a parent issue cannot be shared directly.
+	IssueShare *IssueShareIssueShareIssuePayload `json:"issueShare"`
+}
+
+// GetIssueShare returns IssueShareResponse.IssueShare, and is useful for accessing the field via an interface.
+func (v *IssueShareResponse) GetIssueShare() *IssueShareIssueShareIssuePayload { return v.IssueShare }
+
+// IssueSubscribeIssueSubscribeIssuePayload includes the requested fields of the GraphQL type IssuePayload.
+// The GraphQL type's documentation follows.
+//
+// The result of an issue mutation, containing the created or updated issue and a success indicator.
+type IssueSubscribeIssueSubscribeIssuePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The issue that was created or updated.
+	Issue *IssueSubscribeIssueSubscribeIssuePayloadIssue `json:"issue"`
+}
+
+// GetSuccess returns IssueSubscribeIssueSubscribeIssuePayload.Success, and is useful for accessing the field via an interface.
+func (v *IssueSubscribeIssueSubscribeIssuePayload) GetSuccess() bool { return v.Success }
+
+// GetIssue returns IssueSubscribeIssueSubscribeIssuePayload.Issue, and is useful for accessing the field via an interface.
+func (v *IssueSubscribeIssueSubscribeIssuePayload) GetIssue() *IssueSubscribeIssueSubscribeIssuePayloadIssue {
+	return v.Issue
+}
+
+// IssueSubscribeIssueSubscribeIssuePayloadIssue includes the requested fields of the GraphQL type Issue.
+// The GraphQL type's documentation follows.
+//
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
+type IssueSubscribeIssueSubscribeIssuePayloadIssue struct {
+	IssueListFields `json:"-"`
+}
+
+// GetId returns IssueSubscribeIssueSubscribeIssuePayloadIssue.Id, and is useful for accessing the field via an interface.
+func (v *IssueSubscribeIssueSubscribeIssuePayloadIssue) GetId() string { return v.IssueListFields.Id }
+
+// GetIdentifier returns IssueSubscribeIssueSubscribeIssuePayloadIssue.Identifier, and is useful for accessing the field via an interface.
+func (v *IssueSubscribeIssueSubscribeIssuePayloadIssue) GetIdentifier() string {
+	return v.IssueListFields.Identifier
+}
+
+// GetTitle returns IssueSubscribeIssueSubscribeIssuePayloadIssue.Title, and is useful for accessing the field via an interface.
+func (v *IssueSubscribeIssueSubscribeIssuePayloadIssue) GetTitle() string {
+	return v.IssueListFields.Title
+}
+
+// GetDescription returns IssueSubscribeIssueSubscribeIssuePayloadIssue.Description, and is useful for accessing the field via an interface.
+func (v *IssueSubscribeIssueSubscribeIssuePayloadIssue) GetDescription() *string {
+	return v.IssueListFields.Description
+}
+
+// GetPriority returns IssueSubscribeIssueSubscribeIssuePayloadIssue.Priority, and is useful for accessing the field via an interface.
+func (v *IssueSubscribeIssueSubscribeIssuePayloadIssue) GetPriority() float64 {
+	return v.IssueListFields.Priority
+}
+
+// GetEstimate returns IssueSubscribeIssueSubscribeIssuePayloadIssue.Estimate, and is useful for accessing the field via an interface.
+func (v *IssueSubscribeIssueSubscribeIssuePayloadIssue) GetEstimate() *float64 {
+	return v.IssueListFields.Estimate
+}
+
+// GetCreatedAt returns IssueSubscribeIssueSubscribeIssuePayloadIssue.CreatedAt, and is useful for accessing the field via an interface.
+func (v *IssueSubscribeIssueSubscribeIssuePayloadIssue) GetCreatedAt() time.Time {
+	return v.IssueListFields.CreatedAt
+}
+
+// GetUpdatedAt returns IssueSubscribeIssueSubscribeIssuePayloadIssue.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *IssueSubscribeIssueSubscribeIssuePayloadIssue) GetUpdatedAt() time.Time {
+	return v.IssueListFields.UpdatedAt
+}
+
+// GetDueDate returns IssueSubscribeIssueSubscribeIssuePayloadIssue.DueDate, and is useful for accessing the field via an interface.
+func (v *IssueSubscribeIssueSubscribeIssuePayloadIssue) GetDueDate() *string {
+	return v.IssueListFields.DueDate
+}
+
+// GetUrl returns IssueSubscribeIssueSubscribeIssuePayloadIssue.Url, and is useful for accessing the field via an interface.
+func (v *IssueSubscribeIssueSubscribeIssuePayloadIssue) GetUrl() string { return v.IssueListFields.Url }
+
+// GetState returns IssueSubscribeIssueSubscribeIssuePayloadIssue.State, and is useful for accessing the field via an interface.
+func (v *IssueSubscribeIssueSubscribeIssuePayloadIssue) GetState() *IssueListFieldsStateWorkflowState {
+	return v.IssueListFields.State
+}
+
+// GetAssignee returns IssueSubscribeIssueSubscribeIssuePayloadIssue.Assignee, and is useful for accessing the field via an interface.
+func (v *IssueSubscribeIssueSubscribeIssuePayloadIssue) GetAssignee() *IssueListFieldsAssigneeUser {
+	return v.IssueListFields.Assignee
+}
+
+// GetTeam returns IssueSubscribeIssueSubscribeIssuePayloadIssue.Team, and is useful for accessing the field via an interface.
+func (v *IssueSubscribeIssueSubscribeIssuePayloadIssue) GetTeam() *IssueListFieldsTeam {
+	return v.IssueListFields.Team
+}
+
+// GetLabels returns IssueSubscribeIssueSubscribeIssuePayloadIssue.Labels, and is useful for accessing the field via an interface.
+func (v *IssueSubscribeIssueSubscribeIssuePayloadIssue) GetLabels() *IssueListFieldsLabelsIssueLabelConnection {
+	return v.IssueListFields.Labels
+}
+
+func (v *IssueSubscribeIssueSubscribeIssuePayloadIssue) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IssueSubscribeIssueSubscribeIssuePayloadIssue
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IssueSubscribeIssueSubscribeIssuePayloadIssue = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.IssueListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIssueSubscribeIssueSubscribeIssuePayloadIssue struct {
+	Id string `json:"id"`
+
+	Identifier string `json:"identifier"`
+
+	Title string `json:"title"`
+
+	Description *string `json:"description"`
+
+	Priority float64 `json:"priority"`
+
+	Estimate *float64 `json:"estimate"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	DueDate *string `json:"dueDate"`
+
+	Url string `json:"url"`
+
+	State *IssueListFieldsStateWorkflowState `json:"state"`
+
+	Assignee *IssueListFieldsAssigneeUser `json:"assignee"`
+
+	Team *IssueListFieldsTeam `json:"team"`
+
+	Labels *IssueListFieldsLabelsIssueLabelConnection `json:"labels"`
+}
+
+func (v *IssueSubscribeIssueSubscribeIssuePayloadIssue) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IssueSubscribeIssueSubscribeIssuePayloadIssue) __premarshalJSON() (*__premarshalIssueSubscribeIssueSubscribeIssuePayloadIssue, error) {
+	var retval __premarshalIssueSubscribeIssueSubscribeIssuePayloadIssue
+
+	retval.Id = v.IssueListFields.Id
+	retval.Identifier = v.IssueListFields.Identifier
+	retval.Title = v.IssueListFields.Title
+	retval.Description = v.IssueListFields.Description
+	retval.Priority = v.IssueListFields.Priority
+	retval.Estimate = v.IssueListFields.Estimate
+	retval.CreatedAt = v.IssueListFields.CreatedAt
+	retval.UpdatedAt = v.IssueListFields.UpdatedAt
+	retval.DueDate = v.IssueListFields.DueDate
+	retval.Url = v.IssueListFields.Url
+	retval.State = v.IssueListFields.State
+	retval.Assignee = v.IssueListFields.Assignee
+	retval.Team = v.IssueListFields.Team
+	retval.Labels = v.IssueListFields.Labels
+	return &retval, nil
+}
+
+// IssueSubscribeResponse is returned by IssueSubscribe on success.
+type IssueSubscribeResponse struct {
+	// Subscribes a user to an issue.
+	IssueSubscribe *IssueSubscribeIssueSubscribeIssuePayload `json:"issueSubscribe"`
+}
+
+// GetIssueSubscribe returns IssueSubscribeResponse.IssueSubscribe, and is useful for accessing the field via an interface.
+func (v *IssueSubscribeResponse) GetIssueSubscribe() *IssueSubscribeIssueSubscribeIssuePayload {
+	return v.IssueSubscribe
+}
+
 // IssueSuggestion collection filtering options.
 type IssueSuggestionCollectionFilter struct {
 	// Compound filters, all of which need to be matched by the suggestion.
@@ -10946,6 +14385,590 @@ func (v *IssueSuggestionFilter) GetType() *StringComparator { return v.Type }
 
 // GetUpdatedAt returns IssueSuggestionFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *IssueSuggestionFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
+// IssueUnarchiveIssueUnarchiveIssueArchivePayload includes the requested fields of the GraphQL type IssueArchivePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity archive mutations.
+type IssueUnarchiveIssueUnarchiveIssueArchivePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The archived/unarchived entity. Null if entity was deleted.
+	Entity *IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue `json:"entity"`
+}
+
+// GetSuccess returns IssueUnarchiveIssueUnarchiveIssueArchivePayload.Success, and is useful for accessing the field via an interface.
+func (v *IssueUnarchiveIssueUnarchiveIssueArchivePayload) GetSuccess() bool { return v.Success }
+
+// GetEntity returns IssueUnarchiveIssueUnarchiveIssueArchivePayload.Entity, and is useful for accessing the field via an interface.
+func (v *IssueUnarchiveIssueUnarchiveIssueArchivePayload) GetEntity() *IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue {
+	return v.Entity
+}
+
+// IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue includes the requested fields of the GraphQL type Issue.
+// The GraphQL type's documentation follows.
+//
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
+type IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue struct {
+	IssueListFields `json:"-"`
+}
+
+// GetId returns IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue.Id, and is useful for accessing the field via an interface.
+func (v *IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue) GetId() string {
+	return v.IssueListFields.Id
+}
+
+// GetIdentifier returns IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue.Identifier, and is useful for accessing the field via an interface.
+func (v *IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue) GetIdentifier() string {
+	return v.IssueListFields.Identifier
+}
+
+// GetTitle returns IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue.Title, and is useful for accessing the field via an interface.
+func (v *IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue) GetTitle() string {
+	return v.IssueListFields.Title
+}
+
+// GetDescription returns IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue.Description, and is useful for accessing the field via an interface.
+func (v *IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue) GetDescription() *string {
+	return v.IssueListFields.Description
+}
+
+// GetPriority returns IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue.Priority, and is useful for accessing the field via an interface.
+func (v *IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue) GetPriority() float64 {
+	return v.IssueListFields.Priority
+}
+
+// GetEstimate returns IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue.Estimate, and is useful for accessing the field via an interface.
+func (v *IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue) GetEstimate() *float64 {
+	return v.IssueListFields.Estimate
+}
+
+// GetCreatedAt returns IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue.CreatedAt, and is useful for accessing the field via an interface.
+func (v *IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue) GetCreatedAt() time.Time {
+	return v.IssueListFields.CreatedAt
+}
+
+// GetUpdatedAt returns IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue) GetUpdatedAt() time.Time {
+	return v.IssueListFields.UpdatedAt
+}
+
+// GetDueDate returns IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue.DueDate, and is useful for accessing the field via an interface.
+func (v *IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue) GetDueDate() *string {
+	return v.IssueListFields.DueDate
+}
+
+// GetUrl returns IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue.Url, and is useful for accessing the field via an interface.
+func (v *IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue) GetUrl() string {
+	return v.IssueListFields.Url
+}
+
+// GetState returns IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue.State, and is useful for accessing the field via an interface.
+func (v *IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue) GetState() *IssueListFieldsStateWorkflowState {
+	return v.IssueListFields.State
+}
+
+// GetAssignee returns IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue.Assignee, and is useful for accessing the field via an interface.
+func (v *IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue) GetAssignee() *IssueListFieldsAssigneeUser {
+	return v.IssueListFields.Assignee
+}
+
+// GetTeam returns IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue.Team, and is useful for accessing the field via an interface.
+func (v *IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue) GetTeam() *IssueListFieldsTeam {
+	return v.IssueListFields.Team
+}
+
+// GetLabels returns IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue.Labels, and is useful for accessing the field via an interface.
+func (v *IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue) GetLabels() *IssueListFieldsLabelsIssueLabelConnection {
+	return v.IssueListFields.Labels
+}
+
+func (v *IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.IssueListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue struct {
+	Id string `json:"id"`
+
+	Identifier string `json:"identifier"`
+
+	Title string `json:"title"`
+
+	Description *string `json:"description"`
+
+	Priority float64 `json:"priority"`
+
+	Estimate *float64 `json:"estimate"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	DueDate *string `json:"dueDate"`
+
+	Url string `json:"url"`
+
+	State *IssueListFieldsStateWorkflowState `json:"state"`
+
+	Assignee *IssueListFieldsAssigneeUser `json:"assignee"`
+
+	Team *IssueListFieldsTeam `json:"team"`
+
+	Labels *IssueListFieldsLabelsIssueLabelConnection `json:"labels"`
+}
+
+func (v *IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue) __premarshalJSON() (*__premarshalIssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue, error) {
+	var retval __premarshalIssueUnarchiveIssueUnarchiveIssueArchivePayloadEntityIssue
+
+	retval.Id = v.IssueListFields.Id
+	retval.Identifier = v.IssueListFields.Identifier
+	retval.Title = v.IssueListFields.Title
+	retval.Description = v.IssueListFields.Description
+	retval.Priority = v.IssueListFields.Priority
+	retval.Estimate = v.IssueListFields.Estimate
+	retval.CreatedAt = v.IssueListFields.CreatedAt
+	retval.UpdatedAt = v.IssueListFields.UpdatedAt
+	retval.DueDate = v.IssueListFields.DueDate
+	retval.Url = v.IssueListFields.Url
+	retval.State = v.IssueListFields.State
+	retval.Assignee = v.IssueListFields.Assignee
+	retval.Team = v.IssueListFields.Team
+	retval.Labels = v.IssueListFields.Labels
+	return &retval, nil
+}
+
+// IssueUnarchiveResponse is returned by IssueUnarchive on success.
+type IssueUnarchiveResponse struct {
+	// Unarchives an issue.
+	IssueUnarchive *IssueUnarchiveIssueUnarchiveIssueArchivePayload `json:"issueUnarchive"`
+}
+
+// GetIssueUnarchive returns IssueUnarchiveResponse.IssueUnarchive, and is useful for accessing the field via an interface.
+func (v *IssueUnarchiveResponse) GetIssueUnarchive() *IssueUnarchiveIssueUnarchiveIssueArchivePayload {
+	return v.IssueUnarchive
+}
+
+// IssueUnshareIssueUnshareIssuePayload includes the requested fields of the GraphQL type IssuePayload.
+// The GraphQL type's documentation follows.
+//
+// The result of an issue mutation, containing the created or updated issue and a success indicator.
+type IssueUnshareIssueUnshareIssuePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The issue that was created or updated.
+	Issue *IssueUnshareIssueUnshareIssuePayloadIssue `json:"issue"`
+}
+
+// GetSuccess returns IssueUnshareIssueUnshareIssuePayload.Success, and is useful for accessing the field via an interface.
+func (v *IssueUnshareIssueUnshareIssuePayload) GetSuccess() bool { return v.Success }
+
+// GetIssue returns IssueUnshareIssueUnshareIssuePayload.Issue, and is useful for accessing the field via an interface.
+func (v *IssueUnshareIssueUnshareIssuePayload) GetIssue() *IssueUnshareIssueUnshareIssuePayloadIssue {
+	return v.Issue
+}
+
+// IssueUnshareIssueUnshareIssuePayloadIssue includes the requested fields of the GraphQL type Issue.
+// The GraphQL type's documentation follows.
+//
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
+type IssueUnshareIssueUnshareIssuePayloadIssue struct {
+	IssueListFields `json:"-"`
+}
+
+// GetId returns IssueUnshareIssueUnshareIssuePayloadIssue.Id, and is useful for accessing the field via an interface.
+func (v *IssueUnshareIssueUnshareIssuePayloadIssue) GetId() string { return v.IssueListFields.Id }
+
+// GetIdentifier returns IssueUnshareIssueUnshareIssuePayloadIssue.Identifier, and is useful for accessing the field via an interface.
+func (v *IssueUnshareIssueUnshareIssuePayloadIssue) GetIdentifier() string {
+	return v.IssueListFields.Identifier
+}
+
+// GetTitle returns IssueUnshareIssueUnshareIssuePayloadIssue.Title, and is useful for accessing the field via an interface.
+func (v *IssueUnshareIssueUnshareIssuePayloadIssue) GetTitle() string { return v.IssueListFields.Title }
+
+// GetDescription returns IssueUnshareIssueUnshareIssuePayloadIssue.Description, and is useful for accessing the field via an interface.
+func (v *IssueUnshareIssueUnshareIssuePayloadIssue) GetDescription() *string {
+	return v.IssueListFields.Description
+}
+
+// GetPriority returns IssueUnshareIssueUnshareIssuePayloadIssue.Priority, and is useful for accessing the field via an interface.
+func (v *IssueUnshareIssueUnshareIssuePayloadIssue) GetPriority() float64 {
+	return v.IssueListFields.Priority
+}
+
+// GetEstimate returns IssueUnshareIssueUnshareIssuePayloadIssue.Estimate, and is useful for accessing the field via an interface.
+func (v *IssueUnshareIssueUnshareIssuePayloadIssue) GetEstimate() *float64 {
+	return v.IssueListFields.Estimate
+}
+
+// GetCreatedAt returns IssueUnshareIssueUnshareIssuePayloadIssue.CreatedAt, and is useful for accessing the field via an interface.
+func (v *IssueUnshareIssueUnshareIssuePayloadIssue) GetCreatedAt() time.Time {
+	return v.IssueListFields.CreatedAt
+}
+
+// GetUpdatedAt returns IssueUnshareIssueUnshareIssuePayloadIssue.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *IssueUnshareIssueUnshareIssuePayloadIssue) GetUpdatedAt() time.Time {
+	return v.IssueListFields.UpdatedAt
+}
+
+// GetDueDate returns IssueUnshareIssueUnshareIssuePayloadIssue.DueDate, and is useful for accessing the field via an interface.
+func (v *IssueUnshareIssueUnshareIssuePayloadIssue) GetDueDate() *string {
+	return v.IssueListFields.DueDate
+}
+
+// GetUrl returns IssueUnshareIssueUnshareIssuePayloadIssue.Url, and is useful for accessing the field via an interface.
+func (v *IssueUnshareIssueUnshareIssuePayloadIssue) GetUrl() string { return v.IssueListFields.Url }
+
+// GetState returns IssueUnshareIssueUnshareIssuePayloadIssue.State, and is useful for accessing the field via an interface.
+func (v *IssueUnshareIssueUnshareIssuePayloadIssue) GetState() *IssueListFieldsStateWorkflowState {
+	return v.IssueListFields.State
+}
+
+// GetAssignee returns IssueUnshareIssueUnshareIssuePayloadIssue.Assignee, and is useful for accessing the field via an interface.
+func (v *IssueUnshareIssueUnshareIssuePayloadIssue) GetAssignee() *IssueListFieldsAssigneeUser {
+	return v.IssueListFields.Assignee
+}
+
+// GetTeam returns IssueUnshareIssueUnshareIssuePayloadIssue.Team, and is useful for accessing the field via an interface.
+func (v *IssueUnshareIssueUnshareIssuePayloadIssue) GetTeam() *IssueListFieldsTeam {
+	return v.IssueListFields.Team
+}
+
+// GetLabels returns IssueUnshareIssueUnshareIssuePayloadIssue.Labels, and is useful for accessing the field via an interface.
+func (v *IssueUnshareIssueUnshareIssuePayloadIssue) GetLabels() *IssueListFieldsLabelsIssueLabelConnection {
+	return v.IssueListFields.Labels
+}
+
+func (v *IssueUnshareIssueUnshareIssuePayloadIssue) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IssueUnshareIssueUnshareIssuePayloadIssue
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IssueUnshareIssueUnshareIssuePayloadIssue = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.IssueListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIssueUnshareIssueUnshareIssuePayloadIssue struct {
+	Id string `json:"id"`
+
+	Identifier string `json:"identifier"`
+
+	Title string `json:"title"`
+
+	Description *string `json:"description"`
+
+	Priority float64 `json:"priority"`
+
+	Estimate *float64 `json:"estimate"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	DueDate *string `json:"dueDate"`
+
+	Url string `json:"url"`
+
+	State *IssueListFieldsStateWorkflowState `json:"state"`
+
+	Assignee *IssueListFieldsAssigneeUser `json:"assignee"`
+
+	Team *IssueListFieldsTeam `json:"team"`
+
+	Labels *IssueListFieldsLabelsIssueLabelConnection `json:"labels"`
+}
+
+func (v *IssueUnshareIssueUnshareIssuePayloadIssue) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IssueUnshareIssueUnshareIssuePayloadIssue) __premarshalJSON() (*__premarshalIssueUnshareIssueUnshareIssuePayloadIssue, error) {
+	var retval __premarshalIssueUnshareIssueUnshareIssuePayloadIssue
+
+	retval.Id = v.IssueListFields.Id
+	retval.Identifier = v.IssueListFields.Identifier
+	retval.Title = v.IssueListFields.Title
+	retval.Description = v.IssueListFields.Description
+	retval.Priority = v.IssueListFields.Priority
+	retval.Estimate = v.IssueListFields.Estimate
+	retval.CreatedAt = v.IssueListFields.CreatedAt
+	retval.UpdatedAt = v.IssueListFields.UpdatedAt
+	retval.DueDate = v.IssueListFields.DueDate
+	retval.Url = v.IssueListFields.Url
+	retval.State = v.IssueListFields.State
+	retval.Assignee = v.IssueListFields.Assignee
+	retval.Team = v.IssueListFields.Team
+	retval.Labels = v.IssueListFields.Labels
+	return &retval, nil
+}
+
+// IssueUnshareResponse is returned by IssueUnshare on success.
+type IssueUnshareResponse struct {
+	// Stops sharing an issue with a user. The viewer must have native access to the
+	// issue's full sub-issue tree and permission to share issues in the issue's
+	// team. Issues that inherit sharing from a parent issue cannot be unshared directly.
+	IssueUnshare *IssueUnshareIssueUnshareIssuePayload `json:"issueUnshare"`
+}
+
+// GetIssueUnshare returns IssueUnshareResponse.IssueUnshare, and is useful for accessing the field via an interface.
+func (v *IssueUnshareResponse) GetIssueUnshare() *IssueUnshareIssueUnshareIssuePayload {
+	return v.IssueUnshare
+}
+
+// IssueUnsubscribeIssueUnsubscribeIssuePayload includes the requested fields of the GraphQL type IssuePayload.
+// The GraphQL type's documentation follows.
+//
+// The result of an issue mutation, containing the created or updated issue and a success indicator.
+type IssueUnsubscribeIssueUnsubscribeIssuePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The issue that was created or updated.
+	Issue *IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue `json:"issue"`
+}
+
+// GetSuccess returns IssueUnsubscribeIssueUnsubscribeIssuePayload.Success, and is useful for accessing the field via an interface.
+func (v *IssueUnsubscribeIssueUnsubscribeIssuePayload) GetSuccess() bool { return v.Success }
+
+// GetIssue returns IssueUnsubscribeIssueUnsubscribeIssuePayload.Issue, and is useful for accessing the field via an interface.
+func (v *IssueUnsubscribeIssueUnsubscribeIssuePayload) GetIssue() *IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue {
+	return v.Issue
+}
+
+// IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue includes the requested fields of the GraphQL type Issue.
+// The GraphQL type's documentation follows.
+//
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
+type IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue struct {
+	IssueListFields `json:"-"`
+}
+
+// GetId returns IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue.Id, and is useful for accessing the field via an interface.
+func (v *IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue) GetId() string {
+	return v.IssueListFields.Id
+}
+
+// GetIdentifier returns IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue.Identifier, and is useful for accessing the field via an interface.
+func (v *IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue) GetIdentifier() string {
+	return v.IssueListFields.Identifier
+}
+
+// GetTitle returns IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue.Title, and is useful for accessing the field via an interface.
+func (v *IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue) GetTitle() string {
+	return v.IssueListFields.Title
+}
+
+// GetDescription returns IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue.Description, and is useful for accessing the field via an interface.
+func (v *IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue) GetDescription() *string {
+	return v.IssueListFields.Description
+}
+
+// GetPriority returns IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue.Priority, and is useful for accessing the field via an interface.
+func (v *IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue) GetPriority() float64 {
+	return v.IssueListFields.Priority
+}
+
+// GetEstimate returns IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue.Estimate, and is useful for accessing the field via an interface.
+func (v *IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue) GetEstimate() *float64 {
+	return v.IssueListFields.Estimate
+}
+
+// GetCreatedAt returns IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue.CreatedAt, and is useful for accessing the field via an interface.
+func (v *IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue) GetCreatedAt() time.Time {
+	return v.IssueListFields.CreatedAt
+}
+
+// GetUpdatedAt returns IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue) GetUpdatedAt() time.Time {
+	return v.IssueListFields.UpdatedAt
+}
+
+// GetDueDate returns IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue.DueDate, and is useful for accessing the field via an interface.
+func (v *IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue) GetDueDate() *string {
+	return v.IssueListFields.DueDate
+}
+
+// GetUrl returns IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue.Url, and is useful for accessing the field via an interface.
+func (v *IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue) GetUrl() string {
+	return v.IssueListFields.Url
+}
+
+// GetState returns IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue.State, and is useful for accessing the field via an interface.
+func (v *IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue) GetState() *IssueListFieldsStateWorkflowState {
+	return v.IssueListFields.State
+}
+
+// GetAssignee returns IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue.Assignee, and is useful for accessing the field via an interface.
+func (v *IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue) GetAssignee() *IssueListFieldsAssigneeUser {
+	return v.IssueListFields.Assignee
+}
+
+// GetTeam returns IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue.Team, and is useful for accessing the field via an interface.
+func (v *IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue) GetTeam() *IssueListFieldsTeam {
+	return v.IssueListFields.Team
+}
+
+// GetLabels returns IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue.Labels, and is useful for accessing the field via an interface.
+func (v *IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue) GetLabels() *IssueListFieldsLabelsIssueLabelConnection {
+	return v.IssueListFields.Labels
+}
+
+func (v *IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.IssueListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalIssueUnsubscribeIssueUnsubscribeIssuePayloadIssue struct {
+	Id string `json:"id"`
+
+	Identifier string `json:"identifier"`
+
+	Title string `json:"title"`
+
+	Description *string `json:"description"`
+
+	Priority float64 `json:"priority"`
+
+	Estimate *float64 `json:"estimate"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	DueDate *string `json:"dueDate"`
+
+	Url string `json:"url"`
+
+	State *IssueListFieldsStateWorkflowState `json:"state"`
+
+	Assignee *IssueListFieldsAssigneeUser `json:"assignee"`
+
+	Team *IssueListFieldsTeam `json:"team"`
+
+	Labels *IssueListFieldsLabelsIssueLabelConnection `json:"labels"`
+}
+
+func (v *IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *IssueUnsubscribeIssueUnsubscribeIssuePayloadIssue) __premarshalJSON() (*__premarshalIssueUnsubscribeIssueUnsubscribeIssuePayloadIssue, error) {
+	var retval __premarshalIssueUnsubscribeIssueUnsubscribeIssuePayloadIssue
+
+	retval.Id = v.IssueListFields.Id
+	retval.Identifier = v.IssueListFields.Identifier
+	retval.Title = v.IssueListFields.Title
+	retval.Description = v.IssueListFields.Description
+	retval.Priority = v.IssueListFields.Priority
+	retval.Estimate = v.IssueListFields.Estimate
+	retval.CreatedAt = v.IssueListFields.CreatedAt
+	retval.UpdatedAt = v.IssueListFields.UpdatedAt
+	retval.DueDate = v.IssueListFields.DueDate
+	retval.Url = v.IssueListFields.Url
+	retval.State = v.IssueListFields.State
+	retval.Assignee = v.IssueListFields.Assignee
+	retval.Team = v.IssueListFields.Team
+	retval.Labels = v.IssueListFields.Labels
+	return &retval, nil
+}
+
+// IssueUnsubscribeResponse is returned by IssueUnsubscribe on success.
+type IssueUnsubscribeResponse struct {
+	// Unsubscribes a user from an issue.
+	IssueUnsubscribe *IssueUnsubscribeIssueUnsubscribeIssuePayload `json:"issueUnsubscribe"`
+}
+
+// GetIssueUnsubscribe returns IssueUnsubscribeResponse.IssueUnsubscribe, and is useful for accessing the field via an interface.
+func (v *IssueUnsubscribeResponse) GetIssueUnsubscribe() *IssueUnsubscribeIssueUnsubscribeIssuePayload {
+	return v.IssueUnsubscribe
+}
 
 // Input for updating an existing issue. All fields are optional; only provided
 // fields will be updated. Setting a field to null (where supported) will clear the value.
@@ -11121,6 +15144,97 @@ func (v *IssueUpdateInput) GetTrashed() *bool { return v.Trashed }
 
 // GetTrusted returns IssueUpdateInput.Trusted, and is useful for accessing the field via an interface.
 func (v *IssueUpdateInput) GetTrusted() *bool { return v.Trusted }
+
+// LabelListFields includes the GraphQL fields of IssueLabel requested by the fragment LabelListFields.
+// The GraphQL type's documentation follows.
+//
+// Labels that can be associated with issues. Labels help categorize and filter
+// issues across a workspace. They can be workspace-level (shared across all teams)
+// or team-scoped. Labels have a color for visual identification and can be
+// organized hierarchically into groups, where a parent label acts as a group
+// containing child labels. Labels may also be inherited from parent teams to sub-teams.
+type LabelListFields struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The label's name.
+	Name string `json:"name"`
+	// The label's color as a HEX string (e.g., '#EB5757'). Used for visual identification of the label in the UI.
+	Color string `json:"color"`
+	// The label's description.
+	Description *string `json:"description"`
+	// Whether the label is a group. When true, this label acts as a container for
+	// child labels and cannot be directly applied to issues or projects. When false,
+	// the label can be directly applied.
+	IsGroup bool `json:"isGroup"`
+	// The parent label.
+	Parent *LabelListFieldsParentIssueLabel `json:"parent"`
+	// The team that the label is scoped to. If null, the label is a workspace-level
+	// label available to all teams in the workspace.
+	Team *LabelListFieldsTeam `json:"team"`
+}
+
+// GetId returns LabelListFields.Id, and is useful for accessing the field via an interface.
+func (v *LabelListFields) GetId() string { return v.Id }
+
+// GetName returns LabelListFields.Name, and is useful for accessing the field via an interface.
+func (v *LabelListFields) GetName() string { return v.Name }
+
+// GetColor returns LabelListFields.Color, and is useful for accessing the field via an interface.
+func (v *LabelListFields) GetColor() string { return v.Color }
+
+// GetDescription returns LabelListFields.Description, and is useful for accessing the field via an interface.
+func (v *LabelListFields) GetDescription() *string { return v.Description }
+
+// GetIsGroup returns LabelListFields.IsGroup, and is useful for accessing the field via an interface.
+func (v *LabelListFields) GetIsGroup() bool { return v.IsGroup }
+
+// GetParent returns LabelListFields.Parent, and is useful for accessing the field via an interface.
+func (v *LabelListFields) GetParent() *LabelListFieldsParentIssueLabel { return v.Parent }
+
+// GetTeam returns LabelListFields.Team, and is useful for accessing the field via an interface.
+func (v *LabelListFields) GetTeam() *LabelListFieldsTeam { return v.Team }
+
+// LabelListFieldsParentIssueLabel includes the requested fields of the GraphQL type IssueLabel.
+// The GraphQL type's documentation follows.
+//
+// Labels that can be associated with issues. Labels help categorize and filter
+// issues across a workspace. They can be workspace-level (shared across all teams)
+// or team-scoped. Labels have a color for visual identification and can be
+// organized hierarchically into groups, where a parent label acts as a group
+// containing child labels. Labels may also be inherited from parent teams to sub-teams.
+type LabelListFieldsParentIssueLabel struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The label's name.
+	Name string `json:"name"`
+}
+
+// GetId returns LabelListFieldsParentIssueLabel.Id, and is useful for accessing the field via an interface.
+func (v *LabelListFieldsParentIssueLabel) GetId() string { return v.Id }
+
+// GetName returns LabelListFieldsParentIssueLabel.Name, and is useful for accessing the field via an interface.
+func (v *LabelListFieldsParentIssueLabel) GetName() string { return v.Name }
+
+// LabelListFieldsTeam includes the requested fields of the GraphQL type Team.
+// The GraphQL type's documentation follows.
+//
+// A team is the primary organizational unit in Linear. Issues belong to teams, and
+// each team has its own workflow states, cycles, labels, and settings. Teams can
+// be public (visible to all workspace members), private (visible only to team
+// members), or restricted (visible only within an enclosing private-team
+// boundary). Teams can also have sub-teams that inherit settings from their parent.
+type LabelListFieldsTeam struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The team's unique key, used as a prefix in issue identifiers (e.g., 'ENG' in 'ENG-123') and in URLs.
+	Key string `json:"key"`
+}
+
+// GetId returns LabelListFieldsTeam.Id, and is useful for accessing the field via an interface.
+func (v *LabelListFieldsTeam) GetId() string { return v.Id }
+
+// GetKey returns LabelListFieldsTeam.Key, and is useful for accessing the field via an interface.
+func (v *LabelListFieldsTeam) GetKey() string { return v.Key }
 
 // ListAttachmentsIssue includes the requested fields of the GraphQL type Issue.
 // The GraphQL type's documentation follows.
@@ -11417,6 +15531,166 @@ type ListCommentsResponse struct {
 
 // GetIssue returns ListCommentsResponse.Issue, and is useful for accessing the field via an interface.
 func (v *ListCommentsResponse) GetIssue() *ListCommentsIssue { return v.Issue }
+
+// ListCyclesCyclesCycleConnection includes the requested fields of the GraphQL type CycleConnection.
+type ListCyclesCyclesCycleConnection struct {
+	Nodes    []*ListCyclesCyclesCycleConnectionNodesCycle `json:"nodes"`
+	PageInfo *ListCyclesCyclesCycleConnectionPageInfo     `json:"pageInfo"`
+}
+
+// GetNodes returns ListCyclesCyclesCycleConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ListCyclesCyclesCycleConnection) GetNodes() []*ListCyclesCyclesCycleConnectionNodesCycle {
+	return v.Nodes
+}
+
+// GetPageInfo returns ListCyclesCyclesCycleConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *ListCyclesCyclesCycleConnection) GetPageInfo() *ListCyclesCyclesCycleConnectionPageInfo {
+	return v.PageInfo
+}
+
+// ListCyclesCyclesCycleConnectionNodesCycle includes the requested fields of the GraphQL type Cycle.
+// The GraphQL type's documentation follows.
+//
+// A time-boxed iteration (similar to a sprint) used for planning and tracking
+// work. Cycles belong to a team and have defined start and end dates. Issues are
+// assigned to cycles for time-based planning, and progress is tracked via
+// completed, in-progress, and total scope. Cycles are automatically completed when
+// their end date passes, and uncompleted issues can be carried over to the next cycle.
+type ListCyclesCyclesCycleConnectionNodesCycle struct {
+	CycleListFields `json:"-"`
+}
+
+// GetId returns ListCyclesCyclesCycleConnectionNodesCycle.Id, and is useful for accessing the field via an interface.
+func (v *ListCyclesCyclesCycleConnectionNodesCycle) GetId() string { return v.CycleListFields.Id }
+
+// GetNumber returns ListCyclesCyclesCycleConnectionNodesCycle.Number, and is useful for accessing the field via an interface.
+func (v *ListCyclesCyclesCycleConnectionNodesCycle) GetNumber() float64 {
+	return v.CycleListFields.Number
+}
+
+// GetName returns ListCyclesCyclesCycleConnectionNodesCycle.Name, and is useful for accessing the field via an interface.
+func (v *ListCyclesCyclesCycleConnectionNodesCycle) GetName() *string { return v.CycleListFields.Name }
+
+// GetDescription returns ListCyclesCyclesCycleConnectionNodesCycle.Description, and is useful for accessing the field via an interface.
+func (v *ListCyclesCyclesCycleConnectionNodesCycle) GetDescription() *string {
+	return v.CycleListFields.Description
+}
+
+// GetStartsAt returns ListCyclesCyclesCycleConnectionNodesCycle.StartsAt, and is useful for accessing the field via an interface.
+func (v *ListCyclesCyclesCycleConnectionNodesCycle) GetStartsAt() time.Time {
+	return v.CycleListFields.StartsAt
+}
+
+// GetEndsAt returns ListCyclesCyclesCycleConnectionNodesCycle.EndsAt, and is useful for accessing the field via an interface.
+func (v *ListCyclesCyclesCycleConnectionNodesCycle) GetEndsAt() time.Time {
+	return v.CycleListFields.EndsAt
+}
+
+// GetProgress returns ListCyclesCyclesCycleConnectionNodesCycle.Progress, and is useful for accessing the field via an interface.
+func (v *ListCyclesCyclesCycleConnectionNodesCycle) GetProgress() float64 {
+	return v.CycleListFields.Progress
+}
+
+// GetCompletedAt returns ListCyclesCyclesCycleConnectionNodesCycle.CompletedAt, and is useful for accessing the field via an interface.
+func (v *ListCyclesCyclesCycleConnectionNodesCycle) GetCompletedAt() *time.Time {
+	return v.CycleListFields.CompletedAt
+}
+
+// GetTeam returns ListCyclesCyclesCycleConnectionNodesCycle.Team, and is useful for accessing the field via an interface.
+func (v *ListCyclesCyclesCycleConnectionNodesCycle) GetTeam() *CycleListFieldsTeam {
+	return v.CycleListFields.Team
+}
+
+func (v *ListCyclesCyclesCycleConnectionNodesCycle) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ListCyclesCyclesCycleConnectionNodesCycle
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ListCyclesCyclesCycleConnectionNodesCycle = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.CycleListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalListCyclesCyclesCycleConnectionNodesCycle struct {
+	Id string `json:"id"`
+
+	Number float64 `json:"number"`
+
+	Name *string `json:"name"`
+
+	Description *string `json:"description"`
+
+	StartsAt time.Time `json:"startsAt"`
+
+	EndsAt time.Time `json:"endsAt"`
+
+	Progress float64 `json:"progress"`
+
+	CompletedAt *time.Time `json:"completedAt"`
+
+	Team *CycleListFieldsTeam `json:"team"`
+}
+
+func (v *ListCyclesCyclesCycleConnectionNodesCycle) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ListCyclesCyclesCycleConnectionNodesCycle) __premarshalJSON() (*__premarshalListCyclesCyclesCycleConnectionNodesCycle, error) {
+	var retval __premarshalListCyclesCyclesCycleConnectionNodesCycle
+
+	retval.Id = v.CycleListFields.Id
+	retval.Number = v.CycleListFields.Number
+	retval.Name = v.CycleListFields.Name
+	retval.Description = v.CycleListFields.Description
+	retval.StartsAt = v.CycleListFields.StartsAt
+	retval.EndsAt = v.CycleListFields.EndsAt
+	retval.Progress = v.CycleListFields.Progress
+	retval.CompletedAt = v.CycleListFields.CompletedAt
+	retval.Team = v.CycleListFields.Team
+	return &retval, nil
+}
+
+// ListCyclesCyclesCycleConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+type ListCyclesCyclesCycleConnectionPageInfo struct {
+	// Indicates if there are more results when paginating forward.
+	HasNextPage bool `json:"hasNextPage"`
+	// Cursor representing the last result in the paginated results.
+	EndCursor *string `json:"endCursor"`
+}
+
+// GetHasNextPage returns ListCyclesCyclesCycleConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *ListCyclesCyclesCycleConnectionPageInfo) GetHasNextPage() bool { return v.HasNextPage }
+
+// GetEndCursor returns ListCyclesCyclesCycleConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *ListCyclesCyclesCycleConnectionPageInfo) GetEndCursor() *string { return v.EndCursor }
+
+// ListCyclesResponse is returned by ListCycles on success.
+type ListCyclesResponse struct {
+	// All cycles accessible to the user.
+	Cycles *ListCyclesCyclesCycleConnection `json:"cycles"`
+}
+
+// GetCycles returns ListCyclesResponse.Cycles, and is useful for accessing the field via an interface.
+func (v *ListCyclesResponse) GetCycles() *ListCyclesCyclesCycleConnection { return v.Cycles }
 
 // ListInitiativeLabelsInitiativeLabelsInitiativeLabelConnection includes the requested fields of the GraphQL type InitiativeLabelConnection.
 type ListInitiativeLabelsInitiativeLabelsInitiativeLabelConnection struct {
@@ -11982,25 +16256,104 @@ func (v *ListIssueLabelsIssueLabelsIssueLabelConnection) GetNodes() []*ListIssue
 // organized hierarchically into groups, where a parent label acts as a group
 // containing child labels. Labels may also be inherited from parent teams to sub-teams.
 type ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel struct {
-	// The unique identifier of the entity.
-	Id string `json:"id"`
-	// The label's name.
-	Name string `json:"name"`
-	// The label's color as a HEX string (e.g., '#EB5757'). Used for visual identification of the label in the UI.
-	Color string `json:"color"`
+	LabelListFields `json:"-"`
 }
 
 // GetId returns ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel.Id, and is useful for accessing the field via an interface.
-func (v *ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel) GetId() string { return v.Id }
+func (v *ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel) GetId() string {
+	return v.LabelListFields.Id
+}
 
 // GetName returns ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel.Name, and is useful for accessing the field via an interface.
 func (v *ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel) GetName() string {
-	return v.Name
+	return v.LabelListFields.Name
 }
 
 // GetColor returns ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel.Color, and is useful for accessing the field via an interface.
 func (v *ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel) GetColor() string {
-	return v.Color
+	return v.LabelListFields.Color
+}
+
+// GetDescription returns ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel.Description, and is useful for accessing the field via an interface.
+func (v *ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel) GetDescription() *string {
+	return v.LabelListFields.Description
+}
+
+// GetIsGroup returns ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel.IsGroup, and is useful for accessing the field via an interface.
+func (v *ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel) GetIsGroup() bool {
+	return v.LabelListFields.IsGroup
+}
+
+// GetParent returns ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel.Parent, and is useful for accessing the field via an interface.
+func (v *ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel) GetParent() *LabelListFieldsParentIssueLabel {
+	return v.LabelListFields.Parent
+}
+
+// GetTeam returns ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel.Team, and is useful for accessing the field via an interface.
+func (v *ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel) GetTeam() *LabelListFieldsTeam {
+	return v.LabelListFields.Team
+}
+
+func (v *ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.LabelListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Color string `json:"color"`
+
+	Description *string `json:"description"`
+
+	IsGroup bool `json:"isGroup"`
+
+	Parent *LabelListFieldsParentIssueLabel `json:"parent"`
+
+	Team *LabelListFieldsTeam `json:"team"`
+}
+
+func (v *ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel) __premarshalJSON() (*__premarshalListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel, error) {
+	var retval __premarshalListIssueLabelsIssueLabelsIssueLabelConnectionNodesIssueLabel
+
+	retval.Id = v.LabelListFields.Id
+	retval.Name = v.LabelListFields.Name
+	retval.Color = v.LabelListFields.Color
+	retval.Description = v.LabelListFields.Description
+	retval.IsGroup = v.LabelListFields.IsGroup
+	retval.Parent = v.LabelListFields.Parent
+	retval.Team = v.LabelListFields.Team
+	return &retval, nil
 }
 
 // ListIssueLabelsResponse is returned by ListIssueLabels on success.
@@ -23966,6 +28319,403 @@ func (v *UserListFields) GetActive() bool { return v.Active }
 // GetAdmin returns UserListFields.Admin, and is useful for accessing the field via an interface.
 func (v *UserListFields) GetAdmin() bool { return v.Admin }
 
+// WorkflowStateArchiveResponse is returned by WorkflowStateArchive on success.
+type WorkflowStateArchiveResponse struct {
+	// Archives a state. Only states with issues that have all been archived can be archived.
+	WorkflowStateArchive *WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayload `json:"workflowStateArchive"`
+}
+
+// GetWorkflowStateArchive returns WorkflowStateArchiveResponse.WorkflowStateArchive, and is useful for accessing the field via an interface.
+func (v *WorkflowStateArchiveResponse) GetWorkflowStateArchive() *WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayload {
+	return v.WorkflowStateArchive
+}
+
+// WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayload includes the requested fields of the GraphQL type WorkflowStateArchivePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity archive mutations.
+type WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The archived/unarchived entity. Null if entity was deleted.
+	Entity *WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState `json:"entity"`
+}
+
+// GetSuccess returns WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayload.Success, and is useful for accessing the field via an interface.
+func (v *WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetEntity returns WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayload.Entity, and is useful for accessing the field via an interface.
+func (v *WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayload) GetEntity() *WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState {
+	return v.Entity
+}
+
+// WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState includes the requested fields of the GraphQL type WorkflowState.
+// The GraphQL type's documentation follows.
+//
+// A state in a team's workflow, representing an issue status such as Triage,
+// Backlog, Todo, In Progress, In Review, Done, or Canceled. Each team has its own
+// set of workflow states that define the progression of issues through the team's
+// process. Workflow states have a type that categorizes them (triage, backlog,
+// unstarted, started, completed, canceled), a position that determines their
+// display order, and a color for visual identification. States can be inherited
+// from parent teams to sub-teams.
+type WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState struct {
+	WorkflowStateFields `json:"-"`
+}
+
+// GetId returns WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState.Id, and is useful for accessing the field via an interface.
+func (v *WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState) GetId() string {
+	return v.WorkflowStateFields.Id
+}
+
+// GetName returns WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState.Name, and is useful for accessing the field via an interface.
+func (v *WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState) GetName() string {
+	return v.WorkflowStateFields.Name
+}
+
+// GetType returns WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState.Type, and is useful for accessing the field via an interface.
+func (v *WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState) GetType() string {
+	return v.WorkflowStateFields.Type
+}
+
+// GetColor returns WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState.Color, and is useful for accessing the field via an interface.
+func (v *WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState) GetColor() string {
+	return v.WorkflowStateFields.Color
+}
+
+// GetDescription returns WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState.Description, and is useful for accessing the field via an interface.
+func (v *WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState) GetDescription() *string {
+	return v.WorkflowStateFields.Description
+}
+
+// GetPosition returns WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState.Position, and is useful for accessing the field via an interface.
+func (v *WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState) GetPosition() float64 {
+	return v.WorkflowStateFields.Position
+}
+
+// GetTeam returns WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState.Team, and is useful for accessing the field via an interface.
+func (v *WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState) GetTeam() *WorkflowStateFieldsTeam {
+	return v.WorkflowStateFields.Team
+}
+
+func (v *WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.WorkflowStateFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalWorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Type string `json:"type"`
+
+	Color string `json:"color"`
+
+	Description *string `json:"description"`
+
+	Position float64 `json:"position"`
+
+	Team *WorkflowStateFieldsTeam `json:"team"`
+}
+
+func (v *WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *WorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState) __premarshalJSON() (*__premarshalWorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState, error) {
+	var retval __premarshalWorkflowStateArchiveWorkflowStateArchiveWorkflowStateArchivePayloadEntityWorkflowState
+
+	retval.Id = v.WorkflowStateFields.Id
+	retval.Name = v.WorkflowStateFields.Name
+	retval.Type = v.WorkflowStateFields.Type
+	retval.Color = v.WorkflowStateFields.Color
+	retval.Description = v.WorkflowStateFields.Description
+	retval.Position = v.WorkflowStateFields.Position
+	retval.Team = v.WorkflowStateFields.Team
+	return &retval, nil
+}
+
+// Input for creating a new workflow state (issue status) in a team. The name, type, color, and team are required.
+type WorkflowStateCreateInput struct {
+	// The color of the state.
+	Color string `json:"color"`
+	// The description of the state.
+	Description *string `json:"description"`
+	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
+	Id *string `json:"id"`
+	// The name of the state.
+	Name string `json:"name"`
+	// The position of the state.
+	Position *float64 `json:"position"`
+	// The team associated with the state.
+	TeamId string `json:"teamId"`
+	// The workflow state type, which categorizes the state. Valid values: backlog,
+	// unstarted, started, completed, canceled. The type determines how the state is
+	// treated in workflow progression and reporting.
+	Type string `json:"type"`
+}
+
+// GetColor returns WorkflowStateCreateInput.Color, and is useful for accessing the field via an interface.
+func (v *WorkflowStateCreateInput) GetColor() string { return v.Color }
+
+// GetDescription returns WorkflowStateCreateInput.Description, and is useful for accessing the field via an interface.
+func (v *WorkflowStateCreateInput) GetDescription() *string { return v.Description }
+
+// GetId returns WorkflowStateCreateInput.Id, and is useful for accessing the field via an interface.
+func (v *WorkflowStateCreateInput) GetId() *string { return v.Id }
+
+// GetName returns WorkflowStateCreateInput.Name, and is useful for accessing the field via an interface.
+func (v *WorkflowStateCreateInput) GetName() string { return v.Name }
+
+// GetPosition returns WorkflowStateCreateInput.Position, and is useful for accessing the field via an interface.
+func (v *WorkflowStateCreateInput) GetPosition() *float64 { return v.Position }
+
+// GetTeamId returns WorkflowStateCreateInput.TeamId, and is useful for accessing the field via an interface.
+func (v *WorkflowStateCreateInput) GetTeamId() string { return v.TeamId }
+
+// GetType returns WorkflowStateCreateInput.Type, and is useful for accessing the field via an interface.
+func (v *WorkflowStateCreateInput) GetType() string { return v.Type }
+
+// WorkflowStateCreateResponse is returned by WorkflowStateCreate on success.
+type WorkflowStateCreateResponse struct {
+	// Creates a new state, adding it to the workflow of a team.
+	WorkflowStateCreate *WorkflowStateCreateWorkflowStateCreateWorkflowStatePayload `json:"workflowStateCreate"`
+}
+
+// GetWorkflowStateCreate returns WorkflowStateCreateResponse.WorkflowStateCreate, and is useful for accessing the field via an interface.
+func (v *WorkflowStateCreateResponse) GetWorkflowStateCreate() *WorkflowStateCreateWorkflowStateCreateWorkflowStatePayload {
+	return v.WorkflowStateCreate
+}
+
+// WorkflowStateCreateWorkflowStateCreateWorkflowStatePayload includes the requested fields of the GraphQL type WorkflowStatePayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a workflow state mutation, containing the created or updated state and a success indicator.
+type WorkflowStateCreateWorkflowStateCreateWorkflowStatePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The state that was created or updated.
+	WorkflowState *WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState `json:"workflowState"`
+}
+
+// GetSuccess returns WorkflowStateCreateWorkflowStateCreateWorkflowStatePayload.Success, and is useful for accessing the field via an interface.
+func (v *WorkflowStateCreateWorkflowStateCreateWorkflowStatePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetWorkflowState returns WorkflowStateCreateWorkflowStateCreateWorkflowStatePayload.WorkflowState, and is useful for accessing the field via an interface.
+func (v *WorkflowStateCreateWorkflowStateCreateWorkflowStatePayload) GetWorkflowState() *WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState {
+	return v.WorkflowState
+}
+
+// WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState includes the requested fields of the GraphQL type WorkflowState.
+// The GraphQL type's documentation follows.
+//
+// A state in a team's workflow, representing an issue status such as Triage,
+// Backlog, Todo, In Progress, In Review, Done, or Canceled. Each team has its own
+// set of workflow states that define the progression of issues through the team's
+// process. Workflow states have a type that categorizes them (triage, backlog,
+// unstarted, started, completed, canceled), a position that determines their
+// display order, and a color for visual identification. States can be inherited
+// from parent teams to sub-teams.
+type WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState struct {
+	WorkflowStateFields `json:"-"`
+}
+
+// GetId returns WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState.Id, and is useful for accessing the field via an interface.
+func (v *WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState) GetId() string {
+	return v.WorkflowStateFields.Id
+}
+
+// GetName returns WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState.Name, and is useful for accessing the field via an interface.
+func (v *WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState) GetName() string {
+	return v.WorkflowStateFields.Name
+}
+
+// GetType returns WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState.Type, and is useful for accessing the field via an interface.
+func (v *WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState) GetType() string {
+	return v.WorkflowStateFields.Type
+}
+
+// GetColor returns WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState.Color, and is useful for accessing the field via an interface.
+func (v *WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState) GetColor() string {
+	return v.WorkflowStateFields.Color
+}
+
+// GetDescription returns WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState.Description, and is useful for accessing the field via an interface.
+func (v *WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState) GetDescription() *string {
+	return v.WorkflowStateFields.Description
+}
+
+// GetPosition returns WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState.Position, and is useful for accessing the field via an interface.
+func (v *WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState) GetPosition() float64 {
+	return v.WorkflowStateFields.Position
+}
+
+// GetTeam returns WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState.Team, and is useful for accessing the field via an interface.
+func (v *WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState) GetTeam() *WorkflowStateFieldsTeam {
+	return v.WorkflowStateFields.Team
+}
+
+func (v *WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.WorkflowStateFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalWorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Type string `json:"type"`
+
+	Color string `json:"color"`
+
+	Description *string `json:"description"`
+
+	Position float64 `json:"position"`
+
+	Team *WorkflowStateFieldsTeam `json:"team"`
+}
+
+func (v *WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *WorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState) __premarshalJSON() (*__premarshalWorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState, error) {
+	var retval __premarshalWorkflowStateCreateWorkflowStateCreateWorkflowStatePayloadWorkflowState
+
+	retval.Id = v.WorkflowStateFields.Id
+	retval.Name = v.WorkflowStateFields.Name
+	retval.Type = v.WorkflowStateFields.Type
+	retval.Color = v.WorkflowStateFields.Color
+	retval.Description = v.WorkflowStateFields.Description
+	retval.Position = v.WorkflowStateFields.Position
+	retval.Team = v.WorkflowStateFields.Team
+	return &retval, nil
+}
+
+// WorkflowStateFields includes the GraphQL fields of WorkflowState requested by the fragment WorkflowStateFields.
+// The GraphQL type's documentation follows.
+//
+// A state in a team's workflow, representing an issue status such as Triage,
+// Backlog, Todo, In Progress, In Review, Done, or Canceled. Each team has its own
+// set of workflow states that define the progression of issues through the team's
+// process. Workflow states have a type that categorizes them (triage, backlog,
+// unstarted, started, completed, canceled), a position that determines their
+// display order, and a color for visual identification. States can be inherited
+// from parent teams to sub-teams.
+type WorkflowStateFields struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The state's human-readable name (e.g., 'In Progress', 'Done', 'Backlog').
+	Name string `json:"name"`
+	// The type of the state. One of "triage", "backlog", "unstarted", "started", "completed", "canceled", "duplicate".
+	Type string `json:"type"`
+	// The state's UI color as a HEX string.
+	Color string `json:"color"`
+	// Description of the state.
+	Description *string `json:"description"`
+	// The position of the state in the team's workflow. States are displayed in
+	// ascending order of position within their type group.
+	Position float64 `json:"position"`
+	// The team that this workflow state belongs to. Each team has its own set of workflow states.
+	Team *WorkflowStateFieldsTeam `json:"team"`
+}
+
+// GetId returns WorkflowStateFields.Id, and is useful for accessing the field via an interface.
+func (v *WorkflowStateFields) GetId() string { return v.Id }
+
+// GetName returns WorkflowStateFields.Name, and is useful for accessing the field via an interface.
+func (v *WorkflowStateFields) GetName() string { return v.Name }
+
+// GetType returns WorkflowStateFields.Type, and is useful for accessing the field via an interface.
+func (v *WorkflowStateFields) GetType() string { return v.Type }
+
+// GetColor returns WorkflowStateFields.Color, and is useful for accessing the field via an interface.
+func (v *WorkflowStateFields) GetColor() string { return v.Color }
+
+// GetDescription returns WorkflowStateFields.Description, and is useful for accessing the field via an interface.
+func (v *WorkflowStateFields) GetDescription() *string { return v.Description }
+
+// GetPosition returns WorkflowStateFields.Position, and is useful for accessing the field via an interface.
+func (v *WorkflowStateFields) GetPosition() float64 { return v.Position }
+
+// GetTeam returns WorkflowStateFields.Team, and is useful for accessing the field via an interface.
+func (v *WorkflowStateFields) GetTeam() *WorkflowStateFieldsTeam { return v.Team }
+
+// WorkflowStateFieldsTeam includes the requested fields of the GraphQL type Team.
+// The GraphQL type's documentation follows.
+//
+// A team is the primary organizational unit in Linear. Issues belong to teams, and
+// each team has its own workflow states, cycles, labels, and settings. Teams can
+// be public (visible to all workspace members), private (visible only to team
+// members), or restricted (visible only within an enclosing private-team
+// boundary). Teams can also have sub-teams that inherit settings from their parent.
+type WorkflowStateFieldsTeam struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The team's unique key, used as a prefix in issue identifiers (e.g., 'ENG' in 'ENG-123') and in URLs.
+	Key string `json:"key"`
+}
+
+// GetId returns WorkflowStateFieldsTeam.Id, and is useful for accessing the field via an interface.
+func (v *WorkflowStateFieldsTeam) GetId() string { return v.Id }
+
+// GetKey returns WorkflowStateFieldsTeam.Key, and is useful for accessing the field via an interface.
+func (v *WorkflowStateFieldsTeam) GetKey() string { return v.Key }
+
 // Workflow state filtering options.
 type WorkflowStateFilter struct {
 	// Compound filters, all of which need to be matched by the workflow state.
@@ -24025,6 +28775,174 @@ func (v *WorkflowStateFilter) GetType() *StringComparator { return v.Type }
 
 // GetUpdatedAt returns WorkflowStateFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *WorkflowStateFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
+// Input for updating an existing workflow state. All fields are optional; only
+// provided fields will be updated. The state type cannot be changed after creation.
+type WorkflowStateUpdateInput struct {
+	// The color of the state.
+	Color *string `json:"color"`
+	// The description of the state.
+	Description *string `json:"description"`
+	// The name of the state.
+	Name *string `json:"name"`
+	// The position of the state.
+	Position *float64 `json:"position"`
+}
+
+// GetColor returns WorkflowStateUpdateInput.Color, and is useful for accessing the field via an interface.
+func (v *WorkflowStateUpdateInput) GetColor() *string { return v.Color }
+
+// GetDescription returns WorkflowStateUpdateInput.Description, and is useful for accessing the field via an interface.
+func (v *WorkflowStateUpdateInput) GetDescription() *string { return v.Description }
+
+// GetName returns WorkflowStateUpdateInput.Name, and is useful for accessing the field via an interface.
+func (v *WorkflowStateUpdateInput) GetName() *string { return v.Name }
+
+// GetPosition returns WorkflowStateUpdateInput.Position, and is useful for accessing the field via an interface.
+func (v *WorkflowStateUpdateInput) GetPosition() *float64 { return v.Position }
+
+// WorkflowStateUpdateResponse is returned by WorkflowStateUpdate on success.
+type WorkflowStateUpdateResponse struct {
+	// Updates a state.
+	WorkflowStateUpdate *WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayload `json:"workflowStateUpdate"`
+}
+
+// GetWorkflowStateUpdate returns WorkflowStateUpdateResponse.WorkflowStateUpdate, and is useful for accessing the field via an interface.
+func (v *WorkflowStateUpdateResponse) GetWorkflowStateUpdate() *WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayload {
+	return v.WorkflowStateUpdate
+}
+
+// WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayload includes the requested fields of the GraphQL type WorkflowStatePayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a workflow state mutation, containing the created or updated state and a success indicator.
+type WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The state that was created or updated.
+	WorkflowState *WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState `json:"workflowState"`
+}
+
+// GetSuccess returns WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayload.Success, and is useful for accessing the field via an interface.
+func (v *WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetWorkflowState returns WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayload.WorkflowState, and is useful for accessing the field via an interface.
+func (v *WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayload) GetWorkflowState() *WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState {
+	return v.WorkflowState
+}
+
+// WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState includes the requested fields of the GraphQL type WorkflowState.
+// The GraphQL type's documentation follows.
+//
+// A state in a team's workflow, representing an issue status such as Triage,
+// Backlog, Todo, In Progress, In Review, Done, or Canceled. Each team has its own
+// set of workflow states that define the progression of issues through the team's
+// process. Workflow states have a type that categorizes them (triage, backlog,
+// unstarted, started, completed, canceled), a position that determines their
+// display order, and a color for visual identification. States can be inherited
+// from parent teams to sub-teams.
+type WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState struct {
+	WorkflowStateFields `json:"-"`
+}
+
+// GetId returns WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState.Id, and is useful for accessing the field via an interface.
+func (v *WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState) GetId() string {
+	return v.WorkflowStateFields.Id
+}
+
+// GetName returns WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState.Name, and is useful for accessing the field via an interface.
+func (v *WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState) GetName() string {
+	return v.WorkflowStateFields.Name
+}
+
+// GetType returns WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState.Type, and is useful for accessing the field via an interface.
+func (v *WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState) GetType() string {
+	return v.WorkflowStateFields.Type
+}
+
+// GetColor returns WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState.Color, and is useful for accessing the field via an interface.
+func (v *WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState) GetColor() string {
+	return v.WorkflowStateFields.Color
+}
+
+// GetDescription returns WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState.Description, and is useful for accessing the field via an interface.
+func (v *WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState) GetDescription() *string {
+	return v.WorkflowStateFields.Description
+}
+
+// GetPosition returns WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState.Position, and is useful for accessing the field via an interface.
+func (v *WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState) GetPosition() float64 {
+	return v.WorkflowStateFields.Position
+}
+
+// GetTeam returns WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState.Team, and is useful for accessing the field via an interface.
+func (v *WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState) GetTeam() *WorkflowStateFieldsTeam {
+	return v.WorkflowStateFields.Team
+}
+
+func (v *WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.WorkflowStateFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalWorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Type string `json:"type"`
+
+	Color string `json:"color"`
+
+	Description *string `json:"description"`
+
+	Position float64 `json:"position"`
+
+	Team *WorkflowStateFieldsTeam `json:"team"`
+}
+
+func (v *WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *WorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState) __premarshalJSON() (*__premarshalWorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState, error) {
+	var retval __premarshalWorkflowStateUpdateWorkflowStateUpdateWorkflowStatePayloadWorkflowState
+
+	retval.Id = v.WorkflowStateFields.Id
+	retval.Name = v.WorkflowStateFields.Name
+	retval.Type = v.WorkflowStateFields.Type
+	retval.Color = v.WorkflowStateFields.Color
+	retval.Description = v.WorkflowStateFields.Description
+	retval.Position = v.WorkflowStateFields.Position
+	retval.Team = v.WorkflowStateFields.Team
+	return &retval, nil
+}
 
 // __AttachmentCreateInput is used internally by genqlient
 type __AttachmentCreateInput struct {
@@ -24126,6 +29044,50 @@ func (v *__CreateProjectUpdateReminderInput) GetProjectId() string { return v.Pr
 // GetUserId returns __CreateProjectUpdateReminderInput.UserId, and is useful for accessing the field via an interface.
 func (v *__CreateProjectUpdateReminderInput) GetUserId() *string { return v.UserId }
 
+// __CycleArchiveInput is used internally by genqlient
+type __CycleArchiveInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __CycleArchiveInput.Id, and is useful for accessing the field via an interface.
+func (v *__CycleArchiveInput) GetId() string { return v.Id }
+
+// __CycleCreateInput is used internally by genqlient
+type __CycleCreateInput struct {
+	Input *CycleCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __CycleCreateInput.Input, and is useful for accessing the field via an interface.
+func (v *__CycleCreateInput) GetInput() *CycleCreateInput { return v.Input }
+
+// __CycleShiftAllInput is used internally by genqlient
+type __CycleShiftAllInput struct {
+	Input *CycleShiftAllInput `json:"input,omitempty"`
+}
+
+// GetInput returns __CycleShiftAllInput.Input, and is useful for accessing the field via an interface.
+func (v *__CycleShiftAllInput) GetInput() *CycleShiftAllInput { return v.Input }
+
+// __CycleStartUpcomingCycleTodayInput is used internally by genqlient
+type __CycleStartUpcomingCycleTodayInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __CycleStartUpcomingCycleTodayInput.Id, and is useful for accessing the field via an interface.
+func (v *__CycleStartUpcomingCycleTodayInput) GetId() string { return v.Id }
+
+// __CycleUpdateInput is used internally by genqlient
+type __CycleUpdateInput struct {
+	Id    string            `json:"id"`
+	Input *CycleUpdateInput `json:"input,omitempty"`
+}
+
+// GetId returns __CycleUpdateInput.Id, and is useful for accessing the field via an interface.
+func (v *__CycleUpdateInput) GetId() string { return v.Id }
+
+// GetInput returns __CycleUpdateInput.Input, and is useful for accessing the field via an interface.
+func (v *__CycleUpdateInput) GetInput() *CycleUpdateInput { return v.Input }
+
 // __DeleteIssueRelationInput is used internally by genqlient
 type __DeleteIssueRelationInput struct {
 	Id string `json:"id"`
@@ -24149,6 +29111,14 @@ func (v *__FileUploadInput) GetFilename() string { return v.Filename }
 
 // GetSize returns __FileUploadInput.Size, and is useful for accessing the field via an interface.
 func (v *__FileUploadInput) GetSize() int { return v.Size }
+
+// __GetCycleInput is used internally by genqlient
+type __GetCycleInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __GetCycleInput.Id, and is useful for accessing the field via an interface.
+func (v *__GetCycleInput) GetId() string { return v.Id }
 
 // __GetInitiativeInput is used internally by genqlient
 type __GetInitiativeInput struct {
@@ -24181,6 +29151,14 @@ type __GetIssueInput struct {
 
 // GetId returns __GetIssueInput.Id, and is useful for accessing the field via an interface.
 func (v *__GetIssueInput) GetId() string { return v.Id }
+
+// __GetIssueLabelInput is used internally by genqlient
+type __GetIssueLabelInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __GetIssueLabelInput.Id, and is useful for accessing the field via an interface.
+func (v *__GetIssueLabelInput) GetId() string { return v.Id }
 
 // __GetProjectInitiativeLinksInput is used internally by genqlient
 type __GetProjectInitiativeLinksInput struct {
@@ -24257,6 +29235,14 @@ type __GetUserByEmailInput struct {
 
 // GetFilter returns __GetUserByEmailInput.Filter, and is useful for accessing the field via an interface.
 func (v *__GetUserByEmailInput) GetFilter() *UserFilter { return v.Filter }
+
+// __GetWorkflowStateInput is used internally by genqlient
+type __GetWorkflowStateInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __GetWorkflowStateInput.Id, and is useful for accessing the field via an interface.
+func (v *__GetWorkflowStateInput) GetId() string { return v.Id }
 
 // __InitiativeAddLabelInput is used internally by genqlient
 type __InitiativeAddLabelInput struct {
@@ -24382,6 +29368,162 @@ type __InitiativeUpdateUnarchiveInput struct {
 // GetId returns __InitiativeUpdateUnarchiveInput.Id, and is useful for accessing the field via an interface.
 func (v *__InitiativeUpdateUnarchiveInput) GetId() string { return v.Id }
 
+// __IssueArchiveInput is used internally by genqlient
+type __IssueArchiveInput struct {
+	Id    string `json:"id"`
+	Trash *bool  `json:"trash"`
+}
+
+// GetId returns __IssueArchiveInput.Id, and is useful for accessing the field via an interface.
+func (v *__IssueArchiveInput) GetId() string { return v.Id }
+
+// GetTrash returns __IssueArchiveInput.Trash, and is useful for accessing the field via an interface.
+func (v *__IssueArchiveInput) GetTrash() *bool { return v.Trash }
+
+// __IssueBatchCreateInput is used internally by genqlient
+type __IssueBatchCreateInput struct {
+	Input *IssueBatchCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __IssueBatchCreateInput.Input, and is useful for accessing the field via an interface.
+func (v *__IssueBatchCreateInput) GetInput() *IssueBatchCreateInput { return v.Input }
+
+// __IssueBatchUpdateInput is used internally by genqlient
+type __IssueBatchUpdateInput struct {
+	Ids   []string          `json:"ids"`
+	Input *IssueUpdateInput `json:"input,omitempty"`
+}
+
+// GetIds returns __IssueBatchUpdateInput.Ids, and is useful for accessing the field via an interface.
+func (v *__IssueBatchUpdateInput) GetIds() []string { return v.Ids }
+
+// GetInput returns __IssueBatchUpdateInput.Input, and is useful for accessing the field via an interface.
+func (v *__IssueBatchUpdateInput) GetInput() *IssueUpdateInput { return v.Input }
+
+// __IssueDeleteInput is used internally by genqlient
+type __IssueDeleteInput struct {
+	Id                string `json:"id"`
+	PermanentlyDelete *bool  `json:"permanentlyDelete"`
+}
+
+// GetId returns __IssueDeleteInput.Id, and is useful for accessing the field via an interface.
+func (v *__IssueDeleteInput) GetId() string { return v.Id }
+
+// GetPermanentlyDelete returns __IssueDeleteInput.PermanentlyDelete, and is useful for accessing the field via an interface.
+func (v *__IssueDeleteInput) GetPermanentlyDelete() *bool { return v.PermanentlyDelete }
+
+// __IssueLabelCreateInput is used internally by genqlient
+type __IssueLabelCreateInput struct {
+	Input *IssueLabelCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __IssueLabelCreateInput.Input, and is useful for accessing the field via an interface.
+func (v *__IssueLabelCreateInput) GetInput() *IssueLabelCreateInput { return v.Input }
+
+// __IssueLabelDeleteInput is used internally by genqlient
+type __IssueLabelDeleteInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __IssueLabelDeleteInput.Id, and is useful for accessing the field via an interface.
+func (v *__IssueLabelDeleteInput) GetId() string { return v.Id }
+
+// __IssueLabelRestoreInput is used internally by genqlient
+type __IssueLabelRestoreInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __IssueLabelRestoreInput.Id, and is useful for accessing the field via an interface.
+func (v *__IssueLabelRestoreInput) GetId() string { return v.Id }
+
+// __IssueLabelRetireInput is used internally by genqlient
+type __IssueLabelRetireInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __IssueLabelRetireInput.Id, and is useful for accessing the field via an interface.
+func (v *__IssueLabelRetireInput) GetId() string { return v.Id }
+
+// __IssueLabelUpdateInput is used internally by genqlient
+type __IssueLabelUpdateInput struct {
+	Id    string                 `json:"id"`
+	Input *IssueLabelUpdateInput `json:"input,omitempty"`
+}
+
+// GetId returns __IssueLabelUpdateInput.Id, and is useful for accessing the field via an interface.
+func (v *__IssueLabelUpdateInput) GetId() string { return v.Id }
+
+// GetInput returns __IssueLabelUpdateInput.Input, and is useful for accessing the field via an interface.
+func (v *__IssueLabelUpdateInput) GetInput() *IssueLabelUpdateInput { return v.Input }
+
+// __IssueReminderInput is used internally by genqlient
+type __IssueReminderInput struct {
+	Id         string    `json:"id"`
+	ReminderAt time.Time `json:"reminderAt"`
+}
+
+// GetId returns __IssueReminderInput.Id, and is useful for accessing the field via an interface.
+func (v *__IssueReminderInput) GetId() string { return v.Id }
+
+// GetReminderAt returns __IssueReminderInput.ReminderAt, and is useful for accessing the field via an interface.
+func (v *__IssueReminderInput) GetReminderAt() time.Time { return v.ReminderAt }
+
+// __IssueShareInput is used internally by genqlient
+type __IssueShareInput struct {
+	Id     string `json:"id"`
+	UserId string `json:"userId"`
+}
+
+// GetId returns __IssueShareInput.Id, and is useful for accessing the field via an interface.
+func (v *__IssueShareInput) GetId() string { return v.Id }
+
+// GetUserId returns __IssueShareInput.UserId, and is useful for accessing the field via an interface.
+func (v *__IssueShareInput) GetUserId() string { return v.UserId }
+
+// __IssueSubscribeInput is used internally by genqlient
+type __IssueSubscribeInput struct {
+	Id     string  `json:"id"`
+	UserId *string `json:"userId"`
+}
+
+// GetId returns __IssueSubscribeInput.Id, and is useful for accessing the field via an interface.
+func (v *__IssueSubscribeInput) GetId() string { return v.Id }
+
+// GetUserId returns __IssueSubscribeInput.UserId, and is useful for accessing the field via an interface.
+func (v *__IssueSubscribeInput) GetUserId() *string { return v.UserId }
+
+// __IssueUnarchiveInput is used internally by genqlient
+type __IssueUnarchiveInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __IssueUnarchiveInput.Id, and is useful for accessing the field via an interface.
+func (v *__IssueUnarchiveInput) GetId() string { return v.Id }
+
+// __IssueUnshareInput is used internally by genqlient
+type __IssueUnshareInput struct {
+	Id     string `json:"id"`
+	UserId string `json:"userId"`
+}
+
+// GetId returns __IssueUnshareInput.Id, and is useful for accessing the field via an interface.
+func (v *__IssueUnshareInput) GetId() string { return v.Id }
+
+// GetUserId returns __IssueUnshareInput.UserId, and is useful for accessing the field via an interface.
+func (v *__IssueUnshareInput) GetUserId() string { return v.UserId }
+
+// __IssueUnsubscribeInput is used internally by genqlient
+type __IssueUnsubscribeInput struct {
+	Id     string  `json:"id"`
+	UserId *string `json:"userId"`
+}
+
+// GetId returns __IssueUnsubscribeInput.Id, and is useful for accessing the field via an interface.
+func (v *__IssueUnsubscribeInput) GetId() string { return v.Id }
+
+// GetUserId returns __IssueUnsubscribeInput.UserId, and is useful for accessing the field via an interface.
+func (v *__IssueUnsubscribeInput) GetUserId() *string { return v.UserId }
+
 // __ListAttachmentsInput is used internally by genqlient
 type __ListAttachmentsInput struct {
 	IssueId string             `json:"issueId"`
@@ -24421,6 +29563,26 @@ func (v *__ListCommentsInput) GetAfter() *string { return v.After }
 
 // GetOrderBy returns __ListCommentsInput.OrderBy, and is useful for accessing the field via an interface.
 func (v *__ListCommentsInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy }
+
+// __ListCyclesInput is used internally by genqlient
+type __ListCyclesInput struct {
+	Filter  *CycleFilter       `json:"filter,omitempty"`
+	First   *int               `json:"first"`
+	After   *string            `json:"after"`
+	OrderBy *PaginationOrderBy `json:"orderBy"`
+}
+
+// GetFilter returns __ListCyclesInput.Filter, and is useful for accessing the field via an interface.
+func (v *__ListCyclesInput) GetFilter() *CycleFilter { return v.Filter }
+
+// GetFirst returns __ListCyclesInput.First, and is useful for accessing the field via an interface.
+func (v *__ListCyclesInput) GetFirst() *int { return v.First }
+
+// GetAfter returns __ListCyclesInput.After, and is useful for accessing the field via an interface.
+func (v *__ListCyclesInput) GetAfter() *string { return v.After }
+
+// GetOrderBy returns __ListCyclesInput.OrderBy, and is useful for accessing the field via an interface.
+func (v *__ListCyclesInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy }
 
 // __ListInitiativeLabelsInput is used internally by genqlient
 type __ListInitiativeLabelsInput struct {
@@ -24951,6 +30113,34 @@ func (v *__UpdateProjectInput) GetId() string { return v.Id }
 
 // GetInput returns __UpdateProjectInput.Input, and is useful for accessing the field via an interface.
 func (v *__UpdateProjectInput) GetInput() *ProjectUpdateInput { return v.Input }
+
+// __WorkflowStateArchiveInput is used internally by genqlient
+type __WorkflowStateArchiveInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __WorkflowStateArchiveInput.Id, and is useful for accessing the field via an interface.
+func (v *__WorkflowStateArchiveInput) GetId() string { return v.Id }
+
+// __WorkflowStateCreateInput is used internally by genqlient
+type __WorkflowStateCreateInput struct {
+	Input *WorkflowStateCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __WorkflowStateCreateInput.Input, and is useful for accessing the field via an interface.
+func (v *__WorkflowStateCreateInput) GetInput() *WorkflowStateCreateInput { return v.Input }
+
+// __WorkflowStateUpdateInput is used internally by genqlient
+type __WorkflowStateUpdateInput struct {
+	Id    string                    `json:"id"`
+	Input *WorkflowStateUpdateInput `json:"input,omitempty"`
+}
+
+// GetId returns __WorkflowStateUpdateInput.Id, and is useful for accessing the field via an interface.
+func (v *__WorkflowStateUpdateInput) GetId() string { return v.Id }
+
+// GetInput returns __WorkflowStateUpdateInput.Input, and is useful for accessing the field via an interface.
+func (v *__WorkflowStateUpdateInput) GetInput() *WorkflowStateUpdateInput { return v.Input }
 
 // The mutation executed by AttachmentCreate.
 const AttachmentCreate_Operation = `
@@ -25503,6 +30693,267 @@ func CreateProjectUpdateReminder(
 	return data_, err_
 }
 
+// The mutation executed by CycleArchive.
+const CycleArchive_Operation = `
+mutation CycleArchive ($id: String!) {
+	cycleArchive(id: $id) {
+		success
+		entity {
+			... CycleListFields
+		}
+	}
+}
+fragment CycleListFields on Cycle {
+	id
+	number
+	name
+	description
+	startsAt
+	endsAt
+	progress
+	completedAt
+	team {
+		id
+		key
+	}
+}
+`
+
+func CycleArchive(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *CycleArchiveResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "CycleArchive",
+		Query:  CycleArchive_Operation,
+		Variables: &__CycleArchiveInput{
+			Id: id,
+		},
+	}
+
+	data_ = &CycleArchiveResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by CycleCreate.
+const CycleCreate_Operation = `
+mutation CycleCreate ($input: CycleCreateInput!) {
+	cycleCreate(input: $input) {
+		success
+		cycle {
+			... CycleListFields
+		}
+	}
+}
+fragment CycleListFields on Cycle {
+	id
+	number
+	name
+	description
+	startsAt
+	endsAt
+	progress
+	completedAt
+	team {
+		id
+		key
+	}
+}
+`
+
+func CycleCreate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *CycleCreateInput,
+) (data_ *CycleCreateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "CycleCreate",
+		Query:  CycleCreate_Operation,
+		Variables: &__CycleCreateInput{
+			Input: input,
+		},
+	}
+
+	data_ = &CycleCreateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by CycleShiftAll.
+const CycleShiftAll_Operation = `
+mutation CycleShiftAll ($input: CycleShiftAllInput!) {
+	cycleShiftAll(input: $input) {
+		success
+		cycle {
+			... CycleListFields
+		}
+	}
+}
+fragment CycleListFields on Cycle {
+	id
+	number
+	name
+	description
+	startsAt
+	endsAt
+	progress
+	completedAt
+	team {
+		id
+		key
+	}
+}
+`
+
+// Shifts all cycles' starts and ends by a number of days, beginning from the
+// given cycle onwards.
+func CycleShiftAll(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *CycleShiftAllInput,
+) (data_ *CycleShiftAllResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "CycleShiftAll",
+		Query:  CycleShiftAll_Operation,
+		Variables: &__CycleShiftAllInput{
+			Input: input,
+		},
+	}
+
+	data_ = &CycleShiftAllResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by CycleStartUpcomingCycleToday.
+const CycleStartUpcomingCycleToday_Operation = `
+mutation CycleStartUpcomingCycleToday ($id: String!) {
+	cycleStartUpcomingCycleToday(id: $id) {
+		success
+		cycle {
+			... CycleListFields
+		}
+	}
+}
+fragment CycleListFields on Cycle {
+	id
+	number
+	name
+	description
+	startsAt
+	endsAt
+	progress
+	completedAt
+	team {
+		id
+		key
+	}
+}
+`
+
+// Starts the upcoming (next, not-yet-started) cycle as of midnight today. Takes
+// the id of that upcoming cycle, not a team id.
+func CycleStartUpcomingCycleToday(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *CycleStartUpcomingCycleTodayResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "CycleStartUpcomingCycleToday",
+		Query:  CycleStartUpcomingCycleToday_Operation,
+		Variables: &__CycleStartUpcomingCycleTodayInput{
+			Id: id,
+		},
+	}
+
+	data_ = &CycleStartUpcomingCycleTodayResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by CycleUpdate.
+const CycleUpdate_Operation = `
+mutation CycleUpdate ($id: String!, $input: CycleUpdateInput!) {
+	cycleUpdate(id: $id, input: $input) {
+		success
+		cycle {
+			... CycleListFields
+		}
+	}
+}
+fragment CycleListFields on Cycle {
+	id
+	number
+	name
+	description
+	startsAt
+	endsAt
+	progress
+	completedAt
+	team {
+		id
+		key
+	}
+}
+`
+
+func CycleUpdate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	input *CycleUpdateInput,
+) (data_ *CycleUpdateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "CycleUpdate",
+		Query:  CycleUpdate_Operation,
+		Variables: &__CycleUpdateInput{
+			Id:    id,
+			Input: input,
+		},
+	}
+
+	data_ = &CycleUpdateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The mutation executed by DeleteIssueRelation.
 const DeleteIssueRelation_Operation = `
 mutation DeleteIssueRelation ($id: String!) {
@@ -25574,6 +31025,59 @@ func FileUpload(
 	}
 
 	data_ = &FileUploadResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by GetCycle.
+const GetCycle_Operation = `
+query GetCycle ($id: String!) {
+	cycle(id: $id) {
+		... CycleDetailFields
+	}
+}
+fragment CycleDetailFields on Cycle {
+	... CycleListFields
+	scopeHistory
+	progressHistory
+}
+fragment CycleListFields on Cycle {
+	id
+	number
+	name
+	description
+	startsAt
+	endsAt
+	progress
+	completedAt
+	team {
+		id
+		key
+	}
+}
+`
+
+func GetCycle(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *GetCycleResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetCycle",
+		Query:  GetCycle_Operation,
+		Variables: &__GetCycleInput{
+			Id: id,
+		},
+	}
+
+	data_ = &GetCycleResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -26056,6 +31560,55 @@ func GetIssue(
 	}
 
 	data_ = &GetIssueResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by GetIssueLabel.
+const GetIssueLabel_Operation = `
+query GetIssueLabel ($id: String!) {
+	issueLabel(id: $id) {
+		... LabelListFields
+	}
+}
+fragment LabelListFields on IssueLabel {
+	id
+	name
+	color
+	description
+	isGroup
+	parent {
+		id
+		name
+	}
+	team {
+		id
+		key
+	}
+}
+`
+
+func GetIssueLabel(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *GetIssueLabelResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetIssueLabel",
+		Query:  GetIssueLabel_Operation,
+		Variables: &__GetIssueLabelInput{
+			Id: id,
+		},
+	}
+
+	data_ = &GetIssueLabelResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -26710,6 +32263,52 @@ func GetViewer(
 	return data_, err_
 }
 
+// The query executed by GetWorkflowState.
+const GetWorkflowState_Operation = `
+query GetWorkflowState ($id: String!) {
+	workflowState(id: $id) {
+		... WorkflowStateFields
+	}
+}
+fragment WorkflowStateFields on WorkflowState {
+	id
+	name
+	type
+	color
+	description
+	position
+	team {
+		id
+		key
+	}
+}
+`
+
+func GetWorkflowState(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *GetWorkflowStateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetWorkflowState",
+		Query:  GetWorkflowState_Operation,
+		Variables: &__GetWorkflowStateInput{
+			Id: id,
+		},
+	}
+
+	data_ = &GetWorkflowStateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The mutation executed by InitiativeAddLabel.
 const InitiativeAddLabel_Operation = `
 mutation InitiativeAddLabel ($id: String!, $labelId: String!) {
@@ -27295,6 +32894,997 @@ func InitiativeUpdateUnarchive(
 	return data_, err_
 }
 
+// The mutation executed by IssueArchive.
+const IssueArchive_Operation = `
+mutation IssueArchive ($id: String!, $trash: Boolean) {
+	issueArchive(id: $id, trash: $trash) {
+		success
+		entity {
+			... IssueListFields
+		}
+	}
+}
+fragment IssueListFields on Issue {
+	id
+	identifier
+	title
+	description
+	priority
+	estimate
+	createdAt
+	updatedAt
+	dueDate
+	url
+	state {
+		id
+		name
+		type
+		color
+	}
+	assignee {
+		id
+		name
+		email
+	}
+	team {
+		id
+		key
+		name
+	}
+	labels {
+		nodes {
+			id
+			name
+			color
+		}
+	}
+}
+`
+
+// Archive an issue. trash=true moves it to trash (soft delete with 30-day
+// grace) rather than plain archive.
+func IssueArchive(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	trash *bool,
+) (data_ *IssueArchiveResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "IssueArchive",
+		Query:  IssueArchive_Operation,
+		Variables: &__IssueArchiveInput{
+			Id:    id,
+			Trash: trash,
+		},
+	}
+
+	data_ = &IssueArchiveResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by IssueBatchCreate.
+const IssueBatchCreate_Operation = `
+mutation IssueBatchCreate ($input: IssueBatchCreateInput!) {
+	issueBatchCreate(input: $input) {
+		success
+		issues {
+			... IssueListFields
+		}
+	}
+}
+fragment IssueListFields on Issue {
+	id
+	identifier
+	title
+	description
+	priority
+	estimate
+	createdAt
+	updatedAt
+	dueDate
+	url
+	state {
+		id
+		name
+		type
+		color
+	}
+	assignee {
+		id
+		name
+		email
+	}
+	team {
+		id
+		key
+		name
+	}
+	labels {
+		nodes {
+			id
+			name
+			color
+		}
+	}
+}
+`
+
+func IssueBatchCreate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *IssueBatchCreateInput,
+) (data_ *IssueBatchCreateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "IssueBatchCreate",
+		Query:  IssueBatchCreate_Operation,
+		Variables: &__IssueBatchCreateInput{
+			Input: input,
+		},
+	}
+
+	data_ = &IssueBatchCreateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by IssueBatchUpdate.
+const IssueBatchUpdate_Operation = `
+mutation IssueBatchUpdate ($ids: [UUID!]!, $input: IssueUpdateInput!) {
+	issueBatchUpdate(ids: $ids, input: $input) {
+		success
+		issues {
+			... IssueListFields
+		}
+	}
+}
+fragment IssueListFields on Issue {
+	id
+	identifier
+	title
+	description
+	priority
+	estimate
+	createdAt
+	updatedAt
+	dueDate
+	url
+	state {
+		id
+		name
+		type
+		color
+	}
+	assignee {
+		id
+		name
+		email
+	}
+	team {
+		id
+		key
+		name
+	}
+	labels {
+		nodes {
+			id
+			name
+			color
+		}
+	}
+}
+`
+
+// Update up to 50 issues at once with a single partial update.
+func IssueBatchUpdate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	ids []string,
+	input *IssueUpdateInput,
+) (data_ *IssueBatchUpdateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "IssueBatchUpdate",
+		Query:  IssueBatchUpdate_Operation,
+		Variables: &__IssueBatchUpdateInput{
+			Ids:   ids,
+			Input: input,
+		},
+	}
+
+	data_ = &IssueBatchUpdateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by IssueDelete.
+const IssueDelete_Operation = `
+mutation IssueDelete ($id: String!, $permanentlyDelete: Boolean) {
+	issueDelete(id: $id, permanentlyDelete: $permanentlyDelete) {
+		success
+		entity {
+			... IssueListFields
+		}
+	}
+}
+fragment IssueListFields on Issue {
+	id
+	identifier
+	title
+	description
+	priority
+	estimate
+	createdAt
+	updatedAt
+	dueDate
+	url
+	state {
+		id
+		name
+		type
+		color
+	}
+	assignee {
+		id
+		name
+		email
+	}
+	team {
+		id
+		key
+		name
+	}
+	labels {
+		nodes {
+			id
+			name
+			color
+		}
+	}
+}
+`
+
+// Delete (trash) an issue. permanentlyDelete skips the 30-day grace period and
+// is admin-only.
+func IssueDelete(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	permanentlyDelete *bool,
+) (data_ *IssueDeleteResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "IssueDelete",
+		Query:  IssueDelete_Operation,
+		Variables: &__IssueDeleteInput{
+			Id:                id,
+			PermanentlyDelete: permanentlyDelete,
+		},
+	}
+
+	data_ = &IssueDeleteResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by IssueLabelCreate.
+const IssueLabelCreate_Operation = `
+mutation IssueLabelCreate ($input: IssueLabelCreateInput!) {
+	issueLabelCreate(input: $input) {
+		success
+		issueLabel {
+			... LabelListFields
+		}
+	}
+}
+fragment LabelListFields on IssueLabel {
+	id
+	name
+	color
+	description
+	isGroup
+	parent {
+		id
+		name
+	}
+	team {
+		id
+		key
+	}
+}
+`
+
+func IssueLabelCreate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *IssueLabelCreateInput,
+) (data_ *IssueLabelCreateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "IssueLabelCreate",
+		Query:  IssueLabelCreate_Operation,
+		Variables: &__IssueLabelCreateInput{
+			Input: input,
+		},
+	}
+
+	data_ = &IssueLabelCreateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by IssueLabelDelete.
+const IssueLabelDelete_Operation = `
+mutation IssueLabelDelete ($id: String!) {
+	issueLabelDelete(id: $id) {
+		success
+		entityId
+	}
+}
+`
+
+func IssueLabelDelete(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *IssueLabelDeleteResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "IssueLabelDelete",
+		Query:  IssueLabelDelete_Operation,
+		Variables: &__IssueLabelDeleteInput{
+			Id: id,
+		},
+	}
+
+	data_ = &IssueLabelDeleteResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by IssueLabelRestore.
+const IssueLabelRestore_Operation = `
+mutation IssueLabelRestore ($id: String!) {
+	issueLabelRestore(id: $id) {
+		success
+		issueLabel {
+			... LabelListFields
+		}
+	}
+}
+fragment LabelListFields on IssueLabel {
+	id
+	name
+	color
+	description
+	isGroup
+	parent {
+		id
+		name
+	}
+	team {
+		id
+		key
+	}
+}
+`
+
+func IssueLabelRestore(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *IssueLabelRestoreResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "IssueLabelRestore",
+		Query:  IssueLabelRestore_Operation,
+		Variables: &__IssueLabelRestoreInput{
+			Id: id,
+		},
+	}
+
+	data_ = &IssueLabelRestoreResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by IssueLabelRetire.
+const IssueLabelRetire_Operation = `
+mutation IssueLabelRetire ($id: String!) {
+	issueLabelRetire(id: $id) {
+		success
+		issueLabel {
+			... LabelListFields
+		}
+	}
+}
+fragment LabelListFields on IssueLabel {
+	id
+	name
+	color
+	description
+	isGroup
+	parent {
+		id
+		name
+	}
+	team {
+		id
+		key
+	}
+}
+`
+
+// Retire: label stays visible but cannot be applied to new issues. Existing
+// issues keep it. Reversible via IssueLabelRestore.
+func IssueLabelRetire(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *IssueLabelRetireResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "IssueLabelRetire",
+		Query:  IssueLabelRetire_Operation,
+		Variables: &__IssueLabelRetireInput{
+			Id: id,
+		},
+	}
+
+	data_ = &IssueLabelRetireResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by IssueLabelUpdate.
+const IssueLabelUpdate_Operation = `
+mutation IssueLabelUpdate ($id: String!, $input: IssueLabelUpdateInput!) {
+	issueLabelUpdate(id: $id, input: $input) {
+		success
+		issueLabel {
+			... LabelListFields
+		}
+	}
+}
+fragment LabelListFields on IssueLabel {
+	id
+	name
+	color
+	description
+	isGroup
+	parent {
+		id
+		name
+	}
+	team {
+		id
+		key
+	}
+}
+`
+
+func IssueLabelUpdate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	input *IssueLabelUpdateInput,
+) (data_ *IssueLabelUpdateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "IssueLabelUpdate",
+		Query:  IssueLabelUpdate_Operation,
+		Variables: &__IssueLabelUpdateInput{
+			Id:    id,
+			Input: input,
+		},
+	}
+
+	data_ = &IssueLabelUpdateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by IssueReminder.
+const IssueReminder_Operation = `
+mutation IssueReminder ($id: String!, $reminderAt: DateTime!) {
+	issueReminder(id: $id, reminderAt: $reminderAt) {
+		success
+		issue {
+			... IssueListFields
+		}
+	}
+}
+fragment IssueListFields on Issue {
+	id
+	identifier
+	title
+	description
+	priority
+	estimate
+	createdAt
+	updatedAt
+	dueDate
+	url
+	state {
+		id
+		name
+		type
+		color
+	}
+	assignee {
+		id
+		name
+		email
+	}
+	team {
+		id
+		key
+		name
+	}
+	labels {
+		nodes {
+			id
+			name
+			color
+		}
+	}
+}
+`
+
+// Schedule a reminder notification for an issue at the given time.
+func IssueReminder(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	reminderAt time.Time,
+) (data_ *IssueReminderResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "IssueReminder",
+		Query:  IssueReminder_Operation,
+		Variables: &__IssueReminderInput{
+			Id:         id,
+			ReminderAt: reminderAt,
+		},
+	}
+
+	data_ = &IssueReminderResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by IssueShare.
+const IssueShare_Operation = `
+mutation IssueShare ($id: String!, $userId: String!) {
+	issueShare(id: $id, userId: $userId) {
+		success
+		issue {
+			... IssueListFields
+		}
+	}
+}
+fragment IssueListFields on Issue {
+	id
+	identifier
+	title
+	description
+	priority
+	estimate
+	createdAt
+	updatedAt
+	dueDate
+	url
+	state {
+		id
+		name
+		type
+		color
+	}
+	assignee {
+		id
+		name
+		email
+	}
+	team {
+		id
+		key
+		name
+	}
+	labels {
+		nodes {
+			id
+			name
+			color
+		}
+	}
+}
+`
+
+// Share/unshare an issue with a specific user.
+func IssueShare(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	userId string,
+) (data_ *IssueShareResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "IssueShare",
+		Query:  IssueShare_Operation,
+		Variables: &__IssueShareInput{
+			Id:     id,
+			UserId: userId,
+		},
+	}
+
+	data_ = &IssueShareResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by IssueSubscribe.
+const IssueSubscribe_Operation = `
+mutation IssueSubscribe ($id: String!, $userId: String) {
+	issueSubscribe(id: $id, userId: $userId) {
+		success
+		issue {
+			... IssueListFields
+		}
+	}
+}
+fragment IssueListFields on Issue {
+	id
+	identifier
+	title
+	description
+	priority
+	estimate
+	createdAt
+	updatedAt
+	dueDate
+	url
+	state {
+		id
+		name
+		type
+		color
+	}
+	assignee {
+		id
+		name
+		email
+	}
+	team {
+		id
+		key
+		name
+	}
+	labels {
+		nodes {
+			id
+			name
+			color
+		}
+	}
+}
+`
+
+// Subscribe/unsubscribe the given user (default: the current user) to an issue.
+func IssueSubscribe(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	userId *string,
+) (data_ *IssueSubscribeResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "IssueSubscribe",
+		Query:  IssueSubscribe_Operation,
+		Variables: &__IssueSubscribeInput{
+			Id:     id,
+			UserId: userId,
+		},
+	}
+
+	data_ = &IssueSubscribeResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by IssueUnarchive.
+const IssueUnarchive_Operation = `
+mutation IssueUnarchive ($id: String!) {
+	issueUnarchive(id: $id) {
+		success
+		entity {
+			... IssueListFields
+		}
+	}
+}
+fragment IssueListFields on Issue {
+	id
+	identifier
+	title
+	description
+	priority
+	estimate
+	createdAt
+	updatedAt
+	dueDate
+	url
+	state {
+		id
+		name
+		type
+		color
+	}
+	assignee {
+		id
+		name
+		email
+	}
+	team {
+		id
+		key
+		name
+	}
+	labels {
+		nodes {
+			id
+			name
+			color
+		}
+	}
+}
+`
+
+func IssueUnarchive(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *IssueUnarchiveResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "IssueUnarchive",
+		Query:  IssueUnarchive_Operation,
+		Variables: &__IssueUnarchiveInput{
+			Id: id,
+		},
+	}
+
+	data_ = &IssueUnarchiveResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by IssueUnshare.
+const IssueUnshare_Operation = `
+mutation IssueUnshare ($id: String!, $userId: String!) {
+	issueUnshare(id: $id, userId: $userId) {
+		success
+		issue {
+			... IssueListFields
+		}
+	}
+}
+fragment IssueListFields on Issue {
+	id
+	identifier
+	title
+	description
+	priority
+	estimate
+	createdAt
+	updatedAt
+	dueDate
+	url
+	state {
+		id
+		name
+		type
+		color
+	}
+	assignee {
+		id
+		name
+		email
+	}
+	team {
+		id
+		key
+		name
+	}
+	labels {
+		nodes {
+			id
+			name
+			color
+		}
+	}
+}
+`
+
+func IssueUnshare(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	userId string,
+) (data_ *IssueUnshareResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "IssueUnshare",
+		Query:  IssueUnshare_Operation,
+		Variables: &__IssueUnshareInput{
+			Id:     id,
+			UserId: userId,
+		},
+	}
+
+	data_ = &IssueUnshareResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by IssueUnsubscribe.
+const IssueUnsubscribe_Operation = `
+mutation IssueUnsubscribe ($id: String!, $userId: String) {
+	issueUnsubscribe(id: $id, userId: $userId) {
+		success
+		issue {
+			... IssueListFields
+		}
+	}
+}
+fragment IssueListFields on Issue {
+	id
+	identifier
+	title
+	description
+	priority
+	estimate
+	createdAt
+	updatedAt
+	dueDate
+	url
+	state {
+		id
+		name
+		type
+		color
+	}
+	assignee {
+		id
+		name
+		email
+	}
+	team {
+		id
+		key
+		name
+	}
+	labels {
+		nodes {
+			id
+			name
+			color
+		}
+	}
+}
+`
+
+func IssueUnsubscribe(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	userId *string,
+) (data_ *IssueUnsubscribeResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "IssueUnsubscribe",
+		Query:  IssueUnsubscribe_Operation,
+		Variables: &__IssueUnsubscribeInput{
+			Id:     id,
+			UserId: userId,
+		},
+	}
+
+	data_ = &IssueUnsubscribeResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The query executed by ListAttachments.
 const ListAttachments_Operation = `
 query ListAttachments ($issueId: String!, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
@@ -27401,6 +33991,66 @@ func ListComments(
 	}
 
 	data_ = &ListCommentsResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by ListCycles.
+const ListCycles_Operation = `
+query ListCycles ($filter: CycleFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
+	cycles(filter: $filter, first: $first, after: $after, orderBy: $orderBy) {
+		nodes {
+			... CycleListFields
+		}
+		pageInfo {
+			hasNextPage
+			endCursor
+		}
+	}
+}
+fragment CycleListFields on Cycle {
+	id
+	number
+	name
+	description
+	startsAt
+	endsAt
+	progress
+	completedAt
+	team {
+		id
+		key
+	}
+}
+`
+
+func ListCycles(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter *CycleFilter,
+	first *int,
+	after *string,
+	orderBy *PaginationOrderBy,
+) (data_ *ListCyclesResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ListCycles",
+		Query:  ListCycles_Operation,
+		Variables: &__ListCyclesInput{
+			Filter:  filter,
+			First:   first,
+			After:   after,
+			OrderBy: orderBy,
+		},
+	}
+
+	data_ = &ListCyclesResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -27655,18 +34305,27 @@ const ListIssueLabels_Operation = `
 query ListIssueLabels ($filter: IssueLabelFilter, $first: Int) {
 	issueLabels(filter: $filter, first: $first) {
 		nodes {
-			id
-			name
-			color
+			... LabelListFields
 		}
+	}
+}
+fragment LabelListFields on IssueLabel {
+	id
+	name
+	color
+	description
+	isGroup
+	parent {
+		id
+		name
+	}
+	team {
+		id
+		key
 	}
 }
 `
 
-// Query: minimal issue-label lookup, reused later by the labels domain
-// (issue label add/remove commands). Not used by the initiative label
-// commands above - those resolve against the separate InitiativeLabel
-// catalog via ListInitiativeLabels instead (see header note).
 func ListIssueLabels(
 	ctx_ context.Context,
 	client_ graphql.Client,
@@ -29776,6 +36435,155 @@ func UpdateProject(
 	}
 
 	data_ = &UpdateProjectResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by WorkflowStateArchive.
+const WorkflowStateArchive_Operation = `
+mutation WorkflowStateArchive ($id: String!) {
+	workflowStateArchive(id: $id) {
+		success
+		entity {
+			... WorkflowStateFields
+		}
+	}
+}
+fragment WorkflowStateFields on WorkflowState {
+	id
+	name
+	type
+	color
+	description
+	position
+	team {
+		id
+		key
+	}
+}
+`
+
+func WorkflowStateArchive(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *WorkflowStateArchiveResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "WorkflowStateArchive",
+		Query:  WorkflowStateArchive_Operation,
+		Variables: &__WorkflowStateArchiveInput{
+			Id: id,
+		},
+	}
+
+	data_ = &WorkflowStateArchiveResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by WorkflowStateCreate.
+const WorkflowStateCreate_Operation = `
+mutation WorkflowStateCreate ($input: WorkflowStateCreateInput!) {
+	workflowStateCreate(input: $input) {
+		success
+		workflowState {
+			... WorkflowStateFields
+		}
+	}
+}
+fragment WorkflowStateFields on WorkflowState {
+	id
+	name
+	type
+	color
+	description
+	position
+	team {
+		id
+		key
+	}
+}
+`
+
+func WorkflowStateCreate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *WorkflowStateCreateInput,
+) (data_ *WorkflowStateCreateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "WorkflowStateCreate",
+		Query:  WorkflowStateCreate_Operation,
+		Variables: &__WorkflowStateCreateInput{
+			Input: input,
+		},
+	}
+
+	data_ = &WorkflowStateCreateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by WorkflowStateUpdate.
+const WorkflowStateUpdate_Operation = `
+mutation WorkflowStateUpdate ($id: String!, $input: WorkflowStateUpdateInput!) {
+	workflowStateUpdate(id: $id, input: $input) {
+		success
+		workflowState {
+			... WorkflowStateFields
+		}
+	}
+}
+fragment WorkflowStateFields on WorkflowState {
+	id
+	name
+	type
+	color
+	description
+	position
+	team {
+		id
+		key
+	}
+}
+`
+
+func WorkflowStateUpdate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	input *WorkflowStateUpdateInput,
+) (data_ *WorkflowStateUpdateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "WorkflowStateUpdate",
+		Query:  WorkflowStateUpdate_Operation,
+		Variables: &__WorkflowStateUpdateInput{
+			Id:    id,
+			Input: input,
+		},
+	}
+
+	data_ = &WorkflowStateUpdateResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(

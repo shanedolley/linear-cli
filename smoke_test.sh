@@ -182,6 +182,17 @@ else
 fi
 set -e
 
+# Test cycle / label / state commands (Tier 2)
+echo -e "\n${YELLOW}Testing cycle, label, and state commands...${NC}"
+run_test "label list" "go run main.go label list --limit 5"
+run_test "label list (json)" "go run main.go label list --limit 5 -j"
+run_test "label list (plaintext)" "go run main.go label list --limit 5 -p" "# Labels"
+if [ -n "$team_key" ]; then
+    run_test "state list" "go run main.go state list $team_key"
+    run_test "state list (json)" "go run main.go state list $team_key -j"
+    run_test "cycle list (team filter)" "go run main.go cycle list --team $team_key"
+fi
+
 # Test help commands
 echo -e "\n${YELLOW}Testing help commands...${NC}"
 run_test "help" "go run main.go --help" "Usage:"
@@ -189,6 +200,9 @@ run_test "issue help" "go run main.go issue --help" "Available Commands:"
 run_test "project help" "go run main.go project --help" "Available Commands:"
 run_test "team help" "go run main.go team --help" "Available Commands:"
 run_test "user help" "go run main.go user --help" "Available Commands:"
+run_test "cycle help" "go run main.go cycle --help" "Available Commands:"
+run_test "label help" "go run main.go label --help" "Available Commands:"
+run_test "state help" "go run main.go state --help" "Available Commands:"
 
 # Test unknown command handling
 echo -e "\n${YELLOW}Testing error handling...${NC}"

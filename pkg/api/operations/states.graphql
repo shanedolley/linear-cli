@@ -1,0 +1,52 @@
+# Workflow state operations (Tier 2).
+#
+# Workflow states are per-team issue statuses (Backlog/Todo/In Progress/Done/
+# etc.). `state list <team>` reuses GetTeamStates (teams.graphql), which already
+# embeds the team's states. There is no hard delete in Linear's API - states
+# are archived, not deleted.
+
+fragment WorkflowStateFields on WorkflowState {
+  id
+  name
+  type
+  color
+  description
+  position
+  team {
+    id
+    key
+  }
+}
+
+query GetWorkflowState($id: String!) {
+  workflowState(id: $id) {
+    ...WorkflowStateFields
+  }
+}
+
+mutation WorkflowStateCreate($input: WorkflowStateCreateInput!) {
+  workflowStateCreate(input: $input) {
+    success
+    workflowState {
+      ...WorkflowStateFields
+    }
+  }
+}
+
+mutation WorkflowStateUpdate($id: String!, $input: WorkflowStateUpdateInput!) {
+  workflowStateUpdate(id: $id, input: $input) {
+    success
+    workflowState {
+      ...WorkflowStateFields
+    }
+  }
+}
+
+mutation WorkflowStateArchive($id: String!) {
+  workflowStateArchive(id: $id) {
+    success
+    entity {
+      ...WorkflowStateFields
+    }
+  }
+}

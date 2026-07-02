@@ -1,0 +1,96 @@
+# Cycle operations (Tier 2).
+#
+# Cycles are time-boxed iterations scoped to a team. Cycle writes require the
+# team to have cycles enabled (Team.cyclesEnabled); on a team where cycles are
+# off, the mutations below fail with a clear error from Linear, surfaced as-is.
+
+fragment CycleListFields on Cycle {
+  id
+  number
+  name
+  description
+  startsAt
+  endsAt
+  progress
+  completedAt
+  team {
+    id
+    key
+  }
+}
+
+# CycleDetailFields adds the scope/progress history arrays used by `cycle get`.
+# These are burndown series (JSON arrays of numbers), heavier than the list
+# view, so they are only fetched for a single cycle.
+fragment CycleDetailFields on Cycle {
+  ...CycleListFields
+  scopeHistory
+  progressHistory
+}
+
+query ListCycles($filter: CycleFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
+  cycles(filter: $filter, first: $first, after: $after, orderBy: $orderBy) {
+    nodes {
+      ...CycleListFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+query GetCycle($id: String!) {
+  cycle(id: $id) {
+    ...CycleDetailFields
+  }
+}
+
+mutation CycleCreate($input: CycleCreateInput!) {
+  cycleCreate(input: $input) {
+    success
+    cycle {
+      ...CycleListFields
+    }
+  }
+}
+
+mutation CycleUpdate($id: String!, $input: CycleUpdateInput!) {
+  cycleUpdate(id: $id, input: $input) {
+    success
+    cycle {
+      ...CycleListFields
+    }
+  }
+}
+
+mutation CycleArchive($id: String!) {
+  cycleArchive(id: $id) {
+    success
+    entity {
+      ...CycleListFields
+    }
+  }
+}
+
+# Shifts all cycles' starts and ends by a number of days, beginning from the
+# given cycle onwards.
+mutation CycleShiftAll($input: CycleShiftAllInput!) {
+  cycleShiftAll(input: $input) {
+    success
+    cycle {
+      ...CycleListFields
+    }
+  }
+}
+
+# Starts the upcoming (next, not-yet-started) cycle as of midnight today. Takes
+# the id of that upcoming cycle, not a team id.
+mutation CycleStartUpcomingCycleToday($id: String!) {
+  cycleStartUpcomingCycleToday(id: $id) {
+    success
+    cycle {
+      ...CycleListFields
+    }
+  }
+}

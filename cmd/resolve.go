@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/Khan/genqlient/graphql"
@@ -68,6 +69,11 @@ type ResolverCache struct {
 
 	// milestones caches each project's milestone list, keyed by project ID.
 	milestones map[string][]milestoneInfo
+
+	// cycles caches resolved cycle IDs, keyed by "teamID:lower(ref)". Cycles
+	// are scoped to a team and referenced by number or name, so the team ID is
+	// part of the key.
+	cycles map[string]string
 }
 
 // newResolverCache creates an empty ResolverCache. Call this once per
@@ -85,6 +91,7 @@ func newResolverCache() *ResolverCache {
 		initiativeLabels: make(map[string]string),
 		projectLabels:    make(map[string]string),
 		milestones:       make(map[string][]milestoneInfo),
+		cycles:           make(map[string]string),
 	}
 }
 
@@ -308,12 +315,12 @@ func resolveLabel(ctx context.Context, client graphql.Client, cache *ResolverCac
 	if len(nodes) > 1 {
 		candidates := make([]string, 0, len(nodes))
 		for _, n := range nodes {
-			candidates = append(candidates, fmt.Sprintf("%s (%s)", n.Name, n.Id))
+			candidates = append(candidates, fmt.Sprintf("%s (%s)", n.LabelListFields.Name, n.LabelListFields.Id))
 		}
 		return "", fmt.Errorf("Multiple matches for '%s': %s", nameOrID, strings.Join(candidates, ", "))
 	}
 
-	id := nodes[0].Id
+	id := nodes[0].LabelListFields.Id
 	cache.labels[cacheKey] = id
 	return id, nil
 }
@@ -542,4 +549,52 @@ func resolveMilestone(ctx context.Context, client graphql.Client, cache *Resolve
 	}
 
 	return matches[0].id, nil
+}
+
+// resolveCycle resolves a cycle reference to a cycle ID within the given team.
+// ref may be a UUID (returned as-is), a cycle number (e.g. "12"), or a cycle
+// name; numbers and names are matched within teamID. A reference matching more
+// than one cycle returns an error listing the candidates; a reference matching
+// none returns a "not found" error.
+func resolveCycle(ctx context.Context, client graphql.Client, cache *ResolverCache, teamID, ref string) (string, error) {
+	if isUUID(ref) {
+		return ref, nil
+	}
+
+	cacheKey := teamID + ":" + strings.ToLower(ref)
+	if id, ok := cache.cycles[cacheKey]; ok {
+		return id, nil
+	}
+
+	filter := &api.CycleFilter{
+		Team: &api.TeamFilter{Id: &api.IDComparator{Eq: &teamID}},
+	}
+	// A bare number selects by cycle number; anything else matches by name.
+	if num, err := strconv.ParseFloat(ref, 64); err == nil {
+		filter.Number = &api.NumberComparator{Eq: &num}
+	} else {
+		filter.Name = &api.StringComparator{EqIgnoreCase: &ref}
+	}
+
+	limit := 10
+	resp, err := api.ListCycles(ctx, client, filter, &limit, nil, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to find cycle '%s': %w", ref, err)
+	}
+
+	nodes := resp.Cycles.Nodes
+	if len(nodes) == 0 {
+		return "", fmt.Errorf("Cycle not found in team: %s", ref)
+	}
+	if len(nodes) > 1 {
+		candidates := make([]string, 0, len(nodes))
+		for _, n := range nodes {
+			candidates = append(candidates, fmt.Sprintf("%.0f (%s)", n.CycleListFields.Number, n.CycleListFields.Id))
+		}
+		return "", fmt.Errorf("Multiple matches for '%s': %s", ref, strings.Join(candidates, ", "))
+	}
+
+	id := nodes[0].CycleListFields.Id
+	cache.cycles[cacheKey] = id
+	return id, nil
 }
