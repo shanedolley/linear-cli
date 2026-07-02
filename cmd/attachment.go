@@ -858,3 +858,219 @@ var attachmentDeleteCmd = &cobra.Command{
 func init() {
 	attachmentCmd.AddCommand(attachmentDeleteCmd)
 }
+
+// --- Typed link attachments and Slack sync (Tier 4c) ---
+
+// attachmentLinkProviders lists the canonical --provider values, in the order
+// shown to the user. Each maps to a typed attachmentLink* mutation that takes
+// only (issueId, url).
+var attachmentLinkProviders = []string{"url", "slack", "github-issue", "github-pr", "salesforce"}
+
+// attachmentProviderAliases maps convenient shorthands to a canonical provider.
+var attachmentProviderAliases = map[string]string{
+	"github":   "github-issue",
+	"gh":       "github-issue",
+	"gh-issue": "github-issue",
+	"gh-pr":    "github-pr",
+	"pr":       "github-pr",
+	"sf":       "salesforce",
+}
+
+// normalizeAttachmentProvider maps a --provider value (canonical name or alias,
+// case-insensitively) to its canonical form. An unknown value returns an error
+// listing the valid providers.
+func normalizeAttachmentProvider(provider string) (string, error) {
+	p := strings.ToLower(strings.TrimSpace(provider))
+	if canonical, ok := attachmentProviderAliases[p]; ok {
+		p = canonical
+	}
+	for _, valid := range attachmentLinkProviders {
+		if p == valid {
+			return p, nil
+		}
+	}
+	return "", fmt.Errorf("unknown provider %q: valid providers are %s", provider, strings.Join(attachmentLinkProviders, ", "))
+}
+
+var attachmentLinkCmd = &cobra.Command{
+	Use:   "link <issue-id> <url>",
+	Short: "Link a URL to an issue as a typed attachment",
+	Long: `Link a URL to an issue, dispatching to a provider-typed attachment mutation.
+
+The default provider 'url' auto-detects recognized integration URLs (Zendesk,
+Jira, GitLab, GitHub, Slack, ...) and builds the matching rich attachment, so it
+covers most cases. Use --provider to force a specific type.
+
+Providers: url (default), slack, github-issue, github-pr, salesforce.
+
+Examples:
+  lincli attachment link ENG-123 https://github.com/org/repo/pull/42 --provider github-pr
+  lincli attachment link ENG-123 https://acme.slack.com/archives/C0/p1 --provider slack --sync-to-comment-thread`,
+	Args: cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		issueID := args[0]
+		url := args[1]
+
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		providerRaw, _ := cmd.Flags().GetString("provider")
+		provider, err := normalizeAttachmentProvider(providerRaw)
+		if err != nil {
+			output.Error(err.Error(), plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		var titlePtr *string
+		if cmd.Flags().Changed("title") {
+			title, _ := cmd.Flags().GetString("title")
+			titlePtr = &title
+		}
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+
+		// Each provider maps to a typed mutation returning an AttachmentPayload.
+		// The payload's attachment field is a pointer (genqlient optional:pointer),
+		// so check success and guard the attachment before dereferencing, matching
+		// the check-before-use ordering in the other write commands (see
+		// attachmentCreateCmd, cmd/customer.go).
+		var (
+			success                 bool
+			attID, attTitle, attURL string
+			attCreated              time.Time
+		)
+		switch provider {
+		case "url":
+			resp, err := api.AttachmentLinkURL(ctx, client, issueID, url, titlePtr)
+			if err != nil {
+				output.Error(fmt.Sprintf("Failed to link attachment: %v", err), plaintext, jsonOut)
+				os.Exit(1)
+			}
+			if resp.AttachmentLinkURL != nil && resp.AttachmentLinkURL.Success {
+				if a := resp.AttachmentLinkURL.Attachment; a != nil {
+					success = true
+					attID, attTitle, attURL, attCreated = a.Id, a.Title, a.Url, a.CreatedAt
+				}
+			}
+		case "slack":
+			var syncPtr *bool
+			if cmd.Flags().Changed("sync-to-comment-thread") {
+				sync, _ := cmd.Flags().GetBool("sync-to-comment-thread")
+				syncPtr = &sync
+			}
+			resp, err := api.AttachmentLinkSlack(ctx, client, issueID, url, titlePtr, syncPtr)
+			if err != nil {
+				output.Error(fmt.Sprintf("Failed to link attachment: %v", err), plaintext, jsonOut)
+				os.Exit(1)
+			}
+			if resp.AttachmentLinkSlack != nil && resp.AttachmentLinkSlack.Success {
+				if a := resp.AttachmentLinkSlack.Attachment; a != nil {
+					success = true
+					attID, attTitle, attURL, attCreated = a.Id, a.Title, a.Url, a.CreatedAt
+				}
+			}
+		case "github-issue":
+			resp, err := api.AttachmentLinkGitHubIssue(ctx, client, issueID, url, titlePtr)
+			if err != nil {
+				output.Error(fmt.Sprintf("Failed to link attachment: %v", err), plaintext, jsonOut)
+				os.Exit(1)
+			}
+			if resp.AttachmentLinkGitHubIssue != nil && resp.AttachmentLinkGitHubIssue.Success {
+				if a := resp.AttachmentLinkGitHubIssue.Attachment; a != nil {
+					success = true
+					attID, attTitle, attURL, attCreated = a.Id, a.Title, a.Url, a.CreatedAt
+				}
+			}
+		case "github-pr":
+			resp, err := api.AttachmentLinkGitHubPR(ctx, client, issueID, url, titlePtr)
+			if err != nil {
+				output.Error(fmt.Sprintf("Failed to link attachment: %v", err), plaintext, jsonOut)
+				os.Exit(1)
+			}
+			if resp.AttachmentLinkGitHubPR != nil && resp.AttachmentLinkGitHubPR.Success {
+				if a := resp.AttachmentLinkGitHubPR.Attachment; a != nil {
+					success = true
+					attID, attTitle, attURL, attCreated = a.Id, a.Title, a.Url, a.CreatedAt
+				}
+			}
+		case "salesforce":
+			resp, err := api.AttachmentLinkSalesforce(ctx, client, issueID, url, titlePtr)
+			if err != nil {
+				output.Error(fmt.Sprintf("Failed to link attachment: %v", err), plaintext, jsonOut)
+				os.Exit(1)
+			}
+			if resp.AttachmentLinkSalesforce != nil && resp.AttachmentLinkSalesforce.Success {
+				if a := resp.AttachmentLinkSalesforce.Attachment; a != nil {
+					success = true
+					attID, attTitle, attURL, attCreated = a.Id, a.Title, a.Url, a.CreatedAt
+				}
+			}
+		}
+
+		if !success {
+			output.Error("Failed to link attachment", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if jsonOut {
+			output.JSON(map[string]interface{}{"id": attID, "title": attTitle, "url": attURL, "createdAt": attCreated})
+			return
+		}
+		output.Success(fmt.Sprintf("Linked %s attachment to %s", provider, issueID), plaintext, jsonOut)
+		fmt.Printf("  ID:    %s\n", attID)
+		if attTitle != "" {
+			fmt.Printf("  Title: %s\n", attTitle)
+		}
+		fmt.Printf("  URL:   %s\n", attURL)
+	},
+}
+
+var attachmentSyncToSlackCmd = &cobra.Command{
+	Use:   "sync-to-slack <attachment-id>",
+	Short: "Sync a Slack attachment's thread to the issue comment thread",
+	Long:  `Begin syncing an existing Slack message attachment's thread with the issue's comment thread.`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		plaintext := viper.GetBool("plaintext")
+		jsonOut := viper.GetBool("json")
+
+		authHeader, err := auth.GetAuthHeader()
+		if err != nil {
+			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		client := api.NewClient(authHeader)
+		ctx := context.Background()
+
+		resp, err := api.AttachmentSyncToSlack(ctx, client, args[0])
+		if err != nil {
+			output.Error(fmt.Sprintf("Failed to sync attachment to Slack: %v", err), plaintext, jsonOut)
+			os.Exit(1)
+		}
+		if resp.AttachmentSyncToSlack == nil || !resp.AttachmentSyncToSlack.Success {
+			output.Error("Failed to sync attachment to Slack", plaintext, jsonOut)
+			os.Exit(1)
+		}
+
+		if jsonOut {
+			output.JSON(resp.AttachmentSyncToSlack.Attachment)
+		} else {
+			output.Success(fmt.Sprintf("Syncing attachment %s to Slack", args[0]), plaintext, jsonOut)
+		}
+	},
+}
+
+func init() {
+	attachmentCmd.AddCommand(attachmentLinkCmd)
+	attachmentCmd.AddCommand(attachmentSyncToSlackCmd)
+
+	attachmentLinkCmd.Flags().StringP("provider", "P", "url", "Attachment provider: url, slack, github-issue, github-pr, salesforce")
+	attachmentLinkCmd.Flags().String("title", "", "Attachment title")
+	attachmentLinkCmd.Flags().Bool("sync-to-comment-thread", false, "For --provider slack: sync the Slack thread to the issue comment thread")
+}

@@ -254,6 +254,24 @@ echo -e "\n${YELLOW}Testing schedule commands...${NC}"
 run_test "schedule list" "go run main.go schedule list --limit 5"
 run_test "schedule list (json)" "go run main.go schedule list --limit 5 -j"
 
+# Test attachment link commands (Tier 4c - PR 5c). OAuth apps and the Agents API
+# are deferred: oauth-app needs the oauth:create scope (personal keys can't hold
+# it) and agent writes need an agent-app actor.
+echo -e "\n${YELLOW}Testing attachment link commands...${NC}"
+# Unknown provider must exit non-zero and list the valid providers.
+set +e
+output=$(go run main.go attachment link SD-1 https://example.com --provider bogus 2>&1)
+if echo "$output" | grep -q "valid providers are"; then
+    echo -e "attachment link (invalid provider check): ${GREEN}PASS${NC}"
+    TESTS_RUN=$((TESTS_RUN + 1))
+    TESTS_PASSED=$((TESTS_PASSED + 1))
+else
+    echo -e "attachment link (invalid provider check): ${RED}FAIL${NC}"
+    TESTS_RUN=$((TESTS_RUN + 1))
+    TESTS_FAILED=$((TESTS_FAILED + 1))
+fi
+set -e
+
 # Test help commands
 echo -e "\n${YELLOW}Testing help commands...${NC}"
 run_test "help" "go run main.go --help" "Usage:"
@@ -283,6 +301,8 @@ run_test "triage help" "go run main.go triage --help" "Available Commands:"
 run_test "git help (state/target-branch)" "go run main.go git --help" "target-branch"
 run_test "git state help" "go run main.go git state --help" "Available Commands:"
 run_test "schedule help (upsert/refresh)" "go run main.go schedule --help" "upsert-external"
+run_test "attachment help (link/sync-to-slack)" "go run main.go attachment --help" "sync-to-slack"
+run_test "attachment link help (provider)" "go run main.go attachment link --help" "provider"
 
 # Test unknown command handling
 echo -e "\n${YELLOW}Testing error handling...${NC}"
