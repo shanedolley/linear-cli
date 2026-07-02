@@ -1,0 +1,56 @@
+# Reaction operations (Tier 2).
+#
+# Reactions attach to a parent entity (issue, comment, and others). lincli
+# supports issue and comment reactions, driven by a shared helper in
+# cmd/reaction.go. Adding a reaction only needs ReactionCreate; removing one
+# needs to find the current user's reaction for the emoji first, so the
+# GetIssueReactions / GetCommentReactions queries fetch each parent's
+# reactions with their owning user.
+
+# Mutation: Create a reaction on an issue or comment
+mutation ReactionCreate($input: ReactionCreateInput!) {
+  reactionCreate(input: $input) {
+    success
+    reaction {
+      id
+      emoji
+    }
+  }
+}
+
+# Mutation: Delete a reaction by its ID
+mutation ReactionDelete($id: String!) {
+  reactionDelete(id: $id) {
+    success
+    entityId
+  }
+}
+
+# Query: An issue's reactions, used to find the reaction to remove.
+# The id accepts an issue identifier (e.g. LIN-123) or a UUID.
+query GetIssueReactions($id: String!) {
+  issue(id: $id) {
+    id
+    reactions {
+      id
+      emoji
+      user {
+        id
+      }
+    }
+  }
+}
+
+# Query: A comment's reactions, used to find the reaction to remove.
+query GetCommentReactions($id: String!) {
+  comment(id: $id) {
+    id
+    reactions {
+      id
+      emoji
+      user {
+        id
+      }
+    }
+  }
+}

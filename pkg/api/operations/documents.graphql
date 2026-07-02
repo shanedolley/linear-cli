@@ -1,0 +1,133 @@
+# Document operations (Tier 2).
+#
+# Documents are workspace docs attached to a project or initiative (and, in
+# Linear's schema, other parents). lincli's `document` commands scope create
+# to exactly one of project/initiative; list/search/get/update/delete/
+# unarchive cover the rest of the lifecycle.
+
+fragment DocumentListFields on Document {
+  id
+  title
+  icon
+  color
+  slugId
+  url
+  createdAt
+  updatedAt
+  project {
+    id
+    name
+  }
+  initiative {
+    id
+    name
+  }
+  creator {
+    name
+    email
+  }
+}
+
+fragment DocumentDetailFields on Document {
+  ...DocumentListFields
+  content
+  documentContentId
+  updatedBy {
+    name
+    email
+  }
+}
+
+query ListDocuments($filter: DocumentFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
+  documents(filter: $filter, first: $first, after: $after, orderBy: $orderBy) {
+    nodes {
+      ...DocumentListFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+# searchDocuments returns DocumentSearchResult, a distinct type from Document,
+# so its display fields are selected inline rather than via DocumentListFields.
+query SearchDocuments($term: String!, $first: Int) {
+  searchDocuments(term: $term, first: $first) {
+    nodes {
+      id
+      title
+      icon
+      color
+      slugId
+      url
+      createdAt
+      updatedAt
+      project {
+        id
+        name
+      }
+      initiative {
+        id
+        name
+      }
+      creator {
+        name
+        email
+      }
+    }
+    totalCount
+  }
+}
+
+query GetDocument($id: String!) {
+  document(id: $id) {
+    ...DocumentDetailFields
+  }
+}
+
+mutation DocumentCreate($input: DocumentCreateInput!) {
+  documentCreate(input: $input) {
+    success
+    document {
+      ...DocumentDetailFields
+    }
+  }
+}
+
+mutation DocumentUpdate($id: String!, $input: DocumentUpdateInput!) {
+  documentUpdate(id: $id, input: $input) {
+    success
+    document {
+      ...DocumentDetailFields
+    }
+  }
+}
+
+# Content history for `document get --history`. The id here is the document's
+# documentContentId (from DocumentDetailFields), not the document ID.
+query DocumentContentHistory($id: String!) {
+  documentContentHistory(id: $id) {
+    history {
+      id
+      createdAt
+      contentDataSnapshotAt
+      actorIds
+    }
+  }
+}
+
+mutation DocumentDelete($id: String!) {
+  documentDelete(id: $id) {
+    success
+  }
+}
+
+mutation DocumentUnarchive($id: String!) {
+  documentUnarchive(id: $id) {
+    success
+    entity {
+      id
+    }
+  }
+}

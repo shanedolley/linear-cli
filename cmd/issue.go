@@ -1601,6 +1601,20 @@ var issueUnshareCmd = &cobra.Command{
 	},
 }
 
+var issueReactCmd = &cobra.Command{
+	Use:   "react [issue-id]",
+	Short: "React to an issue with an emoji",
+	Long: `Add or remove an emoji reaction on an issue.
+
+Examples:
+  lincli issue react LIN-123 --emoji 👍
+  lincli issue react LIN-123 --emoji 👍 --remove`,
+	Args: cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		runReaction(cmd, "issue", args[0])
+	},
+}
+
 // runIssueShare handles share/unshare, which both require a target --user.
 func runIssueShare(cmd *cobra.Command, issueID string, share bool) {
 	plaintext := viper.GetBool("plaintext")
@@ -2011,6 +2025,7 @@ func init() {
 	issueCmd.AddCommand(issueReminderCmd)
 	issueCmd.AddCommand(issueShareCmd)
 	issueCmd.AddCommand(issueUnshareCmd)
+	issueCmd.AddCommand(issueReactCmd)
 
 	// Issue lifecycle flags
 	issueArchiveCmd.Flags().Bool("trash", false, "Move the issue to trash (soft delete, 30-day grace) instead of a plain archive")
@@ -2020,6 +2035,7 @@ func init() {
 	issueReminderCmd.Flags().String("at", "", "Reminder time (YYYY-MM-DD or RFC3339, required)")
 	issueShareCmd.Flags().StringP("user", "u", "", "User to share the issue with (email, name, or 'me') (required)")
 	issueUnshareCmd.Flags().StringP("user", "u", "", "User to stop sharing with (email, name, or 'me') (required)")
+	addReactionFlags(issueReactCmd)
 
 	// Issue list flags
 	issueListCmd.Flags().StringP("assignee", "a", "", "Filter by assignee (email or 'me')")

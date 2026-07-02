@@ -3501,6 +3501,34 @@ var AllDay = []Day{
 	DaySaturday,
 }
 
+// DeleteCommentCommentDeleteDeletePayload includes the requested fields of the GraphQL type DeletePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity deletion mutations.
+type DeleteCommentCommentDeleteDeletePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The identifier of the deleted entity.
+	EntityId string `json:"entityId"`
+}
+
+// GetSuccess returns DeleteCommentCommentDeleteDeletePayload.Success, and is useful for accessing the field via an interface.
+func (v *DeleteCommentCommentDeleteDeletePayload) GetSuccess() bool { return v.Success }
+
+// GetEntityId returns DeleteCommentCommentDeleteDeletePayload.EntityId, and is useful for accessing the field via an interface.
+func (v *DeleteCommentCommentDeleteDeletePayload) GetEntityId() string { return v.EntityId }
+
+// DeleteCommentResponse is returned by DeleteComment on success.
+type DeleteCommentResponse struct {
+	// Deletes a comment.
+	CommentDelete *DeleteCommentCommentDeleteDeletePayload `json:"commentDelete"`
+}
+
+// GetCommentDelete returns DeleteCommentResponse.CommentDelete, and is useful for accessing the field via an interface.
+func (v *DeleteCommentResponse) GetCommentDelete() *DeleteCommentCommentDeleteDeletePayload {
+	return v.CommentDelete
+}
+
 // DeleteIssueRelationIssueRelationDeleteDeletePayload includes the requested fields of the GraphQL type DeletePayload.
 // The GraphQL type's documentation follows.
 //
@@ -3523,6 +3551,527 @@ type DeleteIssueRelationResponse struct {
 func (v *DeleteIssueRelationResponse) GetIssueRelationDelete() *DeleteIssueRelationIssueRelationDeleteDeletePayload {
 	return v.IssueRelationDelete
 }
+
+// DocumentContentHistoryDocumentContentHistoryDocumentContentHistoryPayload includes the requested fields of the GraphQL type DocumentContentHistoryPayload.
+type DocumentContentHistoryDocumentContentHistoryDocumentContentHistoryPayload struct {
+	// The document content history entries.
+	History []*DocumentContentHistoryDocumentContentHistoryDocumentContentHistoryPayloadHistoryDocumentContentHistoryType `json:"history"`
+}
+
+// GetHistory returns DocumentContentHistoryDocumentContentHistoryDocumentContentHistoryPayload.History, and is useful for accessing the field via an interface.
+func (v *DocumentContentHistoryDocumentContentHistoryDocumentContentHistoryPayload) GetHistory() []*DocumentContentHistoryDocumentContentHistoryDocumentContentHistoryPayloadHistoryDocumentContentHistoryType {
+	return v.History
+}
+
+// DocumentContentHistoryDocumentContentHistoryDocumentContentHistoryPayloadHistoryDocumentContentHistoryType includes the requested fields of the GraphQL type DocumentContentHistoryType.
+type DocumentContentHistoryDocumentContentHistoryDocumentContentHistoryPayloadHistoryDocumentContentHistoryType struct {
+	// The unique identifier of the document content history entry.
+	Id string `json:"id"`
+	// The date when this document content history entry record was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The timestamp of the document content state when this snapshot was captured.
+	// This can differ from createdAt because the content is captured from its state
+	// at the previously known updatedAt timestamp in the case of an update. On
+	// document creation, these timestamps can be identical.
+	ContentDataSnapshotAt time.Time `json:"contentDataSnapshotAt"`
+	// IDs of users whose edits are included in this history entry.
+	ActorIds []string `json:"actorIds"`
+}
+
+// GetId returns DocumentContentHistoryDocumentContentHistoryDocumentContentHistoryPayloadHistoryDocumentContentHistoryType.Id, and is useful for accessing the field via an interface.
+func (v *DocumentContentHistoryDocumentContentHistoryDocumentContentHistoryPayloadHistoryDocumentContentHistoryType) GetId() string {
+	return v.Id
+}
+
+// GetCreatedAt returns DocumentContentHistoryDocumentContentHistoryDocumentContentHistoryPayloadHistoryDocumentContentHistoryType.CreatedAt, and is useful for accessing the field via an interface.
+func (v *DocumentContentHistoryDocumentContentHistoryDocumentContentHistoryPayloadHistoryDocumentContentHistoryType) GetCreatedAt() time.Time {
+	return v.CreatedAt
+}
+
+// GetContentDataSnapshotAt returns DocumentContentHistoryDocumentContentHistoryDocumentContentHistoryPayloadHistoryDocumentContentHistoryType.ContentDataSnapshotAt, and is useful for accessing the field via an interface.
+func (v *DocumentContentHistoryDocumentContentHistoryDocumentContentHistoryPayloadHistoryDocumentContentHistoryType) GetContentDataSnapshotAt() time.Time {
+	return v.ContentDataSnapshotAt
+}
+
+// GetActorIds returns DocumentContentHistoryDocumentContentHistoryDocumentContentHistoryPayloadHistoryDocumentContentHistoryType.ActorIds, and is useful for accessing the field via an interface.
+func (v *DocumentContentHistoryDocumentContentHistoryDocumentContentHistoryPayloadHistoryDocumentContentHistoryType) GetActorIds() []string {
+	return v.ActorIds
+}
+
+// DocumentContentHistoryResponse is returned by DocumentContentHistory on success.
+type DocumentContentHistoryResponse struct {
+	// A collection of document content history entries.
+	DocumentContentHistory *DocumentContentHistoryDocumentContentHistoryDocumentContentHistoryPayload `json:"documentContentHistory"`
+}
+
+// GetDocumentContentHistory returns DocumentContentHistoryResponse.DocumentContentHistory, and is useful for accessing the field via an interface.
+func (v *DocumentContentHistoryResponse) GetDocumentContentHistory() *DocumentContentHistoryDocumentContentHistoryDocumentContentHistoryPayload {
+	return v.DocumentContentHistory
+}
+
+// DocumentCreateDocumentCreateDocumentPayload includes the requested fields of the GraphQL type DocumentPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a document mutation.
+type DocumentCreateDocumentCreateDocumentPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The document that was created or updated.
+	Document *DocumentCreateDocumentCreateDocumentPayloadDocument `json:"document"`
+}
+
+// GetSuccess returns DocumentCreateDocumentCreateDocumentPayload.Success, and is useful for accessing the field via an interface.
+func (v *DocumentCreateDocumentCreateDocumentPayload) GetSuccess() bool { return v.Success }
+
+// GetDocument returns DocumentCreateDocumentCreateDocumentPayload.Document, and is useful for accessing the field via an interface.
+func (v *DocumentCreateDocumentCreateDocumentPayload) GetDocument() *DocumentCreateDocumentCreateDocumentPayloadDocument {
+	return v.Document
+}
+
+// DocumentCreateDocumentCreateDocumentPayloadDocument includes the requested fields of the GraphQL type Document.
+// The GraphQL type's documentation follows.
+//
+// A rich-text document that lives within a project, initiative, team, issue,
+// release, or cycle. Documents support collaborative editing via ProseMirror/Yjs
+// and store their content in a separate DocumentContent entity. Each document is
+// associated with exactly one parent entity.
+type DocumentCreateDocumentCreateDocumentPayloadDocument struct {
+	DocumentDetailFields `json:"-"`
+}
+
+// GetContent returns DocumentCreateDocumentCreateDocumentPayloadDocument.Content, and is useful for accessing the field via an interface.
+func (v *DocumentCreateDocumentCreateDocumentPayloadDocument) GetContent() *string {
+	return v.DocumentDetailFields.Content
+}
+
+// GetDocumentContentId returns DocumentCreateDocumentCreateDocumentPayloadDocument.DocumentContentId, and is useful for accessing the field via an interface.
+func (v *DocumentCreateDocumentCreateDocumentPayloadDocument) GetDocumentContentId() *string {
+	return v.DocumentDetailFields.DocumentContentId
+}
+
+// GetUpdatedBy returns DocumentCreateDocumentCreateDocumentPayloadDocument.UpdatedBy, and is useful for accessing the field via an interface.
+func (v *DocumentCreateDocumentCreateDocumentPayloadDocument) GetUpdatedBy() *DocumentDetailFieldsUpdatedByUser {
+	return v.DocumentDetailFields.UpdatedBy
+}
+
+// GetId returns DocumentCreateDocumentCreateDocumentPayloadDocument.Id, and is useful for accessing the field via an interface.
+func (v *DocumentCreateDocumentCreateDocumentPayloadDocument) GetId() string {
+	return v.DocumentDetailFields.DocumentListFields.Id
+}
+
+// GetTitle returns DocumentCreateDocumentCreateDocumentPayloadDocument.Title, and is useful for accessing the field via an interface.
+func (v *DocumentCreateDocumentCreateDocumentPayloadDocument) GetTitle() string {
+	return v.DocumentDetailFields.DocumentListFields.Title
+}
+
+// GetIcon returns DocumentCreateDocumentCreateDocumentPayloadDocument.Icon, and is useful for accessing the field via an interface.
+func (v *DocumentCreateDocumentCreateDocumentPayloadDocument) GetIcon() *string {
+	return v.DocumentDetailFields.DocumentListFields.Icon
+}
+
+// GetColor returns DocumentCreateDocumentCreateDocumentPayloadDocument.Color, and is useful for accessing the field via an interface.
+func (v *DocumentCreateDocumentCreateDocumentPayloadDocument) GetColor() *string {
+	return v.DocumentDetailFields.DocumentListFields.Color
+}
+
+// GetSlugId returns DocumentCreateDocumentCreateDocumentPayloadDocument.SlugId, and is useful for accessing the field via an interface.
+func (v *DocumentCreateDocumentCreateDocumentPayloadDocument) GetSlugId() string {
+	return v.DocumentDetailFields.DocumentListFields.SlugId
+}
+
+// GetUrl returns DocumentCreateDocumentCreateDocumentPayloadDocument.Url, and is useful for accessing the field via an interface.
+func (v *DocumentCreateDocumentCreateDocumentPayloadDocument) GetUrl() string {
+	return v.DocumentDetailFields.DocumentListFields.Url
+}
+
+// GetCreatedAt returns DocumentCreateDocumentCreateDocumentPayloadDocument.CreatedAt, and is useful for accessing the field via an interface.
+func (v *DocumentCreateDocumentCreateDocumentPayloadDocument) GetCreatedAt() time.Time {
+	return v.DocumentDetailFields.DocumentListFields.CreatedAt
+}
+
+// GetUpdatedAt returns DocumentCreateDocumentCreateDocumentPayloadDocument.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *DocumentCreateDocumentCreateDocumentPayloadDocument) GetUpdatedAt() time.Time {
+	return v.DocumentDetailFields.DocumentListFields.UpdatedAt
+}
+
+// GetProject returns DocumentCreateDocumentCreateDocumentPayloadDocument.Project, and is useful for accessing the field via an interface.
+func (v *DocumentCreateDocumentCreateDocumentPayloadDocument) GetProject() *DocumentListFieldsProject {
+	return v.DocumentDetailFields.DocumentListFields.Project
+}
+
+// GetInitiative returns DocumentCreateDocumentCreateDocumentPayloadDocument.Initiative, and is useful for accessing the field via an interface.
+func (v *DocumentCreateDocumentCreateDocumentPayloadDocument) GetInitiative() *DocumentListFieldsInitiative {
+	return v.DocumentDetailFields.DocumentListFields.Initiative
+}
+
+// GetCreator returns DocumentCreateDocumentCreateDocumentPayloadDocument.Creator, and is useful for accessing the field via an interface.
+func (v *DocumentCreateDocumentCreateDocumentPayloadDocument) GetCreator() *DocumentListFieldsCreatorUser {
+	return v.DocumentDetailFields.DocumentListFields.Creator
+}
+
+func (v *DocumentCreateDocumentCreateDocumentPayloadDocument) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*DocumentCreateDocumentCreateDocumentPayloadDocument
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.DocumentCreateDocumentCreateDocumentPayloadDocument = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.DocumentDetailFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalDocumentCreateDocumentCreateDocumentPayloadDocument struct {
+	Content *string `json:"content"`
+
+	DocumentContentId *string `json:"documentContentId"`
+
+	UpdatedBy *DocumentDetailFieldsUpdatedByUser `json:"updatedBy"`
+
+	Id string `json:"id"`
+
+	Title string `json:"title"`
+
+	Icon *string `json:"icon"`
+
+	Color *string `json:"color"`
+
+	SlugId string `json:"slugId"`
+
+	Url string `json:"url"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	Project *DocumentListFieldsProject `json:"project"`
+
+	Initiative *DocumentListFieldsInitiative `json:"initiative"`
+
+	Creator *DocumentListFieldsCreatorUser `json:"creator"`
+}
+
+func (v *DocumentCreateDocumentCreateDocumentPayloadDocument) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *DocumentCreateDocumentCreateDocumentPayloadDocument) __premarshalJSON() (*__premarshalDocumentCreateDocumentCreateDocumentPayloadDocument, error) {
+	var retval __premarshalDocumentCreateDocumentCreateDocumentPayloadDocument
+
+	retval.Content = v.DocumentDetailFields.Content
+	retval.DocumentContentId = v.DocumentDetailFields.DocumentContentId
+	retval.UpdatedBy = v.DocumentDetailFields.UpdatedBy
+	retval.Id = v.DocumentDetailFields.DocumentListFields.Id
+	retval.Title = v.DocumentDetailFields.DocumentListFields.Title
+	retval.Icon = v.DocumentDetailFields.DocumentListFields.Icon
+	retval.Color = v.DocumentDetailFields.DocumentListFields.Color
+	retval.SlugId = v.DocumentDetailFields.DocumentListFields.SlugId
+	retval.Url = v.DocumentDetailFields.DocumentListFields.Url
+	retval.CreatedAt = v.DocumentDetailFields.DocumentListFields.CreatedAt
+	retval.UpdatedAt = v.DocumentDetailFields.DocumentListFields.UpdatedAt
+	retval.Project = v.DocumentDetailFields.DocumentListFields.Project
+	retval.Initiative = v.DocumentDetailFields.DocumentListFields.Initiative
+	retval.Creator = v.DocumentDetailFields.DocumentListFields.Creator
+	return &retval, nil
+}
+
+// Input for creating a new document.
+type DocumentCreateInput struct {
+	// The color of the icon.
+	Color *string `json:"color"`
+	// The document content as markdown.
+	Content *string `json:"content"`
+	// [Internal] Related cycle for the document.
+	CycleId *string `json:"cycleId"`
+	// The icon of the document.
+	Icon *string `json:"icon"`
+	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
+	Id *string `json:"id"`
+	// [Internal] Related initiative for the document.
+	InitiativeId *string `json:"initiativeId"`
+	// Related issue for the document. Can be a UUID or issue identifier (e.g., 'LIN-123').
+	IssueId *string `json:"issueId"`
+	// The ID of the last template applied to the document.
+	LastAppliedTemplateId *string `json:"lastAppliedTemplateId"`
+	// Related project for the document.
+	ProjectId *string `json:"projectId"`
+	// Related release for the document.
+	ReleaseId *string `json:"releaseId"`
+	// [Internal] The resource folder containing the document.
+	ResourceFolderId *string `json:"resourceFolderId"`
+	// The order of the item in the resources list.
+	SortOrder *float64 `json:"sortOrder"`
+	// [INTERNAL] The identifiers of the users subscribing to this document.
+	SubscriberIds []string `json:"subscriberIds"`
+	// [Internal] Related team for the document.
+	TeamId *string `json:"teamId"`
+	// The title of the document.
+	Title string `json:"title"`
+}
+
+// GetColor returns DocumentCreateInput.Color, and is useful for accessing the field via an interface.
+func (v *DocumentCreateInput) GetColor() *string { return v.Color }
+
+// GetContent returns DocumentCreateInput.Content, and is useful for accessing the field via an interface.
+func (v *DocumentCreateInput) GetContent() *string { return v.Content }
+
+// GetCycleId returns DocumentCreateInput.CycleId, and is useful for accessing the field via an interface.
+func (v *DocumentCreateInput) GetCycleId() *string { return v.CycleId }
+
+// GetIcon returns DocumentCreateInput.Icon, and is useful for accessing the field via an interface.
+func (v *DocumentCreateInput) GetIcon() *string { return v.Icon }
+
+// GetId returns DocumentCreateInput.Id, and is useful for accessing the field via an interface.
+func (v *DocumentCreateInput) GetId() *string { return v.Id }
+
+// GetInitiativeId returns DocumentCreateInput.InitiativeId, and is useful for accessing the field via an interface.
+func (v *DocumentCreateInput) GetInitiativeId() *string { return v.InitiativeId }
+
+// GetIssueId returns DocumentCreateInput.IssueId, and is useful for accessing the field via an interface.
+func (v *DocumentCreateInput) GetIssueId() *string { return v.IssueId }
+
+// GetLastAppliedTemplateId returns DocumentCreateInput.LastAppliedTemplateId, and is useful for accessing the field via an interface.
+func (v *DocumentCreateInput) GetLastAppliedTemplateId() *string { return v.LastAppliedTemplateId }
+
+// GetProjectId returns DocumentCreateInput.ProjectId, and is useful for accessing the field via an interface.
+func (v *DocumentCreateInput) GetProjectId() *string { return v.ProjectId }
+
+// GetReleaseId returns DocumentCreateInput.ReleaseId, and is useful for accessing the field via an interface.
+func (v *DocumentCreateInput) GetReleaseId() *string { return v.ReleaseId }
+
+// GetResourceFolderId returns DocumentCreateInput.ResourceFolderId, and is useful for accessing the field via an interface.
+func (v *DocumentCreateInput) GetResourceFolderId() *string { return v.ResourceFolderId }
+
+// GetSortOrder returns DocumentCreateInput.SortOrder, and is useful for accessing the field via an interface.
+func (v *DocumentCreateInput) GetSortOrder() *float64 { return v.SortOrder }
+
+// GetSubscriberIds returns DocumentCreateInput.SubscriberIds, and is useful for accessing the field via an interface.
+func (v *DocumentCreateInput) GetSubscriberIds() []string { return v.SubscriberIds }
+
+// GetTeamId returns DocumentCreateInput.TeamId, and is useful for accessing the field via an interface.
+func (v *DocumentCreateInput) GetTeamId() *string { return v.TeamId }
+
+// GetTitle returns DocumentCreateInput.Title, and is useful for accessing the field via an interface.
+func (v *DocumentCreateInput) GetTitle() string { return v.Title }
+
+// DocumentCreateResponse is returned by DocumentCreate on success.
+type DocumentCreateResponse struct {
+	// Creates a new document.
+	DocumentCreate *DocumentCreateDocumentCreateDocumentPayload `json:"documentCreate"`
+}
+
+// GetDocumentCreate returns DocumentCreateResponse.DocumentCreate, and is useful for accessing the field via an interface.
+func (v *DocumentCreateResponse) GetDocumentCreate() *DocumentCreateDocumentCreateDocumentPayload {
+	return v.DocumentCreate
+}
+
+// DocumentDeleteDocumentDeleteDocumentArchivePayload includes the requested fields of the GraphQL type DocumentArchivePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity archive mutations.
+type DocumentDeleteDocumentDeleteDocumentArchivePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+}
+
+// GetSuccess returns DocumentDeleteDocumentDeleteDocumentArchivePayload.Success, and is useful for accessing the field via an interface.
+func (v *DocumentDeleteDocumentDeleteDocumentArchivePayload) GetSuccess() bool { return v.Success }
+
+// DocumentDeleteResponse is returned by DocumentDelete on success.
+type DocumentDeleteResponse struct {
+	// Deletes (trashes) a document. The document is marked as trashed and archived, but not permanently removed.
+	DocumentDelete *DocumentDeleteDocumentDeleteDocumentArchivePayload `json:"documentDelete"`
+}
+
+// GetDocumentDelete returns DocumentDeleteResponse.DocumentDelete, and is useful for accessing the field via an interface.
+func (v *DocumentDeleteResponse) GetDocumentDelete() *DocumentDeleteDocumentDeleteDocumentArchivePayload {
+	return v.DocumentDelete
+}
+
+// DocumentDetailFields includes the GraphQL fields of Document requested by the fragment DocumentDetailFields.
+// The GraphQL type's documentation follows.
+//
+// A rich-text document that lives within a project, initiative, team, issue,
+// release, or cycle. Documents support collaborative editing via ProseMirror/Yjs
+// and store their content in a separate DocumentContent entity. Each document is
+// associated with exactly one parent entity.
+type DocumentDetailFields struct {
+	DocumentListFields `json:"-"`
+	// The document's content in markdown format.
+	Content *string `json:"content"`
+	// The ID of the document content associated with the document.
+	DocumentContentId *string `json:"documentContentId"`
+	// The user who last updated the document. Null if the user's account has been deleted.
+	UpdatedBy *DocumentDetailFieldsUpdatedByUser `json:"updatedBy"`
+}
+
+// GetContent returns DocumentDetailFields.Content, and is useful for accessing the field via an interface.
+func (v *DocumentDetailFields) GetContent() *string { return v.Content }
+
+// GetDocumentContentId returns DocumentDetailFields.DocumentContentId, and is useful for accessing the field via an interface.
+func (v *DocumentDetailFields) GetDocumentContentId() *string { return v.DocumentContentId }
+
+// GetUpdatedBy returns DocumentDetailFields.UpdatedBy, and is useful for accessing the field via an interface.
+func (v *DocumentDetailFields) GetUpdatedBy() *DocumentDetailFieldsUpdatedByUser { return v.UpdatedBy }
+
+// GetId returns DocumentDetailFields.Id, and is useful for accessing the field via an interface.
+func (v *DocumentDetailFields) GetId() string { return v.DocumentListFields.Id }
+
+// GetTitle returns DocumentDetailFields.Title, and is useful for accessing the field via an interface.
+func (v *DocumentDetailFields) GetTitle() string { return v.DocumentListFields.Title }
+
+// GetIcon returns DocumentDetailFields.Icon, and is useful for accessing the field via an interface.
+func (v *DocumentDetailFields) GetIcon() *string { return v.DocumentListFields.Icon }
+
+// GetColor returns DocumentDetailFields.Color, and is useful for accessing the field via an interface.
+func (v *DocumentDetailFields) GetColor() *string { return v.DocumentListFields.Color }
+
+// GetSlugId returns DocumentDetailFields.SlugId, and is useful for accessing the field via an interface.
+func (v *DocumentDetailFields) GetSlugId() string { return v.DocumentListFields.SlugId }
+
+// GetUrl returns DocumentDetailFields.Url, and is useful for accessing the field via an interface.
+func (v *DocumentDetailFields) GetUrl() string { return v.DocumentListFields.Url }
+
+// GetCreatedAt returns DocumentDetailFields.CreatedAt, and is useful for accessing the field via an interface.
+func (v *DocumentDetailFields) GetCreatedAt() time.Time { return v.DocumentListFields.CreatedAt }
+
+// GetUpdatedAt returns DocumentDetailFields.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *DocumentDetailFields) GetUpdatedAt() time.Time { return v.DocumentListFields.UpdatedAt }
+
+// GetProject returns DocumentDetailFields.Project, and is useful for accessing the field via an interface.
+func (v *DocumentDetailFields) GetProject() *DocumentListFieldsProject {
+	return v.DocumentListFields.Project
+}
+
+// GetInitiative returns DocumentDetailFields.Initiative, and is useful for accessing the field via an interface.
+func (v *DocumentDetailFields) GetInitiative() *DocumentListFieldsInitiative {
+	return v.DocumentListFields.Initiative
+}
+
+// GetCreator returns DocumentDetailFields.Creator, and is useful for accessing the field via an interface.
+func (v *DocumentDetailFields) GetCreator() *DocumentListFieldsCreatorUser {
+	return v.DocumentListFields.Creator
+}
+
+func (v *DocumentDetailFields) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*DocumentDetailFields
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.DocumentDetailFields = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.DocumentListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalDocumentDetailFields struct {
+	Content *string `json:"content"`
+
+	DocumentContentId *string `json:"documentContentId"`
+
+	UpdatedBy *DocumentDetailFieldsUpdatedByUser `json:"updatedBy"`
+
+	Id string `json:"id"`
+
+	Title string `json:"title"`
+
+	Icon *string `json:"icon"`
+
+	Color *string `json:"color"`
+
+	SlugId string `json:"slugId"`
+
+	Url string `json:"url"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	Project *DocumentListFieldsProject `json:"project"`
+
+	Initiative *DocumentListFieldsInitiative `json:"initiative"`
+
+	Creator *DocumentListFieldsCreatorUser `json:"creator"`
+}
+
+func (v *DocumentDetailFields) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *DocumentDetailFields) __premarshalJSON() (*__premarshalDocumentDetailFields, error) {
+	var retval __premarshalDocumentDetailFields
+
+	retval.Content = v.Content
+	retval.DocumentContentId = v.DocumentContentId
+	retval.UpdatedBy = v.UpdatedBy
+	retval.Id = v.DocumentListFields.Id
+	retval.Title = v.DocumentListFields.Title
+	retval.Icon = v.DocumentListFields.Icon
+	retval.Color = v.DocumentListFields.Color
+	retval.SlugId = v.DocumentListFields.SlugId
+	retval.Url = v.DocumentListFields.Url
+	retval.CreatedAt = v.DocumentListFields.CreatedAt
+	retval.UpdatedAt = v.DocumentListFields.UpdatedAt
+	retval.Project = v.DocumentListFields.Project
+	retval.Initiative = v.DocumentListFields.Initiative
+	retval.Creator = v.DocumentListFields.Creator
+	return &retval, nil
+}
+
+// DocumentDetailFieldsUpdatedByUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
+type DocumentDetailFieldsUpdatedByUser struct {
+	// The user's full name.
+	Name string `json:"name"`
+	// The user's email address.
+	Email string `json:"email"`
+}
+
+// GetName returns DocumentDetailFieldsUpdatedByUser.Name, and is useful for accessing the field via an interface.
+func (v *DocumentDetailFieldsUpdatedByUser) GetName() string { return v.Name }
+
+// GetEmail returns DocumentDetailFieldsUpdatedByUser.Email, and is useful for accessing the field via an interface.
+func (v *DocumentDetailFieldsUpdatedByUser) GetEmail() string { return v.Email }
 
 // Document filtering options.
 type DocumentFilter struct {
@@ -3597,6 +4146,457 @@ func (v *DocumentFilter) GetTitle() *StringComparator { return v.Title }
 
 // GetUpdatedAt returns DocumentFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *DocumentFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
+
+// DocumentListFields includes the GraphQL fields of Document requested by the fragment DocumentListFields.
+// The GraphQL type's documentation follows.
+//
+// A rich-text document that lives within a project, initiative, team, issue,
+// release, or cycle. Documents support collaborative editing via ProseMirror/Yjs
+// and store their content in a separate DocumentContent entity. Each document is
+// associated with exactly one parent entity.
+type DocumentListFields struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The title of the document. An empty string indicates an untitled document.
+	Title string `json:"title"`
+	// The icon of the document, either a decorative icon type or an emoji string. Null if no icon has been set.
+	Icon *string `json:"icon"`
+	// The hex color of the document icon. Null if no custom color has been set.
+	Color *string `json:"color"`
+	// The document's unique URL slug, used to construct human-readable URLs.
+	SlugId string `json:"slugId"`
+	// The canonical url for the document.
+	Url string `json:"url"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+	// been updated after creation.
+	UpdatedAt time.Time `json:"updatedAt"`
+	// The project that the document is associated with. Null if the document belongs to a different parent entity type.
+	Project *DocumentListFieldsProject `json:"project"`
+	// The initiative that the document is associated with. Null if the document belongs to a different parent entity type.
+	Initiative *DocumentListFieldsInitiative `json:"initiative"`
+	// The user who created the document. Null if the creator's account has been deleted.
+	Creator *DocumentListFieldsCreatorUser `json:"creator"`
+}
+
+// GetId returns DocumentListFields.Id, and is useful for accessing the field via an interface.
+func (v *DocumentListFields) GetId() string { return v.Id }
+
+// GetTitle returns DocumentListFields.Title, and is useful for accessing the field via an interface.
+func (v *DocumentListFields) GetTitle() string { return v.Title }
+
+// GetIcon returns DocumentListFields.Icon, and is useful for accessing the field via an interface.
+func (v *DocumentListFields) GetIcon() *string { return v.Icon }
+
+// GetColor returns DocumentListFields.Color, and is useful for accessing the field via an interface.
+func (v *DocumentListFields) GetColor() *string { return v.Color }
+
+// GetSlugId returns DocumentListFields.SlugId, and is useful for accessing the field via an interface.
+func (v *DocumentListFields) GetSlugId() string { return v.SlugId }
+
+// GetUrl returns DocumentListFields.Url, and is useful for accessing the field via an interface.
+func (v *DocumentListFields) GetUrl() string { return v.Url }
+
+// GetCreatedAt returns DocumentListFields.CreatedAt, and is useful for accessing the field via an interface.
+func (v *DocumentListFields) GetCreatedAt() time.Time { return v.CreatedAt }
+
+// GetUpdatedAt returns DocumentListFields.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *DocumentListFields) GetUpdatedAt() time.Time { return v.UpdatedAt }
+
+// GetProject returns DocumentListFields.Project, and is useful for accessing the field via an interface.
+func (v *DocumentListFields) GetProject() *DocumentListFieldsProject { return v.Project }
+
+// GetInitiative returns DocumentListFields.Initiative, and is useful for accessing the field via an interface.
+func (v *DocumentListFields) GetInitiative() *DocumentListFieldsInitiative { return v.Initiative }
+
+// GetCreator returns DocumentListFields.Creator, and is useful for accessing the field via an interface.
+func (v *DocumentListFields) GetCreator() *DocumentListFieldsCreatorUser { return v.Creator }
+
+// DocumentListFieldsCreatorUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
+type DocumentListFieldsCreatorUser struct {
+	// The user's full name.
+	Name string `json:"name"`
+	// The user's email address.
+	Email string `json:"email"`
+}
+
+// GetName returns DocumentListFieldsCreatorUser.Name, and is useful for accessing the field via an interface.
+func (v *DocumentListFieldsCreatorUser) GetName() string { return v.Name }
+
+// GetEmail returns DocumentListFieldsCreatorUser.Email, and is useful for accessing the field via an interface.
+func (v *DocumentListFieldsCreatorUser) GetEmail() string { return v.Email }
+
+// DocumentListFieldsInitiative includes the requested fields of the GraphQL type Initiative.
+// The GraphQL type's documentation follows.
+//
+// An initiative is a high-level strategic grouping of projects toward a business
+// goal. Initiatives can contain multiple projects, have their own status updates
+// and health tracking, and can be organized hierarchically with parent-child relationships.
+type DocumentListFieldsInitiative struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the initiative.
+	Name string `json:"name"`
+}
+
+// GetId returns DocumentListFieldsInitiative.Id, and is useful for accessing the field via an interface.
+func (v *DocumentListFieldsInitiative) GetId() string { return v.Id }
+
+// GetName returns DocumentListFieldsInitiative.Name, and is useful for accessing the field via an interface.
+func (v *DocumentListFieldsInitiative) GetName() string { return v.Name }
+
+// DocumentListFieldsProject includes the requested fields of the GraphQL type Project.
+// The GraphQL type's documentation follows.
+//
+// A project is a collection of issues working toward a shared goal. Projects have
+// start and target dates, milestones, status tracking, and progress metrics. They
+// can span multiple teams and be grouped under initiatives.
+type DocumentListFieldsProject struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the project.
+	Name string `json:"name"`
+}
+
+// GetId returns DocumentListFieldsProject.Id, and is useful for accessing the field via an interface.
+func (v *DocumentListFieldsProject) GetId() string { return v.Id }
+
+// GetName returns DocumentListFieldsProject.Name, and is useful for accessing the field via an interface.
+func (v *DocumentListFieldsProject) GetName() string { return v.Name }
+
+// DocumentUnarchiveDocumentUnarchiveDocumentArchivePayload includes the requested fields of the GraphQL type DocumentArchivePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity archive mutations.
+type DocumentUnarchiveDocumentUnarchiveDocumentArchivePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The archived/unarchived entity. Null if entity was deleted.
+	Entity *DocumentUnarchiveDocumentUnarchiveDocumentArchivePayloadEntityDocument `json:"entity"`
+}
+
+// GetSuccess returns DocumentUnarchiveDocumentUnarchiveDocumentArchivePayload.Success, and is useful for accessing the field via an interface.
+func (v *DocumentUnarchiveDocumentUnarchiveDocumentArchivePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetEntity returns DocumentUnarchiveDocumentUnarchiveDocumentArchivePayload.Entity, and is useful for accessing the field via an interface.
+func (v *DocumentUnarchiveDocumentUnarchiveDocumentArchivePayload) GetEntity() *DocumentUnarchiveDocumentUnarchiveDocumentArchivePayloadEntityDocument {
+	return v.Entity
+}
+
+// DocumentUnarchiveDocumentUnarchiveDocumentArchivePayloadEntityDocument includes the requested fields of the GraphQL type Document.
+// The GraphQL type's documentation follows.
+//
+// A rich-text document that lives within a project, initiative, team, issue,
+// release, or cycle. Documents support collaborative editing via ProseMirror/Yjs
+// and store their content in a separate DocumentContent entity. Each document is
+// associated with exactly one parent entity.
+type DocumentUnarchiveDocumentUnarchiveDocumentArchivePayloadEntityDocument struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+}
+
+// GetId returns DocumentUnarchiveDocumentUnarchiveDocumentArchivePayloadEntityDocument.Id, and is useful for accessing the field via an interface.
+func (v *DocumentUnarchiveDocumentUnarchiveDocumentArchivePayloadEntityDocument) GetId() string {
+	return v.Id
+}
+
+// DocumentUnarchiveResponse is returned by DocumentUnarchive on success.
+type DocumentUnarchiveResponse struct {
+	// Restores a previously trashed document by unarchiving it.
+	DocumentUnarchive *DocumentUnarchiveDocumentUnarchiveDocumentArchivePayload `json:"documentUnarchive"`
+}
+
+// GetDocumentUnarchive returns DocumentUnarchiveResponse.DocumentUnarchive, and is useful for accessing the field via an interface.
+func (v *DocumentUnarchiveResponse) GetDocumentUnarchive() *DocumentUnarchiveDocumentUnarchiveDocumentArchivePayload {
+	return v.DocumentUnarchive
+}
+
+// DocumentUpdateDocumentUpdateDocumentPayload includes the requested fields of the GraphQL type DocumentPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a document mutation.
+type DocumentUpdateDocumentUpdateDocumentPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The document that was created or updated.
+	Document *DocumentUpdateDocumentUpdateDocumentPayloadDocument `json:"document"`
+}
+
+// GetSuccess returns DocumentUpdateDocumentUpdateDocumentPayload.Success, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateDocumentUpdateDocumentPayload) GetSuccess() bool { return v.Success }
+
+// GetDocument returns DocumentUpdateDocumentUpdateDocumentPayload.Document, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateDocumentUpdateDocumentPayload) GetDocument() *DocumentUpdateDocumentUpdateDocumentPayloadDocument {
+	return v.Document
+}
+
+// DocumentUpdateDocumentUpdateDocumentPayloadDocument includes the requested fields of the GraphQL type Document.
+// The GraphQL type's documentation follows.
+//
+// A rich-text document that lives within a project, initiative, team, issue,
+// release, or cycle. Documents support collaborative editing via ProseMirror/Yjs
+// and store their content in a separate DocumentContent entity. Each document is
+// associated with exactly one parent entity.
+type DocumentUpdateDocumentUpdateDocumentPayloadDocument struct {
+	DocumentDetailFields `json:"-"`
+}
+
+// GetContent returns DocumentUpdateDocumentUpdateDocumentPayloadDocument.Content, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateDocumentUpdateDocumentPayloadDocument) GetContent() *string {
+	return v.DocumentDetailFields.Content
+}
+
+// GetDocumentContentId returns DocumentUpdateDocumentUpdateDocumentPayloadDocument.DocumentContentId, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateDocumentUpdateDocumentPayloadDocument) GetDocumentContentId() *string {
+	return v.DocumentDetailFields.DocumentContentId
+}
+
+// GetUpdatedBy returns DocumentUpdateDocumentUpdateDocumentPayloadDocument.UpdatedBy, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateDocumentUpdateDocumentPayloadDocument) GetUpdatedBy() *DocumentDetailFieldsUpdatedByUser {
+	return v.DocumentDetailFields.UpdatedBy
+}
+
+// GetId returns DocumentUpdateDocumentUpdateDocumentPayloadDocument.Id, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateDocumentUpdateDocumentPayloadDocument) GetId() string {
+	return v.DocumentDetailFields.DocumentListFields.Id
+}
+
+// GetTitle returns DocumentUpdateDocumentUpdateDocumentPayloadDocument.Title, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateDocumentUpdateDocumentPayloadDocument) GetTitle() string {
+	return v.DocumentDetailFields.DocumentListFields.Title
+}
+
+// GetIcon returns DocumentUpdateDocumentUpdateDocumentPayloadDocument.Icon, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateDocumentUpdateDocumentPayloadDocument) GetIcon() *string {
+	return v.DocumentDetailFields.DocumentListFields.Icon
+}
+
+// GetColor returns DocumentUpdateDocumentUpdateDocumentPayloadDocument.Color, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateDocumentUpdateDocumentPayloadDocument) GetColor() *string {
+	return v.DocumentDetailFields.DocumentListFields.Color
+}
+
+// GetSlugId returns DocumentUpdateDocumentUpdateDocumentPayloadDocument.SlugId, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateDocumentUpdateDocumentPayloadDocument) GetSlugId() string {
+	return v.DocumentDetailFields.DocumentListFields.SlugId
+}
+
+// GetUrl returns DocumentUpdateDocumentUpdateDocumentPayloadDocument.Url, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateDocumentUpdateDocumentPayloadDocument) GetUrl() string {
+	return v.DocumentDetailFields.DocumentListFields.Url
+}
+
+// GetCreatedAt returns DocumentUpdateDocumentUpdateDocumentPayloadDocument.CreatedAt, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateDocumentUpdateDocumentPayloadDocument) GetCreatedAt() time.Time {
+	return v.DocumentDetailFields.DocumentListFields.CreatedAt
+}
+
+// GetUpdatedAt returns DocumentUpdateDocumentUpdateDocumentPayloadDocument.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateDocumentUpdateDocumentPayloadDocument) GetUpdatedAt() time.Time {
+	return v.DocumentDetailFields.DocumentListFields.UpdatedAt
+}
+
+// GetProject returns DocumentUpdateDocumentUpdateDocumentPayloadDocument.Project, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateDocumentUpdateDocumentPayloadDocument) GetProject() *DocumentListFieldsProject {
+	return v.DocumentDetailFields.DocumentListFields.Project
+}
+
+// GetInitiative returns DocumentUpdateDocumentUpdateDocumentPayloadDocument.Initiative, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateDocumentUpdateDocumentPayloadDocument) GetInitiative() *DocumentListFieldsInitiative {
+	return v.DocumentDetailFields.DocumentListFields.Initiative
+}
+
+// GetCreator returns DocumentUpdateDocumentUpdateDocumentPayloadDocument.Creator, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateDocumentUpdateDocumentPayloadDocument) GetCreator() *DocumentListFieldsCreatorUser {
+	return v.DocumentDetailFields.DocumentListFields.Creator
+}
+
+func (v *DocumentUpdateDocumentUpdateDocumentPayloadDocument) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*DocumentUpdateDocumentUpdateDocumentPayloadDocument
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.DocumentUpdateDocumentUpdateDocumentPayloadDocument = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.DocumentDetailFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalDocumentUpdateDocumentUpdateDocumentPayloadDocument struct {
+	Content *string `json:"content"`
+
+	DocumentContentId *string `json:"documentContentId"`
+
+	UpdatedBy *DocumentDetailFieldsUpdatedByUser `json:"updatedBy"`
+
+	Id string `json:"id"`
+
+	Title string `json:"title"`
+
+	Icon *string `json:"icon"`
+
+	Color *string `json:"color"`
+
+	SlugId string `json:"slugId"`
+
+	Url string `json:"url"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	Project *DocumentListFieldsProject `json:"project"`
+
+	Initiative *DocumentListFieldsInitiative `json:"initiative"`
+
+	Creator *DocumentListFieldsCreatorUser `json:"creator"`
+}
+
+func (v *DocumentUpdateDocumentUpdateDocumentPayloadDocument) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *DocumentUpdateDocumentUpdateDocumentPayloadDocument) __premarshalJSON() (*__premarshalDocumentUpdateDocumentUpdateDocumentPayloadDocument, error) {
+	var retval __premarshalDocumentUpdateDocumentUpdateDocumentPayloadDocument
+
+	retval.Content = v.DocumentDetailFields.Content
+	retval.DocumentContentId = v.DocumentDetailFields.DocumentContentId
+	retval.UpdatedBy = v.DocumentDetailFields.UpdatedBy
+	retval.Id = v.DocumentDetailFields.DocumentListFields.Id
+	retval.Title = v.DocumentDetailFields.DocumentListFields.Title
+	retval.Icon = v.DocumentDetailFields.DocumentListFields.Icon
+	retval.Color = v.DocumentDetailFields.DocumentListFields.Color
+	retval.SlugId = v.DocumentDetailFields.DocumentListFields.SlugId
+	retval.Url = v.DocumentDetailFields.DocumentListFields.Url
+	retval.CreatedAt = v.DocumentDetailFields.DocumentListFields.CreatedAt
+	retval.UpdatedAt = v.DocumentDetailFields.DocumentListFields.UpdatedAt
+	retval.Project = v.DocumentDetailFields.DocumentListFields.Project
+	retval.Initiative = v.DocumentDetailFields.DocumentListFields.Initiative
+	retval.Creator = v.DocumentDetailFields.DocumentListFields.Creator
+	return &retval, nil
+}
+
+// Input for updating an existing document.
+type DocumentUpdateInput struct {
+	// The color of the icon.
+	Color *string `json:"color"`
+	// The document content as markdown.
+	Content *string `json:"content"`
+	// [Internal] Related cycle for the document.
+	CycleId *string `json:"cycleId"`
+	// The time at which the document was hidden. Set to null to unhide.
+	HiddenAt *time.Time `json:"hiddenAt"`
+	// The icon of the document.
+	Icon *string `json:"icon"`
+	// [Internal] Related initiative for the document.
+	InitiativeId *string `json:"initiativeId"`
+	// Related issue for the document. Can be a UUID or issue identifier (e.g., 'LIN-123').
+	IssueId *string `json:"issueId"`
+	// The ID of the last template applied to the document.
+	LastAppliedTemplateId *string `json:"lastAppliedTemplateId"`
+	// Related project for the document.
+	ProjectId *string `json:"projectId"`
+	// Related release for the document.
+	ReleaseId *string `json:"releaseId"`
+	// [Internal] The resource folder containing the document.
+	ResourceFolderId *string `json:"resourceFolderId"`
+	// The order of the item in the resources list.
+	SortOrder *float64 `json:"sortOrder"`
+	// [INTERNAL] The identifiers of the users subscribing to this document.
+	SubscriberIds []string `json:"subscriberIds"`
+	// [Internal] Related team for the document.
+	TeamId *string `json:"teamId"`
+	// The title of the document.
+	Title *string `json:"title"`
+	// Whether the document has been trashed. Set to true to trash, or null to restore from trash.
+	Trashed *bool `json:"trashed"`
+}
+
+// GetColor returns DocumentUpdateInput.Color, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateInput) GetColor() *string { return v.Color }
+
+// GetContent returns DocumentUpdateInput.Content, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateInput) GetContent() *string { return v.Content }
+
+// GetCycleId returns DocumentUpdateInput.CycleId, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateInput) GetCycleId() *string { return v.CycleId }
+
+// GetHiddenAt returns DocumentUpdateInput.HiddenAt, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateInput) GetHiddenAt() *time.Time { return v.HiddenAt }
+
+// GetIcon returns DocumentUpdateInput.Icon, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateInput) GetIcon() *string { return v.Icon }
+
+// GetInitiativeId returns DocumentUpdateInput.InitiativeId, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateInput) GetInitiativeId() *string { return v.InitiativeId }
+
+// GetIssueId returns DocumentUpdateInput.IssueId, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateInput) GetIssueId() *string { return v.IssueId }
+
+// GetLastAppliedTemplateId returns DocumentUpdateInput.LastAppliedTemplateId, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateInput) GetLastAppliedTemplateId() *string { return v.LastAppliedTemplateId }
+
+// GetProjectId returns DocumentUpdateInput.ProjectId, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateInput) GetProjectId() *string { return v.ProjectId }
+
+// GetReleaseId returns DocumentUpdateInput.ReleaseId, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateInput) GetReleaseId() *string { return v.ReleaseId }
+
+// GetResourceFolderId returns DocumentUpdateInput.ResourceFolderId, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateInput) GetResourceFolderId() *string { return v.ResourceFolderId }
+
+// GetSortOrder returns DocumentUpdateInput.SortOrder, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateInput) GetSortOrder() *float64 { return v.SortOrder }
+
+// GetSubscriberIds returns DocumentUpdateInput.SubscriberIds, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateInput) GetSubscriberIds() []string { return v.SubscriberIds }
+
+// GetTeamId returns DocumentUpdateInput.TeamId, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateInput) GetTeamId() *string { return v.TeamId }
+
+// GetTitle returns DocumentUpdateInput.Title, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateInput) GetTitle() *string { return v.Title }
+
+// GetTrashed returns DocumentUpdateInput.Trashed, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateInput) GetTrashed() *bool { return v.Trashed }
+
+// DocumentUpdateResponse is returned by DocumentUpdate on success.
+type DocumentUpdateResponse struct {
+	// Updates a document.
+	DocumentUpdate *DocumentUpdateDocumentUpdateDocumentPayload `json:"documentUpdate"`
+}
+
+// GetDocumentUpdate returns DocumentUpdateResponse.DocumentUpdate, and is useful for accessing the field via an interface.
+func (v *DocumentUpdateResponse) GetDocumentUpdate() *DocumentUpdateDocumentUpdateDocumentPayload {
+	return v.DocumentUpdate
+}
 
 // Comparator for estimates.
 type EstimateComparator struct {
@@ -3738,6 +4738,82 @@ var AllFrequencyResolutionType = []FrequencyResolutionType{
 	FrequencyResolutionTypeWeekly,
 }
 
+// GetCommentReactionsComment includes the requested fields of the GraphQL type Comment.
+// The GraphQL type's documentation follows.
+//
+// A comment associated with an issue, project update, initiative update, document
+// content, post, project, or initiative. Comments support rich text (ProseMirror),
+// emoji reactions, and threaded replies via parentId. Comments can be created by
+// workspace users or by external users through integrations (e.g., Slack,
+// Intercom). Each comment belongs to exactly one parent entity.
+type GetCommentReactionsComment struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// Reactions associated with the comment.
+	Reactions []*GetCommentReactionsCommentReactionsReaction `json:"reactions"`
+}
+
+// GetId returns GetCommentReactionsComment.Id, and is useful for accessing the field via an interface.
+func (v *GetCommentReactionsComment) GetId() string { return v.Id }
+
+// GetReactions returns GetCommentReactionsComment.Reactions, and is useful for accessing the field via an interface.
+func (v *GetCommentReactionsComment) GetReactions() []*GetCommentReactionsCommentReactionsReaction {
+	return v.Reactions
+}
+
+// GetCommentReactionsCommentReactionsReaction includes the requested fields of the GraphQL type Reaction.
+// The GraphQL type's documentation follows.
+//
+// An emoji reaction on a comment, issue, project update, initiative update, post,
+// pull request, or pull request comment. Each reaction is associated with exactly
+// one parent entity and is created by either a workspace user or an external user.
+// Reactions are persisted individually but surfaced on their parent entities as
+// aggregated reactionData.
+type GetCommentReactionsCommentReactionsReaction struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the emoji used for this reaction. For custom workspace emojis,
+	// this is the custom emoji name; for standard emojis, this is the normalized emoji name.
+	Emoji string `json:"emoji"`
+	// The workspace user that created the reaction. Null if the reaction was created by an external user through an integration.
+	User *GetCommentReactionsCommentReactionsReactionUser `json:"user"`
+}
+
+// GetId returns GetCommentReactionsCommentReactionsReaction.Id, and is useful for accessing the field via an interface.
+func (v *GetCommentReactionsCommentReactionsReaction) GetId() string { return v.Id }
+
+// GetEmoji returns GetCommentReactionsCommentReactionsReaction.Emoji, and is useful for accessing the field via an interface.
+func (v *GetCommentReactionsCommentReactionsReaction) GetEmoji() string { return v.Emoji }
+
+// GetUser returns GetCommentReactionsCommentReactionsReaction.User, and is useful for accessing the field via an interface.
+func (v *GetCommentReactionsCommentReactionsReaction) GetUser() *GetCommentReactionsCommentReactionsReactionUser {
+	return v.User
+}
+
+// GetCommentReactionsCommentReactionsReactionUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
+type GetCommentReactionsCommentReactionsReactionUser struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+}
+
+// GetId returns GetCommentReactionsCommentReactionsReactionUser.Id, and is useful for accessing the field via an interface.
+func (v *GetCommentReactionsCommentReactionsReactionUser) GetId() string { return v.Id }
+
+// GetCommentReactionsResponse is returned by GetCommentReactions on success.
+type GetCommentReactionsResponse struct {
+	// A specific comment.
+	Comment *GetCommentReactionsComment `json:"comment"`
+}
+
+// GetComment returns GetCommentReactionsResponse.Comment, and is useful for accessing the field via an interface.
+func (v *GetCommentReactionsResponse) GetComment() *GetCommentReactionsComment { return v.Comment }
+
 // GetCycleCycle includes the requested fields of the GraphQL type Cycle.
 // The GraphQL type's documentation follows.
 //
@@ -3873,6 +4949,173 @@ type GetCycleResponse struct {
 
 // GetCycle returns GetCycleResponse.Cycle, and is useful for accessing the field via an interface.
 func (v *GetCycleResponse) GetCycle() *GetCycleCycle { return v.Cycle }
+
+// GetDocumentDocument includes the requested fields of the GraphQL type Document.
+// The GraphQL type's documentation follows.
+//
+// A rich-text document that lives within a project, initiative, team, issue,
+// release, or cycle. Documents support collaborative editing via ProseMirror/Yjs
+// and store their content in a separate DocumentContent entity. Each document is
+// associated with exactly one parent entity.
+type GetDocumentDocument struct {
+	DocumentDetailFields `json:"-"`
+}
+
+// GetContent returns GetDocumentDocument.Content, and is useful for accessing the field via an interface.
+func (v *GetDocumentDocument) GetContent() *string { return v.DocumentDetailFields.Content }
+
+// GetDocumentContentId returns GetDocumentDocument.DocumentContentId, and is useful for accessing the field via an interface.
+func (v *GetDocumentDocument) GetDocumentContentId() *string {
+	return v.DocumentDetailFields.DocumentContentId
+}
+
+// GetUpdatedBy returns GetDocumentDocument.UpdatedBy, and is useful for accessing the field via an interface.
+func (v *GetDocumentDocument) GetUpdatedBy() *DocumentDetailFieldsUpdatedByUser {
+	return v.DocumentDetailFields.UpdatedBy
+}
+
+// GetId returns GetDocumentDocument.Id, and is useful for accessing the field via an interface.
+func (v *GetDocumentDocument) GetId() string { return v.DocumentDetailFields.DocumentListFields.Id }
+
+// GetTitle returns GetDocumentDocument.Title, and is useful for accessing the field via an interface.
+func (v *GetDocumentDocument) GetTitle() string {
+	return v.DocumentDetailFields.DocumentListFields.Title
+}
+
+// GetIcon returns GetDocumentDocument.Icon, and is useful for accessing the field via an interface.
+func (v *GetDocumentDocument) GetIcon() *string {
+	return v.DocumentDetailFields.DocumentListFields.Icon
+}
+
+// GetColor returns GetDocumentDocument.Color, and is useful for accessing the field via an interface.
+func (v *GetDocumentDocument) GetColor() *string {
+	return v.DocumentDetailFields.DocumentListFields.Color
+}
+
+// GetSlugId returns GetDocumentDocument.SlugId, and is useful for accessing the field via an interface.
+func (v *GetDocumentDocument) GetSlugId() string {
+	return v.DocumentDetailFields.DocumentListFields.SlugId
+}
+
+// GetUrl returns GetDocumentDocument.Url, and is useful for accessing the field via an interface.
+func (v *GetDocumentDocument) GetUrl() string { return v.DocumentDetailFields.DocumentListFields.Url }
+
+// GetCreatedAt returns GetDocumentDocument.CreatedAt, and is useful for accessing the field via an interface.
+func (v *GetDocumentDocument) GetCreatedAt() time.Time {
+	return v.DocumentDetailFields.DocumentListFields.CreatedAt
+}
+
+// GetUpdatedAt returns GetDocumentDocument.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *GetDocumentDocument) GetUpdatedAt() time.Time {
+	return v.DocumentDetailFields.DocumentListFields.UpdatedAt
+}
+
+// GetProject returns GetDocumentDocument.Project, and is useful for accessing the field via an interface.
+func (v *GetDocumentDocument) GetProject() *DocumentListFieldsProject {
+	return v.DocumentDetailFields.DocumentListFields.Project
+}
+
+// GetInitiative returns GetDocumentDocument.Initiative, and is useful for accessing the field via an interface.
+func (v *GetDocumentDocument) GetInitiative() *DocumentListFieldsInitiative {
+	return v.DocumentDetailFields.DocumentListFields.Initiative
+}
+
+// GetCreator returns GetDocumentDocument.Creator, and is useful for accessing the field via an interface.
+func (v *GetDocumentDocument) GetCreator() *DocumentListFieldsCreatorUser {
+	return v.DocumentDetailFields.DocumentListFields.Creator
+}
+
+func (v *GetDocumentDocument) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*GetDocumentDocument
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.GetDocumentDocument = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.DocumentDetailFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalGetDocumentDocument struct {
+	Content *string `json:"content"`
+
+	DocumentContentId *string `json:"documentContentId"`
+
+	UpdatedBy *DocumentDetailFieldsUpdatedByUser `json:"updatedBy"`
+
+	Id string `json:"id"`
+
+	Title string `json:"title"`
+
+	Icon *string `json:"icon"`
+
+	Color *string `json:"color"`
+
+	SlugId string `json:"slugId"`
+
+	Url string `json:"url"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	Project *DocumentListFieldsProject `json:"project"`
+
+	Initiative *DocumentListFieldsInitiative `json:"initiative"`
+
+	Creator *DocumentListFieldsCreatorUser `json:"creator"`
+}
+
+func (v *GetDocumentDocument) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *GetDocumentDocument) __premarshalJSON() (*__premarshalGetDocumentDocument, error) {
+	var retval __premarshalGetDocumentDocument
+
+	retval.Content = v.DocumentDetailFields.Content
+	retval.DocumentContentId = v.DocumentDetailFields.DocumentContentId
+	retval.UpdatedBy = v.DocumentDetailFields.UpdatedBy
+	retval.Id = v.DocumentDetailFields.DocumentListFields.Id
+	retval.Title = v.DocumentDetailFields.DocumentListFields.Title
+	retval.Icon = v.DocumentDetailFields.DocumentListFields.Icon
+	retval.Color = v.DocumentDetailFields.DocumentListFields.Color
+	retval.SlugId = v.DocumentDetailFields.DocumentListFields.SlugId
+	retval.Url = v.DocumentDetailFields.DocumentListFields.Url
+	retval.CreatedAt = v.DocumentDetailFields.DocumentListFields.CreatedAt
+	retval.UpdatedAt = v.DocumentDetailFields.DocumentListFields.UpdatedAt
+	retval.Project = v.DocumentDetailFields.DocumentListFields.Project
+	retval.Initiative = v.DocumentDetailFields.DocumentListFields.Initiative
+	retval.Creator = v.DocumentDetailFields.DocumentListFields.Creator
+	return &retval, nil
+}
+
+// GetDocumentResponse is returned by GetDocument on success.
+type GetDocumentResponse struct {
+	// A specific document by ID or slug.
+	Document *GetDocumentDocument `json:"document"`
+}
+
+// GetDocument returns GetDocumentResponse.Document, and is useful for accessing the field via an interface.
+func (v *GetDocumentResponse) GetDocument() *GetDocumentDocument { return v.Document }
 
 // GetInitiativeInitiative includes the requested fields of the GraphQL type Initiative.
 // The GraphQL type's documentation follows.
@@ -4761,6 +6004,83 @@ type GetIssueLabelResponse struct {
 
 // GetIssueLabel returns GetIssueLabelResponse.IssueLabel, and is useful for accessing the field via an interface.
 func (v *GetIssueLabelResponse) GetIssueLabel() *GetIssueLabelIssueLabel { return v.IssueLabel }
+
+// GetIssueReactionsIssue includes the requested fields of the GraphQL type Issue.
+// The GraphQL type's documentation follows.
+//
+// An issue is the core work item in Linear. Issues belong to a team, have a
+// workflow status, can be assigned to users, carry a priority level, and can be
+// organized into projects and cycles. Issues support sub-issues (parent-child
+// hierarchy up to 10 levels deep), labels, due dates, estimates, and SLA tracking.
+// They can also be linked to other issues via relations, attached to releases, and
+// tracked through their full history of changes.
+type GetIssueReactionsIssue struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// Reactions associated with the issue.
+	Reactions []*GetIssueReactionsIssueReactionsReaction `json:"reactions"`
+}
+
+// GetId returns GetIssueReactionsIssue.Id, and is useful for accessing the field via an interface.
+func (v *GetIssueReactionsIssue) GetId() string { return v.Id }
+
+// GetReactions returns GetIssueReactionsIssue.Reactions, and is useful for accessing the field via an interface.
+func (v *GetIssueReactionsIssue) GetReactions() []*GetIssueReactionsIssueReactionsReaction {
+	return v.Reactions
+}
+
+// GetIssueReactionsIssueReactionsReaction includes the requested fields of the GraphQL type Reaction.
+// The GraphQL type's documentation follows.
+//
+// An emoji reaction on a comment, issue, project update, initiative update, post,
+// pull request, or pull request comment. Each reaction is associated with exactly
+// one parent entity and is created by either a workspace user or an external user.
+// Reactions are persisted individually but surfaced on their parent entities as
+// aggregated reactionData.
+type GetIssueReactionsIssueReactionsReaction struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the emoji used for this reaction. For custom workspace emojis,
+	// this is the custom emoji name; for standard emojis, this is the normalized emoji name.
+	Emoji string `json:"emoji"`
+	// The workspace user that created the reaction. Null if the reaction was created by an external user through an integration.
+	User *GetIssueReactionsIssueReactionsReactionUser `json:"user"`
+}
+
+// GetId returns GetIssueReactionsIssueReactionsReaction.Id, and is useful for accessing the field via an interface.
+func (v *GetIssueReactionsIssueReactionsReaction) GetId() string { return v.Id }
+
+// GetEmoji returns GetIssueReactionsIssueReactionsReaction.Emoji, and is useful for accessing the field via an interface.
+func (v *GetIssueReactionsIssueReactionsReaction) GetEmoji() string { return v.Emoji }
+
+// GetUser returns GetIssueReactionsIssueReactionsReaction.User, and is useful for accessing the field via an interface.
+func (v *GetIssueReactionsIssueReactionsReaction) GetUser() *GetIssueReactionsIssueReactionsReactionUser {
+	return v.User
+}
+
+// GetIssueReactionsIssueReactionsReactionUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
+type GetIssueReactionsIssueReactionsReactionUser struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+}
+
+// GetId returns GetIssueReactionsIssueReactionsReactionUser.Id, and is useful for accessing the field via an interface.
+func (v *GetIssueReactionsIssueReactionsReactionUser) GetId() string { return v.Id }
+
+// GetIssueReactionsResponse is returned by GetIssueReactions on success.
+type GetIssueReactionsResponse struct {
+	// One specific issue, looked up by its unique identifier.
+	Issue *GetIssueReactionsIssue `json:"issue"`
+}
+
+// GetIssue returns GetIssueReactionsResponse.Issue, and is useful for accessing the field via an interface.
+func (v *GetIssueReactionsResponse) GetIssue() *GetIssueReactionsIssue { return v.Issue }
 
 // GetIssueResponse is returned by GetIssue on success.
 type GetIssueResponse struct {
@@ -15692,6 +17012,189 @@ type ListCyclesResponse struct {
 // GetCycles returns ListCyclesResponse.Cycles, and is useful for accessing the field via an interface.
 func (v *ListCyclesResponse) GetCycles() *ListCyclesCyclesCycleConnection { return v.Cycles }
 
+// ListDocumentsDocumentsDocumentConnection includes the requested fields of the GraphQL type DocumentConnection.
+type ListDocumentsDocumentsDocumentConnection struct {
+	Nodes    []*ListDocumentsDocumentsDocumentConnectionNodesDocument `json:"nodes"`
+	PageInfo *ListDocumentsDocumentsDocumentConnectionPageInfo        `json:"pageInfo"`
+}
+
+// GetNodes returns ListDocumentsDocumentsDocumentConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ListDocumentsDocumentsDocumentConnection) GetNodes() []*ListDocumentsDocumentsDocumentConnectionNodesDocument {
+	return v.Nodes
+}
+
+// GetPageInfo returns ListDocumentsDocumentsDocumentConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *ListDocumentsDocumentsDocumentConnection) GetPageInfo() *ListDocumentsDocumentsDocumentConnectionPageInfo {
+	return v.PageInfo
+}
+
+// ListDocumentsDocumentsDocumentConnectionNodesDocument includes the requested fields of the GraphQL type Document.
+// The GraphQL type's documentation follows.
+//
+// A rich-text document that lives within a project, initiative, team, issue,
+// release, or cycle. Documents support collaborative editing via ProseMirror/Yjs
+// and store their content in a separate DocumentContent entity. Each document is
+// associated with exactly one parent entity.
+type ListDocumentsDocumentsDocumentConnectionNodesDocument struct {
+	DocumentListFields `json:"-"`
+}
+
+// GetId returns ListDocumentsDocumentsDocumentConnectionNodesDocument.Id, and is useful for accessing the field via an interface.
+func (v *ListDocumentsDocumentsDocumentConnectionNodesDocument) GetId() string {
+	return v.DocumentListFields.Id
+}
+
+// GetTitle returns ListDocumentsDocumentsDocumentConnectionNodesDocument.Title, and is useful for accessing the field via an interface.
+func (v *ListDocumentsDocumentsDocumentConnectionNodesDocument) GetTitle() string {
+	return v.DocumentListFields.Title
+}
+
+// GetIcon returns ListDocumentsDocumentsDocumentConnectionNodesDocument.Icon, and is useful for accessing the field via an interface.
+func (v *ListDocumentsDocumentsDocumentConnectionNodesDocument) GetIcon() *string {
+	return v.DocumentListFields.Icon
+}
+
+// GetColor returns ListDocumentsDocumentsDocumentConnectionNodesDocument.Color, and is useful for accessing the field via an interface.
+func (v *ListDocumentsDocumentsDocumentConnectionNodesDocument) GetColor() *string {
+	return v.DocumentListFields.Color
+}
+
+// GetSlugId returns ListDocumentsDocumentsDocumentConnectionNodesDocument.SlugId, and is useful for accessing the field via an interface.
+func (v *ListDocumentsDocumentsDocumentConnectionNodesDocument) GetSlugId() string {
+	return v.DocumentListFields.SlugId
+}
+
+// GetUrl returns ListDocumentsDocumentsDocumentConnectionNodesDocument.Url, and is useful for accessing the field via an interface.
+func (v *ListDocumentsDocumentsDocumentConnectionNodesDocument) GetUrl() string {
+	return v.DocumentListFields.Url
+}
+
+// GetCreatedAt returns ListDocumentsDocumentsDocumentConnectionNodesDocument.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ListDocumentsDocumentsDocumentConnectionNodesDocument) GetCreatedAt() time.Time {
+	return v.DocumentListFields.CreatedAt
+}
+
+// GetUpdatedAt returns ListDocumentsDocumentsDocumentConnectionNodesDocument.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ListDocumentsDocumentsDocumentConnectionNodesDocument) GetUpdatedAt() time.Time {
+	return v.DocumentListFields.UpdatedAt
+}
+
+// GetProject returns ListDocumentsDocumentsDocumentConnectionNodesDocument.Project, and is useful for accessing the field via an interface.
+func (v *ListDocumentsDocumentsDocumentConnectionNodesDocument) GetProject() *DocumentListFieldsProject {
+	return v.DocumentListFields.Project
+}
+
+// GetInitiative returns ListDocumentsDocumentsDocumentConnectionNodesDocument.Initiative, and is useful for accessing the field via an interface.
+func (v *ListDocumentsDocumentsDocumentConnectionNodesDocument) GetInitiative() *DocumentListFieldsInitiative {
+	return v.DocumentListFields.Initiative
+}
+
+// GetCreator returns ListDocumentsDocumentsDocumentConnectionNodesDocument.Creator, and is useful for accessing the field via an interface.
+func (v *ListDocumentsDocumentsDocumentConnectionNodesDocument) GetCreator() *DocumentListFieldsCreatorUser {
+	return v.DocumentListFields.Creator
+}
+
+func (v *ListDocumentsDocumentsDocumentConnectionNodesDocument) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ListDocumentsDocumentsDocumentConnectionNodesDocument
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ListDocumentsDocumentsDocumentConnectionNodesDocument = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.DocumentListFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalListDocumentsDocumentsDocumentConnectionNodesDocument struct {
+	Id string `json:"id"`
+
+	Title string `json:"title"`
+
+	Icon *string `json:"icon"`
+
+	Color *string `json:"color"`
+
+	SlugId string `json:"slugId"`
+
+	Url string `json:"url"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	Project *DocumentListFieldsProject `json:"project"`
+
+	Initiative *DocumentListFieldsInitiative `json:"initiative"`
+
+	Creator *DocumentListFieldsCreatorUser `json:"creator"`
+}
+
+func (v *ListDocumentsDocumentsDocumentConnectionNodesDocument) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ListDocumentsDocumentsDocumentConnectionNodesDocument) __premarshalJSON() (*__premarshalListDocumentsDocumentsDocumentConnectionNodesDocument, error) {
+	var retval __premarshalListDocumentsDocumentsDocumentConnectionNodesDocument
+
+	retval.Id = v.DocumentListFields.Id
+	retval.Title = v.DocumentListFields.Title
+	retval.Icon = v.DocumentListFields.Icon
+	retval.Color = v.DocumentListFields.Color
+	retval.SlugId = v.DocumentListFields.SlugId
+	retval.Url = v.DocumentListFields.Url
+	retval.CreatedAt = v.DocumentListFields.CreatedAt
+	retval.UpdatedAt = v.DocumentListFields.UpdatedAt
+	retval.Project = v.DocumentListFields.Project
+	retval.Initiative = v.DocumentListFields.Initiative
+	retval.Creator = v.DocumentListFields.Creator
+	return &retval, nil
+}
+
+// ListDocumentsDocumentsDocumentConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+type ListDocumentsDocumentsDocumentConnectionPageInfo struct {
+	// Indicates if there are more results when paginating forward.
+	HasNextPage bool `json:"hasNextPage"`
+	// Cursor representing the last result in the paginated results.
+	EndCursor *string `json:"endCursor"`
+}
+
+// GetHasNextPage returns ListDocumentsDocumentsDocumentConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *ListDocumentsDocumentsDocumentConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// GetEndCursor returns ListDocumentsDocumentsDocumentConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *ListDocumentsDocumentsDocumentConnectionPageInfo) GetEndCursor() *string { return v.EndCursor }
+
+// ListDocumentsResponse is returned by ListDocuments on success.
+type ListDocumentsResponse struct {
+	// All documents the user has access to in the workspace.
+	Documents *ListDocumentsDocumentsDocumentConnection `json:"documents"`
+}
+
+// GetDocuments returns ListDocumentsResponse.Documents, and is useful for accessing the field via an interface.
+func (v *ListDocumentsResponse) GetDocuments() *ListDocumentsDocumentsDocumentConnection {
+	return v.Documents
+}
+
 // ListInitiativeLabelsInitiativeLabelsInitiativeLabelConnection includes the requested fields of the GraphQL type InitiativeLabelConnection.
 type ListInitiativeLabelsInitiativeLabelsInitiativeLabelConnection struct {
 	Nodes []*ListInitiativeLabelsInitiativeLabelsInitiativeLabelConnectionNodesInitiativeLabel `json:"nodes"`
@@ -25676,6 +27179,135 @@ func (v *ReactionCollectionFilter) GetSome() *ReactionFilter { return v.Some }
 // GetUpdatedAt returns ReactionCollectionFilter.UpdatedAt, and is useful for accessing the field via an interface.
 func (v *ReactionCollectionFilter) GetUpdatedAt() *DateComparator { return v.UpdatedAt }
 
+// Input for creating a new reaction.
+type ReactionCreateInput struct {
+	// The comment to associate the reaction with.
+	CommentId *string `json:"commentId"`
+	// The emoji the user reacted with.
+	Emoji string `json:"emoji"`
+	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
+	Id *string `json:"id"`
+	// The update to associate the reaction with.
+	InitiativeUpdateId *string `json:"initiativeUpdateId"`
+	// The issue to associate the reaction with. Can be a UUID or issue identifier (e.g., 'LIN-123').
+	IssueId *string `json:"issueId"`
+	// [Internal] The post to associate the reaction with.
+	PostId *string `json:"postId"`
+	// The project update to associate the reaction with.
+	ProjectUpdateId *string `json:"projectUpdateId"`
+	// [Internal] The pull request comment to associate the reaction with.
+	PullRequestCommentId *string `json:"pullRequestCommentId"`
+	// [Internal] The pull request to associate the reaction with.
+	PullRequestId *string `json:"pullRequestId"`
+}
+
+// GetCommentId returns ReactionCreateInput.CommentId, and is useful for accessing the field via an interface.
+func (v *ReactionCreateInput) GetCommentId() *string { return v.CommentId }
+
+// GetEmoji returns ReactionCreateInput.Emoji, and is useful for accessing the field via an interface.
+func (v *ReactionCreateInput) GetEmoji() string { return v.Emoji }
+
+// GetId returns ReactionCreateInput.Id, and is useful for accessing the field via an interface.
+func (v *ReactionCreateInput) GetId() *string { return v.Id }
+
+// GetInitiativeUpdateId returns ReactionCreateInput.InitiativeUpdateId, and is useful for accessing the field via an interface.
+func (v *ReactionCreateInput) GetInitiativeUpdateId() *string { return v.InitiativeUpdateId }
+
+// GetIssueId returns ReactionCreateInput.IssueId, and is useful for accessing the field via an interface.
+func (v *ReactionCreateInput) GetIssueId() *string { return v.IssueId }
+
+// GetPostId returns ReactionCreateInput.PostId, and is useful for accessing the field via an interface.
+func (v *ReactionCreateInput) GetPostId() *string { return v.PostId }
+
+// GetProjectUpdateId returns ReactionCreateInput.ProjectUpdateId, and is useful for accessing the field via an interface.
+func (v *ReactionCreateInput) GetProjectUpdateId() *string { return v.ProjectUpdateId }
+
+// GetPullRequestCommentId returns ReactionCreateInput.PullRequestCommentId, and is useful for accessing the field via an interface.
+func (v *ReactionCreateInput) GetPullRequestCommentId() *string { return v.PullRequestCommentId }
+
+// GetPullRequestId returns ReactionCreateInput.PullRequestId, and is useful for accessing the field via an interface.
+func (v *ReactionCreateInput) GetPullRequestId() *string { return v.PullRequestId }
+
+// ReactionCreateReactionCreateReactionPayload includes the requested fields of the GraphQL type ReactionPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a reaction mutation.
+type ReactionCreateReactionCreateReactionPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The reaction that was created.
+	Reaction *ReactionCreateReactionCreateReactionPayloadReaction `json:"reaction"`
+}
+
+// GetSuccess returns ReactionCreateReactionCreateReactionPayload.Success, and is useful for accessing the field via an interface.
+func (v *ReactionCreateReactionCreateReactionPayload) GetSuccess() bool { return v.Success }
+
+// GetReaction returns ReactionCreateReactionCreateReactionPayload.Reaction, and is useful for accessing the field via an interface.
+func (v *ReactionCreateReactionCreateReactionPayload) GetReaction() *ReactionCreateReactionCreateReactionPayloadReaction {
+	return v.Reaction
+}
+
+// ReactionCreateReactionCreateReactionPayloadReaction includes the requested fields of the GraphQL type Reaction.
+// The GraphQL type's documentation follows.
+//
+// An emoji reaction on a comment, issue, project update, initiative update, post,
+// pull request, or pull request comment. Each reaction is associated with exactly
+// one parent entity and is created by either a workspace user or an external user.
+// Reactions are persisted individually but surfaced on their parent entities as
+// aggregated reactionData.
+type ReactionCreateReactionCreateReactionPayloadReaction struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the emoji used for this reaction. For custom workspace emojis,
+	// this is the custom emoji name; for standard emojis, this is the normalized emoji name.
+	Emoji string `json:"emoji"`
+}
+
+// GetId returns ReactionCreateReactionCreateReactionPayloadReaction.Id, and is useful for accessing the field via an interface.
+func (v *ReactionCreateReactionCreateReactionPayloadReaction) GetId() string { return v.Id }
+
+// GetEmoji returns ReactionCreateReactionCreateReactionPayloadReaction.Emoji, and is useful for accessing the field via an interface.
+func (v *ReactionCreateReactionCreateReactionPayloadReaction) GetEmoji() string { return v.Emoji }
+
+// ReactionCreateResponse is returned by ReactionCreate on success.
+type ReactionCreateResponse struct {
+	// Creates a new reaction.
+	ReactionCreate *ReactionCreateReactionCreateReactionPayload `json:"reactionCreate"`
+}
+
+// GetReactionCreate returns ReactionCreateResponse.ReactionCreate, and is useful for accessing the field via an interface.
+func (v *ReactionCreateResponse) GetReactionCreate() *ReactionCreateReactionCreateReactionPayload {
+	return v.ReactionCreate
+}
+
+// ReactionDeleteReactionDeleteDeletePayload includes the requested fields of the GraphQL type DeletePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity deletion mutations.
+type ReactionDeleteReactionDeleteDeletePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The identifier of the deleted entity.
+	EntityId string `json:"entityId"`
+}
+
+// GetSuccess returns ReactionDeleteReactionDeleteDeletePayload.Success, and is useful for accessing the field via an interface.
+func (v *ReactionDeleteReactionDeleteDeletePayload) GetSuccess() bool { return v.Success }
+
+// GetEntityId returns ReactionDeleteReactionDeleteDeletePayload.EntityId, and is useful for accessing the field via an interface.
+func (v *ReactionDeleteReactionDeleteDeletePayload) GetEntityId() string { return v.EntityId }
+
+// ReactionDeleteResponse is returned by ReactionDelete on success.
+type ReactionDeleteResponse struct {
+	// Deletes a reaction.
+	ReactionDelete *ReactionDeleteReactionDeleteDeletePayload `json:"reactionDelete"`
+}
+
+// GetReactionDelete returns ReactionDeleteResponse.ReactionDelete, and is useful for accessing the field via an interface.
+func (v *ReactionDeleteResponse) GetReactionDelete() *ReactionDeleteReactionDeleteDeletePayload {
+	return v.ReactionDelete
+}
+
 // Reaction filtering options.
 type ReactionFilter struct {
 	// Compound filters, all of which need to be matched by the reaction.
@@ -26110,6 +27742,151 @@ func (v *ReleaseStageTypeComparator) GetNin() []ReleaseStageType { return v.Nin 
 // GetNull returns ReleaseStageTypeComparator.Null, and is useful for accessing the field via an interface.
 func (v *ReleaseStageTypeComparator) GetNull() *bool { return v.Null }
 
+// ResolveCommentCommentResolveCommentPayload includes the requested fields of the GraphQL type CommentPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a comment mutation.
+type ResolveCommentCommentResolveCommentPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The comment that was created or updated.
+	Comment *ResolveCommentCommentResolveCommentPayloadComment `json:"comment"`
+}
+
+// GetSuccess returns ResolveCommentCommentResolveCommentPayload.Success, and is useful for accessing the field via an interface.
+func (v *ResolveCommentCommentResolveCommentPayload) GetSuccess() bool { return v.Success }
+
+// GetComment returns ResolveCommentCommentResolveCommentPayload.Comment, and is useful for accessing the field via an interface.
+func (v *ResolveCommentCommentResolveCommentPayload) GetComment() *ResolveCommentCommentResolveCommentPayloadComment {
+	return v.Comment
+}
+
+// ResolveCommentCommentResolveCommentPayloadComment includes the requested fields of the GraphQL type Comment.
+// The GraphQL type's documentation follows.
+//
+// A comment associated with an issue, project update, initiative update, document
+// content, post, project, or initiative. Comments support rich text (ProseMirror),
+// emoji reactions, and threaded replies via parentId. Comments can be created by
+// workspace users or by external users through integrations (e.g., Slack,
+// Intercom). Each comment belongs to exactly one parent entity.
+type ResolveCommentCommentResolveCommentPayloadComment struct {
+	CommentFields `json:"-"`
+}
+
+// GetId returns ResolveCommentCommentResolveCommentPayloadComment.Id, and is useful for accessing the field via an interface.
+func (v *ResolveCommentCommentResolveCommentPayloadComment) GetId() string { return v.CommentFields.Id }
+
+// GetBody returns ResolveCommentCommentResolveCommentPayloadComment.Body, and is useful for accessing the field via an interface.
+func (v *ResolveCommentCommentResolveCommentPayloadComment) GetBody() string {
+	return v.CommentFields.Body
+}
+
+// GetCreatedAt returns ResolveCommentCommentResolveCommentPayloadComment.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ResolveCommentCommentResolveCommentPayloadComment) GetCreatedAt() time.Time {
+	return v.CommentFields.CreatedAt
+}
+
+// GetUpdatedAt returns ResolveCommentCommentResolveCommentPayloadComment.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ResolveCommentCommentResolveCommentPayloadComment) GetUpdatedAt() time.Time {
+	return v.CommentFields.UpdatedAt
+}
+
+// GetEditedAt returns ResolveCommentCommentResolveCommentPayloadComment.EditedAt, and is useful for accessing the field via an interface.
+func (v *ResolveCommentCommentResolveCommentPayloadComment) GetEditedAt() *time.Time {
+	return v.CommentFields.EditedAt
+}
+
+// GetUser returns ResolveCommentCommentResolveCommentPayloadComment.User, and is useful for accessing the field via an interface.
+func (v *ResolveCommentCommentResolveCommentPayloadComment) GetUser() *CommentFieldsUser {
+	return v.CommentFields.User
+}
+
+// GetParent returns ResolveCommentCommentResolveCommentPayloadComment.Parent, and is useful for accessing the field via an interface.
+func (v *ResolveCommentCommentResolveCommentPayloadComment) GetParent() *CommentFieldsParentComment {
+	return v.CommentFields.Parent
+}
+
+// GetChildren returns ResolveCommentCommentResolveCommentPayloadComment.Children, and is useful for accessing the field via an interface.
+func (v *ResolveCommentCommentResolveCommentPayloadComment) GetChildren() *CommentFieldsChildrenCommentConnection {
+	return v.CommentFields.Children
+}
+
+func (v *ResolveCommentCommentResolveCommentPayloadComment) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ResolveCommentCommentResolveCommentPayloadComment
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ResolveCommentCommentResolveCommentPayloadComment = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.CommentFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalResolveCommentCommentResolveCommentPayloadComment struct {
+	Id string `json:"id"`
+
+	Body string `json:"body"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	EditedAt *time.Time `json:"editedAt"`
+
+	User *CommentFieldsUser `json:"user"`
+
+	Parent *CommentFieldsParentComment `json:"parent"`
+
+	Children *CommentFieldsChildrenCommentConnection `json:"children"`
+}
+
+func (v *ResolveCommentCommentResolveCommentPayloadComment) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ResolveCommentCommentResolveCommentPayloadComment) __premarshalJSON() (*__premarshalResolveCommentCommentResolveCommentPayloadComment, error) {
+	var retval __premarshalResolveCommentCommentResolveCommentPayloadComment
+
+	retval.Id = v.CommentFields.Id
+	retval.Body = v.CommentFields.Body
+	retval.CreatedAt = v.CommentFields.CreatedAt
+	retval.UpdatedAt = v.CommentFields.UpdatedAt
+	retval.EditedAt = v.CommentFields.EditedAt
+	retval.User = v.CommentFields.User
+	retval.Parent = v.CommentFields.Parent
+	retval.Children = v.CommentFields.Children
+	return &retval, nil
+}
+
+// ResolveCommentResponse is returned by ResolveComment on success.
+type ResolveCommentResponse struct {
+	// Resolves a comment thread. Marks the root comment as resolved by the current user.
+	CommentResolve *ResolveCommentCommentResolveCommentPayload `json:"commentResolve"`
+}
+
+// GetCommentResolve returns ResolveCommentResponse.CommentResolve, and is useful for accessing the field via an interface.
+func (v *ResolveCommentResponse) GetCommentResolve() *ResolveCommentCommentResolveCommentPayload {
+	return v.CommentResolve
+}
+
 // Roadmap collection filtering options.
 type RoadmapCollectionFilter struct {
 	// Compound filters, all of which need to be matched by the roadmap.
@@ -26235,6 +28012,188 @@ type SalesforceMetadataIntegrationComparator struct {
 // GetCaseMetadata returns SalesforceMetadataIntegrationComparator.CaseMetadata, and is useful for accessing the field via an interface.
 func (v *SalesforceMetadataIntegrationComparator) GetCaseMetadata() *map[string]interface{} {
 	return v.CaseMetadata
+}
+
+// SearchDocumentsResponse is returned by SearchDocuments on success.
+type SearchDocumentsResponse struct {
+	// Search documents by text query using full-text and vector search. Results are
+	// ranked by relevance unless an orderBy parameter is specified. Rate-limited to
+	// 30 requests per minute.
+	SearchDocuments *SearchDocumentsSearchDocumentsDocumentSearchPayload `json:"searchDocuments"`
+}
+
+// GetSearchDocuments returns SearchDocumentsResponse.SearchDocuments, and is useful for accessing the field via an interface.
+func (v *SearchDocumentsResponse) GetSearchDocuments() *SearchDocumentsSearchDocumentsDocumentSearchPayload {
+	return v.SearchDocuments
+}
+
+// SearchDocumentsSearchDocumentsDocumentSearchPayload includes the requested fields of the GraphQL type DocumentSearchPayload.
+type SearchDocumentsSearchDocumentsDocumentSearchPayload struct {
+	Nodes []*SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult `json:"nodes"`
+	// Total number of matching results before pagination is applied.
+	TotalCount float64 `json:"totalCount"`
+}
+
+// GetNodes returns SearchDocumentsSearchDocumentsDocumentSearchPayload.Nodes, and is useful for accessing the field via an interface.
+func (v *SearchDocumentsSearchDocumentsDocumentSearchPayload) GetNodes() []*SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult {
+	return v.Nodes
+}
+
+// GetTotalCount returns SearchDocumentsSearchDocumentsDocumentSearchPayload.TotalCount, and is useful for accessing the field via an interface.
+func (v *SearchDocumentsSearchDocumentsDocumentSearchPayload) GetTotalCount() float64 {
+	return v.TotalCount
+}
+
+// SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult includes the requested fields of the GraphQL type DocumentSearchResult.
+type SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The title of the document. An empty string indicates an untitled document.
+	Title string `json:"title"`
+	// The icon of the document, either a decorative icon type or an emoji string. Null if no icon has been set.
+	Icon *string `json:"icon"`
+	// The hex color of the document icon. Null if no custom color has been set.
+	Color *string `json:"color"`
+	// The document's unique URL slug, used to construct human-readable URLs.
+	SlugId string `json:"slugId"`
+	// The canonical url for the document.
+	Url string `json:"url"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+	// been updated after creation.
+	UpdatedAt time.Time `json:"updatedAt"`
+	// The project that the document is associated with. Null if the document belongs to a different parent entity type.
+	Project *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultProject `json:"project"`
+	// The initiative that the document is associated with. Null if the document belongs to a different parent entity type.
+	Initiative *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultInitiative `json:"initiative"`
+	// The user who created the document. Null if the creator's account has been deleted.
+	Creator *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultCreatorUser `json:"creator"`
+}
+
+// GetId returns SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult.Id, and is useful for accessing the field via an interface.
+func (v *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult) GetId() string {
+	return v.Id
+}
+
+// GetTitle returns SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult.Title, and is useful for accessing the field via an interface.
+func (v *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult) GetTitle() string {
+	return v.Title
+}
+
+// GetIcon returns SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult.Icon, and is useful for accessing the field via an interface.
+func (v *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult) GetIcon() *string {
+	return v.Icon
+}
+
+// GetColor returns SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult.Color, and is useful for accessing the field via an interface.
+func (v *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult) GetColor() *string {
+	return v.Color
+}
+
+// GetSlugId returns SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult.SlugId, and is useful for accessing the field via an interface.
+func (v *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult) GetSlugId() string {
+	return v.SlugId
+}
+
+// GetUrl returns SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult.Url, and is useful for accessing the field via an interface.
+func (v *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult) GetUrl() string {
+	return v.Url
+}
+
+// GetCreatedAt returns SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult.CreatedAt, and is useful for accessing the field via an interface.
+func (v *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult) GetCreatedAt() time.Time {
+	return v.CreatedAt
+}
+
+// GetUpdatedAt returns SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult) GetUpdatedAt() time.Time {
+	return v.UpdatedAt
+}
+
+// GetProject returns SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult.Project, and is useful for accessing the field via an interface.
+func (v *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult) GetProject() *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultProject {
+	return v.Project
+}
+
+// GetInitiative returns SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult.Initiative, and is useful for accessing the field via an interface.
+func (v *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult) GetInitiative() *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultInitiative {
+	return v.Initiative
+}
+
+// GetCreator returns SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult.Creator, and is useful for accessing the field via an interface.
+func (v *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResult) GetCreator() *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultCreatorUser {
+	return v.Creator
+}
+
+// SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultCreatorUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
+type SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultCreatorUser struct {
+	// The user's full name.
+	Name string `json:"name"`
+	// The user's email address.
+	Email string `json:"email"`
+}
+
+// GetName returns SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultCreatorUser.Name, and is useful for accessing the field via an interface.
+func (v *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultCreatorUser) GetName() string {
+	return v.Name
+}
+
+// GetEmail returns SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultCreatorUser.Email, and is useful for accessing the field via an interface.
+func (v *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultCreatorUser) GetEmail() string {
+	return v.Email
+}
+
+// SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultInitiative includes the requested fields of the GraphQL type Initiative.
+// The GraphQL type's documentation follows.
+//
+// An initiative is a high-level strategic grouping of projects toward a business
+// goal. Initiatives can contain multiple projects, have their own status updates
+// and health tracking, and can be organized hierarchically with parent-child relationships.
+type SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultInitiative struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the initiative.
+	Name string `json:"name"`
+}
+
+// GetId returns SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultInitiative.Id, and is useful for accessing the field via an interface.
+func (v *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultInitiative) GetId() string {
+	return v.Id
+}
+
+// GetName returns SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultInitiative.Name, and is useful for accessing the field via an interface.
+func (v *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultInitiative) GetName() string {
+	return v.Name
+}
+
+// SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultProject includes the requested fields of the GraphQL type Project.
+// The GraphQL type's documentation follows.
+//
+// A project is a collection of issues working toward a shared goal. Projects have
+// start and target dates, milestones, status tracking, and progress metrics. They
+// can span multiple teams and be grouped under initiatives.
+type SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultProject struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the project.
+	Name string `json:"name"`
+}
+
+// GetId returns SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultProject.Id, and is useful for accessing the field via an interface.
+func (v *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultProject) GetId() string {
+	return v.Id
+}
+
+// GetName returns SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultProject.Name, and is useful for accessing the field via an interface.
+func (v *SearchDocumentsSearchDocumentsDocumentSearchPayloadNodesDocumentSearchResultProject) GetName() string {
+	return v.Name
 }
 
 // SearchIssuesResponse is returned by SearchIssues on success.
@@ -27202,6 +29161,153 @@ func (v *TeamVisibilityComparator) GetNeq() *TeamVisibility { return v.Neq }
 
 // GetNin returns TeamVisibilityComparator.Nin, and is useful for accessing the field via an interface.
 func (v *TeamVisibilityComparator) GetNin() []TeamVisibility { return v.Nin }
+
+// UnresolveCommentCommentUnresolveCommentPayload includes the requested fields of the GraphQL type CommentPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a comment mutation.
+type UnresolveCommentCommentUnresolveCommentPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The comment that was created or updated.
+	Comment *UnresolveCommentCommentUnresolveCommentPayloadComment `json:"comment"`
+}
+
+// GetSuccess returns UnresolveCommentCommentUnresolveCommentPayload.Success, and is useful for accessing the field via an interface.
+func (v *UnresolveCommentCommentUnresolveCommentPayload) GetSuccess() bool { return v.Success }
+
+// GetComment returns UnresolveCommentCommentUnresolveCommentPayload.Comment, and is useful for accessing the field via an interface.
+func (v *UnresolveCommentCommentUnresolveCommentPayload) GetComment() *UnresolveCommentCommentUnresolveCommentPayloadComment {
+	return v.Comment
+}
+
+// UnresolveCommentCommentUnresolveCommentPayloadComment includes the requested fields of the GraphQL type Comment.
+// The GraphQL type's documentation follows.
+//
+// A comment associated with an issue, project update, initiative update, document
+// content, post, project, or initiative. Comments support rich text (ProseMirror),
+// emoji reactions, and threaded replies via parentId. Comments can be created by
+// workspace users or by external users through integrations (e.g., Slack,
+// Intercom). Each comment belongs to exactly one parent entity.
+type UnresolveCommentCommentUnresolveCommentPayloadComment struct {
+	CommentFields `json:"-"`
+}
+
+// GetId returns UnresolveCommentCommentUnresolveCommentPayloadComment.Id, and is useful for accessing the field via an interface.
+func (v *UnresolveCommentCommentUnresolveCommentPayloadComment) GetId() string {
+	return v.CommentFields.Id
+}
+
+// GetBody returns UnresolveCommentCommentUnresolveCommentPayloadComment.Body, and is useful for accessing the field via an interface.
+func (v *UnresolveCommentCommentUnresolveCommentPayloadComment) GetBody() string {
+	return v.CommentFields.Body
+}
+
+// GetCreatedAt returns UnresolveCommentCommentUnresolveCommentPayloadComment.CreatedAt, and is useful for accessing the field via an interface.
+func (v *UnresolveCommentCommentUnresolveCommentPayloadComment) GetCreatedAt() time.Time {
+	return v.CommentFields.CreatedAt
+}
+
+// GetUpdatedAt returns UnresolveCommentCommentUnresolveCommentPayloadComment.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *UnresolveCommentCommentUnresolveCommentPayloadComment) GetUpdatedAt() time.Time {
+	return v.CommentFields.UpdatedAt
+}
+
+// GetEditedAt returns UnresolveCommentCommentUnresolveCommentPayloadComment.EditedAt, and is useful for accessing the field via an interface.
+func (v *UnresolveCommentCommentUnresolveCommentPayloadComment) GetEditedAt() *time.Time {
+	return v.CommentFields.EditedAt
+}
+
+// GetUser returns UnresolveCommentCommentUnresolveCommentPayloadComment.User, and is useful for accessing the field via an interface.
+func (v *UnresolveCommentCommentUnresolveCommentPayloadComment) GetUser() *CommentFieldsUser {
+	return v.CommentFields.User
+}
+
+// GetParent returns UnresolveCommentCommentUnresolveCommentPayloadComment.Parent, and is useful for accessing the field via an interface.
+func (v *UnresolveCommentCommentUnresolveCommentPayloadComment) GetParent() *CommentFieldsParentComment {
+	return v.CommentFields.Parent
+}
+
+// GetChildren returns UnresolveCommentCommentUnresolveCommentPayloadComment.Children, and is useful for accessing the field via an interface.
+func (v *UnresolveCommentCommentUnresolveCommentPayloadComment) GetChildren() *CommentFieldsChildrenCommentConnection {
+	return v.CommentFields.Children
+}
+
+func (v *UnresolveCommentCommentUnresolveCommentPayloadComment) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*UnresolveCommentCommentUnresolveCommentPayloadComment
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.UnresolveCommentCommentUnresolveCommentPayloadComment = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.CommentFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalUnresolveCommentCommentUnresolveCommentPayloadComment struct {
+	Id string `json:"id"`
+
+	Body string `json:"body"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	EditedAt *time.Time `json:"editedAt"`
+
+	User *CommentFieldsUser `json:"user"`
+
+	Parent *CommentFieldsParentComment `json:"parent"`
+
+	Children *CommentFieldsChildrenCommentConnection `json:"children"`
+}
+
+func (v *UnresolveCommentCommentUnresolveCommentPayloadComment) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *UnresolveCommentCommentUnresolveCommentPayloadComment) __premarshalJSON() (*__premarshalUnresolveCommentCommentUnresolveCommentPayloadComment, error) {
+	var retval __premarshalUnresolveCommentCommentUnresolveCommentPayloadComment
+
+	retval.Id = v.CommentFields.Id
+	retval.Body = v.CommentFields.Body
+	retval.CreatedAt = v.CommentFields.CreatedAt
+	retval.UpdatedAt = v.CommentFields.UpdatedAt
+	retval.EditedAt = v.CommentFields.EditedAt
+	retval.User = v.CommentFields.User
+	retval.Parent = v.CommentFields.Parent
+	retval.Children = v.CommentFields.Children
+	return &retval, nil
+}
+
+// UnresolveCommentResponse is returned by UnresolveComment on success.
+type UnresolveCommentResponse struct {
+	// Unresolves a previously resolved comment thread. Clears the resolved state on the root comment.
+	CommentUnresolve *UnresolveCommentCommentUnresolveCommentPayload `json:"commentUnresolve"`
+}
+
+// GetCommentUnresolve returns UnresolveCommentResponse.CommentUnresolve, and is useful for accessing the field via an interface.
+func (v *UnresolveCommentResponse) GetCommentUnresolve() *UnresolveCommentCommentUnresolveCommentPayload {
+	return v.CommentUnresolve
+}
 
 // UpdateCommentCommentUpdateCommentPayload includes the requested fields of the GraphQL type CommentPayload.
 // The GraphQL type's documentation follows.
@@ -29088,6 +31194,14 @@ func (v *__CycleUpdateInput) GetId() string { return v.Id }
 // GetInput returns __CycleUpdateInput.Input, and is useful for accessing the field via an interface.
 func (v *__CycleUpdateInput) GetInput() *CycleUpdateInput { return v.Input }
 
+// __DeleteCommentInput is used internally by genqlient
+type __DeleteCommentInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __DeleteCommentInput.Id, and is useful for accessing the field via an interface.
+func (v *__DeleteCommentInput) GetId() string { return v.Id }
+
 // __DeleteIssueRelationInput is used internally by genqlient
 type __DeleteIssueRelationInput struct {
 	Id string `json:"id"`
@@ -29095,6 +31209,50 @@ type __DeleteIssueRelationInput struct {
 
 // GetId returns __DeleteIssueRelationInput.Id, and is useful for accessing the field via an interface.
 func (v *__DeleteIssueRelationInput) GetId() string { return v.Id }
+
+// __DocumentContentHistoryInput is used internally by genqlient
+type __DocumentContentHistoryInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __DocumentContentHistoryInput.Id, and is useful for accessing the field via an interface.
+func (v *__DocumentContentHistoryInput) GetId() string { return v.Id }
+
+// __DocumentCreateInput is used internally by genqlient
+type __DocumentCreateInput struct {
+	Input *DocumentCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __DocumentCreateInput.Input, and is useful for accessing the field via an interface.
+func (v *__DocumentCreateInput) GetInput() *DocumentCreateInput { return v.Input }
+
+// __DocumentDeleteInput is used internally by genqlient
+type __DocumentDeleteInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __DocumentDeleteInput.Id, and is useful for accessing the field via an interface.
+func (v *__DocumentDeleteInput) GetId() string { return v.Id }
+
+// __DocumentUnarchiveInput is used internally by genqlient
+type __DocumentUnarchiveInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __DocumentUnarchiveInput.Id, and is useful for accessing the field via an interface.
+func (v *__DocumentUnarchiveInput) GetId() string { return v.Id }
+
+// __DocumentUpdateInput is used internally by genqlient
+type __DocumentUpdateInput struct {
+	Id    string               `json:"id"`
+	Input *DocumentUpdateInput `json:"input,omitempty"`
+}
+
+// GetId returns __DocumentUpdateInput.Id, and is useful for accessing the field via an interface.
+func (v *__DocumentUpdateInput) GetId() string { return v.Id }
+
+// GetInput returns __DocumentUpdateInput.Input, and is useful for accessing the field via an interface.
+func (v *__DocumentUpdateInput) GetInput() *DocumentUpdateInput { return v.Input }
 
 // __FileUploadInput is used internally by genqlient
 type __FileUploadInput struct {
@@ -29112,6 +31270,14 @@ func (v *__FileUploadInput) GetFilename() string { return v.Filename }
 // GetSize returns __FileUploadInput.Size, and is useful for accessing the field via an interface.
 func (v *__FileUploadInput) GetSize() int { return v.Size }
 
+// __GetCommentReactionsInput is used internally by genqlient
+type __GetCommentReactionsInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __GetCommentReactionsInput.Id, and is useful for accessing the field via an interface.
+func (v *__GetCommentReactionsInput) GetId() string { return v.Id }
+
 // __GetCycleInput is used internally by genqlient
 type __GetCycleInput struct {
 	Id string `json:"id"`
@@ -29119,6 +31285,14 @@ type __GetCycleInput struct {
 
 // GetId returns __GetCycleInput.Id, and is useful for accessing the field via an interface.
 func (v *__GetCycleInput) GetId() string { return v.Id }
+
+// __GetDocumentInput is used internally by genqlient
+type __GetDocumentInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __GetDocumentInput.Id, and is useful for accessing the field via an interface.
+func (v *__GetDocumentInput) GetId() string { return v.Id }
 
 // __GetInitiativeInput is used internally by genqlient
 type __GetInitiativeInput struct {
@@ -29159,6 +31333,14 @@ type __GetIssueLabelInput struct {
 
 // GetId returns __GetIssueLabelInput.Id, and is useful for accessing the field via an interface.
 func (v *__GetIssueLabelInput) GetId() string { return v.Id }
+
+// __GetIssueReactionsInput is used internally by genqlient
+type __GetIssueReactionsInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __GetIssueReactionsInput.Id, and is useful for accessing the field via an interface.
+func (v *__GetIssueReactionsInput) GetId() string { return v.Id }
 
 // __GetProjectInitiativeLinksInput is used internally by genqlient
 type __GetProjectInitiativeLinksInput struct {
@@ -29583,6 +31765,26 @@ func (v *__ListCyclesInput) GetAfter() *string { return v.After }
 
 // GetOrderBy returns __ListCyclesInput.OrderBy, and is useful for accessing the field via an interface.
 func (v *__ListCyclesInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy }
+
+// __ListDocumentsInput is used internally by genqlient
+type __ListDocumentsInput struct {
+	Filter  *DocumentFilter    `json:"filter,omitempty"`
+	First   *int               `json:"first"`
+	After   *string            `json:"after"`
+	OrderBy *PaginationOrderBy `json:"orderBy"`
+}
+
+// GetFilter returns __ListDocumentsInput.Filter, and is useful for accessing the field via an interface.
+func (v *__ListDocumentsInput) GetFilter() *DocumentFilter { return v.Filter }
+
+// GetFirst returns __ListDocumentsInput.First, and is useful for accessing the field via an interface.
+func (v *__ListDocumentsInput) GetFirst() *int { return v.First }
+
+// GetAfter returns __ListDocumentsInput.After, and is useful for accessing the field via an interface.
+func (v *__ListDocumentsInput) GetAfter() *string { return v.After }
+
+// GetOrderBy returns __ListDocumentsInput.OrderBy, and is useful for accessing the field via an interface.
+func (v *__ListDocumentsInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy }
 
 // __ListInitiativeLabelsInput is used internally by genqlient
 type __ListInitiativeLabelsInput struct {
@@ -30026,6 +32228,42 @@ func (v *__ProjectUpdateUpdateInput) GetId() string { return v.Id }
 // GetInput returns __ProjectUpdateUpdateInput.Input, and is useful for accessing the field via an interface.
 func (v *__ProjectUpdateUpdateInput) GetInput() *ProjectUpdateUpdateInput { return v.Input }
 
+// __ReactionCreateInput is used internally by genqlient
+type __ReactionCreateInput struct {
+	Input *ReactionCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __ReactionCreateInput.Input, and is useful for accessing the field via an interface.
+func (v *__ReactionCreateInput) GetInput() *ReactionCreateInput { return v.Input }
+
+// __ReactionDeleteInput is used internally by genqlient
+type __ReactionDeleteInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __ReactionDeleteInput.Id, and is useful for accessing the field via an interface.
+func (v *__ReactionDeleteInput) GetId() string { return v.Id }
+
+// __ResolveCommentInput is used internally by genqlient
+type __ResolveCommentInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __ResolveCommentInput.Id, and is useful for accessing the field via an interface.
+func (v *__ResolveCommentInput) GetId() string { return v.Id }
+
+// __SearchDocumentsInput is used internally by genqlient
+type __SearchDocumentsInput struct {
+	Term  string `json:"term"`
+	First *int   `json:"first"`
+}
+
+// GetTerm returns __SearchDocumentsInput.Term, and is useful for accessing the field via an interface.
+func (v *__SearchDocumentsInput) GetTerm() string { return v.Term }
+
+// GetFirst returns __SearchDocumentsInput.First, and is useful for accessing the field via an interface.
+func (v *__SearchDocumentsInput) GetFirst() *int { return v.First }
+
 // __SearchIssuesInput is used internally by genqlient
 type __SearchIssuesInput struct {
 	Term            string             `json:"term"`
@@ -30053,6 +32291,14 @@ func (v *__SearchIssuesInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy
 
 // GetIncludeArchived returns __SearchIssuesInput.IncludeArchived, and is useful for accessing the field via an interface.
 func (v *__SearchIssuesInput) GetIncludeArchived() *bool { return v.IncludeArchived }
+
+// __UnresolveCommentInput is used internally by genqlient
+type __UnresolveCommentInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __UnresolveCommentInput.Id, and is useful for accessing the field via an interface.
+func (v *__UnresolveCommentInput) GetId() string { return v.Id }
 
 // __UpdateCommentInput is used internally by genqlient
 type __UpdateCommentInput struct {
@@ -30954,6 +33200,42 @@ func CycleUpdate(
 	return data_, err_
 }
 
+// The mutation executed by DeleteComment.
+const DeleteComment_Operation = `
+mutation DeleteComment ($id: String!) {
+	commentDelete(id: $id) {
+		success
+		entityId
+	}
+}
+`
+
+// Mutation: Delete a comment
+func DeleteComment(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *DeleteCommentResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "DeleteComment",
+		Query:  DeleteComment_Operation,
+		Variables: &__DeleteCommentInput{
+			Id: id,
+		},
+	}
+
+	data_ = &DeleteCommentResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The mutation executed by DeleteIssueRelation.
 const DeleteIssueRelation_Operation = `
 mutation DeleteIssueRelation ($id: String!) {
@@ -30978,6 +33260,256 @@ func DeleteIssueRelation(
 	}
 
 	data_ = &DeleteIssueRelationResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by DocumentContentHistory.
+const DocumentContentHistory_Operation = `
+query DocumentContentHistory ($id: String!) {
+	documentContentHistory(id: $id) {
+		history {
+			id
+			createdAt
+			contentDataSnapshotAt
+			actorIds
+		}
+	}
+}
+`
+
+// Content history for `document get --history`. The id here is the document's
+// documentContentId (from DocumentDetailFields), not the document ID.
+func DocumentContentHistory(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *DocumentContentHistoryResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "DocumentContentHistory",
+		Query:  DocumentContentHistory_Operation,
+		Variables: &__DocumentContentHistoryInput{
+			Id: id,
+		},
+	}
+
+	data_ = &DocumentContentHistoryResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by DocumentCreate.
+const DocumentCreate_Operation = `
+mutation DocumentCreate ($input: DocumentCreateInput!) {
+	documentCreate(input: $input) {
+		success
+		document {
+			... DocumentDetailFields
+		}
+	}
+}
+fragment DocumentDetailFields on Document {
+	... DocumentListFields
+	content
+	documentContentId
+	updatedBy {
+		name
+		email
+	}
+}
+fragment DocumentListFields on Document {
+	id
+	title
+	icon
+	color
+	slugId
+	url
+	createdAt
+	updatedAt
+	project {
+		id
+		name
+	}
+	initiative {
+		id
+		name
+	}
+	creator {
+		name
+		email
+	}
+}
+`
+
+func DocumentCreate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *DocumentCreateInput,
+) (data_ *DocumentCreateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "DocumentCreate",
+		Query:  DocumentCreate_Operation,
+		Variables: &__DocumentCreateInput{
+			Input: input,
+		},
+	}
+
+	data_ = &DocumentCreateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by DocumentDelete.
+const DocumentDelete_Operation = `
+mutation DocumentDelete ($id: String!) {
+	documentDelete(id: $id) {
+		success
+	}
+}
+`
+
+func DocumentDelete(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *DocumentDeleteResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "DocumentDelete",
+		Query:  DocumentDelete_Operation,
+		Variables: &__DocumentDeleteInput{
+			Id: id,
+		},
+	}
+
+	data_ = &DocumentDeleteResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by DocumentUnarchive.
+const DocumentUnarchive_Operation = `
+mutation DocumentUnarchive ($id: String!) {
+	documentUnarchive(id: $id) {
+		success
+		entity {
+			id
+		}
+	}
+}
+`
+
+func DocumentUnarchive(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *DocumentUnarchiveResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "DocumentUnarchive",
+		Query:  DocumentUnarchive_Operation,
+		Variables: &__DocumentUnarchiveInput{
+			Id: id,
+		},
+	}
+
+	data_ = &DocumentUnarchiveResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by DocumentUpdate.
+const DocumentUpdate_Operation = `
+mutation DocumentUpdate ($id: String!, $input: DocumentUpdateInput!) {
+	documentUpdate(id: $id, input: $input) {
+		success
+		document {
+			... DocumentDetailFields
+		}
+	}
+}
+fragment DocumentDetailFields on Document {
+	... DocumentListFields
+	content
+	documentContentId
+	updatedBy {
+		name
+		email
+	}
+}
+fragment DocumentListFields on Document {
+	id
+	title
+	icon
+	color
+	slugId
+	url
+	createdAt
+	updatedAt
+	project {
+		id
+		name
+	}
+	initiative {
+		id
+		name
+	}
+	creator {
+		name
+		email
+	}
+}
+`
+
+func DocumentUpdate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	input *DocumentUpdateInput,
+) (data_ *DocumentUpdateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "DocumentUpdate",
+		Query:  DocumentUpdate_Operation,
+		Variables: &__DocumentUpdateInput{
+			Id:    id,
+			Input: input,
+		},
+	}
+
+	data_ = &DocumentUpdateResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -31036,6 +33568,48 @@ func FileUpload(
 	return data_, err_
 }
 
+// The query executed by GetCommentReactions.
+const GetCommentReactions_Operation = `
+query GetCommentReactions ($id: String!) {
+	comment(id: $id) {
+		id
+		reactions {
+			id
+			emoji
+			user {
+				id
+			}
+		}
+	}
+}
+`
+
+// Query: A comment's reactions, used to find the reaction to remove.
+func GetCommentReactions(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *GetCommentReactionsResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetCommentReactions",
+		Query:  GetCommentReactions_Operation,
+		Variables: &__GetCommentReactionsInput{
+			Id: id,
+		},
+	}
+
+	data_ = &GetCommentReactionsResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The query executed by GetCycle.
 const GetCycle_Operation = `
 query GetCycle ($id: String!) {
@@ -31078,6 +33652,71 @@ func GetCycle(
 	}
 
 	data_ = &GetCycleResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by GetDocument.
+const GetDocument_Operation = `
+query GetDocument ($id: String!) {
+	document(id: $id) {
+		... DocumentDetailFields
+	}
+}
+fragment DocumentDetailFields on Document {
+	... DocumentListFields
+	content
+	documentContentId
+	updatedBy {
+		name
+		email
+	}
+}
+fragment DocumentListFields on Document {
+	id
+	title
+	icon
+	color
+	slugId
+	url
+	createdAt
+	updatedAt
+	project {
+		id
+		name
+	}
+	initiative {
+		id
+		name
+	}
+	creator {
+		name
+		email
+	}
+}
+`
+
+func GetDocument(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *GetDocumentResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetDocument",
+		Query:  GetDocument_Operation,
+		Variables: &__GetDocumentInput{
+			Id: id,
+		},
+	}
+
+	data_ = &GetDocumentResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -31609,6 +34248,49 @@ func GetIssueLabel(
 	}
 
 	data_ = &GetIssueLabelResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by GetIssueReactions.
+const GetIssueReactions_Operation = `
+query GetIssueReactions ($id: String!) {
+	issue(id: $id) {
+		id
+		reactions {
+			id
+			emoji
+			user {
+				id
+			}
+		}
+	}
+}
+`
+
+// Query: An issue's reactions, used to find the reaction to remove.
+// The id accepts an issue identifier (e.g. LIN-123) or a UUID.
+func GetIssueReactions(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *GetIssueReactionsResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetIssueReactions",
+		Query:  GetIssueReactions_Operation,
+		Variables: &__GetIssueReactionsInput{
+			Id: id,
+		},
+	}
+
+	data_ = &GetIssueReactionsResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -34062,6 +36744,74 @@ func ListCycles(
 	return data_, err_
 }
 
+// The query executed by ListDocuments.
+const ListDocuments_Operation = `
+query ListDocuments ($filter: DocumentFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
+	documents(filter: $filter, first: $first, after: $after, orderBy: $orderBy) {
+		nodes {
+			... DocumentListFields
+		}
+		pageInfo {
+			hasNextPage
+			endCursor
+		}
+	}
+}
+fragment DocumentListFields on Document {
+	id
+	title
+	icon
+	color
+	slugId
+	url
+	createdAt
+	updatedAt
+	project {
+		id
+		name
+	}
+	initiative {
+		id
+		name
+	}
+	creator {
+		name
+		email
+	}
+}
+`
+
+func ListDocuments(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	filter *DocumentFilter,
+	first *int,
+	after *string,
+	orderBy *PaginationOrderBy,
+) (data_ *ListDocumentsResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ListDocuments",
+		Query:  ListDocuments_Operation,
+		Variables: &__ListDocumentsInput{
+			Filter:  filter,
+			First:   first,
+			After:   after,
+			OrderBy: orderBy,
+		},
+	}
+
+	data_ = &ListDocumentsResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The query executed by ListInitiativeLabels.
 const ListInitiativeLabels_Operation = `
 query ListInitiativeLabels ($filter: InitiativeLabelFilter, $first: Int) {
@@ -36038,6 +38788,204 @@ func ProjectUpdateUpdate(
 	return data_, err_
 }
 
+// The mutation executed by ReactionCreate.
+const ReactionCreate_Operation = `
+mutation ReactionCreate ($input: ReactionCreateInput!) {
+	reactionCreate(input: $input) {
+		success
+		reaction {
+			id
+			emoji
+		}
+	}
+}
+`
+
+// Mutation: Create a reaction on an issue or comment
+func ReactionCreate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *ReactionCreateInput,
+) (data_ *ReactionCreateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ReactionCreate",
+		Query:  ReactionCreate_Operation,
+		Variables: &__ReactionCreateInput{
+			Input: input,
+		},
+	}
+
+	data_ = &ReactionCreateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by ReactionDelete.
+const ReactionDelete_Operation = `
+mutation ReactionDelete ($id: String!) {
+	reactionDelete(id: $id) {
+		success
+		entityId
+	}
+}
+`
+
+// Mutation: Delete a reaction by its ID
+func ReactionDelete(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *ReactionDeleteResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ReactionDelete",
+		Query:  ReactionDelete_Operation,
+		Variables: &__ReactionDeleteInput{
+			Id: id,
+		},
+	}
+
+	data_ = &ReactionDeleteResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by ResolveComment.
+const ResolveComment_Operation = `
+mutation ResolveComment ($id: String!) {
+	commentResolve(id: $id) {
+		success
+		comment {
+			... CommentFields
+		}
+	}
+}
+fragment CommentFields on Comment {
+	id
+	body
+	createdAt
+	updatedAt
+	editedAt
+	user {
+		id
+		name
+		email
+		avatarUrl
+	}
+	parent {
+		id
+	}
+	children {
+		nodes {
+			id
+			body
+			user {
+				name
+			}
+		}
+	}
+}
+`
+
+// Mutation: Resolve a comment thread
+func ResolveComment(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *ResolveCommentResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ResolveComment",
+		Query:  ResolveComment_Operation,
+		Variables: &__ResolveCommentInput{
+			Id: id,
+		},
+	}
+
+	data_ = &ResolveCommentResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by SearchDocuments.
+const SearchDocuments_Operation = `
+query SearchDocuments ($term: String!, $first: Int) {
+	searchDocuments(term: $term, first: $first) {
+		nodes {
+			id
+			title
+			icon
+			color
+			slugId
+			url
+			createdAt
+			updatedAt
+			project {
+				id
+				name
+			}
+			initiative {
+				id
+				name
+			}
+			creator {
+				name
+				email
+			}
+		}
+		totalCount
+	}
+}
+`
+
+// searchDocuments returns DocumentSearchResult, a distinct type from Document,
+// so its display fields are selected inline rather than via DocumentListFields.
+func SearchDocuments(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	term string,
+	first *int,
+) (data_ *SearchDocumentsResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "SearchDocuments",
+		Query:  SearchDocuments_Operation,
+		Variables: &__SearchDocumentsInput{
+			Term:  term,
+			First: first,
+		},
+	}
+
+	data_ = &SearchDocumentsResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The query executed by SearchIssues.
 const SearchIssues_Operation = `
 query SearchIssues ($term: String!, $filter: IssueFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy, $includeArchived: Boolean) {
@@ -36121,6 +39069,69 @@ func SearchIssues(
 	return data_, err_
 }
 
+// The mutation executed by UnresolveComment.
+const UnresolveComment_Operation = `
+mutation UnresolveComment ($id: String!) {
+	commentUnresolve(id: $id) {
+		success
+		comment {
+			... CommentFields
+		}
+	}
+}
+fragment CommentFields on Comment {
+	id
+	body
+	createdAt
+	updatedAt
+	editedAt
+	user {
+		id
+		name
+		email
+		avatarUrl
+	}
+	parent {
+		id
+	}
+	children {
+		nodes {
+			id
+			body
+			user {
+				name
+			}
+		}
+	}
+}
+`
+
+// Mutation: Unresolve a previously resolved comment thread
+func UnresolveComment(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *UnresolveCommentResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "UnresolveComment",
+		Query:  UnresolveComment_Operation,
+		Variables: &__UnresolveCommentInput{
+			Id: id,
+		},
+	}
+
+	data_ = &UnresolveCommentResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The mutation executed by UpdateComment.
 const UpdateComment_Operation = `
 mutation UpdateComment ($id: String!, $input: CommentUpdateInput!) {
@@ -36157,7 +39168,7 @@ fragment CommentFields on Comment {
 }
 `
 
-// Mutation: Update an existing comment
+// Mutation: Update an existing comment (wired by `comment edit`)
 func UpdateComment(
 	ctx_ context.Context,
 	client_ graphql.Client,

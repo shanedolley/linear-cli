@@ -193,6 +193,14 @@ if [ -n "$team_key" ]; then
     run_test "cycle list (team filter)" "go run main.go cycle list --team $team_key"
 fi
 
+# Test document commands (Tier 2)
+echo -e "\n${YELLOW}Testing document commands...${NC}"
+run_test "document list" "go run main.go document list --limit 5"
+run_test "document list (json)" "go run main.go document list --limit 5 -j"
+run_test "document list (plaintext)" "go run main.go document list --limit 5 -p"
+run_test "document search" "go run main.go document search test --limit 5"
+run_test "document search (json)" "go run main.go document search test --limit 5 -j"
+
 # Test help commands
 echo -e "\n${YELLOW}Testing help commands...${NC}"
 run_test "help" "go run main.go --help" "Usage:"
@@ -203,6 +211,8 @@ run_test "user help" "go run main.go user --help" "Available Commands:"
 run_test "cycle help" "go run main.go cycle --help" "Available Commands:"
 run_test "label help" "go run main.go label --help" "Available Commands:"
 run_test "state help" "go run main.go state --help" "Available Commands:"
+run_test "document help" "go run main.go document --help" "Available Commands:"
+run_test "comment help" "go run main.go comment --help" "resolve"
 
 # Test unknown command handling
 echo -e "\n${YELLOW}Testing error handling...${NC}"
