@@ -594,7 +594,7 @@
         "dependencies": [
           "8"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -602,9 +602,10 @@
             "description": "Implement emoji management commands for custom organization emojis including list, create (with --name and --url flags), and delete operations.",
             "dependencies": [],
             "details": "Create pkg/api/operations/emojis.graphql with ListEmojis query, EmojiCreate and EmojiDelete mutations. Create cmd/emoji.go following existing command patterns (issue.go, comment.go). Implement: 'emoji list --limit' displaying name/URL/creator columns, 'emoji create --name <name> --url <image-url>' for adding custom emojis, 'emoji delete <id>' for removal. Support all three output modes (table, plaintext, JSON). Register command in root.go.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Add 'lincli emoji list' and 'lincli emoji list --json' tests to smoke_test.sh. Manual verification: create a test emoji, verify it appears in list, delete it.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-07-02T05:08:50.299Z"
           },
           {
             "id": 2,
@@ -614,9 +615,10 @@
               1
             ],
             "details": "Create pkg/api/operations/triage.graphql with ListTriageResponsibilities and GetTriageResponsibility queries, plus TriageResponsibilityCreate/Update/Delete mutations. Create cmd/triage.go implementing: 'triage list --limit' showing responsibility details, 'triage get <id>' for single responsibility, 'triage create' with team/user flags, 'triage update <id>' with modifiable fields, 'triage delete <id>' for removal. Follow CRUD patterns from project.go. Support all output modes.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Add 'lincli triage list' test to smoke_test.sh. Manual verification: create triage responsibility, update it, verify changes, delete it.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-07-02T05:08:50.302Z"
           },
           {
             "id": 3,
@@ -627,9 +629,10 @@
               2
             ],
             "details": "Create pkg/api/operations/git.graphql with GitAutomationStateCreate/Update/Delete and GitAutomationTargetBranchCreate/Update/Delete mutations. Create cmd/git.go with two subcommand groups: 'git state create/update/delete' for managing automation states (link states to branches), 'git target-branch create/update/delete' for managing target branches. Flags include --team, --state, --branch-pattern. Follow nested subcommand pattern. Support all output modes.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Manual verification only (no list operation available): create git automation state, update it, delete it. Same for target-branch operations. Verify operations succeed without error.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-07-02T05:08:50.303Z"
           },
           {
             "id": 4,
@@ -641,14 +644,16 @@
               3
             ],
             "details": "Create pkg/api/operations/schedules.graphql with ListTimeSchedules, GetTimeSchedule queries and TimeScheduleCreate/Update/Delete/UpsertExternal/RefreshIntegrationSchedule mutations. Create cmd/schedule.go implementing: 'schedule list --newer-than all_time' (default all_time unlike issues), 'schedule get <id-or-name>' with name resolution, 'schedule create/update/delete', 'schedule upsert-external' for external integrations, 'schedule refresh <id>' for integration sync. Support name-to-ID resolution. All output modes.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Add 'lincli schedule list' and 'lincli schedule list --json' tests to smoke_test.sh. Manual verification: create schedule, verify name resolution in get, test update/delete flow. Verify upsert-external and refresh operations.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-07-02T05:08:50.304Z"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "Break down into: (1) Create cmd/emoji.go with list/create/delete for custom org emojis, (2) Create cmd/triage.go with full CRUD for triage responsibilities, (3) Create cmd/git.go with git automation state and target-branch management commands, (4) Create cmd/schedule.go with time schedule CRUD plus upsert-external and refresh operations."
+        "expansionPrompt": "Break down into: (1) Create cmd/emoji.go with list/create/delete for custom org emojis, (2) Create cmd/triage.go with full CRUD for triage responsibilities, (3) Create cmd/git.go with git automation state and target-branch management commands, (4) Create cmd/schedule.go with time schedule CRUD plus upsert-external and refresh operations.",
+        "updatedAt": "2026-07-02T05:08:50.304Z"
       },
       {
         "id": "10",
@@ -831,9 +836,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-02T04:27:05.910Z",
+      "lastModified": "2026-07-02T05:08:50.304Z",
       "taskCount": 12,
-      "completedCount": 8,
+      "completedCount": 9,
       "tags": [
         "master"
       ]

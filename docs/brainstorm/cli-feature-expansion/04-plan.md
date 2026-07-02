@@ -41,3 +41,16 @@ Total recommended subtasks: 52.
 - Task data: `.taskmaster/tasks/tasks.json`
 - Complexity report: `.taskmaster/reports/task-complexity-report.json`
 - Resume state: `.taskmaster-state.json`
+
+## Execution status
+
+Tasks 1-9 complete; 10-12 remain (authoritative status: `.execution-state.json` and task-master).
+
+Plan-gate deferrals recorded so far:
+
+- Task 8 (Tier 4a): Releases deferred; writes need the Business plan
+  (`FEATURE_NOT_ACCESSIBLE 'releaseManagement'`). Customers/CRM shipped.
+- Task 9 (Tier 4b): Emoji, git automation, and schedules shipped. Triage is
+  read-only (list/get); its writes need the Business plan (FORBIDDEN), so
+  create/update/delete are deferred. Git automation is write-only, because the
+  live API exposes no root query for automation rules.

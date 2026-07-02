@@ -4,18 +4,25 @@
   "branch": "feature/cli-feature-expansion",
   "totalTasks": 12,
   "totalSubtasks": 52,
-  "completed": [1, 2, 3, 4, 5, 6, 7, 8],
+  "completed": [1, 2, 3, 4, 5, 6, 7, 8, 9],
   "inProgress": null,
-  "milestone": "Tier 4a (task 8) complete (Customers/CRM: customer, need, status, tier). Releases deferred: writes are Business-plan-gated (FEATURE_NOT_ACCESSIBLE 'releaseManagement').",
+  "milestone": "Tier 4b (task 9) complete: emoji (list/create/delete), triage (list/get read-only), git state + target-branch (create/update/delete), schedule (full CRUD + upsert-external/refresh). Triage writes deferred (Business-plan-gated); git is write-only (no root query on the live API).",
   "status": "in_progress",
-  "sandbox": { "project": "lincli-sandbox", "team": "SD" },
+  "sandbox": { "project": "lincli-sandbox", "team": "SD", "teamId": "d5b746fb-e47d-48c0-a299-ca5ecb6d33f2" },
   "planGate": {
     "task8_tier4a": {
       "customers": "write available (customerCreate/customerDelete verified in sandbox)",
       "releases": "write BLOCKED - FEATURE_NOT_ACCESSIBLE 'releaseManagement' (Business plan required); read returns empty. Deferred per mandatory plan-availability gate.",
       "probedAt": "2026-07-02"
+    },
+    "task9_tier4b": {
+      "emoji": "read available (emojis returns nodes)",
+      "triage": "read available (triageResponsibilities returns empty list, no plan error)",
+      "gitAutomation": "write available (gitAutomationTargetBranchCreate/Delete verified in SD sandbox). NOTE: root gitAutomationStates query is NOT exposed on the live API, so git commands are write-only (create/update/delete), matching the plan.",
+      "timeSchedule": "read available (timeSchedules returns empty list, no plan error)",
+      "probedAt": "2026-07-02"
     }
   },
   "startedAt": "2026-07-02",
-  "updatedAt": "2026-07-02T14:30:00Z"
+  "updatedAt": "2026-07-02T16:00:00Z"
 }
