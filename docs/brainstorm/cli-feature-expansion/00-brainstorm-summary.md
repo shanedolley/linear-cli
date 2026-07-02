@@ -17,7 +17,7 @@ Initiatives, Projects, Cycles, Labels, Documents, and the rest of Tiers 1-5.
 | 03 Document (Design/PRD) | `/brainstorm-03-document` | Complete (PRD + 7-reviewer pass) |
 | 04 Plan | `/brainstorm-04-plan` | Complete (12 tasks / 52 subtasks) |
 | 05 Implement | `/brainstorm-05-implement` | Complete (12/12 tasks) |
-| 06 Review | `/brainstorm-06-review` | Pending |
+| 06 Review | `/brainstorm-06-review` | Complete (PASS, 0 critical, 4 important fixed) |
 | 07 Verify | `/brainstorm-07-verify` | Pending |
 | 08 Finish | `/brainstorm-08-finish` | Pending |
 
