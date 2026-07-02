@@ -1,0 +1,14 @@
+{
+  "brainstorm": "cli-feature-expansion",
+  "complexity": "COMPLEX",
+  "branch": "feature/cli-feature-expansion",
+  "totalTasks": 12,
+  "totalSubtasks": 52,
+  "completed": [1, 2, 3],
+  "inProgress": null,
+  "milestone": "Tier 1 complete (shared resolvers + Initiatives + Projects)",
+  "status": "in_progress",
+  "sandbox": { "project": "lincli-sandbox", "team": "SD" },
+  "startedAt": "2026-07-02",
+  "updatedAt": "2026-07-02"
+}

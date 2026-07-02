@@ -2,14 +2,14 @@
   "master": {
     "tasks": [
       {
-        "id": 1,
+        "id": "1",
         "title": "Create Shared Resolver Infrastructure",
         "description": "Build the shared name-to-ID resolver framework in cmd/resolve.go that all new commands will use. This is foundational infrastructure that enables human-friendly identifiers across all domains.",
         "details": "Create `cmd/resolve.go` with resolver functions for each entity type:\n\n1. Define a `ResolverCache` struct with maps for teams, users, projects, states, etc. Instantiate per-command invocation.\n\n2. Implement these resolver functions:\n   - `ResolveTeam(client, keyOrID) (teamID, error)` - accepts team key (uppercase) or UUID\n   - `ResolveUser(client, emailOrNameOrID) (userID, error)` - uses existing UserFilter with Or pattern\n   - `ResolveProject(client, nameOrID) (projectID, error)` - case-insensitive name match via ProjectFilter\n   - `ResolveWorkflowState(client, teamID, nameOrID) (stateID, error)` - uses embedded team.states.nodes\n   - `ResolveInitiative(client, nameOrID) (initiativeID, error)` - new, uses InitiativeFilter\n   - `ResolveCycle(client, teamID, numberOrNameOrID) (cycleID, error)` - number or name within team\n   - `ResolveLabel(client, teamID, nameOrID) (labelID, error)` - team or workspace scope\n   - `ResolveMilestone(client, projectID, nameOrID) (milestoneID, error)` - within project scope\n\n3. Each resolver:\n   - Returns input unchanged if it matches UUID pattern (regex `^[a-f0-9]{8}-`)\n   - Caches lookups in the command-scoped cache\n   - Case-insensitive comparison for names\n   - Returns error with candidate list on ambiguous match: `fmt.Errorf(\"Multiple matches for '%s': %s\", name, candidateList)`\n   - Returns error with valid options on no match for bounded sets\n\n4. Add helper `isUUID(s string) bool` using regex.\n\n5. Refactor existing resolvers in cmd/issue.go (user, team, state, project lookups) to use the new shared helpers.",
         "testStrategy": "1. Unit test each resolver with mock data: UUID passthrough, exact name match, ambiguous names, not found cases.\n2. Integration test: Verify existing issue update commands still work with --assignee, --state, --project flags.\n3. Run full smoke_test.sh to confirm no regressions.\n4. Manual verification: `lincli issue update SD-123 --assignee shane.dolley@email.com` and `lincli issue update SD-123 --state 'In Progress'`",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -18,7 +18,8 @@
             "dependencies": [],
             "details": "Create cmd/resolve.go with: (1) ResolverCache struct with map[string]string fields for Teams, Users, Projects, States, Initiatives, Cycles, Labels, Milestones. (2) NewResolverCache() constructor returning an initialized cache. (3) isUUID(s string) bool helper using regexp.MustCompile(`^[a-f0-9]{8}-`) to match Linear UUID format. (4) Package-level comment explaining the resolver pattern and per-command-invocation cache scope. This establishes the foundation all resolver functions will use.",
             "status": "pending",
-            "testStrategy": "Unit test isUUID with valid UUIDs, partial UUIDs, team keys, emails, and names. Verify NewResolverCache returns initialized maps. Compile the package to ensure no syntax errors."
+            "testStrategy": "Unit test isUUID with valid UUIDs, partial UUIDs, team keys, emails, and names. Verify NewResolverCache returns initialized maps. Compile the package to ensure no syntax errors.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -29,7 +30,8 @@
             ],
             "details": "Implement in cmd/resolve.go: (1) ResolveTeam(client, cache, keyOrID) - if isUUID return input, else use api.GetTeam by key, cache result. (2) ResolveUser(client, cache, emailOrNameOrID) - if isUUID return input, handle 'me' via GetViewer, else use UserFilter with Or pattern from lines 1032-1037, support both email and name, cache result. (3) ResolveProject(client, cache, nameOrID) - if isUUID return input, else use ProjectFilter.Name.EqIgnoreCase from lines 1114-1116, return error with candidates on ambiguous match. All functions should return (string, error) and use the cache parameter for lookups.",
             "status": "pending",
-            "testStrategy": "Unit test each resolver: UUID passthrough returns input unchanged, name/email lookup calls API once, cached lookup skips API, ambiguous match returns error with candidate list, not-found returns descriptive error. Integration test with mock client."
+            "testStrategy": "Unit test each resolver: UUID passthrough returns input unchanged, name/email lookup calls API once, cached lookup skips API, ambiguous match returns error with candidate list, not-found returns descriptive error. Integration test with mock client.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -40,7 +42,8 @@
             ],
             "details": "Implement in cmd/resolve.go: (1) ResolveWorkflowState(client, cache, teamID, nameOrID) - if isUUID return input, else iterate team.States.Nodes with case-insensitive name match (refactor from lines 1068-1087), return error listing valid states on no match. (2) ResolveCycle(client, cache, teamID, numberOrNameOrID) - support cycle number (e.g., '12') or name lookup within team, use CycleFilter. (3) ResolveLabel(client, cache, teamID, nameOrID) - check team labels first, fall back to workspace labels, use LabelFilter. (4) ResolveMilestone(client, cache, projectID, nameOrID) - query milestones within project scope. All functions handle the bounded-set pattern: return error with valid options when no match found.",
             "status": "pending",
-            "testStrategy": "Unit test state resolver with various team states (Backlog, In Progress, Done), verify case-insensitive matching, verify error includes available state names. Test cycle by number and name. Test label team vs workspace scope precedence. Test milestone within project."
+            "testStrategy": "Unit test state resolver with various team states (Backlog, In Progress, Done), verify case-insensitive matching, verify error includes available state names. Test cycle by number and name. Test label team vs workspace scope precedence. Test milestone within project.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -52,21 +55,26 @@
             ],
             "details": "In cmd/resolve.go: (1) ResolveInitiative(client, cache, nameOrID) - if isUUID return input, else use InitiativeFilter with Name.EqIgnoreCase, return error on ambiguous or not found. In cmd/issue.go: (2) Refactor issueCreateCmd team lookup (lines 935-941) to use ResolveTeam. (3) Refactor issueUpdateCmd assignee lookup (lines 1032-1051) to use ResolveUser. (4) Refactor issueUpdateCmd state lookup (lines 1056-1091) to use ResolveWorkflowState. (5) Refactor issueUpdateCmd project lookup (lines 1105-1130) to use ResolveProject. (6) Create ResolverCache at start of each Run function, pass to resolvers. Ensure all existing flags continue to work identically.",
             "status": "pending",
-            "testStrategy": "Run full smoke_test.sh (39 tests must pass). Manual verification: lincli issue create --team ENG --title 'test', lincli issue update LIN-123 --assignee user@email.com, lincli issue update LIN-123 --state 'In Progress', lincli issue update LIN-123 --project 'MyProject'. Verify no regressions in existing behavior."
+            "testStrategy": "Run full smoke_test.sh (39 tests must pass). Manual verification: lincli issue create --team ENG --title 'test', lincli issue update LIN-123 --assignee user@email.com, lincli issue update LIN-123 --state 'In Progress', lincli issue update LIN-123 --project 'MyProject'. Verify no regressions in existing behavior.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break down the resolver infrastructure task into: (1) Create cmd/resolve.go with ResolverCache struct and isUUID helper, (2) Implement ResolveTeam, ResolveUser, and ResolveProject functions extracting/refactoring existing inline code from cmd/issue.go, (3) Implement ResolveWorkflowState, ResolveCycle, ResolveLabel, ResolveMilestone functions with team-scoping, (4) Implement ResolveInitiative and refactor existing issue update commands to use shared resolvers with integration tests.",
+        "updatedAt": "2026-07-01T22:54:09.076Z"
       },
       {
-        "id": 2,
+        "id": "2",
         "title": "Implement Initiative Domain (Tier 1a - PR 1)",
         "description": "Build complete Initiative CRUD, project links, labels, relations, and status updates. This is the largest coverage gap with zero current commands.",
         "details": "Create `cmd/initiative.go` and `pkg/api/operations/initiatives.graphql`:\n\n**GraphQL Operations (initiatives.graphql):**\n```graphql\nfragment InitiativeListFields on Initiative {\n  id, name, status, owner { id name email }, targetDate, progress, createdAt, updatedAt\n}\nfragment InitiativeDetailFields on Initiative {\n  ...InitiativeListFields\n  description, archivedAt, lead { id key name }\n  initiativeToProjects { nodes { id project { id name } sortOrder } }\n  labels { nodes { id name color } }\n  relations { nodes { id type relatedInitiative { id name } } }\n}\nquery ListInitiatives($filter: InitiativeFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy)\nquery GetInitiative($id: String!)\nmutation CreateInitiative($input: InitiativeCreateInput!)\nmutation UpdateInitiative($id: String!, $input: InitiativeUpdateInput!)  # Go name distinct from query\nmutation InitiativeArchive($id: String!)\nmutation InitiativeUnarchive($id: String!)\nmutation InitiativeDelete($id: String!)\nmutation InitiativeLeadTeamUpdate($id: String!, $leadTeamId: String!, $mode: InitiativeLeadTeamChangeMode)\nmutation InitiativeToProjectCreate($input: InitiativeToProjectCreateInput!)\nmutation InitiativeToProjectDelete($id: String!)\nmutation InitiativeToProjectUpdate($id: String!, $input: InitiativeToProjectUpdateInput!)\nmutation InitiativeAddLabel($id: String!, $labelId: String!)\nmutation InitiativeRemoveLabel($id: String!, $labelId: String!)\nmutation InitiativeRelationCreate($input: InitiativeRelationCreateInput!)\nmutation InitiativeRelationDelete($id: String!)\nquery ListInitiativeUpdates($initiativeId: String!, $first: Int)\nquery GetInitiativeUpdate($id: String!)  # Go name distinct from mutation\nmutation CreateInitiativeUpdate($input: InitiativeUpdateCreateInput!)\nmutation UpdateInitiativeUpdate($id: String!, $input: InitiativeUpdateUpdateInput!)\nmutation InitiativeUpdateArchive($id: String!)\nmutation InitiativeUpdateUnarchive($id: String!)\nmutation CreateInitiativeUpdateReminder($id: String!)\n```\n\n**Commands (cmd/initiative.go):**\n- `initiative list` with --limit, --sort, --newer-than (default all_time), --include-archived\n- `initiative get <id>` with Projects, Labels, Relations sections\n- `initiative create --name (required) --description --owner --target-date --status`\n- `initiative update <id>` - edits initiative record\n- `initiative archive/unarchive/delete <id>`\n- `initiative set-lead <id> --team --mode` (selectedOnly|includeDescendants)\n- Nested group `initiative project`: add/remove/reorder\n- Nested group `initiative label`: add/remove\n- `initiative relate <id> <other> --relation <kind> --remove`\n- `initiative update-post`: list/create/edit/archive/unarchive\n- `initiative update-reminder <id>`\n\n**Key Implementation Details:**\n- Validate --status against InitiativeStatus enum: Proposed, Planned, Active, Completed, Canceled\n- Validate --health against InitiativeUpdateHealthType: onTrack, atRisk, offTrack\n- Validate --mode against InitiativeLeadTeamChangeMode: selectedOnly, includeDescendants\n- --target-date accepts YYYY-MM-DD format\n- Use ResolveInitiative from task 1 for name-to-ID\n- Three-mode output (table/json/plaintext) matching existing patterns",
         "testStrategy": "1. Add read-only smoke tests to smoke_test.sh:\n   - `initiative list`, `initiative list -j`, `initiative list -p`\n   - `initiative get <id>` (discover ID from list output)\n2. Manual write verification in lincli-sandbox project:\n   - Create initiative, update fields, link projects, add labels, create status updates\n   - Log each command with expected/actual output in PR description\n3. Validate error messages for invalid --status/--health/--mode values\n4. Run `make build` and full smoke suite",
         "priority": "high",
         "dependencies": [
-          1
+          "1"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -75,7 +83,8 @@
             "dependencies": [],
             "details": "Create pkg/api/operations/initiatives.graphql following the patterns in issues.graphql and projects.graphql. Define InitiativeListFields fragment with: id, name, status, owner {id name email}, targetDate, progress, createdAt, updatedAt. Define InitiativeDetailFields extending list fields with: description, archivedAt, lead {id key name}, initiativeToProjects {nodes {id project {id name} sortOrder}}, labels {nodes {id name color}}, relations {nodes {id relatedInitiative {id name} sortOrder}}. Add queries: ListInitiatives with $filter: InitiativeFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy; GetInitiative with $id: String!. Add mutations: CreateInitiative with $input: InitiativeCreateInput!; ModifyInitiative (distinct Go name from GetInitiative) with $id: String!, $input: InitiativeUpdateInput!. Run 'go generate ./pkg/api' to produce generated.go bindings. Verify compilation with 'go build ./...'.",
             "status": "pending",
-            "testStrategy": "Run 'go generate ./pkg/api' successfully. Verify generated.go contains ListInitiatives, GetInitiative, CreateInitiative, ModifyInitiative functions. Run 'go build ./...' to confirm no type errors."
+            "testStrategy": "Run 'go generate ./pkg/api' successfully. Verify generated.go contains ListInitiatives, GetInitiative, CreateInitiative, ModifyInitiative functions. Run 'go build ./...' to confirm no type errors.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -86,7 +95,8 @@
             ],
             "details": "Create cmd/initiative.go with initiativeCmd as the parent command. Implement initiativeListCmd with flags: --limit (default 50), --sort (created/updated/linear), --newer-than (default all_time unlike issues), --include-archived. Implement initiativeGetCmd accepting initiative ID argument, displaying Projects/Labels/Relations sections. Implement initiativeCreateCmd with flags: --name (required), --description, --owner (email), --target-date (YYYY-MM-DD), --status. Validate --status against InitiativeStatus enum values: Proposed, Planned, Active, Completed, Canceled (error if invalid). Implement initiativeUpdateCmd for editing existing initiatives with same flags. Use ResolveInitiative helper from task 1 for name-to-ID resolution. All commands must support three output modes: default table view, --json for agent consumption, --plaintext for scripts. Follow error handling pattern from issue.go using output.Error() and os.Exit(1). Register all commands in init() function.",
             "status": "pending",
-            "testStrategy": "Run 'go build ./...' with no errors. Manual test: lincli initiative list, lincli initiative list --json, lincli initiative list --plaintext. Verify --status flag rejects invalid values with clear error message."
+            "testStrategy": "Run 'go build ./...' with no errors. Manual test: lincli initiative list, lincli initiative list --json, lincli initiative list --plaintext. Verify --status flag rejects invalid values with clear error message.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -98,7 +108,8 @@
             ],
             "details": "Add to initiatives.graphql: mutation InitiativeArchive($id: String!), InitiativeUnarchive($id: String!), InitiativeDelete($id: String!), InitiativeLeadTeamUpdate($id: String!, $leadTeamId: String!, $mode: InitiativeLeadTeamChangeMode). Run go generate. In cmd/initiative.go, implement: initiativeArchiveCmd, initiativeUnarchiveCmd, initiativeDeleteCmd - each accepting initiative ID argument. Implement initiativeSetLeadCmd with flags: --team (required, team key), --mode (required, validated against enum). Validate --mode accepts only 'selectedOnly' or 'includeDescendants', error otherwise. Add confirmation prompt for delete command unless --force flag is passed. All commands output success/failure in three modes. Handle API errors gracefully with descriptive messages.",
             "status": "pending",
-            "testStrategy": "Verify go generate succeeds. Run 'go build ./...' with no errors. Test enum validation: lincli initiative set-lead <id> --team ENG --mode invalid should error. Manual test in lincli-sandbox: archive, unarchive an initiative."
+            "testStrategy": "Verify go generate succeeds. Run 'go build ./...' with no errors. Test enum validation: lincli initiative set-lead <id> --team ENG --mode invalid should error. Manual test in lincli-sandbox: archive, unarchive an initiative.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -110,7 +121,8 @@
             ],
             "details": "Add to initiatives.graphql: mutation InitiativeToProjectCreate($input: InitiativeToProjectCreateInput!), InitiativeToProjectDelete($id: String!), InitiativeToProjectUpdate($id: String!, $input: InitiativeToProjectUpdateInput!). The InitiativeToProjectCreateInput requires initiativeId, projectId, and optional sortOrder. Run go generate. In cmd/initiative.go, create initiativeProjectCmd parent command. Implement: initiativeProjectAddCmd with args [initiative-id] [project-id] and optional --sort-order flag; initiativeProjectRemoveCmd with args [initiative-id] [project-id] that looks up the InitiativeToProject link ID and deletes it; initiativeProjectReorderCmd with args [initiative-id] [project-id] --position <number> that updates sortOrder. For remove, query the initiative first to find the link ID matching the project. Output in three modes. Add 'project' as an alias for ls subcommand that lists linked projects.",
             "status": "pending",
-            "testStrategy": "Run go generate and go build successfully. Manual test in lincli-sandbox: create initiative, link a project, list to verify, reorder, remove. Verify JSON output contains link metadata."
+            "testStrategy": "Run go generate and go build successfully. Manual test in lincli-sandbox: create initiative, link a project, list to verify, reorder, remove. Verify JSON output contains link metadata.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -122,7 +134,8 @@
             ],
             "details": "Add to initiatives.graphql: mutation InitiativeAddLabel($id: String!, $labelId: String!), InitiativeRemoveLabel($id: String!, $labelId: String!), InitiativeRelationCreate($input: InitiativeRelationCreateInput!), InitiativeRelationDelete($id: String!). InitiativeRelationCreateInput requires initiativeId (parent), relatedInitiativeId (child), optional sortOrder. Run go generate. In cmd/initiative.go, create initiativeLabelCmd parent with: initiativeLabelAddCmd accepting [initiative-id] [label-id-or-name]; initiativeLabelRemoveCmd with same args. Create initiativeRelateCmd accepting [parent-id] [child-id] with flags: --remove (to delete existing relation instead of create), --sort-order <number>. For relate --remove, query the parent initiative's relations to find the link ID. Note: InitiativeRelation models parent-child hierarchy (not arbitrary relation types like issues). Output in three modes. Add 'relate list' to show current relations from initiative detail.",
             "status": "pending",
-            "testStrategy": "Run go generate and go build successfully. Manual test: add label to initiative, remove it, verify via initiative get. Create parent-child relation between two initiatives, remove it. Verify JSON shows relation metadata."
+            "testStrategy": "Run go generate and go build successfully. Manual test: add label to initiative, remove it, verify via initiative get. Create parent-child relation between two initiatives, remove it. Verify JSON shows relation metadata.",
+            "parentId": "undefined"
           },
           {
             "id": 6,
@@ -134,22 +147,27 @@
             ],
             "details": "Add to initiatives.graphql: query ListInitiativeUpdates($initiativeId: String!, $first: Int), query FetchInitiativeUpdate($id: String!) (distinct Go name), mutation CreateInitiativeUpdate($input: InitiativeUpdateCreateInput!), mutation ModifyInitiativeUpdate($id: String!, $input: InitiativeUpdateUpdateInput!) (distinct Go name), mutation InitiativeUpdateArchive($id: String!), InitiativeUpdateUnarchive($id: String!), mutation CreateInitiativeUpdateReminder($id: String!). InitiativeUpdateCreateInput requires initiativeId, body, optional health. Run go generate. In cmd/initiative.go, create initiativeUpdatePostCmd parent with: listCmd (list updates for an initiative), createCmd with --body (required), --health (onTrack|atRisk|offTrack), getCmd, editCmd with --body and --health, archiveCmd, unarchiveCmd. Validate --health against InitiativeUpdateHealthType enum. Create initiativeUpdateReminderCmd at initiative level accepting initiative ID. Output in three modes. Update-post create should display the created update's details on success.",
             "status": "pending",
-            "testStrategy": "Run go generate and go build successfully. Add to smoke_test.sh: initiative list, initiative list -j, initiative list -p. Manual test in lincli-sandbox: create status update with --health onTrack, edit it, list updates, archive/unarchive, test reminder creation. Verify invalid --health values are rejected."
+            "testStrategy": "Run go generate and go build successfully. Add to smoke_test.sh: initiative list, initiative list -j, initiative list -p. Manual test in lincli-sandbox: create status update with --health onTrack, edit it, list updates, archive/unarchive, test reminder creation. Verify invalid --health values are rejected.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 8,
+        "recommendedSubtasks": 6,
+        "expansionPrompt": "Break down initiative implementation into: (1) Create pkg/api/operations/initiatives.graphql with fragments and CRUD queries/mutations, (2) Create cmd/initiative.go with list/get/create/update base commands following existing issue.go patterns, (3) Add archive/unarchive/delete and set-lead commands with enum validation, (4) Implement nested 'initiative project' subgroup for project links with add/remove/reorder, (5) Implement nested 'initiative label' and 'initiative relate' subgroups, (6) Implement 'initiative update-post' nested commands for status updates with list/create/edit/archive/unarchive operations.",
+        "updatedAt": "2026-07-01T23:35:34.843Z"
       },
       {
-        "id": 3,
+        "id": "3",
         "title": "Extend Project Domain (Tier 1b - PR 2)",
         "description": "Add write operations to the read-only project commands: CRUD, members, milestones, status updates, labels, relations, and project status management.",
         "details": "Extend `cmd/project.go` and `pkg/api/operations/projects.graphql`:\n\n**New GraphQL Operations:**\n```graphql\nmutation CreateProject($input: ProjectCreateInput!)\nmutation UpdateProject($id: String!, $input: ProjectUpdateInput!)  # Note: no --state or --health flags\nmutation ProjectDelete($id: String!)\nmutation ProjectUnarchive($id: String!)\nquery ListProjectMilestones($projectId: String!, $filter: ProjectMilestoneFilter)\nmutation ProjectMilestoneCreate($input: ProjectMilestoneCreateInput!)\nmutation ProjectMilestoneUpdate($id: String!, $input: ProjectMilestoneUpdateInput!)\nmutation ProjectMilestoneMove($id: String!, $input: ProjectMilestoneMoveInput!)\nmutation ProjectMilestoneDelete($id: String!)\nquery ListProjectUpdates($projectId: String!, $first: Int)\nquery GetProjectUpdate($id: String!)  # Go name distinct from mutation\nmutation ProjectUpdateCreate($input: ProjectUpdateCreateInput!)\nmutation ProjectUpdateUpdate($id: String!, $input: ProjectUpdateUpdateInput!)\nmutation ProjectUpdateArchive($id: String!)\nmutation ProjectUpdateUnarchive($id: String!)\nmutation CreateProjectUpdateReminder($projectId: String!)\nquery ListProjectLabels($filter: ProjectLabelFilter, $first: Int)\nmutation ProjectLabelCreate($input: ProjectLabelCreateInput!)\nmutation ProjectLabelUpdate($id: String!, $input: ProjectLabelUpdateInput!)\nmutation ProjectLabelDelete($id: String!)\nmutation ProjectLabelRetire($id: String!)\nmutation ProjectLabelRestore($id: String!)\nmutation ProjectAddLabel($id: String!, $labelId: String!)\nmutation ProjectRemoveLabel($id: String!, $labelId: String!)\nmutation ProjectRelationCreate($input: ProjectRelationCreateInput!)\nmutation ProjectRelationUpdate($id: String!, $input: ProjectRelationUpdateInput!)\nmutation ProjectRelationDelete($id: String!)\nquery ListProjectStatuses($first: Int)\nmutation ProjectStatusCreate($input: ProjectStatusCreateInput!)\nmutation ProjectStatusUpdate($id: String!, $input: ProjectStatusUpdateInput!)\nmutation ProjectStatusArchive($id: String!)\nmutation ProjectStatusUnarchive($id: String!)\nmutation ProjectReassignStatus($input: ProjectReassignStatusInput!)\n```\n\n**Commands:**\n- `project create --name (required) --description --team (one+, required) --lead --start-date --target-date --status`\n- `project update <id>` - status sets statusId via projectStatuses lookup\n- `project delete/unarchive <id>`\n- `project members <id>` - list members\n- `project member add/remove <id> <user>` - via projectUpdate memberIds\n- Nested group `project milestone`: list/create/update/move/delete\n- Nested group `project update-post`: list/create/edit/archive/unarchive\n- `project update-reminder <project>` - creates reminder\n- Nested group `project label`: list/create/update/delete/retire/restore/add/remove\n- `project relate <id> <other> --relation <kind> --remove`\n- Nested group `project status`: list/create/update/archive/unarchive\n- `project reassign-status --from --to`\n\n**Key Details:**\n- `project update` has NO --state or --health flags (per PRD). State is set via --status resolving to statusId\n- --health is settable only on `project update-post create` (ProjectUpdateCreateInput.health)\n- Validate --status-type against ProjectStatusType: backlog, planned, started, paused, completed, canceled\n- Validate --health against ProjectUpdateHealthType: onTrack, atRisk, offTrack\n- Use ResolveMilestone, ResolveProjectLabel from task 1",
         "testStrategy": "1. Extend smoke_test.sh with project milestone list, project label list tests\n2. Manual write verification in lincli-sandbox:\n   - Create project, update with --status, add/remove members, create milestones, post updates\n   - Verify --health flag on project update-post create works\n   - Verify project update has no --state or --health acceptance\n3. Run flag-regression check: existing project list/get commands unchanged\n4. Full smoke suite passes",
         "priority": "high",
         "dependencies": [
-          1,
-          2
+          "1",
+          "2"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -158,7 +176,8 @@
             "dependencies": [],
             "details": "Extend pkg/api/operations/projects.graphql with: CreateProject($input: ProjectCreateInput!), UpdateProject($id: String!, $input: ProjectUpdateInput!), ProjectDelete($id: String!), and ProjectUnarchive($id: String!) mutations. Create fragments for mutation responses. Implement 'project create' with flags: --name (required), --description, --team (required, supports multiple), --lead (email lookup), --start-date, --target-date, --status (resolves to statusId via projectStatuses lookup). Implement 'project update <id>' command that updates description, lead, dates, and status (NO --state or --health flags per PRD - status sets statusId). Implement 'project delete <id>' and 'project unarchive <id>' commands. Run go generate ./pkg/api after adding GraphQL operations. Follow existing patterns from issue create/update commands for flag handling and output formatting.",
             "status": "pending",
-            "testStrategy": "Add smoke tests for project create/delete operations. Test project create with minimum required flags (--name --team), then with all optional flags. Verify project update correctly resolves --status to statusId. Test that project update explicitly rejects --state and --health flags with clear error messages. Verify project delete/unarchive operations. Run ./smoke_test.sh to verify no regression."
+            "testStrategy": "Add smoke tests for project create/delete operations. Test project create with minimum required flags (--name --team), then with all optional flags. Verify project update correctly resolves --status to statusId. Test that project update explicitly rejects --state and --health flags with clear error messages. Verify project delete/unarchive operations. Run ./smoke_test.sh to verify no regression.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -169,7 +188,8 @@
             ],
             "details": "Add to pkg/api/operations/projects.graphql: ListProjectMilestones($projectId: String!, $filter: ProjectMilestoneFilter) query, ProjectMilestoneCreate($input: ProjectMilestoneCreateInput!), ProjectMilestoneUpdate($id: String!, $input: ProjectMilestoneUpdateInput!), ProjectMilestoneMove($id: String!, $input: ProjectMilestoneMoveInput!), and ProjectMilestoneDelete($id: String!) mutations. Create ProjectMilestoneListFields fragment with id, name, description, targetDate, sortOrder. Create projectMilestoneCmd as nested group under projectCmd. Implement: 'project milestone list <project-id>' with table/JSON/plaintext output, 'project milestone create <project-id> --name --description --target-date', 'project milestone update <milestone-id> --name --description --target-date', 'project milestone move <milestone-id> --sort-order', 'project milestone delete <milestone-id>'. Wire commands in init() function following Cobra nested command patterns.",
             "status": "pending",
-            "testStrategy": "Add smoke test for 'project milestone list' command. Manual test milestone create/update/move/delete in lincli-sandbox project. Verify milestone list shows milestones with correct fields. Test move operation changes sort order. Verify delete requires confirmation or --force flag."
+            "testStrategy": "Add smoke test for 'project milestone list' command. Manual test milestone create/update/move/delete in lincli-sandbox project. Verify milestone list shows milestones with correct fields. Test move operation changes sort order. Verify delete requires confirmation or --force flag.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -180,7 +200,8 @@
             ],
             "details": "Add to pkg/api/operations/projects.graphql: ListProjectUpdates($projectId: String!, $first: Int) query, GetProjectUpdate($id: String!) query, ProjectUpdateCreate($input: ProjectUpdateCreateInput!) mutation with --health flag support (onTrack/atRisk/offTrack), ProjectUpdateUpdate($id: String!, $input: ProjectUpdateUpdateInput!) mutation, ProjectUpdateArchive($id: String!), ProjectUpdateUnarchive($id: String!), and CreateProjectUpdateReminder($projectId: String!) mutations. Create ProjectUpdateListFields fragment with id, body, health, createdAt, editedAt, user fields. Implement projectUpdatePostCmd nested group with: 'project update-post list <project-id>', 'project update-post create <project-id> --body --health' (health is settable HERE via ProjectUpdateHealthType enum validation), 'project update-post edit <id> --body', 'project update-post archive/unarchive <id>'. Add 'project update-reminder <project-id>' command at project level.",
             "status": "pending",
-            "testStrategy": "Add smoke test for 'project update-post list'. Manually test creating project update-post with --health flag (verify onTrack, atRisk, offTrack values work). Verify health validation errors show correct allowed values. Test archive/unarchive workflow. Verify update-reminder creates reminder correctly."
+            "testStrategy": "Add smoke test for 'project update-post list'. Manually test creating project update-post with --health flag (verify onTrack, atRisk, offTrack values work). Verify health validation errors show correct allowed values. Test archive/unarchive workflow. Verify update-reminder creates reminder correctly.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -191,7 +212,8 @@
             ],
             "details": "Add to pkg/api/operations/projects.graphql: ListProjectLabels($filter: ProjectLabelFilter, $first: Int) query, ProjectLabelCreate($input: ProjectLabelCreateInput!), ProjectLabelUpdate($id: String!, $input: ProjectLabelUpdateInput!), ProjectLabelDelete($id: String!), ProjectLabelRetire($id: String!), ProjectLabelRestore($id: String!), ProjectAddLabel($id: String!, $labelId: String!), ProjectRemoveLabel($id: String!, $labelId: String!) mutations. Create ProjectLabelListFields fragment. Implement projectLabelCmd nested group with: list, create (--name --color --description), update, delete, retire, restore subcommands. Add 'project label add <project-id> <label-name-or-id>' and 'project label remove <project-id> <label-name-or-id>' that resolve label by name. Also implement 'project members <id>' list command and 'project member add/remove <id> <user-email>' commands via projectUpdate memberIds mutation.",
             "status": "pending",
-            "testStrategy": "Add smoke test for 'project label list'. Test project label create with --name --color. Verify label add/remove commands resolve label names correctly. Test project members list output. Test member add using email lookup, verify member remove works. Use ResolveMilestone/ResolveProjectLabel helpers from task 1 for lookups."
+            "testStrategy": "Add smoke test for 'project label list'. Test project label create with --name --color. Verify label add/remove commands resolve label names correctly. Test project members list output. Test member add using email lookup, verify member remove works. Use ResolveMilestone/ResolveProjectLabel helpers from task 1 for lookups.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -202,21 +224,26 @@
             ],
             "details": "Add to pkg/api/operations/projects.graphql: ProjectRelationCreate($input: ProjectRelationCreateInput!), ProjectRelationUpdate($id: String!, $input: ProjectRelationUpdateInput!), ProjectRelationDelete($id: String!) mutations. Add ListProjectStatuses($first: Int) query, ProjectStatusCreate($input: ProjectStatusCreateInput!), ProjectStatusUpdate($id: String!, $input: ProjectStatusUpdateInput!), ProjectStatusArchive($id: String!), ProjectStatusUnarchive($id: String!), and ProjectReassignStatus($input: ProjectReassignStatusInput!) mutations. Create fragments for both entities. Implement 'project relate <id> <other-project-id> --relation <kind>' with --remove flag to delete relation. Validate --relation against ProjectRelationType enum. Implement projectStatusCmd nested group with: list, create (--name --color --type with ProjectStatusType validation: backlog, planned, started, paused, completed, canceled), update, archive, unarchive subcommands. Add 'project reassign-status --from <status-id> --to <status-id>' at project level.",
             "status": "pending",
-            "testStrategy": "Add smoke test for 'project status list'. Verify --status-type validation shows correct values (backlog/planned/started/paused/completed/canceled). Test project relate creates relation between projects. Test --remove flag deletes the relation. Test project reassign-status moves projects from one status to another. Verify all operations work in lincli-sandbox workspace."
+            "testStrategy": "Add smoke test for 'project status list'. Verify --status-type validation shows correct values (backlog/planned/started/paused/completed/canceled). Test project relate creates relation between projects. Test --remove flag deletes the relation. Test project reassign-status moves projects from one status to another. Verify all operations work in lincli-sandbox workspace.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 5,
+        "expansionPrompt": "Break down project extension into: (1) Add CreateProject/UpdateProject/ProjectDelete/ProjectUnarchive mutations to projects.graphql, (2) Implement project create/update/delete/unarchive commands in cmd/project.go, (3) Implement 'project milestone' nested group with CRUD operations, (4) Implement 'project update-post' nested group for status updates, (5) Implement 'project label', 'project relate', 'project status', and member management commands.",
+        "updatedAt": "2026-07-02T00:25:44.307Z"
       },
       {
-        "id": 4,
+        "id": "4",
         "title": "Implement Cycles, Labels, States, Issue Extensions (Tier 2 - PR 3)",
         "description": "Add cycle, issue label, and workflow state management. Extend issue commands with archive/delete/lifecycle ops and enrich issue create/update with --label, --cycle, --milestone, --estimate, --parent flags. Add batch operations.",
         "details": "Create `cmd/cycle.go`, `cmd/label.go`, `cmd/state.go` and extend `cmd/issue.go`:\n\n**New GraphQL Operations (cycles.graphql):**\n```graphql\nfragment CycleListFields on Cycle { id number name description startsAt endsAt progress completedAt team { id key } }\nfragment CycleDetailFields on Cycle { ...CycleListFields scopeHistory progressHistory }\nquery ListCycles($filter: CycleFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy)\nquery GetCycle($id: String!)\nmutation CycleCreate($input: CycleCreateInput!)\nmutation CycleUpdate($id: String!, $input: CycleUpdateInput!)\nmutation CycleArchive($id: String!)\nmutation CycleShiftAll($input: CycleShiftAllInput!)\nmutation CycleStartUpcomingCycleToday($teamId: String!)\n```\n\n**New GraphQL Operations (labels.graphql):**\n```graphql\nfragment LabelListFields on IssueLabel { id name color description parent { id name } team { id key } }\nquery ListIssueLabels($filter: IssueLabelFilter, $first: Int)\nquery GetIssueLabel($id: String!)\nmutation IssueLabelCreate($input: IssueLabelCreateInput!)\nmutation IssueLabelUpdate($id: String!, $input: IssueLabelUpdateInput!)\nmutation IssueLabelDelete($id: String!)\nmutation IssueLabelRetire($id: String!)\nmutation IssueLabelRestore($id: String!)\n```\n\n**New GraphQL Operations (states.graphql):**\n```graphql\nquery GetWorkflowState($id: String!)\nmutation WorkflowStateCreate($input: WorkflowStateCreateInput!)\nmutation WorkflowStateUpdate($id: String!, $input: WorkflowStateUpdateInput!)\nmutation WorkflowStateArchive($id: String!)  # No hard delete, archive only\n```\n\n**Extended Issue Operations (issues.graphql):**\n```graphql\nmutation IssueArchive($id: String!)\nmutation IssueUnarchive($id: String!)\nmutation IssueDelete($id: String!)\nmutation IssueSubscribe($id: String!)\nmutation IssueUnsubscribe($id: String!)\nmutation IssueReminder($id: String!, $at: DateTime!)\nmutation IssueShare($id: String!)\nmutation IssueUnshare($id: String!)\nmutation IssueAddLabel($id: String!, $labelId: String!)\nmutation IssueRemoveLabel($id: String!, $labelId: String!)\nmutation IssueBatchCreate($input: IssueBatchCreateInput!)\nmutation IssueBatchUpdate($input: IssueBatchUpdateInput!)\n```\n\n**Commands:**\n- `cycle list --team --limit --sort --newer-than (default all_time)`\n- `cycle get/create/update/archive <id>`\n- `cycle shift <team> --from --by`\n- `cycle start-now <team>`\n- `label list --team --limit`\n- `label create/update/delete/retire/restore <id>`\n- `state list <team>` - reuses GetTeamStates embed\n- `state get/create/update/delete <id>` - delete maps to archive\n- `issue archive/unarchive/delete <id>`\n- `issue subscribe/unsubscribe <id>`\n- `issue remind <id> --at`\n- `issue share/unshare <id>` - share prints public URL\n- Enrich `issue create/update` with: --label (repeatable), --cycle, --milestone, --estimate, --parent\n- `issue batch-create --file` (JSON/CSV)\n- `issue batch-update --filter plus set flags`\n\n**Key Details:**\n- Validate --state-type: backlog, unstarted, started, completed, canceled\n- Batch commands use resolver caching to avoid per-row lookups\n- Batch commands retry with backoff on rate-limit errors\n- Update buildIssueCreateInput/buildIssueUpdateInput for new flags",
         "testStrategy": "1. Extend smoke_test.sh: cycle list, label list, state list tests\n2. Flag regression check: existing issue flags (title, description, assignee, state, priority, project) still work when new flags unset and when combined\n3. Manual write verification in SD team:\n   - Create/archive cycles, labels, states\n   - issue archive/unarchive/subscribe/share\n   - issue create with --label --cycle --milestone --estimate --parent\n   - Clean up test artifacts after verification\n4. Full smoke suite passes",
         "priority": "high",
         "dependencies": [
-          1,
-          2,
-          3
+          "1",
+          "2",
+          "3"
         ],
         "status": "pending",
         "subtasks": [
@@ -227,7 +254,8 @@
             "dependencies": [],
             "details": "Create pkg/api/operations/cycles.graphql with CycleListFields/CycleDetailFields fragments (id, number, name, description, startsAt, endsAt, progress, completedAt, team, scopeHistory, progressHistory). Add queries: ListCycles with CycleFilter, GetCycle. Add mutations: CycleCreate, CycleUpdate, CycleArchive, CycleShiftAll, CycleStartUpcomingCycleToday. Run go generate ./pkg/api. Create cmd/cycle.go with cycleCmd root, cycleListCmd (--team --limit --sort --newer-than defaulting all_time unlike issues), cycleGetCmd, cycleCreateCmd (--team --name --description --starts-at --ends-at), cycleUpdateCmd (--name --description --starts-at --ends-at), cycleArchiveCmd. Add cycleShiftCmd (cycle shift <team> --from --by) and cycleStartNowCmd (cycle start-now <team>). All commands use standard output modes (--json, --plaintext, table). Follow existing patterns from project.go/issue.go for team resolution and output formatting.",
             "status": "pending",
-            "testStrategy": "Add to smoke_test.sh: cycle list, cycle list --team SD --json, cycle list -p. Manual verification: create a cycle in SD team, update it, archive it. Test cycle shift and start-now in a team with cycles enabled."
+            "testStrategy": "Add to smoke_test.sh: cycle list, cycle list --team SD --json, cycle list -p. Manual verification: create a cycle in SD team, update it, archive it. Test cycle shift and start-now in a team with cycles enabled.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -236,7 +264,8 @@
             "dependencies": [],
             "details": "Create pkg/api/operations/labels.graphql with LabelListFields fragment (id, name, color, description, parent { id name }, team { id key }). Add ListIssueLabels query with IssueLabelFilter supporting team and workspace scope. Add GetIssueLabel query. Add mutations: IssueLabelCreate, IssueLabelUpdate, IssueLabelDelete, IssueLabelRetire, IssueLabelRestore. Run go generate ./pkg/api. Create cmd/label.go with labelCmd root, labelListCmd (--team for team-scoped, omit for workspace labels, --limit), labelGetCmd, labelCreateCmd (--name --color --description --parent --team), labelUpdateCmd (--name --color --description --parent), labelDeleteCmd (hard delete), labelRetireCmd (soft disable), labelRestoreCmd (re-enable retired). Handle parent hierarchy display in list output showing parent.name prefix. All three output modes.",
             "status": "pending",
-            "testStrategy": "Add to smoke_test.sh: label list, label list --team SD --json, label list -p. Manual verification: create workspace label, create team label with --team, create child label with --parent, retire and restore a label, delete a test label."
+            "testStrategy": "Add to smoke_test.sh: label list, label list --team SD --json, label list -p. Manual verification: create workspace label, create team label with --team, create child label with --parent, retire and restore a label, delete a test label.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -245,7 +274,8 @@
             "dependencies": [],
             "details": "Create pkg/api/operations/states.graphql with GetWorkflowState query and mutations: WorkflowStateCreate, WorkflowStateUpdate, WorkflowStateArchive (no hard delete per Linear API). Run go generate ./pkg/api. Create cmd/state.go with stateCmd root. stateListCmd (state list <team>) reuses GetTeam query with embedded states.nodes - no separate ListWorkflowStates query needed, avoiding extra API call. stateGetCmd fetches single state with GetWorkflowState. stateCreateCmd (--name --color --description --type --position) validates --type against: backlog, unstarted, started, completed, canceled. stateUpdateCmd (--name --color --description --position). stateDeleteCmd maps to WorkflowStateArchive mutation (terminology: 'delete' for UX, archive under hood). Display state type with color coding in table output.",
             "status": "pending",
-            "testStrategy": "Add to smoke_test.sh: state list SD, state list SD --json. Manual verification in SD team: create new state with --type started, update its name/color, archive it. Verify --type validation rejects invalid values like 'active' or 'closed'."
+            "testStrategy": "Add to smoke_test.sh: state list SD, state list SD --json. Manual verification in SD team: create new state with --type started, update its name/color, archive it. Verify --type validation rejects invalid values like 'active' or 'closed'.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -258,7 +288,8 @@
             ],
             "details": "Extend pkg/api/operations/issues.graphql with mutations: IssueArchive, IssueUnarchive, IssueDelete, IssueSubscribe, IssueUnsubscribe, IssueReminder (with DateTime at parameter), IssueShare, IssueUnshare. IssueShare returns shareUrl field. Run go generate ./pkg/api. Add to cmd/issue.go: issueArchiveCmd, issueUnarchiveCmd, issueDeleteCmd (warn about permanence), issueSubscribeCmd, issueUnsubscribeCmd, issueRemindCmd (--at flag for DateTime), issueShareCmd (prints public URL on success), issueUnshareCmd. Also add issueAddLabelCmd and issueRemoveLabelCmd using IssueAddLabel/IssueRemoveLabel mutations for direct label manipulation. Register all new commands in init(). Each command takes issue-id as positional arg.",
             "status": "pending",
-            "testStrategy": "Manual verification in SD team: archive an issue, unarchive it, subscribe/unsubscribe to verify subscriber list changes, set reminder with --at, share issue and verify URL works in browser, unshare. Test issue add-label and remove-label commands. Avoid testing delete on real data - use throwaway test issue."
+            "testStrategy": "Manual verification in SD team: archive an issue, unarchive it, subscribe/unsubscribe to verify subscriber list changes, set reminder with --at, share issue and verify URL works in browser, unshare. Test issue add-label and remove-label commands. Avoid testing delete on real data - use throwaway test issue.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -269,7 +300,8 @@
             ],
             "details": "In cmd/issue.go, extend issueCreateCmd and issueUpdateCmd flag definitions: --label (StringSlice, repeatable for multiple labels), --cycle (String, cycle ID or name), --milestone (String, milestone ID or name), --estimate (Int, story points), --parent (String, parent issue ID/identifier for sub-issues). Update buildIssueCreateInput: resolve --label names to IDs using label list lookup, resolve --cycle to cycleId, resolve --milestone to milestoneId (projectMilestoneId field), set Estimate field, resolve --parent to parentId. Update buildIssueUpdateInput similarly. Add helper functions resolveLabelsToIDs, resolveCycleID, resolveMilestoneID that cache lookups. Ensure existing flags (title, description, assignee, state, priority, project) continue working - run regression tests.",
             "status": "pending",
-            "testStrategy": "Flag regression check: test existing issue create/update flags work standalone and combined with new flags. Test: issue create --title 'Test' --team SD --label bug --label urgent, issue update ISSUE-ID --cycle 'Sprint 42' --estimate 3, issue create with --parent for sub-issue. Verify each resolver handles not-found gracefully."
+            "testStrategy": "Flag regression check: test existing issue create/update flags work standalone and combined with new flags. Test: issue create --title 'Test' --team SD --label bug --label urgent, issue update ISSUE-ID --cycle 'Sprint 42' --estimate 3, issue create with --parent for sub-issue. Verify each resolver handles not-found gracefully.",
+            "parentId": "undefined"
           },
           {
             "id": 6,
@@ -280,19 +312,23 @@
             ],
             "details": "Extend pkg/api/operations/issues.graphql with IssueBatchCreate and IssueBatchUpdate mutations. Run go generate ./pkg/api. Create issueBatchCreateCmd (issue batch-create --file) supporting JSON array format [{title, team, ...}] and CSV with headers. Parse file, validate required fields (title, team per row). Build resolver cache: pre-fetch all teams, labels, cycles, milestones once before processing rows to avoid N+1 lookups. Call IssueBatchCreate mutation. Create issueBatchUpdateCmd (issue batch-update --filter plus set flags like --assignee --state --priority) - first queries issues matching filter, then applies IssueBatchUpdate. Implement exponential backoff retry on rate-limit errors (HTTP 429 or GraphQL rate limit error codes). Report progress during batch ops. Cap batch size per API limits (likely 50-100 per call).",
             "status": "pending",
-            "testStrategy": "Create test fixtures: issues.json with 5 issues, issues.csv with 5 issues. Test batch-create from both formats. Test batch-update with simple filter (--team SD --state Backlog) applying --priority 3. Verify resolver cache hits by checking API call count. Test rate limit retry by simulating high volume (may need manual throttling test)."
+            "testStrategy": "Create test fixtures: issues.json with 5 issues, issues.csv with 5 issues. Test batch-create from both formats. Test batch-update with simple filter (--team SD --state Backlog) applying --priority 3. Verify resolver cache hits by checking API call count. Test rate limit retry by simulating high volume (may need manual throttling test).",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 8,
+        "recommendedSubtasks": 6,
+        "expansionPrompt": "Break down into: (1) Create cmd/cycle.go with list/get/create/update/archive and shift/start-now commands plus cycles.graphql, (2) Create cmd/label.go with full CRUD and retire/restore operations plus labels.graphql, (3) Create cmd/state.go with get/create/update/archive operations plus states.graphql, (4) Add issue archive/unarchive/delete/subscribe/share commands to cmd/issue.go, (5) Extend buildIssueCreateInput/buildIssueUpdateInput with --label/--cycle/--milestone/--estimate/--parent flags, (6) Implement issue batch-create and batch-update commands with resolver caching and rate-limit retry logic."
       },
       {
-        "id": 5,
+        "id": "5",
         "title": "Extend Comments and Add Documents (Tier 2 continued - PR 3)",
         "description": "Add comment edit/delete/resolve and reactions. Create new document domain with full CRUD and search.",
         "details": "Extend `cmd/comment.go` and create `cmd/document.go`:\n\n**Extended Comment Operations (comments.graphql):**\n```graphql\nmutation CommentUpdate($id: String!, $input: CommentUpdateInput!)  # Already defined, wire it\nmutation CommentDelete($id: String!)\nmutation CommentResolve($id: String!)\nmutation CommentUnresolve($id: String!)\nmutation ReactionCreate($input: ReactionCreateInput!)\nmutation ReactionDelete($id: String!)\n```\n\n**New Document Operations (documents.graphql):**\n```graphql\nfragment DocumentListFields on Document { id title icon color createdAt updatedAt project { id name } initiative { id name } creator { name email } }\nfragment DocumentDetailFields on Document { ...DocumentListFields content contentHistory { nodes { id content createdAt } } }\nquery ListDocuments($filter: DocumentFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy)\nquery SearchDocuments($term: String!, $first: Int)\nquery GetDocument($id: String!)\nmutation DocumentCreate($input: DocumentCreateInput!)\nmutation DocumentUpdate($id: String!, $input: DocumentUpdateInput!)\nmutation DocumentDelete($id: String!)\nmutation DocumentUnarchive($id: String!)\n```\n\n**Commands:**\n- `comment edit <id> --body`\n- `comment delete <id>`\n- `comment resolve/unresolve <id>`\n- `comment create --parent <comment-id>` - adds reply threading\n- `comment react <id> --emoji --remove`\n- `issue react <id> --emoji --remove` - shared reaction helper\n- `document list --limit --project --initiative --newer-than (default all_time)`\n- `document search <term>`\n- `document get <id>` - can show content history\n- `document create --title (required) --content --project|--initiative` (exactly one required)\n- `document update <id> --title --content`\n- `document delete/unarchive <id>`\n\n**Key Details:**\n- Wire existing commentUpdate operation that's already defined but unwired\n- Reactions use a shared helper function for both issues and comments\n- Document create requires exactly one of --project or --initiative",
         "testStrategy": "1. Extend smoke_test.sh: document list, document search tests\n2. Manual write verification:\n   - comment edit, delete, resolve/unresolve\n   - comment create with --parent for threading\n   - issue react and comment react with emoji\n   - document create with --project and --initiative separately\n3. Verify error on document create with neither or both --project/--initiative\n4. Full smoke suite passes",
         "priority": "high",
         "dependencies": [
-          4
+          "4"
         ],
         "status": "pending",
         "subtasks": [
@@ -303,7 +339,8 @@
             "dependencies": [],
             "details": "1. Add GraphQL operations to comments.graphql: CommentDelete($id), CommentResolve($id), CommentUnresolve($id) mutations\n2. Run go generate ./pkg/api to regenerate bindings\n3. Create commentEditCmd: takes comment ID as arg, requires --body flag, calls existing UpdateComment operation\n4. Create commentDeleteCmd: takes comment ID as arg, calls CommentDelete, outputs success\n5. Create commentResolveCmd and commentUnresolveCmd: take comment ID, call respective mutations\n6. Extend commentCreateCmd: add --parent flag for reply threading (sets parentId in CommentCreateInput)\n7. Register all new subcommands in init()\n8. Follow existing patterns: plaintext/jsonOut flags, auth handling, output formatting",
             "status": "pending",
-            "testStrategy": "1. Manual test: comment edit <id> --body 'updated text' on existing comment\n2. Manual test: comment resolve/unresolve <id> toggle\n3. Manual test: comment create <issue> --body 'reply' --parent <comment-id>\n4. Verify comment delete prompts or succeeds (check Linear API behavior)\n5. Extend smoke_test.sh with read-only verification where possible"
+            "testStrategy": "1. Manual test: comment edit <id> --body 'updated text' on existing comment\n2. Manual test: comment resolve/unresolve <id> toggle\n3. Manual test: comment create <issue> --body 'reply' --parent <comment-id>\n4. Verify comment delete prompts or succeeds (check Linear API behavior)\n5. Extend smoke_test.sh with read-only verification where possible",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -314,7 +351,8 @@
             ],
             "details": "1. Create reactions.graphql with ReactionCreate($input: ReactionCreateInput!) and ReactionDelete($id: String!) mutations\n2. Run go generate ./pkg/api\n3. Create shared helper in cmd/helpers.go or similar: func handleReaction(targetType string, targetID string, emoji string, remove bool) error - handles both comment and issue reactions\n4. ReactionCreateInput needs either commentId or issueId based on targetType\n5. Add commentReactCmd to comment.go: 'comment react <comment-id> --emoji <emoji> [--remove]'\n6. Add issueReactCmd to issue.go: 'issue react <issue-id> --emoji <emoji> [--remove]'\n7. For --remove, need to find reaction ID first then call ReactionDelete (may need ReactionsByUser query)\n8. Output: show success message with emoji and target",
             "status": "pending",
-            "testStrategy": "1. Manual test: issue react SD-123 --emoji thumbsup (add reaction)\n2. Manual test: comment react <comment-id> --emoji heart\n3. Manual test: issue react SD-123 --emoji thumbsup --remove (remove reaction)\n4. Verify reactions appear in Linear UI\n5. Test error cases: invalid emoji, already reacted"
+            "testStrategy": "1. Manual test: issue react SD-123 --emoji thumbsup (add reaction)\n2. Manual test: comment react <comment-id> --emoji heart\n3. Manual test: issue react SD-123 --emoji thumbsup --remove (remove reaction)\n4. Verify reactions appear in Linear UI\n5. Test error cases: invalid emoji, already reacted",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -323,19 +361,23 @@
             "dependencies": [],
             "details": "1. Create documents.graphql with fragments and operations:\n   - DocumentListFields fragment (id, title, icon, color, createdAt, updatedAt, project, initiative, creator)\n   - DocumentDetailFields fragment (extends list + content, contentHistory)\n   - ListDocuments query with filter, pagination\n   - SearchDocuments query (term, first)\n   - GetDocument query (id)\n   - DocumentCreate, DocumentUpdate, DocumentDelete, DocumentUnarchive mutations\n2. Run go generate ./pkg/api\n3. Create cmd/document.go following existing patterns (issue.go, project.go):\n   - documentListCmd: --limit, --project, --initiative, --newer-than (default all_time unlike issues)\n   - documentSearchCmd: takes search term as arg\n   - documentGetCmd: takes ID as arg, displays content and optional content history\n   - documentCreateCmd: --title (required), --content, --project OR --initiative (exactly one required validation)\n   - documentUpdateCmd: takes ID, --title, --content optional updates\n   - documentDeleteCmd, documentUnarchiveCmd: take ID\n4. Add mutual exclusion validation for --project/--initiative on create\n5. Content history display: show version count, optionally list versions with timestamps",
             "status": "pending",
-            "testStrategy": "1. Add to smoke_test.sh: document list, document list -j, document search 'test'\n2. Manual write verification:\n   - document create --title 'Test Doc' --project <project-id>\n   - document create --title 'Initiative Doc' --initiative <initiative-id>\n   - document update <id> --content 'Updated content'\n   - document get <id> shows content and history\n   - document delete <id> and document unarchive <id>\n3. Verify --project/--initiative mutual exclusion error message"
+            "testStrategy": "1. Add to smoke_test.sh: document list, document list -j, document search 'test'\n2. Manual write verification:\n   - document create --title 'Test Doc' --project <project-id>\n   - document create --title 'Initiative Doc' --initiative <initiative-id>\n   - document update <id> --content 'Updated content'\n   - document get <id> shows content and history\n   - document delete <id> and document unarchive <id>\n3. Verify --project/--initiative mutual exclusion error message",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down into: (1) Extend cmd/comment.go with edit/delete/resolve/unresolve commands and wire existing commentUpdate operation, (2) Add reaction support for both comments and issues with shared helper function, (3) Create cmd/document.go with full CRUD, search, and content history display following existing patterns."
       },
       {
-        "id": 6,
+        "id": "6",
         "title": "Extend Teams and Users, Add Org (Tier 3 - PR 4)",
         "description": "Add team write operations and membership management. Extend user commands and create new org domain for organization-level operations.",
         "details": "Extend `cmd/team.go`, `cmd/user.go` and create `cmd/org.go`:\n\n**Extended Team Operations (teams.graphql):**\n```graphql\nmutation TeamCreate($input: TeamCreateInput!)\nmutation TeamUpdate($id: String!, $input: TeamUpdateInput!)\nmutation TeamDelete($id: String!)\nmutation TeamUnarchive($id: String!)\nmutation TeamMembershipCreate($input: TeamMembershipCreateInput!)\nmutation TeamMembershipDelete($id: String!)\nmutation TeamMembershipUpdate($id: String!, $input: TeamMembershipUpdateInput!)\n```\n\n**Extended User Operations (users.graphql):**\n```graphql\nmutation UserUpdate($id: String!, $input: UserUpdateInput!)\nmutation UserChangeRole($id: String!, $role: UserRoleType!)\nmutation UserSuspend($id: String!)\nmutation UserUnsuspend($id: String!)\nmutation UserSettingsUpdate($id: String!, $input: UserSettingsUpdateInput!)\n```\n\n**New Org Operations (organization.graphql):**\n```graphql\nquery GetOrganization\nmutation OrganizationUpdate($input: OrganizationUpdateInput!)\nquery ListOrganizationInvites($first: Int)\nmutation OrganizationInviteCreate($input: OrganizationInviteCreateInput!)\nmutation OrganizationInviteDelete($id: String!)\nmutation ResendOrganizationInvite($id: String!)\n```\n\n**Commands:**\n- `team create --name (required) --key --description`\n- `team update <key> --name --description` and settings flags\n- `team delete/unarchive <key>` - delete executes immediately\n- `team member add/remove <key> <user>` - nested add-child shape\n- `team set-role <key> <user> --role` - sets team-membership role (owner|member)\n- `user update` - profile flags (--name, --display-name, etc)\n- `user set-role <id> --role` - sets org role (owner|admin|guest|user|app)\n- `user suspend/unsuspend <id>` - executes immediately\n- `user settings update` - user settings flags\n- `org get` - organization details\n- `org update` - settings flags\n- `org invite list --limit`\n- `org invite create --email --role`\n- `org invite delete/resend <id>`\n\n**Key Details:**\n- team set-role is for team-membership (TeamRoleType: owner, member)\n- user set-role is for org role (UserRoleType: owner, admin, guest, user, app) - NOT 'member'\n- Both command help texts explicitly state which scope they change\n- team delete executes immediately (accepted risk per PRD)\n- user suspend executes immediately (accepted risk per PRD)",
         "testStrategy": "1. Extend smoke_test.sh: org get tests\n2. Manual write verification in SD team:\n   - team update settings, team member add/remove\n   - team set-role with --role owner and --role member\n   - user update profile fields\n   - org invite list\n3. Verify --role validation errors show correct values for team vs user commands\n4. Full smoke suite passes",
         "priority": "medium",
         "dependencies": [
-          5
+          "5"
         ],
         "status": "pending",
         "subtasks": [
@@ -346,7 +388,8 @@
             "dependencies": [],
             "details": "1. Add GraphQL mutations to pkg/api/operations/teams.graphql:\n   - TeamCreate($input: TeamCreateInput!)\n   - TeamUpdate($id: String!, $input: TeamUpdateInput!)\n   - TeamDelete($id: String!)\n   - TeamUnarchive($id: String!)\n   - TeamMembershipCreate($input: TeamMembershipCreateInput!)\n   - TeamMembershipDelete($id: String!)\n\n2. Run `go generate ./pkg/api` to regenerate bindings.\n\n3. Add commands to cmd/team.go:\n   - `team create --name (required) --key --description` - creates team with TeamCreateInput\n   - `team update <key> --name --description` plus settings flags (cyclesEnabled, private, etc.)\n   - `team delete <key>` - executes immediately (accepted risk per PRD), no confirmation prompt\n   - `team unarchive <key>` - restores archived team\n\n4. Add nested subcommands for membership:\n   - `team member` parent command\n   - `team member add <team-key> <user-email>` - uses TeamMembershipCreate with resolved userId/teamId\n   - `team member remove <team-key> <user-email>` - uses TeamMembershipDelete with membership ID lookup\n\n5. Use existing resolve patterns from cmd/resolve.go for team key and user email lookups.\n\n6. Follow output patterns from existing commands: --json for agents, --plaintext for scripts, table for interactive.",
             "status": "pending",
-            "testStrategy": "1. Unit test: Verify GraphQL operations compile after generation.\n2. Smoke test: Add `team create/update/delete` tests to smoke_test.sh (create test team, update, then delete).\n3. Manual test: Create team with --name, update with --description, verify with `team get`, then delete.\n4. Manual test: `team member add/remove` with valid user email in SD team."
+            "testStrategy": "1. Unit test: Verify GraphQL operations compile after generation.\n2. Smoke test: Add `team create/update/delete` tests to smoke_test.sh (create test team, update, then delete).\n3. Manual test: Create team with --name, update with --description, verify with `team get`, then delete.\n4. Manual test: `team member add/remove` with valid user email in SD team.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -357,7 +400,8 @@
             ],
             "details": "1. Add GraphQL mutation to teams.graphql:\n   - TeamMembershipUpdate($id: String!, $input: TeamMembershipUpdateInput!) - uses `owner: Boolean` field\n\n2. Run `go generate ./pkg/api` to regenerate.\n\n3. Add `team set-role <team-key> <user-email> --role <role>` command:\n   - Resolve team key to team ID\n   - Resolve user email to user ID\n   - Lookup TeamMembership by teamId+userId\n   - Validate --role flag: must be 'owner' or 'member' (TeamRoleType values)\n   - Map to TeamMembershipUpdateInput: owner=true for 'owner', owner=false for 'member'\n   - Print clear error if invalid role with valid values listed\n\n4. Command help text must explicitly state: \"Sets the user's role within the team (owner or member). This is different from org-level roles set via `user set-role`.\"\n\n5. Output success message showing team, user, and new role.",
             "status": "pending",
-            "testStrategy": "1. Manual test: `team set-role SD user@example.com --role owner` then verify with team members command.\n2. Manual test: `team set-role SD user@example.com --role member` - downgrade and verify.\n3. Error test: `team set-role SD user@example.com --role admin` should fail with message listing valid values (owner, member).\n4. Add to smoke_test.sh: basic set-role validation."
+            "testStrategy": "1. Manual test: `team set-role SD user@example.com --role owner` then verify with team members command.\n2. Manual test: `team set-role SD user@example.com --role member` - downgrade and verify.\n3. Error test: `team set-role SD user@example.com --role admin` should fail with message listing valid values (owner, member).\n4. Add to smoke_test.sh: basic set-role validation.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -366,7 +410,8 @@
             "dependencies": [],
             "details": "1. Add GraphQL mutations to pkg/api/operations/users.graphql:\n   - UserUpdate($id: String!, $input: UserUpdateInput!)\n   - UserChangeRole($id: String!, $role: UserRoleType!) - note: this is userAdmin mutation\n   - UserSuspend($id: String!)\n   - UserUnsuspend($id: String!)\n   - UserSettingsUpdate($id: String!, $input: UserSettingsUpdateInput!)\n\n2. Run `go generate ./pkg/api` to regenerate.\n\n3. Add commands to cmd/user.go:\n   - `user update <email> --name --display-name --description --title --timezone --status-emoji --status-label` - uses UserUpdateInput\n   - `user set-role <email> --role <role>` - validates against UserRoleType: owner, admin, guest, user, app\n   - `user suspend <email>` - executes immediately (accepted risk per PRD)\n   - `user unsuspend <email>` - reactivates user\n   - `user settings update <email>` - settings flags for UserSettingsUpdateInput\n\n4. set-role help text: \"Sets the user's organization-level role (owner, admin, guest, user, or app). This controls workspace-wide permissions, not team membership. Team roles are set via `team set-role`.\"\n\n5. Validate --role flag strictly: reject 'member' with clear error explaining valid UserRoleType values.\n\n6. Resolve user email to ID using existing GetUserByEmail pattern.",
             "status": "pending",
-            "testStrategy": "1. Smoke test: Add `user update/suspend/unsuspend` tests to smoke_test.sh.\n2. Manual test: `user update email --display-name 'Test'` and verify.\n3. Error test: `user set-role email --role member` must fail with message listing valid values (owner, admin, guest, user, app).\n4. Manual test: `user set-role email --role admin` in SD workspace.\n5. Manual test: suspend/unsuspend cycle on test user."
+            "testStrategy": "1. Smoke test: Add `user update/suspend/unsuspend` tests to smoke_test.sh.\n2. Manual test: `user update email --display-name 'Test'` and verify.\n3. Error test: `user set-role email --role member` must fail with message listing valid values (owner, admin, guest, user, app).\n4. Manual test: `user set-role email --role admin` in SD workspace.\n5. Manual test: suspend/unsuspend cycle on test user.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -375,19 +420,23 @@
             "dependencies": [],
             "details": "1. Create pkg/api/operations/organization.graphql with:\n   - Fragment OrganizationFields (id, name, urlKey, logoUrl, subscription info, settings)\n   - GetOrganization query\n   - OrganizationUpdate($input: OrganizationUpdateInput!) mutation\n   - Fragment OrganizationInviteFields (id, email, role, status, createdAt, expiresAt)\n   - ListOrganizationInvites($first: Int) query\n   - OrganizationInviteCreate($input: OrganizationInviteCreateInput!) mutation\n   - OrganizationInviteDelete($id: String!) mutation\n   - ResendOrganizationInvite($id: String!) mutation\n\n2. Run `go generate ./pkg/api`.\n\n3. Create cmd/org.go with structure:\n   - `org` parent command\n   - `org get` - displays organization details (name, urlKey, subscription plan, member count)\n   - `org update --name --logo-url` plus settings flags from OrganizationUpdateInput\n   - `org invite` parent command for invite subgroup\n   - `org invite list --limit` - lists pending invites\n   - `org invite create --email (required) --role (default: user)` - validates role against UserRoleType\n   - `org invite delete <id>` - deletes invite by ID\n   - `org invite resend <id>` - resends invite email\n\n4. Register orgCmd with rootCmd in init().\n\n5. Follow existing output patterns: table for interactive, JSON for --json, tab-delimited for --plaintext.",
             "status": "pending",
-            "testStrategy": "1. Smoke test: Add `org get` test to smoke_test.sh.\n2. Smoke test: Add `org invite list` test to smoke_test.sh.\n3. Manual test: `org get` displays workspace details correctly.\n4. Manual test: `org invite list --limit 5` shows pending invites.\n5. Manual test: Create invite with `org invite create --email test@example.com --role guest`, verify with list, then delete."
+            "testStrategy": "1. Smoke test: Add `org get` test to smoke_test.sh.\n2. Smoke test: Add `org invite list` test to smoke_test.sh.\n3. Manual test: `org get` displays workspace details correctly.\n4. Manual test: `org invite list --limit 5` shows pending invites.\n5. Manual test: Create invite with `org invite create --email test@example.com --role guest`, verify with list, then delete.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break down into: (1) Add team write operations (create/update/delete/unarchive) and membership management to cmd/team.go, (2) Implement team set-role with TeamRoleType validation, (3) Add user write operations (update/set-role/suspend/unsuspend/settings) to cmd/user.go with UserRoleType validation, (4) Create cmd/org.go with get/update and invite management commands."
       },
       {
-        "id": 7,
+        "id": "7",
         "title": "Add Favorites, Views, Notifications, Webhooks, Templates (Tier 3 - PR 4)",
         "description": "Create command groups for favorites, custom views, notifications, webhooks, and templates. These are all new domains with no current coverage.",
         "details": "Create `cmd/favorite.go`, `cmd/view.go`, `cmd/notification.go`, `cmd/webhook.go`, `cmd/template.go`:\n\n**GraphQL Operations:**\n```graphql\n# favorites.graphql\nquery ListFavorites($first: Int)\nquery GetFavorite($id: String!)\nmutation FavoriteCreate($input: FavoriteCreateInput!)\nmutation FavoriteUpdate($id: String!, $input: FavoriteUpdateInput!)\nmutation FavoriteDelete($id: String!)\n\n# views.graphql\nquery ListCustomViews($first: Int)\nquery GetCustomView($id: String!)\nmutation CustomViewCreate($input: CustomViewCreateInput!)\nmutation CustomViewUpdate($id: String!, $input: CustomViewUpdateInput!)\nmutation CustomViewDelete($id: String!)\nmutation ViewPreferencesCreate($input: ViewPreferencesCreateInput!)\nmutation ViewPreferencesUpdate($id: String!, $input: ViewPreferencesUpdateInput!)\nmutation ViewPreferencesDelete($id: String!)\n\n# notifications.graphql\nquery ListNotifications($first: Int)\nquery GetNotification($id: String!)\nquery GetNotificationsUnreadCount\nmutation NotificationMarkReadAll\nmutation NotificationMarkUnreadAll\nmutation NotificationArchive($id: String!)\nmutation NotificationArchiveAll\nmutation NotificationSnoozeAll($input: NotificationSnoozeAllInput!)\nmutation NotificationSubscriptionCreate($input: NotificationSubscriptionCreateInput!)\nmutation NotificationSubscriptionUpdate($id: String!, $input: NotificationSubscriptionUpdateInput!)  # use active=false, not delete\n\n# webhooks.graphql\nquery ListWebhooks($first: Int)\nquery GetWebhook($id: String!)\nmutation WebhookCreate($input: WebhookCreateInput!)\nmutation WebhookUpdate($id: String!, $input: WebhookUpdateInput!)\nmutation WebhookDelete($id: String!)\nmutation WebhookRotateSecret($id: String!)\n\n# templates.graphql\nquery ListTemplates($first: Int)\nquery GetTemplate($id: String!)\nmutation TemplateCreate($input: TemplateCreateInput!)\nmutation TemplateUpdate($id: String!, $input: TemplateUpdateInput!)\nmutation TemplateDelete($id: String!)\n```\n\n**Commands:**\n- `favorite list`\n- `favorite add/remove --entity <kind>` - kind flag selects favorited entity type\n- `view list`, `view create/update/delete`\n- `view prefs create/update/delete`\n- `notification list` - shows unread count\n- `notification read-all/unread-all`\n- `notification archive/snooze`\n- `notification subscribe/unsubscribe` - unsubscribe uses update active=false\n- `webhook list/get/create/update/delete`\n- `webhook rotate-secret` - prints new secret once\n- `template list (issue and project)/create/update/delete`\n- Templates threading: add --template flag to `issue create` and `project create`\n\n**Key Details:**\n- favorite add uses --entity <kind>, not --type\n- webhook create validates URL: reject localhost, loopback, link-local, private IPs\n- webhook rotate-secret prints secret once to stdout (accepted risk)\n- notification unsubscribe uses notificationSubscriptionUpdate with active=false (avoid deprecated delete)\n- Template apply threads templateId into issue/project create (cross-tier touch)",
         "testStrategy": "1. Extend smoke_test.sh: favorite list, view list, notification list, webhook list, template list tests\n2. Manual write verification:\n   - favorite add/remove with various entity types\n   - view create/update/delete\n   - notification read-all/archive\n   - webhook create with valid URL, verify rejection of localhost URLs\n   - webhook rotate-secret, capture output\n3. Verify template --template flag works on issue create and project create\n4. Full smoke suite passes",
         "priority": "medium",
         "dependencies": [
-          6
+          "6"
         ],
         "status": "pending",
         "subtasks": [
@@ -398,7 +447,8 @@
             "dependencies": [],
             "details": "Create cmd/favorite.go following existing command patterns from issue.go and project.go:\n\n1. Define GraphQL operations in pkg/api/operations/favorites.graphql:\n   - query ListFavorites($first: Int) with FavoriteListFields fragment (id, type, sortOrder, parent { id }, folderName, owner { id name email }, createdAt, updatedAt, and nullable entity refs: issue, project, cycle, label, etc.)\n   - query GetFavorite($id: String!) with FavoriteDetailFields fragment\n   - mutation FavoriteCreate($input: FavoriteCreateInput!)\n   - mutation FavoriteUpdate($id: String!, $input: FavoriteUpdateInput!)\n   - mutation FavoriteDelete($id: String!)\n\n2. Implement commands:\n   - favoriteCmd: root command with Use: \"favorite\", Aliases: [\"fav\"]\n   - favoriteListCmd: list favorites with --limit, supports all three output modes (table/plaintext/JSON)\n   - favoriteAddCmd: Use: \"add [entity-id]\", with --entity flag to specify type (issue, project, cycle, label, roadmap, custom-view, document, initiative, predefined-filter). Validate entity type, resolve entity ID, then call FavoriteCreate\n   - favoriteRemoveCmd: Use: \"remove [favorite-id]\", calls FavoriteDelete\n\n3. Key implementation details:\n   - --entity flag accepts: issue, project, cycle, label, roadmap, custom-view, document, initiative, predefined-filter\n   - Entity ID can be identifier format (TEAM-123 for issues) or UUID\n   - List output shows entity type, name, sortOrder, and folder\n   - Run go generate ./pkg/api after adding GraphQL operations",
             "status": "pending",
-            "testStrategy": "Add smoke tests for favorite list (readonly). Manual verification: create favorite for an issue, list to confirm, remove to confirm deletion. Verify --entity flag validation rejects invalid types."
+            "testStrategy": "Add smoke tests for favorite list (readonly). Manual verification: create favorite for an issue, list to confirm, remove to confirm deletion. Verify --entity flag validation rejects invalid types.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -407,7 +457,8 @@
             "dependencies": [],
             "details": "Create cmd/view.go with custom view management:\n\n1. Define GraphQL operations in pkg/api/operations/views.graphql:\n   - query ListCustomViews($first: Int, $filter: CustomViewFilter) with CustomViewListFields (id, name, description, icon, color, modelName, filterData, shared, creator { id name }, team { id key }, createdAt, updatedAt)\n   - query GetCustomView($id: String!) with CustomViewDetailFields (includes issues count, subscribers)\n   - mutation CustomViewCreate($input: CustomViewCreateInput!)\n   - mutation CustomViewUpdate($id: String!, $input: CustomViewUpdateInput!)\n   - mutation CustomViewDelete($id: String!)\n   - mutation ViewPreferencesCreate($input: ViewPreferencesCreateInput!)\n   - mutation ViewPreferencesUpdate($id: String!, $input: ViewPreferencesUpdateInput!)\n   - mutation ViewPreferencesDelete($id: String!)\n\n2. Implement commands:\n   - viewCmd: root with Use: \"view\"\n   - viewListCmd: list custom views with --team, --shared filters\n   - viewGetCmd: Use: \"get [view-id]\", show view details including filter config\n   - viewCreateCmd: Use: \"create\", with --name (required), --description, --team, --icon, --color, --filter-data (JSON string)\n   - viewUpdateCmd: Use: \"update [view-id]\", same flags as create\n   - viewDeleteCmd: Use: \"delete [view-id]\"\n   - viewPrefsCmd: subcommand group with create/update/delete for ViewPreferences\n\n3. Key implementation details:\n   - filterData is JSON - accept as string flag, validate it parses\n   - modelName indicates what the view shows (Issue, Project, etc.)\n   - View preferences control display options (columns, grouping)\n   - Team flag accepts key or ID, resolve to ID before API call",
             "status": "pending",
-            "testStrategy": "Add smoke tests for view list (readonly). Manual verification: create a custom view, update its name, delete it. Verify filterData JSON validation catches malformed input."
+            "testStrategy": "Add smoke tests for view list (readonly). Manual verification: create a custom view, update its name, delete it. Verify filterData JSON validation catches malformed input.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -416,7 +467,8 @@
             "dependencies": [],
             "details": "Create cmd/notification.go:\n\n1. Define GraphQL operations in pkg/api/operations/notifications.graphql:\n   - query ListNotifications($first: Int, $filter: NotificationFilter) with NotificationListFields (id, type, readAt, snoozedUntilAt, archivedAt, actor { id name }, issue { id identifier title }, project { id name }, comment { id body }, createdAt)\n   - query GetNotification($id: String!) with NotificationDetailFields\n   - query GetNotificationsUnreadCount returns unreadCount integer\n   - mutation NotificationMarkReadAll\n   - mutation NotificationMarkUnreadAll\n   - mutation NotificationArchive($id: String!)\n   - mutation NotificationArchiveAll($filter: NotificationFilter)\n   - mutation NotificationSnoozeAll($input: NotificationSnoozeAllInput!)\n   - mutation NotificationSubscriptionCreate($input: NotificationSubscriptionCreateInput!)\n   - mutation NotificationSubscriptionUpdate($id: String!, $input: NotificationSubscriptionUpdateInput!)\n\n2. Implement commands:\n   - notificationCmd: root with Use: \"notification\", Aliases: [\"notif\"]\n   - notificationListCmd: list with --unread-only flag, shows unread count in output header\n   - notificationGetCmd: Use: \"get [notification-id]\"\n   - notificationReadAllCmd: Use: \"read-all\", marks all as read\n   - notificationUnreadAllCmd: Use: \"unread-all\"\n   - notificationArchiveCmd: Use: \"archive [notification-id]\" or \"archive --all\"\n   - notificationSnoozeCmd: Use: \"snooze [notification-id]\", with --until flag (datetime or duration like \"2h\", \"1d\")\n   - notificationSubscribeCmd: Use: \"subscribe\", with --team, --project, --user, --label flags to specify subscription target\n   - notificationUnsubscribeCmd: Use: \"unsubscribe [subscription-id]\", calls NotificationSubscriptionUpdate with active=false (not delete, per API guidance)\n\n3. Key implementation details:\n   - Unsubscribe MUST use update with active=false, never delete mutation (deprecated)\n   - Snooze duration parsing: accept ISO datetime or relative (2h, 1d, 1w)\n   - List shows notification type, source entity, and read status\n   - Subscribe needs to resolve target entity IDs from human-readable identifiers",
             "status": "pending",
-            "testStrategy": "Add smoke tests for notification list (readonly). Manual verification: read-all, verify unread count drops to 0; snooze a notification, verify snoozedUntilAt set; create subscription, then unsubscribe with active=false."
+            "testStrategy": "Add smoke tests for notification list (readonly). Manual verification: read-all, verify unread count drops to 0; snooze a notification, verify snoozedUntilAt set; create subscription, then unsubscribe with active=false.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -425,7 +477,8 @@
             "dependencies": [],
             "details": "Create cmd/webhook.go:\n\n1. Define GraphQL operations in pkg/api/operations/webhooks.graphql:\n   - query ListWebhooks($first: Int, $filter: WebhookFilter) with WebhookListFields (id, label, url, enabled, team { id key }, allPublicTeams, createdAt, updatedAt)\n   - query GetWebhook($id: String!) with WebhookDetailFields (includes resourceTypes array, secret presence indicator)\n   - mutation WebhookCreate($input: WebhookCreateInput!)\n   - mutation WebhookUpdate($id: String!, $input: WebhookUpdateInput!)\n   - mutation WebhookDelete($id: String!)\n   - mutation WebhookRotateSecret($id: String!) returns WebhookRotateSecretPayload with secret field\n\n2. Implement commands:\n   - webhookCmd: root with Use: \"webhook\"\n   - webhookListCmd: list webhooks, show enabled status and team\n   - webhookGetCmd: Use: \"get [webhook-id]\", show full details\n   - webhookCreateCmd: Use: \"create\", with --url (required), --label, --team, --resource-types (comma-separated: Issue, Comment, Project, Cycle, etc.), --enabled (default true)\n   - webhookUpdateCmd: Use: \"update [webhook-id]\", same flags as create\n   - webhookDeleteCmd: Use: \"delete [webhook-id]\"\n   - webhookRotateSecretCmd: Use: \"rotate-secret [webhook-id]\", prints new secret to stdout once\n\n3. URL validation (CRITICAL - security):\n   - Create validateWebhookURL() helper function in cmd/webhook.go\n   - Parse URL, extract host\n   - Reject if host is localhost, 127.0.0.1, ::1\n   - Resolve hostname to IP addresses using net.LookupIP()\n   - Reject if any resolved IP is in private ranges: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16 (link-local), fc00::/7 (IPv6 ULA), fe80::/10 (IPv6 link-local)\n   - Use net.IP.IsPrivate(), IsLoopback(), IsLinkLocalUnicast(), IsLinkLocalMulticast()\n   - Return clear error message listing why URL was rejected\n\n4. Key implementation details:\n   - rotate-secret prints secret in plaintext mode, JSON object in --json mode (accepted security risk, necessary for webhook configuration)\n   - resourceTypes accepts: Issue, Comment, Project, Cycle, IssueLabel, User, Reaction, ProjectUpdate, etc.\n   - URL validation runs before WebhookCreate mutation\n   - --enabled defaults to true; use --enabled=false to create disabled webhook",
             "status": "pending",
-            "testStrategy": "Add smoke tests for webhook list (readonly). Manual verification: attempt create with localhost URL (must fail); attempt create with 10.0.0.1 (must fail); create with valid external URL (must succeed). Test rotate-secret prints secret exactly once."
+            "testStrategy": "Add smoke tests for webhook list (readonly). Manual verification: attempt create with localhost URL (must fail); attempt create with 10.0.0.1 (must fail); create with valid external URL (must succeed). Test rotate-secret prints secret exactly once.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -439,19 +492,23 @@
             ],
             "details": "Create cmd/template.go and modify cmd/issue.go and cmd/project.go:\n\n1. Define GraphQL operations in pkg/api/operations/templates.graphql:\n   - query ListTemplates($first: Int, $filter: TemplateFilter) with TemplateListFields (id, name, description, type, templateData, team { id key }, creator { id name }, createdAt, updatedAt)\n   - query GetTemplate($id: String!) with TemplateDetailFields (full templateData object)\n   - mutation TemplateCreate($input: TemplateCreateInput!)\n   - mutation TemplateUpdate($id: String!, $input: TemplateUpdateInput!)\n   - mutation TemplateDelete($id: String!)\n\n2. Implement template commands:\n   - templateCmd: root with Use: \"template\", Aliases: [\"tmpl\"]\n   - templateListCmd: list with --type filter (issue, project), --team filter\n   - templateGetCmd: Use: \"get [template-id]\", show template details and templateData\n   - templateCreateCmd: Use: \"create\", with --name (required), --type (required: issue or project), --team, --description, --template-data (JSON string for the template content)\n   - templateUpdateCmd: Use: \"update [template-id]\", same flags as create\n   - templateDeleteCmd: Use: \"delete [template-id]\"\n\n3. Thread --template into issue create (cmd/issue.go):\n   - Add --template flag to issueCreateCmd (accepts template name or ID)\n   - In issueCreateCmd.Run, if --template set:\n     - Resolve template by name (case-insensitive) or UUID\n     - Add templateId field to IssueCreateInput\n   - Template fields merged with explicit flags (explicit flags override template values)\n\n4. Thread --template into project create (cmd/project.go):\n   - Add projectCreateCmd if not exists, with --template flag\n   - Resolve template by name or ID, add templateId to ProjectCreateInput\n   - Same merge behavior: explicit flags override template defaults\n\n5. Key implementation details:\n   - Template type field distinguishes issue vs project templates\n   - templateData is JSON object containing default field values\n   - Template resolution: first try exact name match, then case-insensitive, then UUID\n   - If template not found, fail with helpful error listing available templates\n   - This subtask touches cmd/issue.go and cmd/project.go (cross-tier modification)",
             "status": "pending",
-            "testStrategy": "Add smoke tests for template list (readonly). Manual verification: create issue template, use it with issue create --template, verify template fields applied. Verify explicit flags override template values. Test project create --template similarly."
+            "testStrategy": "Add smoke tests for template list (readonly). Manual verification: create issue template, use it with issue create --template, verify template fields applied. Verify explicit flags override template values. Test project create --template similarly.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 5,
+        "expansionPrompt": "Break down into: (1) Create cmd/favorite.go with list/add/remove and --entity flag for entity type selection, (2) Create cmd/view.go with custom view CRUD and view preferences management, (3) Create cmd/notification.go with list/read-all/archive/snooze and subscription management, (4) Create cmd/webhook.go with CRUD, URL validation (reject localhost/private IPs), and rotate-secret command, (5) Create cmd/template.go with CRUD and thread --template flag into issue/project create commands."
       },
       {
-        "id": 8,
+        "id": "8",
         "title": "Add Releases and Customers/CRM (Tier 4a - PR 5a)",
         "description": "Create release management domain with pipelines, stages, and notes. Add customers/CRM domain with needs, statuses, and tiers. Run plan-availability gate first.",
         "details": "Create `cmd/release.go` and `cmd/customer.go`:\n\n**IMPORTANT: Plan-availability gate required before building.** Attempt one scoped write per domain in lincli-sandbox. If plan/permission error, defer domain and record in PR.\n\n**GraphQL Operations (releases.graphql):**\n```graphql\nfragment ReleaseListFields on Release { id name description createdAt updatedAt completedAt archivedAt pipeline { id name } }\nfragment ReleaseDetailFields on Release { ...ReleaseListFields pipeline { id name stages { nodes { id name position } } } }\nquery ListReleases($filter: ReleaseFilter, $first: Int, $orderBy: PaginationOrderBy)\nquery GetRelease($id: String!)\nquery SearchReleases($term: String!, $first: Int)\nmutation ReleaseCreate($input: ReleaseCreateInput!)\nmutation ReleaseUpdate($id: String!, $input: ReleaseUpdateInput!)\nmutation ReleaseDelete($id: String!)\nmutation ReleaseArchive($id: String!)\nmutation ReleaseUnarchive($id: String!)\nmutation ReleaseComplete($id: String!)\nmutation ReleaseSync($id: String!)\nmutation ReleaseUpdateByPipeline($input: ReleaseUpdateByPipelineInput!)\n# Pipeline CRUD\nquery ListReleasePipelines($first: Int)\nmutation ReleasePipelineCreate($input: ReleasePipelineCreateInput!)\nmutation ReleasePipelineUpdate($id: String!, $input: ReleasePipelineUpdateInput!)\nmutation ReleasePipelineDelete($id: String!)\nmutation ReleasePipelineArchive($id: String!)\nmutation ReleasePipelineUnarchive($id: String!)\n# Stage CRUD\nquery ListReleaseStages($pipelineId: String!, $first: Int)\nmutation ReleaseStageCreate($input: ReleaseStageCreateInput!)\nmutation ReleaseStageUpdate($id: String!, $input: ReleaseStageUpdateInput!)\nmutation ReleaseStageArchive($id: String!)\nmutation ReleaseStageUnarchive($id: String!)\n# Notes\nquery ListReleaseNotes($releaseId: String!, $first: Int)\nmutation ReleaseNoteCreate($input: ReleaseNoteCreateInput!)\nmutation ReleaseNoteUpdate($id: String!, $input: ReleaseNoteUpdateInput!)\nmutation ReleaseNoteDelete($id: String!)\n# Issue links\nmutation IssueToReleaseCreate($input: IssueToReleaseCreateInput!)\nmutation IssueToReleaseDelete($id: String!)\nmutation IssueToReleaseDeleteByIssueAndRelease($issueId: String!, $releaseId: String!)\n```\n\n**GraphQL Operations (customers.graphql):**\n```graphql\nfragment CustomerListFields on Customer { id name status { id name } tier { id name } createdAt updatedAt }\nfragment CustomerDetailFields on Customer { ...CustomerListFields description externalIds needs { nodes { id title priority } } }\nquery ListCustomers($filter: CustomerFilter, $first: Int, $orderBy: PaginationOrderBy)\nquery GetCustomer($id: String!)\nmutation CustomerCreate($input: CustomerCreateInput!)\nmutation CustomerUpdate($id: String!, $input: CustomerUpdateInput!)\nmutation CustomerDelete($id: String!)\nmutation CustomerMerge($input: CustomerMergeInput!)\nmutation CustomerUpsert($input: CustomerUpsertInput!)\nmutation CustomerUnsync($id: String!)\n# Needs, Statuses, Tiers CRUD...\n```\n\n**Commands:**\n- `release list/get/search --newer-than (default all_time)`\n- `release create/update/delete/archive/unarchive/complete/sync`\n- Nested `release pipeline`: list/create/update/delete/archive/unarchive\n- Nested `release stage`: list/create/update/archive/unarchive\n- Nested `release note`: list/create/update/delete\n- `release issue add/remove <release> <issue>`\n- `customer list/get --newer-than (default all_time)`\n- `customer create/update/delete/merge/upsert/unsync`\n- Nested `customer need/status/tier`: list/get/create/update/delete/archive/unarchive\n- `customer need create-from-attachment`\n\n**Key Details:**\n- release get nests pipeline -> stages in output\n- customer merge executes immediately, reports survivor\n- customer upsert keys on external identifier\n- Access-key variants stay unwired unless CI use case appears",
         "testStrategy": "1. **First:** Run plan-availability gate - attempt one write per domain, record results\n2. If gate passes, extend smoke_test.sh: release list, customer list tests\n3. Manual write verification:\n   - release create/complete/sync, pipeline and stage management\n   - customer create/merge/upsert, need/status/tier management\n4. Verify release get shows nested pipeline and stages\n5. Full smoke suite passes",
         "priority": "medium",
         "dependencies": [
-          7
+          "7"
         ],
         "status": "pending",
         "subtasks": [
@@ -462,7 +519,8 @@
             "dependencies": [],
             "details": "Execute plan-availability gate before any implementation:\n\n1. **Release domain gate:** Attempt a minimal release pipeline create or release create operation via GraphQL.\n2. **Customer domain gate:** Attempt a minimal customer create operation via GraphQL.\n\nFor each domain:\n- If write succeeds: Domain is available, proceed with implementation, clean up test data.\n- If plan/permission error (e.g., 'Feature not available on your plan'): Defer entire domain, record error in PR description, skip related subtasks.\n\nUse raw GraphQL via the existing client to test availability before generating full operations. Record gate results in a file (e.g., `docs/brainstorm/cli-feature-expansion/tier4a-gate-results.md`) with timestamp, domain, result, and error message if applicable.",
             "status": "pending",
-            "testStrategy": "Verification is the gate itself. Success = write completes without plan error. Failure = plan/permission error captured and documented. No smoke tests needed for gate subtask."
+            "testStrategy": "Verification is the gate itself. Success = write completes without plan error. Failure = plan/permission error captured and documented. No smoke tests needed for gate subtask.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -473,7 +531,8 @@
             ],
             "details": "Create `cmd/release.go` and `pkg/api/operations/releases.graphql`:\n\n**GraphQL operations:**\n- Fragments: ReleaseListFields, ReleaseDetailFields (includes nested pipeline -> stages)\n- Queries: ListReleases, GetRelease, SearchReleases\n- Mutations: ReleaseCreate, ReleaseUpdate, ReleaseDelete, ReleaseArchive, ReleaseUnarchive, ReleaseComplete, ReleaseSync, ReleaseUpdateByPipeline\n- Pipeline queries/mutations: ListReleasePipelines, ReleasePipelineCreate/Update/Delete/Archive/Unarchive\n- Stage queries/mutations: ListReleaseStages, ReleaseStageCreate/Update/Archive/Unarchive\n- Note queries/mutations: ListReleaseNotes, ReleaseNoteCreate/Update/Delete\n- Issue links: IssueToReleaseCreate, IssueToReleaseDelete, IssueToReleaseDeleteByIssueAndRelease\n\n**Commands:**\n- `release list/get/search` with `--newer-than all_time` default\n- `release create/update/delete/archive/unarchive/complete/sync`\n- Nested `release pipeline list/create/update/delete/archive/unarchive`\n- Nested `release stage list/create/update/archive/unarchive`\n- Nested `release note list/create/update/delete`\n- `release issue add/remove <release> <issue>`\n\nFollow existing command patterns from issue.go and project.go. Use cobra command groups for nested subcommands. Release get output nests pipeline -> stages.",
             "status": "pending",
-            "testStrategy": "1. Add smoke tests: `release list`, `release list -j`, `release pipeline list`.\n2. Manual write verification in SD team: create release, complete it, create pipeline/stages, add notes, link issues.\n3. Verify nested output: `release get <id>` shows pipeline with stages.\n4. Clean up test data after verification."
+            "testStrategy": "1. Add smoke tests: `release list`, `release list -j`, `release pipeline list`.\n2. Manual write verification in SD team: create release, complete it, create pipeline/stages, add notes, link issues.\n3. Verify nested output: `release get <id>` shows pipeline with stages.\n4. Clean up test data after verification.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -484,7 +543,8 @@
             ],
             "details": "Create `cmd/customer.go` and `pkg/api/operations/customers.graphql`:\n\n**GraphQL operations:**\n- Fragments: CustomerListFields (id, name, status, tier, timestamps), CustomerDetailFields (adds description, externalIds, needs)\n- Queries: ListCustomers, GetCustomer\n- Mutations: CustomerCreate, CustomerUpdate, CustomerDelete, CustomerMerge, CustomerUpsert, CustomerUnsync\n\n**Commands:**\n- `customer list` with `--newer-than all_time` default, filter by status/tier\n- `customer get <id>` shows full details including needs\n- `customer create --name <name> [--description] [--status] [--tier] [--external-id]`\n- `customer update <id> [--name] [--description] [--status] [--tier]`\n- `customer delete <id>`\n- `customer merge --source <id> --target <id>` - executes immediately, reports survivor ID\n- `customer upsert --external-id <ext-id> --name <name> [flags]` - keys on external identifier\n- `customer unsync <id>`\n\nFollow existing patterns. CustomerMerge executes immediately and reports which customer survived. CustomerUpsert keys on external identifier for idempotent operations.",
             "status": "pending",
-            "testStrategy": "1. Add smoke tests: `customer list`, `customer list -j`.\n2. Manual write verification: create customer, update fields, test merge (create two, merge, verify survivor), test upsert with external ID.\n3. Verify customer get shows status, tier, and needs list.\n4. Clean up test data after verification."
+            "testStrategy": "1. Add smoke tests: `customer list`, `customer list -j`.\n2. Manual write verification: create customer, update fields, test merge (create two, merge, verify survivor), test upsert with external ID.\n3. Verify customer get shows status, tier, and needs list.\n4. Clean up test data after verification.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -495,19 +555,23 @@
             ],
             "details": "Extend `cmd/customer.go` and `pkg/api/operations/customers.graphql` with nested subgroups:\n\n**Customer Need operations:**\n- `customer need list [--customer <id>]` - list needs, optionally filtered by customer\n- `customer need get <id>`\n- `customer need create --title <title> --customer <id> [--priority] [--description]`\n- `customer need create-from-attachment --customer <id> --attachment <id>` - special creation from attachment\n- `customer need update <id> [--title] [--priority] [--description]`\n- `customer need delete <id>`\n- `customer need archive/unarchive <id>`\n\n**Customer Status operations:**\n- `customer status list`\n- `customer status get <id>`\n- `customer status create --name <name> [--color] [--description]`\n- `customer status update <id> [--name] [--color]`\n- `customer status delete <id>`\n- `customer status archive/unarchive <id>`\n\n**Customer Tier operations:**\n- `customer tier list`\n- `customer tier get <id>`\n- `customer tier create --name <name> [--description]`\n- `customer tier update <id> [--name]`\n- `customer tier delete <id>`\n- `customer tier archive/unarchive <id>`\n\nUse cobra command groups. Each subgroup follows the established CRUD + archive/unarchive pattern.",
             "status": "pending",
-            "testStrategy": "1. Add smoke tests: `customer need list`, `customer status list`, `customer tier list`.\n2. Manual write verification: create/archive status, create/archive tier, create customer need from scratch and from attachment.\n3. Verify need list filters by customer when flag provided.\n4. Clean up test data after verification."
+            "testStrategy": "1. Add smoke tests: `customer need list`, `customer status list`, `customer tier list`.\n2. Manual write verification: create/archive status, create/archive tier, create customer need from scratch and from attachment.\n3. Verify need list filters by customer when flag provided.\n4. Clean up test data after verification.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break down into: (1) Run plan-availability gate first - attempt one scoped write per domain in lincli-sandbox, record results before proceeding, (2) Create cmd/release.go with release CRUD plus nested pipeline/stage/note subgroups and issue link management, (3) Create cmd/customer.go with customer CRUD plus merge/upsert operations, (4) Implement customer need/status/tier nested subgroups with full lifecycle operations."
       },
       {
-        "id": 9,
+        "id": "9",
         "title": "Add Emoji, Triage, Git Automation, Schedules (Tier 4b - PR 5b)",
         "description": "Create emoji management, triage responsibility, git automation state/target-branch, and time schedule domains.",
         "details": "Create `cmd/emoji.go`, `cmd/triage.go`, `cmd/git.go`, `cmd/schedule.go`:\n\n**GraphQL Operations:**\n```graphql\n# emojis.graphql\nquery ListEmojis($first: Int)\nmutation EmojiCreate($input: EmojiCreateInput!)\nmutation EmojiDelete($id: String!)\n\n# triage.graphql\nquery ListTriageResponsibilities($first: Int)\nquery GetTriageResponsibility($id: String!)\nmutation TriageResponsibilityCreate($input: TriageResponsibilityCreateInput!)\nmutation TriageResponsibilityUpdate($id: String!, $input: TriageResponsibilityUpdateInput!)\nmutation TriageResponsibilityDelete($id: String!)\n\n# git.graphql\nmutation GitAutomationStateCreate($input: GitAutomationStateCreateInput!)\nmutation GitAutomationStateUpdate($id: String!, $input: GitAutomationStateUpdateInput!)\nmutation GitAutomationStateDelete($id: String!)\nmutation GitAutomationTargetBranchCreate($input: GitAutomationTargetBranchCreateInput!)\nmutation GitAutomationTargetBranchUpdate($id: String!, $input: GitAutomationTargetBranchUpdateInput!)\nmutation GitAutomationTargetBranchDelete($id: String!)\n\n# schedules.graphql\nquery ListTimeSchedules($first: Int)\nquery GetTimeSchedule($id: String!)\nmutation TimeScheduleCreate($input: TimeScheduleCreateInput!)\nmutation TimeScheduleUpdate($id: String!, $input: TimeScheduleUpdateInput!)\nmutation TimeScheduleDelete($id: String!)\nmutation TimeScheduleUpsertExternal($input: TimeScheduleUpsertExternalInput!)\nmutation TimeScheduleRefreshIntegrationSchedule($id: String!)\n```\n\n**Commands:**\n- `emoji list --limit`\n- `emoji create --name --url`\n- `emoji delete <id>`\n- `triage list/get/create/update/delete`\n- `git state create/update/delete`\n- `git target-branch create/update/delete`\n- `schedule list/get --newer-than (default all_time)`\n- `schedule create/update/delete`\n- `schedule upsert-external/refresh`\n\n**Key Details:**\n- Reactions (issue react/comment react) use shared helper from task 5\n- Custom org emoji list/create/delete\n- schedule is the group name (not time-schedule)\n- Schedules resolve by name or ID",
         "testStrategy": "1. Extend smoke_test.sh: emoji list, triage list, schedule list tests\n2. Manual write verification:\n   - emoji create/delete\n   - triage create/update/delete\n   - git state and target-branch operations\n   - schedule create/update/delete\n3. Verify schedule resolves by name\n4. Full smoke suite passes",
         "priority": "medium",
         "dependencies": [
-          8
+          "8"
         ],
         "status": "pending",
         "subtasks": [
@@ -518,7 +582,8 @@
             "dependencies": [],
             "details": "Create pkg/api/operations/emojis.graphql with ListEmojis query, EmojiCreate and EmojiDelete mutations. Create cmd/emoji.go following existing command patterns (issue.go, comment.go). Implement: 'emoji list --limit' displaying name/URL/creator columns, 'emoji create --name <name> --url <image-url>' for adding custom emojis, 'emoji delete <id>' for removal. Support all three output modes (table, plaintext, JSON). Register command in root.go.",
             "status": "pending",
-            "testStrategy": "Add 'lincli emoji list' and 'lincli emoji list --json' tests to smoke_test.sh. Manual verification: create a test emoji, verify it appears in list, delete it."
+            "testStrategy": "Add 'lincli emoji list' and 'lincli emoji list --json' tests to smoke_test.sh. Manual verification: create a test emoji, verify it appears in list, delete it.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -529,7 +594,8 @@
             ],
             "details": "Create pkg/api/operations/triage.graphql with ListTriageResponsibilities and GetTriageResponsibility queries, plus TriageResponsibilityCreate/Update/Delete mutations. Create cmd/triage.go implementing: 'triage list --limit' showing responsibility details, 'triage get <id>' for single responsibility, 'triage create' with team/user flags, 'triage update <id>' with modifiable fields, 'triage delete <id>' for removal. Follow CRUD patterns from project.go. Support all output modes.",
             "status": "pending",
-            "testStrategy": "Add 'lincli triage list' test to smoke_test.sh. Manual verification: create triage responsibility, update it, verify changes, delete it."
+            "testStrategy": "Add 'lincli triage list' test to smoke_test.sh. Manual verification: create triage responsibility, update it, verify changes, delete it.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -541,7 +607,8 @@
             ],
             "details": "Create pkg/api/operations/git.graphql with GitAutomationStateCreate/Update/Delete and GitAutomationTargetBranchCreate/Update/Delete mutations. Create cmd/git.go with two subcommand groups: 'git state create/update/delete' for managing automation states (link states to branches), 'git target-branch create/update/delete' for managing target branches. Flags include --team, --state, --branch-pattern. Follow nested subcommand pattern. Support all output modes.",
             "status": "pending",
-            "testStrategy": "Manual verification only (no list operation available): create git automation state, update it, delete it. Same for target-branch operations. Verify operations succeed without error."
+            "testStrategy": "Manual verification only (no list operation available): create git automation state, update it, delete it. Same for target-branch operations. Verify operations succeed without error.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -554,19 +621,23 @@
             ],
             "details": "Create pkg/api/operations/schedules.graphql with ListTimeSchedules, GetTimeSchedule queries and TimeScheduleCreate/Update/Delete/UpsertExternal/RefreshIntegrationSchedule mutations. Create cmd/schedule.go implementing: 'schedule list --newer-than all_time' (default all_time unlike issues), 'schedule get <id-or-name>' with name resolution, 'schedule create/update/delete', 'schedule upsert-external' for external integrations, 'schedule refresh <id>' for integration sync. Support name-to-ID resolution. All output modes.",
             "status": "pending",
-            "testStrategy": "Add 'lincli schedule list' and 'lincli schedule list --json' tests to smoke_test.sh. Manual verification: create schedule, verify name resolution in get, test update/delete flow. Verify upsert-external and refresh operations."
+            "testStrategy": "Add 'lincli schedule list' and 'lincli schedule list --json' tests to smoke_test.sh. Manual verification: create schedule, verify name resolution in get, test update/delete flow. Verify upsert-external and refresh operations.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break down into: (1) Create cmd/emoji.go with list/create/delete for custom org emojis, (2) Create cmd/triage.go with full CRUD for triage responsibilities, (3) Create cmd/git.go with git automation state and target-branch management commands, (4) Create cmd/schedule.go with time schedule CRUD plus upsert-external and refresh operations."
       },
       {
-        "id": 10,
+        "id": "10",
         "title": "Add OAuth Apps, Attachment Links, Agents (Tier 4c - PR 5c)",
         "description": "Create OAuth application management, extend attachments with link helpers, and add Agents API as lowest priority.",
         "details": "Create `cmd/oauthapp.go`, `cmd/agent.go` and extend `cmd/attachment.go`:\n\n**GraphQL Operations (oauthapp.graphql):**\n```graphql\nquery ListOAuthApplications($first: Int)\nquery GetOAuthApplication($id: String!)\nmutation OAuthApplicationCreate($input: OAuthApplicationCreateInput!)\nmutation OAuthApplicationUpdate($id: String!, $input: OAuthApplicationUpdateInput!)\nmutation OAuthApplicationArchive($id: String!)\nmutation OAuthApplicationRotateSecret($id: String!)\nmutation OAuthApplicationRotateWebhookSecret($id: String!)\n```\n\n**Extended Attachment Operations:**\n```graphql\nmutation AttachmentLinkURL($issueId: String!, $url: String!, $input: AttachmentLinkUrlInput!)\nmutation AttachmentLinkSlack($issueId: String!, $url: String!)\nmutation AttachmentLinkDiscord($issueId: String!, $url: String!)\nmutation AttachmentLinkFront($issueId: String!, $url: String!)\nmutation AttachmentLinkIntercom($issueId: String!, $url: String!)\nmutation AttachmentLinkZendesk($issueId: String!, $url: String!)\nmutation AttachmentLinkJiraIssue($issueId: String!, $url: String!)\nmutation AttachmentLinkGitHubIssue($issueId: String!, $url: String!)\nmutation AttachmentLinkGitHubPR($issueId: String!, $url: String!)\nmutation AttachmentLinkGitLabMR($issueId: String!, $url: String!)\nmutation AttachmentLinkSalesforce($issueId: String!, $url: String!)\nmutation AttachmentSyncToSlack($id: String!)\n```\n\n**GraphQL Operations (agents.graphql) - Build last:**\n```graphql\nquery ListAgentSessions($first: Int)\nquery GetAgentSession($id: String!)\nquery AgentSessionSandbox\nmutation AgentSessionCreate($input: AgentSessionCreateInput!)\nmutation AgentSessionCreateOnIssue($issueId: String!, $input: AgentSessionCreateInput!)\nmutation AgentSessionCreateOnComment($commentId: String!, $input: AgentSessionCreateInput!)\nmutation AgentSessionUpdate($id: String!, $input: AgentSessionUpdateInput!)\nmutation AgentSessionUpdateExternalUrl($id: String!, $url: String!)\nquery ListAgentActivities($sessionId: String!, $first: Int)\nmutation AgentActivityCreate($input: AgentActivityCreateInput!)\nmutation AgentActivityCreatePrompt($input: AgentActivityCreatePromptInput!)\nmutation AgentActivitySendQueued($id: String!)\nmutation AgentActivityDeleteQueued($id: String!)\nquery ListAgentSkills($first: Int)\nmutation AgentSkillCreate($input: AgentSkillCreateInput!)\nmutation AgentSkillUpdate($id: String!, $input: AgentSkillUpdateInput!)\nmutation AgentSkillDelete($id: String!)\n```\n\n**Commands:**\n- `oauth-app list/get`\n- `oauth-app create/update/archive`\n- `oauth-app rotate-secret` - prints new secret once\n- `oauth-app rotate-webhook-secret` - prints new secret once\n- `attachment link <issue> <url> --provider <name>` - single command dispatches to typed mutations\n- `attachment sync-to-slack <id>`\n- `agent session list/get/sandbox/create/create-on-issue/create-on-comment/update/update-external-url`\n- `agent activity list/get/create/create-prompt/send-queued/delete-queued`\n- `agent skill list/get/create/update/delete`\n\n**Key Details:**\n- oauth-app is the group name\n- rotate-secret commands print new secret once (accepted risk)\n- attachment link uses --provider (not --type), default 'url'\n- Unknown provider exits non-zero with valid providers list\n- Build Agents API last within this PR, confirm use case first",
         "testStrategy": "1. Extend smoke_test.sh: oauth-app list, agent session list tests\n2. Manual write verification:\n   - oauth-app create/archive\n   - oauth-app rotate-secret, capture output\n   - attachment link with various --provider values\n   - attachment sync-to-slack\n   - agent session/activity/skill operations (if use case confirmed)\n3. Verify --provider validation errors list valid providers\n4. Full smoke suite passes",
         "priority": "medium",
         "dependencies": [
-          9
+          "9"
         ],
         "status": "pending",
         "subtasks": [
@@ -577,7 +648,8 @@
             "dependencies": [],
             "details": "Create pkg/api/operations/oauthapp.graphql with ListOAuthApplications, GetOAuthApplication, OAuthApplicationCreate, OAuthApplicationUpdate, OAuthApplicationArchive, OAuthApplicationRotateSecret, and OAuthApplicationRotateWebhookSecret operations. Create cmd/oauthapp.go with 'oauth-app' as the command group. Implement list/get with standard output modes (table, JSON, plaintext). For rotate-secret and rotate-webhook-secret: print the new secret value exactly once to stdout (no JSON wrapping for security - user captures it or loses it). Add clear warning message that the secret is shown only once. Run go generate after adding GraphQL operations.",
             "status": "pending",
-            "testStrategy": "Add smoke tests for oauth-app list and oauth-app list --json. Manual verification: create an OAuth app, update it, rotate both secrets (capture output), verify secrets differ, archive the app. Confirm rotate commands exit 0 and print secret without extra formatting."
+            "testStrategy": "Add smoke tests for oauth-app list and oauth-app list --json. Manual verification: create an OAuth app, update it, rotate both secrets (capture output), verify secrets differ, archive the app. Confirm rotate commands exit 0 and print secret without extra formatting.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -586,7 +658,8 @@
             "dependencies": [],
             "details": "Add GraphQL mutations to pkg/api/operations/attachments.graphql: AttachmentLinkURL (with input), AttachmentLinkSlack, AttachmentLinkDiscord, AttachmentLinkFront, AttachmentLinkIntercom, AttachmentLinkZendesk, AttachmentLinkJiraIssue, AttachmentLinkGitHubIssue, AttachmentLinkGitHubPR, AttachmentLinkGitLabMR, AttachmentLinkSalesforce. Create linkCmd under attachment with --provider flag (default 'url'). Build provider dispatch map: url, slack, discord, front, intercom, zendesk, jira, github-issue, github-pr, gitlab-mr, salesforce. For unknown provider, exit non-zero with message listing valid providers. The url provider requires additional input fields; others take only issueId and url.",
             "status": "pending",
-            "testStrategy": "Manual verification: link a URL attachment with default provider, link with --provider slack/github-pr/jira, verify each creates correct attachment type. Test unknown provider (e.g., --provider invalid) exits non-zero with valid providers list. Verify issue ID resolution works with TEAM-123 format."
+            "testStrategy": "Manual verification: link a URL attachment with default provider, link with --provider slack/github-pr/jira, verify each creates correct attachment type. Test unknown provider (e.g., --provider invalid) exits non-zero with valid providers list. Verify issue ID resolution works with TEAM-123 format.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -597,7 +670,8 @@
             ],
             "details": "Add AttachmentSyncToSlack mutation to pkg/api/operations/attachments.graphql. Create syncToSlackCmd under attachment command group. Takes attachment ID as positional argument. Call the mutation and report success/failure with standard output modes. This is a simple single-mutation command following existing patterns in the codebase.",
             "status": "pending",
-            "testStrategy": "Manual verification: create an attachment, run sync-to-slack on it, verify command exits 0. Test with invalid attachment ID to confirm error handling. Add smoke test for command help text."
+            "testStrategy": "Manual verification: create an attachment, run sync-to-slack on it, verify command exits 0. Test with invalid attachment ID to confirm error handling. Add smoke test for command help text.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -610,19 +684,23 @@
             ],
             "details": "Create pkg/api/operations/agents.graphql with all agent operations: ListAgentSessions, GetAgentSession, AgentSessionSandbox, AgentSessionCreate, AgentSessionCreateOnIssue, AgentSessionCreateOnComment, AgentSessionUpdate, AgentSessionUpdateExternalUrl, ListAgentActivities, AgentActivityCreate, AgentActivityCreatePrompt, AgentActivitySendQueued, AgentActivityDeleteQueued, ListAgentSkills, AgentSkillCreate, AgentSkillUpdate, AgentSkillDelete. Create cmd/agent.go with three subcommand groups: 'agent session', 'agent activity', 'agent skill'. Session commands need issue/comment ID resolution for create-on-issue/create-on-comment variants. Activity commands take sessionId for list and filtering. This is lowest priority within the PR; confirm the use case before investing significant time.",
             "status": "pending",
-            "testStrategy": "Add smoke tests for agent session list and agent skill list. Manual verification: create a session, create activity on it, create a skill, update skill, delete skill. Test sandbox query returns expected structure. Verify create-on-issue resolves TEAM-123 format issue IDs."
+            "testStrategy": "Add smoke tests for agent session list and agent skill list. Manual verification: create a session, create activity on it, create a skill, update skill, delete skill. Test sandbox query returns expected structure. Verify create-on-issue resolves TEAM-123 format issue IDs.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break down into: (1) Create cmd/oauthapp.go with CRUD plus two rotate-secret commands (print once, security-sensitive), (2) Extend cmd/attachment.go with link command that dispatches to typed mutations based on --provider flag with validation, (3) Implement attachment sync-to-slack command, (4) Create cmd/agent.go with session/activity/skill management (build last, confirm use case first)."
       },
       {
-        "id": 11,
+        "id": "11",
         "title": "Add Tier 5 Cross-Cutting Operations (PR 6)",
         "description": "Add audit log, global search extensions, rate-limit diagnostics, external links, view preferences, user settings, issue relation update, SLA and external users.",
         "details": "Create `cmd/audit.go`, `cmd/link.go`, `cmd/ratelimit.go` and extend existing domains:\n\n**GraphQL Operations:**\n```graphql\n# audit.graphql\nquery ListAuditEntries($first: Int)\nquery GetAuditEntryTypes\n\n# search.graphql (extend)\nquery SearchProjects($term: String!, $first: Int)\nquery SemanticSearch($term: String!, $first: Int)\n\n# ratelimit.graphql\nquery GetRateLimitStatus\n\n# links.graphql\nquery GetEntityExternalLink($id: String!)\nmutation EntityExternalLinkCreate($input: EntityExternalLinkCreateInput!)\nmutation EntityExternalLinkUpdate($id: String!, $input: EntityExternalLinkUpdateInput!)\nmutation EntityExternalLinkDelete($id: String!)\n\n# issues.graphql (extend)\nmutation IssueRelationUpdate($id: String!, $input: IssueRelationUpdateInput!)\n\n# sla.graphql\nquery ListSLAConfigurations\n\n# externalusers.graphql\nquery ListExternalUsers($first: Int)\nquery GetExternalUser($id: String!)\n```\n\n**Commands:**\n- `audit list`\n- `search projects <term>`\n- `search semantic <term>` - returns AI results\n- `rate-limit` - shows current budget from rateLimitStatus query\n- `link add/update/remove` - works on any entity including initiatives/documents\n- `view prefs create/update/delete` (if not already in task 7)\n- `user settings update`\n- `issue relate` gains update support\n- `sla list` - run plan-availability gate first (Business+ feature)\n- `user external list/get`\n\n**Key Details:**\n- rate-limit must query real rateLimitStatus, remove/replace Client.GetRateLimit() placeholder\n- issue relate uses --relation (not --type)\n- Tier 5 helper queries (issuePriorityValues, issueFilterSuggestion, issueVcsBranchSearch, issueRepositorySuggestions) are wired as internals, not standalone commands\n- Audit entries and external users carry PII, --json prints raw\n- SLA requires plan-availability gate",
         "testStrategy": "1. Extend smoke_test.sh: audit list, rate-limit, search projects tests\n2. **Plan-availability gate for SLA:** attempt slaConfigurations read, defer if plan error\n3. Manual verification:\n   - rate-limit shows real values (not hardcoded 5000/4999)\n   - link add on initiative/document\n   - search semantic returns results\n   - issue relate update\n4. Verify Client.GetRateLimit() placeholder removed/replaced\n5. Full smoke suite passes (all ~75+ tests)",
         "priority": "medium",
         "dependencies": [
-          10
+          "10"
         ],
         "status": "pending",
         "subtasks": [
@@ -633,7 +711,8 @@
             "dependencies": [],
             "details": "Create audit.graphql with ListAuditEntries query (using AuditEntryFilter, pagination) and GetAuditEntryTypes query. Create ratelimit.graphql with GetRateLimitStatus query returning RateLimitPayload (identifier, kind, limits array with allowedAmount, remainingAmount, resetAt). Build cmd/audit.go with 'audit list' command supporting --limit, --json, --plaintext flags. Note: audit entries carry PII so --json prints raw. Build cmd/ratelimit.go as 'rate-limit' command showing current budget from rateLimitStatus query. Critical: remove or replace the existing placeholder Client.GetRateLimit() method in pkg/api/client.go that returns hardcoded values (5000/4999) with the real API call. Verify rate-limit output shows actual values, not hardcoded placeholders.",
             "status": "pending",
-            "testStrategy": "Add smoke tests: 'audit list' and 'rate-limit' commands. Verify rate-limit shows real values (not 5000/4999). Test audit list with --json for PII handling. Verify audit entries display actor, type, countryCode, ip fields."
+            "testStrategy": "Add smoke tests: 'audit list' and 'rate-limit' commands. Verify rate-limit shows real values (not 5000/4999). Test audit list with --json for PII handling. Verify audit entries display actor, type, countryCode, ip fields.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -644,7 +723,8 @@
             ],
             "details": "Extend pkg/api/operations/search.graphql (or issues.graphql) with SearchProjects query ($term: String!, $first: Int) using searchProjects endpoint that returns ProjectConnection. Add SemanticSearch query ($term: String!, $first: Int) using semanticSearch endpoint that returns SemanticSearchPayload with AI-powered results. Create or extend cmd/search.go with 'search projects <term>' command listing matching projects with name, state, progress, lead. Add 'search semantic <term>' command that returns AI-generated search results. Both commands support --limit, --json, --plaintext. Follow existing issue search patterns from cmd/issue.go issueSearchCmd for output formatting.",
             "status": "pending",
-            "testStrategy": "Add smoke tests: 'search projects <term>' and 'search semantic <term>'. Verify project search returns project fields (name, state, progress). Verify semantic search returns AI results. Test --json output format for both commands."
+            "testStrategy": "Add smoke tests: 'search projects <term>' and 'search semantic <term>'. Verify project search returns project fields (name, state, progress). Verify semantic search returns AI results. Test --json output format for both commands.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -655,7 +735,8 @@
             ],
             "details": "Create links.graphql with GetEntityExternalLink ($id: String!) query, EntityExternalLinkCreate ($input: EntityExternalLinkCreateInput!) mutation, EntityExternalLinkUpdate ($id: String!, $input: EntityExternalLinkUpdateInput!) mutation, and EntityExternalLinkDelete ($id: String!) mutation. Build cmd/link.go with 'link add' command accepting --entity-id, --url, --label flags for creating links on any entity type (initiatives, documents, projects, teams, etc.). Add 'link update' command with --id, --url, --label flags. Add 'link remove' command with --id flag. All commands support --json, --plaintext output. External links work across entity types without type-specific restrictions.",
             "status": "pending",
-            "testStrategy": "Manual verification: link add on initiative/document entities. Test link update and remove operations. Verify --json output includes entityExternalLink fields. Test error handling for invalid entity IDs."
+            "testStrategy": "Manual verification: link add on initiative/document entities. Test link update and remove operations. Verify --json output includes entityExternalLink fields. Test error handling for invalid entity IDs.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -668,19 +749,23 @@
             ],
             "details": "Create sla.graphql with ListSLAConfigurations ($teamId: String!) query. Add plan-availability gate: attempt slaConfigurations read first, defer with user-friendly message if plan error indicates Business+ required. Extend externalusers.graphql with ListExternalUsers ($first: Int) and GetExternalUser ($id: String!) queries. External users carry PII so --json prints raw. Extend cmd/user.go with 'user external list' and 'user external get <id>' subcommands. Add view preferences operations if not in task 7: create viewpreferences.graphql with ViewPreferencesCreate, ViewPreferencesUpdate, ViewPreferencesDelete mutations. Add 'view prefs create/update/delete' commands to appropriate cmd file. Add user settings update to cmd/user.go as 'user settings update' command. Extend issues.graphql with IssueRelationUpdate mutation ($id: String!, $input: IssueRelationUpdateInput!) and update 'issue relate' command (using --relation flag not --type) to support update operations on existing relations.",
             "status": "pending",
-            "testStrategy": "Smoke test: 'sla list' with plan-availability gate verification. Test 'user external list/get' commands. Verify external user PII handling in --json. Test issue relate update with --relation flag. Manual verification of view prefs and user settings commands."
+            "testStrategy": "Smoke test: 'sla list' with plan-availability gate verification. Test 'user external list/get' commands. Verify external user PII handling in --json. Test issue relate update with --relation flag. Manual verification of view prefs and user settings commands.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break down into: (1) Create cmd/audit.go with list command and cmd/ratelimit.go replacing Client.GetRateLimit() placeholder with real rateLimitStatus query, (2) Extend search commands with project search and semantic search operations, (3) Create cmd/link.go for external links on any entity (initiatives/documents/etc), (4) Add SLA list (with plan-availability gate), external users, view preferences, user settings, and issue relation update operations."
       },
       {
-        "id": 12,
+        "id": "12",
         "title": "Update Documentation and Final Verification",
         "description": "Update README.md, CLAUDE.md, and local instruction files with new command references. Run final comprehensive verification.",
         "details": "Documentation updates:\n\n**README.md:**\n1. Add command reference section for each new domain:\n   - initiative, cycle, label, state, document, org, favorite, view, notification, webhook, template\n   - release, customer, emoji, triage, git, schedule, oauth-app, agent, audit\n2. Remove 'coming soon' note for issue archive\n3. Document three output modes (table/json/plaintext) for new commands\n4. Add examples for common workflows:\n   - Initiative management with projects\n   - Release pipeline setup\n   - Customer need tracking\n\n**CLAUDE.md:**\n1. Extend 'Adding Commands' section with:\n   - Nested group patterns (initiative project, project milestone, etc.)\n   - Name-to-ID resolver conventions\n   - Three-mode output requirements\n2. Extend 'AI Agent Notes' with:\n   - New domain commands and their entity identifiers\n   - Resolver behavior (names vs IDs recommendation)\n   - Rate limit considerations for batch operations\n\n**cmd/CLAUDE.local.md (create if not exists):**\n1. Document shared resolver helpers in cmd/resolve.go\n2. Per-invocation caching rules\n3. Add-child shape pattern\n4. Kind flag naming conventions\n\n**pkg/api/CLAUDE.local.md (extend):**\n1. Operation-naming rules for collisions (initiativeUpdate, projectUpdate)\n2. Fragment patterns (ListFields, DetailFields)\n3. genqlient regeneration workflow\n\n**Final Verification Checklist:**\n1. All smoke tests pass (~75+ tests)\n2. `make build` succeeds\n3. All three output modes work on every new command\n4. Write-verification logs complete for all tiers\n5. Flag-regression checks passed for issue create/update\n6. Team-scoped artifacts cleaned up from SD team",
         "testStrategy": "1. Run complete smoke_test.sh - all tests pass\n2. Run `make build` - clean build\n3. Manually verify documentation accuracy:\n   - Each documented command works as described\n   - Examples in README run successfully\n4. Review PR description write-verification logs are complete\n5. Verify no orphaned test artifacts in Linear workspace\n6. Final confirmation: `lincli --help` shows all new command groups",
         "priority": "low",
         "dependencies": [
-          11
+          "11"
         ],
         "status": "pending",
         "subtasks": [
@@ -691,7 +776,8 @@
             "dependencies": [],
             "details": "README.md updates:\n\n1. Add Command Reference sections after existing Attachment Commands section for each new domain (~15 new sections). Each section follows established pattern: bash code blocks showing list/get/create/update commands, flags documentation, and usage examples.\n\n2. Remove '(coming soon)' from line 284-286 for issue archive command since it's now implemented.\n\n3. Add workflow examples to Real-World Examples section:\n   - Initiative management with linked projects: show initiative list, initiative get, initiative add-project, initiative add-label\n   - Release pipeline: show release list, release create, release update, release add-issue workflow\n   - Customer need tracking: show customer list, customer get, customer create with need tracking examples\n\n4. Each new command must document all three output modes (table default, --json, --plaintext) consistent with existing patterns in lines 445-503.\n\n5. Maintain existing emoji section headers and formatting conventions.",
             "status": "pending",
-            "testStrategy": "Verify each documented command executes without error. Run `lincli <domain> --help` for each new domain and confirm flags match documentation. Test at least one example from each workflow section runs successfully."
+            "testStrategy": "Verify each documented command executes without error. Run `lincli <domain> --help` for each new domain and confirm flags match documentation. Test at least one example from each workflow section runs successfully.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -700,7 +786,8 @@
             "dependencies": [],
             "details": "Documentation updates across three files:\n\n**CLAUDE.md (extend existing):**\n1. Add to 'Adding Commands' section:\n   - Nested group patterns example: `initiative project add`, `project milestone create`\n   - Name-to-ID resolver conventions: when to use ResolveXXXID helpers\n   - Three-mode output requirement: all commands must support table/json/plaintext\n\n2. Add to 'AI Agent Notes' section:\n   - New domain commands list with entity identifiers (initiative by name/ID, release by name, etc.)\n   - Resolver behavior guidance: prefer names for user-facing, IDs for scripting\n   - Rate limit guidance for batch operations: recommend --limit flags, mention 5k/hour cap\n\n**cmd/CLAUDE.local.md (create new):**\n- Document shared resolver helpers in cmd/resolve.go (ResolveInitiativeID, ResolveReleaseID, etc.)\n- Per-invocation caching rules: resolvers cache within single command execution\n- Add-child shape pattern: standard signature for `<domain> <child> add` commands\n- Kind flag naming conventions: --kind for enum filtering\n\n**pkg/api/CLAUDE.local.md (extend):**\n- Operation naming collision rules: prefix with entity name (initiativeUpdate vs projectUpdate)\n- Fragment patterns: ListFields for list queries, DetailFields for get queries\n- genqlient regeneration workflow: `go generate ./pkg/api` after schema changes",
             "status": "pending",
-            "testStrategy": "Review each instruction file for completeness against the spec. Verify cmd/resolve.go exists and resolver functions documented actually exist in codebase. Confirm pkg/api/operations/*.graphql files follow documented fragment patterns."
+            "testStrategy": "Review each instruction file for completeness against the spec. Verify cmd/resolve.go exists and resolver functions documented actually exist in codebase. Confirm pkg/api/operations/*.graphql files follow documented fragment patterns.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -712,15 +799,23 @@
             ],
             "details": "Final verification checklist:\n\n1. **Smoke test suite** (~75+ tests expected after expansion):\n   - Run `./smoke_test.sh` - all tests must pass\n   - Verify new domain tests added for: initiative, cycle, label, state, document, org, favorite, view, notification, webhook, template, release, customer, emoji, triage, git, schedule, oauth-app, agent, audit\n   - Each domain needs at least: list, list -j, list -p, get <id> tests\n\n2. **Build verification**:\n   - Run `make build` - must complete without errors\n   - Run `make test` if additional unit tests exist\n\n3. **Documentation accuracy check**:\n   - Spot-check 5+ commands from README examples run correctly\n   - Verify issue archive command works (removed 'coming soon')\n   - Verify three output modes on 3+ new domain commands\n\n4. **Write verification log review**:\n   - Confirm all tier PRs (1-4) have write-verification evidence\n   - Check PR descriptions or separate logs documenting manual create/update/delete tests\n\n5. **Flag regression check**:\n   - Run `lincli issue create --help` and `lincli issue update --help`\n   - Verify no flags removed or changed unexpectedly\n\n6. **Test artifact cleanup**:\n   - List any test initiatives, releases, documents created in SD team\n   - Delete or archive test artifacts via CLI: `lincli <domain> delete <id>`\n   - Document cleanup actions taken",
             "status": "pending",
-            "testStrategy": "Smoke test suite exit code must be 0. Make build exit code must be 0. Create verification checklist markdown file documenting each step completed and results. Screenshot or log output for critical verification steps."
+            "testStrategy": "Smoke test suite exit code must be 0. Make build exit code must be 0. Create verification checklist markdown file documenting each step completed and results. Screenshot or log output for critical verification steps.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 4,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down into: (1) Update README.md with command reference for all new domains and workflow examples, (2) Update CLAUDE.md and create/extend local instruction files with new patterns (nested groups, resolver conventions, three-mode output), (3) Run final verification - complete smoke suite (~75+ tests), make build, manual documentation accuracy check, cleanup test artifacts."
       }
     ],
     "metadata": {
-      "created": "2026-07-01T15:50:26.837Z",
-      "updated": "2026-07-01T15:50:26.837Z",
-      "description": "Tasks for master context"
+      "version": "1.0.0",
+      "lastModified": "2026-07-02T00:25:44.307Z",
+      "taskCount": 12,
+      "completedCount": 3,
+      "tags": [
+        "master"
+      ]
     }
   }
 }
