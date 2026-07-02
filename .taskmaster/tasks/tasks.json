@@ -526,7 +526,7 @@
         "dependencies": [
           "7"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -534,9 +534,10 @@
             "description": "Attempt one scoped write operation per domain (releases and customers) against lincli-sandbox to verify plan availability. Record results before proceeding with implementation.",
             "dependencies": [],
             "details": "Execute plan-availability gate before any implementation:\n\n1. **Release domain gate:** Attempt a minimal release pipeline create or release create operation via GraphQL.\n2. **Customer domain gate:** Attempt a minimal customer create operation via GraphQL.\n\nFor each domain:\n- If write succeeds: Domain is available, proceed with implementation, clean up test data.\n- If plan/permission error (e.g., 'Feature not available on your plan'): Defer entire domain, record error in PR description, skip related subtasks.\n\nUse raw GraphQL via the existing client to test availability before generating full operations. Record gate results in a file (e.g., `docs/brainstorm/cli-feature-expansion/tier4a-gate-results.md`) with timestamp, domain, result, and error message if applicable.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verification is the gate itself. Success = write completes without plan error. Failure = plan/permission error captured and documented. No smoke tests needed for gate subtask.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-07-02T04:26:58.193Z"
           },
           {
             "id": 2,
@@ -546,9 +547,10 @@
               1
             ],
             "details": "Create `cmd/release.go` and `pkg/api/operations/releases.graphql`:\n\n**GraphQL operations:**\n- Fragments: ReleaseListFields, ReleaseDetailFields (includes nested pipeline -> stages)\n- Queries: ListReleases, GetRelease, SearchReleases\n- Mutations: ReleaseCreate, ReleaseUpdate, ReleaseDelete, ReleaseArchive, ReleaseUnarchive, ReleaseComplete, ReleaseSync, ReleaseUpdateByPipeline\n- Pipeline queries/mutations: ListReleasePipelines, ReleasePipelineCreate/Update/Delete/Archive/Unarchive\n- Stage queries/mutations: ListReleaseStages, ReleaseStageCreate/Update/Archive/Unarchive\n- Note queries/mutations: ListReleaseNotes, ReleaseNoteCreate/Update/Delete\n- Issue links: IssueToReleaseCreate, IssueToReleaseDelete, IssueToReleaseDeleteByIssueAndRelease\n\n**Commands:**\n- `release list/get/search` with `--newer-than all_time` default\n- `release create/update/delete/archive/unarchive/complete/sync`\n- Nested `release pipeline list/create/update/delete/archive/unarchive`\n- Nested `release stage list/create/update/archive/unarchive`\n- Nested `release note list/create/update/delete`\n- `release issue add/remove <release> <issue>`\n\nFollow existing command patterns from issue.go and project.go. Use cobra command groups for nested subcommands. Release get output nests pipeline -> stages.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "1. Add smoke tests: `release list`, `release list -j`, `release pipeline list`.\n2. Manual write verification in SD team: create release, complete it, create pipeline/stages, add notes, link issues.\n3. Verify nested output: `release get <id>` shows pipeline with stages.\n4. Clean up test data after verification.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-07-02T04:27:01.224Z"
           },
           {
             "id": 3,
@@ -558,9 +560,10 @@
               1
             ],
             "details": "Create `cmd/customer.go` and `pkg/api/operations/customers.graphql`:\n\n**GraphQL operations:**\n- Fragments: CustomerListFields (id, name, status, tier, timestamps), CustomerDetailFields (adds description, externalIds, needs)\n- Queries: ListCustomers, GetCustomer\n- Mutations: CustomerCreate, CustomerUpdate, CustomerDelete, CustomerMerge, CustomerUpsert, CustomerUnsync\n\n**Commands:**\n- `customer list` with `--newer-than all_time` default, filter by status/tier\n- `customer get <id>` shows full details including needs\n- `customer create --name <name> [--description] [--status] [--tier] [--external-id]`\n- `customer update <id> [--name] [--description] [--status] [--tier]`\n- `customer delete <id>`\n- `customer merge --source <id> --target <id>` - executes immediately, reports survivor ID\n- `customer upsert --external-id <ext-id> --name <name> [flags]` - keys on external identifier\n- `customer unsync <id>`\n\nFollow existing patterns. CustomerMerge executes immediately and reports which customer survived. CustomerUpsert keys on external identifier for idempotent operations.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "1. Add smoke tests: `customer list`, `customer list -j`.\n2. Manual write verification: create customer, update fields, test merge (create two, merge, verify survivor), test upsert with external ID.\n3. Verify customer get shows status, tier, and needs list.\n4. Clean up test data after verification.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-07-02T04:27:03.864Z"
           },
           {
             "id": 4,
@@ -570,14 +573,16 @@
               3
             ],
             "details": "Extend `cmd/customer.go` and `pkg/api/operations/customers.graphql` with nested subgroups:\n\n**Customer Need operations:**\n- `customer need list [--customer <id>]` - list needs, optionally filtered by customer\n- `customer need get <id>`\n- `customer need create --title <title> --customer <id> [--priority] [--description]`\n- `customer need create-from-attachment --customer <id> --attachment <id>` - special creation from attachment\n- `customer need update <id> [--title] [--priority] [--description]`\n- `customer need delete <id>`\n- `customer need archive/unarchive <id>`\n\n**Customer Status operations:**\n- `customer status list`\n- `customer status get <id>`\n- `customer status create --name <name> [--color] [--description]`\n- `customer status update <id> [--name] [--color]`\n- `customer status delete <id>`\n- `customer status archive/unarchive <id>`\n\n**Customer Tier operations:**\n- `customer tier list`\n- `customer tier get <id>`\n- `customer tier create --name <name> [--description]`\n- `customer tier update <id> [--name]`\n- `customer tier delete <id>`\n- `customer tier archive/unarchive <id>`\n\nUse cobra command groups. Each subgroup follows the established CRUD + archive/unarchive pattern.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "1. Add smoke tests: `customer need list`, `customer status list`, `customer tier list`.\n2. Manual write verification: create/archive status, create/archive tier, create customer need from scratch and from attachment.\n3. Verify need list filters by customer when flag provided.\n4. Clean up test data after verification.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-07-02T04:27:05.910Z"
           }
         ],
         "complexity": 7,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "Break down into: (1) Run plan-availability gate first - attempt one scoped write per domain in lincli-sandbox, record results before proceeding, (2) Create cmd/release.go with release CRUD plus nested pipeline/stage/note subgroups and issue link management, (3) Create cmd/customer.go with customer CRUD plus merge/upsert operations, (4) Implement customer need/status/tier nested subgroups with full lifecycle operations."
+        "expansionPrompt": "Break down into: (1) Run plan-availability gate first - attempt one scoped write per domain in lincli-sandbox, record results before proceeding, (2) Create cmd/release.go with release CRUD plus nested pipeline/stage/note subgroups and issue link management, (3) Create cmd/customer.go with customer CRUD plus merge/upsert operations, (4) Implement customer need/status/tier nested subgroups with full lifecycle operations.",
+        "updatedAt": "2026-07-02T04:27:05.910Z"
       },
       {
         "id": "9",
@@ -826,9 +831,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-02T03:27:11.125Z",
+      "lastModified": "2026-07-02T04:27:05.910Z",
       "taskCount": 12,
-      "completedCount": 7,
+      "completedCount": 8,
       "tags": [
         "master"
       ]
