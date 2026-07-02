@@ -44,8 +44,8 @@ Total recommended subtasks: 52.
 
 ## Execution status
 
-Tasks 1-10 complete (Tier 4 fully done); 11-12 remain (authoritative status:
-`.execution-state.json` and task-master).
+Tasks 1-11 complete (Tiers 1-5 done); task 12 (docs + final verification)
+remains (authoritative status: `.execution-state.json` and task-master).
 
 Plan-gate deferrals recorded so far:
 
@@ -59,3 +59,9 @@ Plan-gate deferrals recorded so far:
   salesforce) and sync-to-slack shipped. OAuth apps deferred (need the
   `oauth:create` scope, which personal API keys cannot hold). Agents deferred
   entirely (writes need an agent-app actor; not usable from a personal-key CLI).
+- Task 11 (Tier 5): Nothing deferred. rate-limit (real `rateLimitStatus`,
+  placeholder removed), audit, search projects/semantic, external links, view
+  preferences, SLA (read-only), external users, and issue relation update all
+  shipped. `sla list` needed no plan gate: `slaConfigurations` returns an empty
+  list rather than a plan error. External links expose only initiative/project
+  parents (team/release/cycle are internal; no document parent exists).

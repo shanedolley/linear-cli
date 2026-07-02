@@ -733,7 +733,7 @@
         "dependencies": [
           "10"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -786,7 +786,8 @@
         ],
         "complexity": 6,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "Break down into: (1) Create cmd/audit.go with list command and cmd/ratelimit.go replacing Client.GetRateLimit() placeholder with real rateLimitStatus query, (2) Extend search commands with project search and semantic search operations, (3) Create cmd/link.go for external links on any entity (initiatives/documents/etc), (4) Add SLA list (with plan-availability gate), external users, view preferences, user settings, and issue relation update operations."
+        "expansionPrompt": "Break down into: (1) Create cmd/audit.go with list command and cmd/ratelimit.go replacing Client.GetRateLimit() placeholder with real rateLimitStatus query, (2) Extend search commands with project search and semantic search operations, (3) Create cmd/link.go for external links on any entity (initiatives/documents/etc), (4) Add SLA list (with plan-availability gate), external users, view preferences, user settings, and issue relation update operations.",
+        "updatedAt": "2026-07-02T07:28:38.478Z"
       },
       {
         "id": "12",
@@ -841,9 +842,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-02T06:19:45.969Z",
+      "lastModified": "2026-07-02T07:28:38.478Z",
       "taskCount": 12,
-      "completedCount": 10,
+      "completedCount": 11,
       "tags": [
         "master"
       ]

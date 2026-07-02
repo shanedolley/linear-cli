@@ -4,9 +4,9 @@
   "branch": "feature/cli-feature-expansion",
   "totalTasks": 12,
   "totalSubtasks": 52,
-  "completed": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  "completed": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
   "inProgress": null,
-  "milestone": "Tier 4c (task 10) complete: attachment link (url/slack/github-issue/github-pr/salesforce) + attachment sync-to-slack. OAuth apps deferred (needs oauth:create scope, unavailable to personal API keys); Agents API deferred entirely (writes need an agent-app actor; user opted to skip). Tier 4 fully done.",
+  "milestone": "Tier 5 (task 11) complete: rate-limit (real rateLimitStatus, placeholder removed), audit list/types, search projects/semantic, link add/get/update/remove, sla list (read-only), user external list/get, view prefs create/update/delete, issue relate update, user settings update (added dpa/privacy-legal). Nothing deferred: every Tier 5 op was available on the plan. All 126 smoke tests pass; write CRUD verified in SD sandbox. Task 12 (docs + final verification) remains.",
   "status": "in_progress",
   "sandbox": { "project": "lincli-sandbox", "team": "SD", "teamId": "d5b746fb-e47d-48c0-a299-ca5ecb6d33f2" },
   "planGate": {
@@ -28,8 +28,20 @@
       "oauthApps": "DEFERRED - oauthApplications is FORBIDDEN 'Invalid scope: oauth:create required'. Personal API keys cannot hold oauth:create, so no oauth-app command is usable.",
       "agents": "DEFERRED entirely (user decision). Reads work (agentSessions/agentSkills), but writes need an agent-app actor (appUserId) + untyped JSON payloads; not usable from a personal-key CLI.",
       "probedAt": "2026-07-02"
+    },
+    "task11_tier5": {
+      "rateLimit": "available (real data: 2500 requests/hr, 3M complexity). Dead Client.GetRateLimit() placeholder removed; rate-limit now queries rateLimitStatus.",
+      "audit": "read available (auditEntries/auditEntryTypes return data with actor/IP/country).",
+      "search": "read available (searchProjects returns matches; semanticSearch returns typed issue/project/initiative/document results).",
+      "externalLinks": "write available (entityExternalLinkCreate/Update/Delete verified in SD sandbox). Only initiative/project parents exposed; team/release/cycle are [Internal], no document parent exists.",
+      "viewPreferences": "write available (viewPreferencesCreate/Update/Delete verified in SD sandbox). NOTE: the client's stripNulls drops empty maps, so --preferences must be a non-empty JSON object; commands guard against empty input.",
+      "issueRelationUpdate": "write available (issueRelationUpdate verified in SD sandbox: created a relation, changed its type, removed it). IssueId/RelatedIssueId accept TEAM-123 identifiers directly.",
+      "sla": "read available (slaConfigurations(teamId) returns [] on this workspace, no plan error). Read-only per plan; requires --team.",
+      "externalUsers": "read available (externalUsers/externalUser return data).",
+      "userSettings": "already shipped in an earlier task; extended with --dpa and --privacy-legal subscription flags.",
+      "probedAt": "2026-07-02"
     }
   },
   "startedAt": "2026-07-02",
-  "updatedAt": "2026-07-02T17:00:00Z"
+  "updatedAt": "2026-07-02T18:30:00Z"
 }
