@@ -91,6 +91,12 @@ type ResolverCache struct {
 	customerStatusesLoaded bool
 	customerTiers          map[string]string
 	customerTiersLoaded    bool
+
+	// timeSchedules caches the workspace's time schedule catalog, keyed by
+	// lower(name); fetched at most once per invocation. timeSchedulesLoaded
+	// distinguishes "not fetched yet" from "fetched, workspace has none".
+	timeSchedules       map[string]string
+	timeSchedulesLoaded bool
 }
 
 // newResolverCache creates an empty ResolverCache. Call this once per
@@ -113,6 +119,7 @@ func newResolverCache() *ResolverCache {
 		customers:        make(map[string]string),
 		customerStatuses: make(map[string]string),
 		customerTiers:    make(map[string]string),
+		timeSchedules:    make(map[string]string),
 	}
 }
 
@@ -819,4 +826,40 @@ func resolveCustomerTier(ctx context.Context, client graphql.Client, cache *Reso
 		names = append(names, name)
 	}
 	return "", fmt.Errorf("Customer tier '%s' not found. Valid values: %s", nameOrID, strings.Join(names, ", "))
+}
+
+// resolveTimeSchedule resolves a time schedule name or UUID to a TimeSchedule
+// ID. The timeSchedules query has no server-side name filter, so the whole
+// (small) catalog is fetched at most once per invocation and matched
+// case-insensitively by name. A name matching none returns a "not found" error
+// listing the available schedule names.
+func resolveTimeSchedule(ctx context.Context, client graphql.Client, cache *ResolverCache, nameOrID string) (string, error) {
+	if isUUID(nameOrID) {
+		return nameOrID, nil
+	}
+
+	if !cache.timeSchedulesLoaded {
+		limit := 250
+		resp, err := api.ListTimeSchedules(ctx, client, &limit, nil, nil)
+		if err != nil {
+			return "", fmt.Errorf("failed to list time schedules: %w", err)
+		}
+		if resp.TimeSchedules != nil {
+			for _, n := range resp.TimeSchedules.Nodes {
+				f := n.TimeScheduleFields
+				cache.timeSchedules[strings.ToLower(f.Name)] = f.Id
+			}
+		}
+		cache.timeSchedulesLoaded = true
+	}
+
+	if id, ok := cache.timeSchedules[strings.ToLower(nameOrID)]; ok {
+		return id, nil
+	}
+
+	names := make([]string, 0, len(cache.timeSchedules))
+	for name := range cache.timeSchedules {
+		names = append(names, name)
+	}
+	return "", fmt.Errorf("Time schedule not found: %s. Available: %s", nameOrID, strings.Join(names, ", "))
 }

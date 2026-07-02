@@ -239,6 +239,21 @@ run_test "customer tier list" "go run main.go customer tier list"
 run_test "customer need list" "go run main.go customer need list --limit 5"
 run_test "customer need list (json)" "go run main.go customer need list --limit 5 -j"
 
+# Test emoji/triage/git/schedule commands (Tier 4b - PR 5b).
+# Triage is read-only and git is write-only (create/update/delete): triage
+# writes need the Business plan, and the git automation query is not exposed.
+echo -e "\n${YELLOW}Testing emoji commands...${NC}"
+run_test "emoji list" "go run main.go emoji list --limit 5"
+run_test "emoji list (json)" "go run main.go emoji list --limit 5 -j"
+
+echo -e "\n${YELLOW}Testing triage commands...${NC}"
+run_test "triage list" "go run main.go triage list --limit 5"
+run_test "triage list (json)" "go run main.go triage list --limit 5 -j"
+
+echo -e "\n${YELLOW}Testing schedule commands...${NC}"
+run_test "schedule list" "go run main.go schedule list --limit 5"
+run_test "schedule list (json)" "go run main.go schedule list --limit 5 -j"
+
 # Test help commands
 echo -e "\n${YELLOW}Testing help commands...${NC}"
 run_test "help" "go run main.go --help" "Usage:"
@@ -262,6 +277,12 @@ run_test "template help" "go run main.go template --help" "Available Commands:"
 run_test "issue create help (template)" "go run main.go issue create --help" "template"
 run_test "customer help (merge/need)" "go run main.go customer --help" "merge"
 run_test "customer need help" "go run main.go customer need --help" "Available Commands:"
+run_test "emoji help" "go run main.go emoji --help" "Available Commands:"
+run_test "emoji create help (file/url)" "go run main.go emoji create --help" "file"
+run_test "triage help" "go run main.go triage --help" "Available Commands:"
+run_test "git help (state/target-branch)" "go run main.go git --help" "target-branch"
+run_test "git state help" "go run main.go git state --help" "Available Commands:"
+run_test "schedule help (upsert/refresh)" "go run main.go schedule --help" "upsert-external"
 
 # Test unknown command handling
 echo -e "\n${YELLOW}Testing error handling...${NC}"

@@ -1236,6 +1236,92 @@ func TestResolveTeamMembership_Paginates(t *testing.T) {
 	}
 }
 
+// --- resolveTimeSchedule ---
+//
+// timeSchedules has no server-side name filter, so the whole catalog is fetched
+// once (ListTimeSchedules) and matched case-insensitively by name.
+
+func TestResolveTimeSchedule_UUIDPassthrough(t *testing.T) {
+	client := newMockGraphQLClient()
+	cache := newResolverCache()
+
+	id := "550e8400-e29b-41d4-a716-446655440000"
+	got, err := resolveTimeSchedule(context.Background(), client, cache, id)
+	if err != nil {
+		t.Fatalf("resolveTimeSchedule() error = %v", err)
+	}
+	if got != id {
+		t.Errorf("resolveTimeSchedule() = %q, want %q", got, id)
+	}
+	if len(client.calls) != 0 {
+		t.Errorf("expected no API calls for UUID passthrough, got %v", client.calls)
+	}
+}
+
+func TestResolveTimeSchedule_ExactMatch(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListTimeSchedules"] = `{"timeSchedules": {"nodes": [
+		{"id": "sched-uuid-1", "name": "On-call", "externalId": null, "externalUrl": null, "createdAt": "2024-01-01T00:00:00Z", "updatedAt": "2024-01-01T00:00:00Z", "integration": null, "entries": []}
+	], "pageInfo": {"hasNextPage": false, "endCursor": null}}}`
+	cache := newResolverCache()
+
+	got, err := resolveTimeSchedule(context.Background(), client, cache, "on-call")
+	if err != nil {
+		t.Fatalf("resolveTimeSchedule() error = %v", err)
+	}
+	if got != "sched-uuid-1" {
+		t.Errorf("resolveTimeSchedule() = %q, want %q", got, "sched-uuid-1")
+	}
+	if client.callCount("ListTimeSchedules") != 1 {
+		t.Errorf("expected exactly 1 ListTimeSchedules call, got %d", client.callCount("ListTimeSchedules"))
+	}
+}
+
+func TestResolveTimeSchedule_NotFound(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListTimeSchedules"] = `{"timeSchedules": {"nodes": [
+		{"id": "sched-uuid-1", "name": "On-call", "externalId": null, "externalUrl": null, "createdAt": "2024-01-01T00:00:00Z", "updatedAt": "2024-01-01T00:00:00Z", "integration": null, "entries": []}
+	], "pageInfo": {"hasNextPage": false, "endCursor": null}}}`
+	cache := newResolverCache()
+
+	_, err := resolveTimeSchedule(context.Background(), client, cache, "Nonexistent")
+	if err == nil {
+		t.Fatal("expected error for unknown schedule name, got nil")
+	}
+	if !strings.Contains(err.Error(), "Nonexistent") {
+		t.Errorf("expected error to mention the schedule name, got: %v", err)
+	}
+	if !strings.Contains(err.Error(), "on-call") {
+		t.Errorf("expected error to list the available schedule names, got: %v", err)
+	}
+}
+
+func TestResolveTimeSchedule_CacheHit(t *testing.T) {
+	client := newMockGraphQLClient()
+	client.responses["ListTimeSchedules"] = `{"timeSchedules": {"nodes": [
+		{"id": "sched-uuid-1", "name": "On-call", "externalId": null, "externalUrl": null, "createdAt": "2024-01-01T00:00:00Z", "updatedAt": "2024-01-01T00:00:00Z", "integration": null, "entries": []}
+	], "pageInfo": {"hasNextPage": false, "endCursor": null}}}`
+	cache := newResolverCache()
+
+	if _, err := resolveTimeSchedule(context.Background(), client, cache, "On-call"); err != nil {
+		t.Fatalf("first resolveTimeSchedule() error = %v", err)
+	}
+	if client.callCount("ListTimeSchedules") != 1 {
+		t.Fatalf("expected exactly 1 ListTimeSchedules call after first resolve, got %d", client.callCount("ListTimeSchedules"))
+	}
+
+	got, err := resolveTimeSchedule(context.Background(), client, cache, "on-call")
+	if err != nil {
+		t.Fatalf("second resolveTimeSchedule() error = %v", err)
+	}
+	if got != "sched-uuid-1" {
+		t.Errorf("resolveTimeSchedule() = %q, want %q", got, "sched-uuid-1")
+	}
+	if client.callCount("ListTimeSchedules") != 1 {
+		t.Errorf("expected cache hit to avoid a second ListTimeSchedules call, total calls = %d", client.callCount("ListTimeSchedules"))
+	}
+}
+
 // Sanity check that our mock actually satisfies genqlient's graphql.Client
 // interface, since that's what makes it usable with the generated api.* functions.
 var _ graphql.Client = (*mockGraphQLClient)(nil)

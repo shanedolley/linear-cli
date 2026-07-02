@@ -1,0 +1,50 @@
+# Custom org emoji operations (Tier 4b).
+#
+# Covers the workspace's custom emoji catalog: list, create, delete. The single
+# `emoji(id)` query accepts either a UUID or the emoji name, so a delete by name
+# resolves through it first.
+
+fragment EmojiFields on Emoji {
+  id
+  name
+  url
+  source
+  createdAt
+  creator {
+    id
+    name
+  }
+}
+
+query ListEmojis($first: Int, $after: String, $orderBy: PaginationOrderBy) {
+  emojis(first: $first, after: $after, orderBy: $orderBy) {
+    nodes {
+      ...EmojiFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+query GetEmoji($id: String!) {
+  emoji(id: $id) {
+    ...EmojiFields
+  }
+}
+
+mutation EmojiCreate($input: EmojiCreateInput!) {
+  emojiCreate(input: $input) {
+    success
+    emoji {
+      ...EmojiFields
+    }
+  }
+}
+
+mutation EmojiDelete($id: String!) {
+  emojiDelete(id: $id) {
+    success
+  }
+}

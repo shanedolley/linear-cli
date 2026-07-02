@@ -8345,6 +8345,228 @@ func (v *DocumentUpdateResponse) GetDocumentUpdate() *DocumentUpdateDocumentUpda
 	return v.DocumentUpdate
 }
 
+// EmojiCreateEmojiCreateEmojiPayload includes the requested fields of the GraphQL type EmojiPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a custom emoji mutation.
+type EmojiCreateEmojiCreateEmojiPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The emoji that was created.
+	Emoji *EmojiCreateEmojiCreateEmojiPayloadEmoji `json:"emoji"`
+}
+
+// GetSuccess returns EmojiCreateEmojiCreateEmojiPayload.Success, and is useful for accessing the field via an interface.
+func (v *EmojiCreateEmojiCreateEmojiPayload) GetSuccess() bool { return v.Success }
+
+// GetEmoji returns EmojiCreateEmojiCreateEmojiPayload.Emoji, and is useful for accessing the field via an interface.
+func (v *EmojiCreateEmojiCreateEmojiPayload) GetEmoji() *EmojiCreateEmojiCreateEmojiPayloadEmoji {
+	return v.Emoji
+}
+
+// EmojiCreateEmojiCreateEmojiPayloadEmoji includes the requested fields of the GraphQL type Emoji.
+// The GraphQL type's documentation follows.
+//
+// A custom emoji defined in the workspace. Custom emojis are uploaded by users and
+// can be used in reactions and other places where standard emojis are supported.
+// Each emoji has a unique name within the workspace.
+type EmojiCreateEmojiCreateEmojiPayloadEmoji struct {
+	EmojiFields `json:"-"`
+}
+
+// GetId returns EmojiCreateEmojiCreateEmojiPayloadEmoji.Id, and is useful for accessing the field via an interface.
+func (v *EmojiCreateEmojiCreateEmojiPayloadEmoji) GetId() string { return v.EmojiFields.Id }
+
+// GetName returns EmojiCreateEmojiCreateEmojiPayloadEmoji.Name, and is useful for accessing the field via an interface.
+func (v *EmojiCreateEmojiCreateEmojiPayloadEmoji) GetName() string { return v.EmojiFields.Name }
+
+// GetUrl returns EmojiCreateEmojiCreateEmojiPayloadEmoji.Url, and is useful for accessing the field via an interface.
+func (v *EmojiCreateEmojiCreateEmojiPayloadEmoji) GetUrl() string { return v.EmojiFields.Url }
+
+// GetSource returns EmojiCreateEmojiCreateEmojiPayloadEmoji.Source, and is useful for accessing the field via an interface.
+func (v *EmojiCreateEmojiCreateEmojiPayloadEmoji) GetSource() string { return v.EmojiFields.Source }
+
+// GetCreatedAt returns EmojiCreateEmojiCreateEmojiPayloadEmoji.CreatedAt, and is useful for accessing the field via an interface.
+func (v *EmojiCreateEmojiCreateEmojiPayloadEmoji) GetCreatedAt() time.Time {
+	return v.EmojiFields.CreatedAt
+}
+
+// GetCreator returns EmojiCreateEmojiCreateEmojiPayloadEmoji.Creator, and is useful for accessing the field via an interface.
+func (v *EmojiCreateEmojiCreateEmojiPayloadEmoji) GetCreator() *EmojiFieldsCreatorUser {
+	return v.EmojiFields.Creator
+}
+
+func (v *EmojiCreateEmojiCreateEmojiPayloadEmoji) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*EmojiCreateEmojiCreateEmojiPayloadEmoji
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.EmojiCreateEmojiCreateEmojiPayloadEmoji = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.EmojiFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalEmojiCreateEmojiCreateEmojiPayloadEmoji struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Url string `json:"url"`
+
+	Source string `json:"source"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	Creator *EmojiFieldsCreatorUser `json:"creator"`
+}
+
+func (v *EmojiCreateEmojiCreateEmojiPayloadEmoji) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *EmojiCreateEmojiCreateEmojiPayloadEmoji) __premarshalJSON() (*__premarshalEmojiCreateEmojiCreateEmojiPayloadEmoji, error) {
+	var retval __premarshalEmojiCreateEmojiCreateEmojiPayloadEmoji
+
+	retval.Id = v.EmojiFields.Id
+	retval.Name = v.EmojiFields.Name
+	retval.Url = v.EmojiFields.Url
+	retval.Source = v.EmojiFields.Source
+	retval.CreatedAt = v.EmojiFields.CreatedAt
+	retval.Creator = v.EmojiFields.Creator
+	return &retval, nil
+}
+
+// Input for creating a new custom emoji.
+type EmojiCreateInput struct {
+	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
+	Id *string `json:"id"`
+	// The name of the custom emoji.
+	Name string `json:"name"`
+	// The URL for the emoji.
+	Url string `json:"url"`
+}
+
+// GetId returns EmojiCreateInput.Id, and is useful for accessing the field via an interface.
+func (v *EmojiCreateInput) GetId() *string { return v.Id }
+
+// GetName returns EmojiCreateInput.Name, and is useful for accessing the field via an interface.
+func (v *EmojiCreateInput) GetName() string { return v.Name }
+
+// GetUrl returns EmojiCreateInput.Url, and is useful for accessing the field via an interface.
+func (v *EmojiCreateInput) GetUrl() string { return v.Url }
+
+// EmojiCreateResponse is returned by EmojiCreate on success.
+type EmojiCreateResponse struct {
+	// Creates a custom emoji.
+	EmojiCreate *EmojiCreateEmojiCreateEmojiPayload `json:"emojiCreate"`
+}
+
+// GetEmojiCreate returns EmojiCreateResponse.EmojiCreate, and is useful for accessing the field via an interface.
+func (v *EmojiCreateResponse) GetEmojiCreate() *EmojiCreateEmojiCreateEmojiPayload {
+	return v.EmojiCreate
+}
+
+// EmojiDeleteEmojiDeleteDeletePayload includes the requested fields of the GraphQL type DeletePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity deletion mutations.
+type EmojiDeleteEmojiDeleteDeletePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+}
+
+// GetSuccess returns EmojiDeleteEmojiDeleteDeletePayload.Success, and is useful for accessing the field via an interface.
+func (v *EmojiDeleteEmojiDeleteDeletePayload) GetSuccess() bool { return v.Success }
+
+// EmojiDeleteResponse is returned by EmojiDelete on success.
+type EmojiDeleteResponse struct {
+	// Deletes an emoji.
+	EmojiDelete *EmojiDeleteEmojiDeleteDeletePayload `json:"emojiDelete"`
+}
+
+// GetEmojiDelete returns EmojiDeleteResponse.EmojiDelete, and is useful for accessing the field via an interface.
+func (v *EmojiDeleteResponse) GetEmojiDelete() *EmojiDeleteEmojiDeleteDeletePayload {
+	return v.EmojiDelete
+}
+
+// EmojiFields includes the GraphQL fields of Emoji requested by the fragment EmojiFields.
+// The GraphQL type's documentation follows.
+//
+// A custom emoji defined in the workspace. Custom emojis are uploaded by users and
+// can be used in reactions and other places where standard emojis are supported.
+// Each emoji has a unique name within the workspace.
+type EmojiFields struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The unique name of the custom emoji within the workspace.
+	Name string `json:"name"`
+	// The URL of the uploaded image for this custom emoji.
+	Url string `json:"url"`
+	// The source of the emoji, indicating how it was created (e.g., uploaded by a user or imported).
+	Source string `json:"source"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The user who created the emoji.
+	Creator *EmojiFieldsCreatorUser `json:"creator"`
+}
+
+// GetId returns EmojiFields.Id, and is useful for accessing the field via an interface.
+func (v *EmojiFields) GetId() string { return v.Id }
+
+// GetName returns EmojiFields.Name, and is useful for accessing the field via an interface.
+func (v *EmojiFields) GetName() string { return v.Name }
+
+// GetUrl returns EmojiFields.Url, and is useful for accessing the field via an interface.
+func (v *EmojiFields) GetUrl() string { return v.Url }
+
+// GetSource returns EmojiFields.Source, and is useful for accessing the field via an interface.
+func (v *EmojiFields) GetSource() string { return v.Source }
+
+// GetCreatedAt returns EmojiFields.CreatedAt, and is useful for accessing the field via an interface.
+func (v *EmojiFields) GetCreatedAt() time.Time { return v.CreatedAt }
+
+// GetCreator returns EmojiFields.Creator, and is useful for accessing the field via an interface.
+func (v *EmojiFields) GetCreator() *EmojiFieldsCreatorUser { return v.Creator }
+
+// EmojiFieldsCreatorUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
+type EmojiFieldsCreatorUser struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The user's full name.
+	Name string `json:"name"`
+}
+
+// GetId returns EmojiFieldsCreatorUser.Id, and is useful for accessing the field via an interface.
+func (v *EmojiFieldsCreatorUser) GetId() string { return v.Id }
+
+// GetName returns EmojiFieldsCreatorUser.Name, and is useful for accessing the field via an interface.
+func (v *EmojiFieldsCreatorUser) GetName() string { return v.Name }
+
 // Comparator for estimates.
 type EstimateComparator struct {
 	// Compound filters, one of which need to be matched by the estimate.
@@ -10249,6 +10471,102 @@ type GetDocumentResponse struct {
 
 // GetDocument returns GetDocumentResponse.Document, and is useful for accessing the field via an interface.
 func (v *GetDocumentResponse) GetDocument() *GetDocumentDocument { return v.Document }
+
+// GetEmojiEmoji includes the requested fields of the GraphQL type Emoji.
+// The GraphQL type's documentation follows.
+//
+// A custom emoji defined in the workspace. Custom emojis are uploaded by users and
+// can be used in reactions and other places where standard emojis are supported.
+// Each emoji has a unique name within the workspace.
+type GetEmojiEmoji struct {
+	EmojiFields `json:"-"`
+}
+
+// GetId returns GetEmojiEmoji.Id, and is useful for accessing the field via an interface.
+func (v *GetEmojiEmoji) GetId() string { return v.EmojiFields.Id }
+
+// GetName returns GetEmojiEmoji.Name, and is useful for accessing the field via an interface.
+func (v *GetEmojiEmoji) GetName() string { return v.EmojiFields.Name }
+
+// GetUrl returns GetEmojiEmoji.Url, and is useful for accessing the field via an interface.
+func (v *GetEmojiEmoji) GetUrl() string { return v.EmojiFields.Url }
+
+// GetSource returns GetEmojiEmoji.Source, and is useful for accessing the field via an interface.
+func (v *GetEmojiEmoji) GetSource() string { return v.EmojiFields.Source }
+
+// GetCreatedAt returns GetEmojiEmoji.CreatedAt, and is useful for accessing the field via an interface.
+func (v *GetEmojiEmoji) GetCreatedAt() time.Time { return v.EmojiFields.CreatedAt }
+
+// GetCreator returns GetEmojiEmoji.Creator, and is useful for accessing the field via an interface.
+func (v *GetEmojiEmoji) GetCreator() *EmojiFieldsCreatorUser { return v.EmojiFields.Creator }
+
+func (v *GetEmojiEmoji) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*GetEmojiEmoji
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.GetEmojiEmoji = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.EmojiFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalGetEmojiEmoji struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Url string `json:"url"`
+
+	Source string `json:"source"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	Creator *EmojiFieldsCreatorUser `json:"creator"`
+}
+
+func (v *GetEmojiEmoji) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *GetEmojiEmoji) __premarshalJSON() (*__premarshalGetEmojiEmoji, error) {
+	var retval __premarshalGetEmojiEmoji
+
+	retval.Id = v.EmojiFields.Id
+	retval.Name = v.EmojiFields.Name
+	retval.Url = v.EmojiFields.Url
+	retval.Source = v.EmojiFields.Source
+	retval.CreatedAt = v.EmojiFields.CreatedAt
+	retval.Creator = v.EmojiFields.Creator
+	return &retval, nil
+}
+
+// GetEmojiResponse is returned by GetEmoji on success.
+type GetEmojiResponse struct {
+	// A specific custom emoji by ID or name.
+	Emoji *GetEmojiEmoji `json:"emoji"`
+}
+
+// GetEmoji returns GetEmojiResponse.Emoji, and is useful for accessing the field via an interface.
+func (v *GetEmojiResponse) GetEmoji() *GetEmojiEmoji { return v.Emoji }
 
 // GetFavoriteFavorite includes the requested fields of the GraphQL type Favorite.
 // The GraphQL type's documentation follows.
@@ -14901,6 +15219,251 @@ func (v *GetTemplateTemplate) __premarshalJSON() (*__premarshalGetTemplateTempla
 	return &retval, nil
 }
 
+// GetTimeScheduleResponse is returned by GetTimeSchedule on success.
+type GetTimeScheduleResponse struct {
+	// A specific time schedule.
+	TimeSchedule *GetTimeScheduleTimeSchedule `json:"timeSchedule"`
+}
+
+// GetTimeSchedule returns GetTimeScheduleResponse.TimeSchedule, and is useful for accessing the field via an interface.
+func (v *GetTimeScheduleResponse) GetTimeSchedule() *GetTimeScheduleTimeSchedule {
+	return v.TimeSchedule
+}
+
+// GetTimeScheduleTimeSchedule includes the requested fields of the GraphQL type TimeSchedule.
+// The GraphQL type's documentation follows.
+//
+// A time-based schedule defining on-call rotations or availability windows.
+// Schedules contain a series of time entries, each specifying a user and their
+// active period. They can be synced from external services (such as PagerDuty or
+// Opsgenie) via integrations, or created manually. Schedules are used by triage
+// responsibilities to determine who should be assigned or notified when issues enter triage.
+type GetTimeScheduleTimeSchedule struct {
+	TimeScheduleFields `json:"-"`
+}
+
+// GetId returns GetTimeScheduleTimeSchedule.Id, and is useful for accessing the field via an interface.
+func (v *GetTimeScheduleTimeSchedule) GetId() string { return v.TimeScheduleFields.Id }
+
+// GetName returns GetTimeScheduleTimeSchedule.Name, and is useful for accessing the field via an interface.
+func (v *GetTimeScheduleTimeSchedule) GetName() string { return v.TimeScheduleFields.Name }
+
+// GetExternalId returns GetTimeScheduleTimeSchedule.ExternalId, and is useful for accessing the field via an interface.
+func (v *GetTimeScheduleTimeSchedule) GetExternalId() *string { return v.TimeScheduleFields.ExternalId }
+
+// GetExternalUrl returns GetTimeScheduleTimeSchedule.ExternalUrl, and is useful for accessing the field via an interface.
+func (v *GetTimeScheduleTimeSchedule) GetExternalUrl() *string {
+	return v.TimeScheduleFields.ExternalUrl
+}
+
+// GetCreatedAt returns GetTimeScheduleTimeSchedule.CreatedAt, and is useful for accessing the field via an interface.
+func (v *GetTimeScheduleTimeSchedule) GetCreatedAt() time.Time { return v.TimeScheduleFields.CreatedAt }
+
+// GetUpdatedAt returns GetTimeScheduleTimeSchedule.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *GetTimeScheduleTimeSchedule) GetUpdatedAt() time.Time { return v.TimeScheduleFields.UpdatedAt }
+
+// GetIntegration returns GetTimeScheduleTimeSchedule.Integration, and is useful for accessing the field via an interface.
+func (v *GetTimeScheduleTimeSchedule) GetIntegration() *TimeScheduleFieldsIntegration {
+	return v.TimeScheduleFields.Integration
+}
+
+// GetEntries returns GetTimeScheduleTimeSchedule.Entries, and is useful for accessing the field via an interface.
+func (v *GetTimeScheduleTimeSchedule) GetEntries() []*TimeScheduleFieldsEntriesTimeScheduleEntry {
+	return v.TimeScheduleFields.Entries
+}
+
+func (v *GetTimeScheduleTimeSchedule) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*GetTimeScheduleTimeSchedule
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.GetTimeScheduleTimeSchedule = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.TimeScheduleFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalGetTimeScheduleTimeSchedule struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	ExternalId *string `json:"externalId"`
+
+	ExternalUrl *string `json:"externalUrl"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	Integration *TimeScheduleFieldsIntegration `json:"integration"`
+
+	Entries []*TimeScheduleFieldsEntriesTimeScheduleEntry `json:"entries"`
+}
+
+func (v *GetTimeScheduleTimeSchedule) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *GetTimeScheduleTimeSchedule) __premarshalJSON() (*__premarshalGetTimeScheduleTimeSchedule, error) {
+	var retval __premarshalGetTimeScheduleTimeSchedule
+
+	retval.Id = v.TimeScheduleFields.Id
+	retval.Name = v.TimeScheduleFields.Name
+	retval.ExternalId = v.TimeScheduleFields.ExternalId
+	retval.ExternalUrl = v.TimeScheduleFields.ExternalUrl
+	retval.CreatedAt = v.TimeScheduleFields.CreatedAt
+	retval.UpdatedAt = v.TimeScheduleFields.UpdatedAt
+	retval.Integration = v.TimeScheduleFields.Integration
+	retval.Entries = v.TimeScheduleFields.Entries
+	return &retval, nil
+}
+
+// GetTriageResponsibilityResponse is returned by GetTriageResponsibility on success.
+type GetTriageResponsibilityResponse struct {
+	// A specific triage responsibility.
+	TriageResponsibility *GetTriageResponsibilityTriageResponsibility `json:"triageResponsibility"`
+}
+
+// GetTriageResponsibility returns GetTriageResponsibilityResponse.TriageResponsibility, and is useful for accessing the field via an interface.
+func (v *GetTriageResponsibilityResponse) GetTriageResponsibility() *GetTriageResponsibilityTriageResponsibility {
+	return v.TriageResponsibility
+}
+
+// GetTriageResponsibilityTriageResponsibility includes the requested fields of the GraphQL type TriageResponsibility.
+// The GraphQL type's documentation follows.
+//
+// A team's triage responsibility configuration that defines how issues entering
+// triage are handled. Each team can have one triage responsibility, which
+// specifies the action to take (notify or assign) and the responsible users,
+// determined either by a manual selection of specific users or by an on-call time schedule.
+type GetTriageResponsibilityTriageResponsibility struct {
+	TriageResponsibilityFields `json:"-"`
+}
+
+// GetId returns GetTriageResponsibilityTriageResponsibility.Id, and is useful for accessing the field via an interface.
+func (v *GetTriageResponsibilityTriageResponsibility) GetId() string {
+	return v.TriageResponsibilityFields.Id
+}
+
+// GetAction returns GetTriageResponsibilityTriageResponsibility.Action, and is useful for accessing the field via an interface.
+func (v *GetTriageResponsibilityTriageResponsibility) GetAction() TriageResponsibilityAction {
+	return v.TriageResponsibilityFields.Action
+}
+
+// GetCreatedAt returns GetTriageResponsibilityTriageResponsibility.CreatedAt, and is useful for accessing the field via an interface.
+func (v *GetTriageResponsibilityTriageResponsibility) GetCreatedAt() time.Time {
+	return v.TriageResponsibilityFields.CreatedAt
+}
+
+// GetUpdatedAt returns GetTriageResponsibilityTriageResponsibility.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *GetTriageResponsibilityTriageResponsibility) GetUpdatedAt() time.Time {
+	return v.TriageResponsibilityFields.UpdatedAt
+}
+
+// GetTeam returns GetTriageResponsibilityTriageResponsibility.Team, and is useful for accessing the field via an interface.
+func (v *GetTriageResponsibilityTriageResponsibility) GetTeam() *TriageResponsibilityFieldsTeam {
+	return v.TriageResponsibilityFields.Team
+}
+
+// GetCurrentUser returns GetTriageResponsibilityTriageResponsibility.CurrentUser, and is useful for accessing the field via an interface.
+func (v *GetTriageResponsibilityTriageResponsibility) GetCurrentUser() *TriageResponsibilityFieldsCurrentUser {
+	return v.TriageResponsibilityFields.CurrentUser
+}
+
+// GetTimeSchedule returns GetTriageResponsibilityTriageResponsibility.TimeSchedule, and is useful for accessing the field via an interface.
+func (v *GetTriageResponsibilityTriageResponsibility) GetTimeSchedule() *TriageResponsibilityFieldsTimeSchedule {
+	return v.TriageResponsibilityFields.TimeSchedule
+}
+
+// GetManualSelection returns GetTriageResponsibilityTriageResponsibility.ManualSelection, and is useful for accessing the field via an interface.
+func (v *GetTriageResponsibilityTriageResponsibility) GetManualSelection() *TriageResponsibilityFieldsManualSelectionTriageResponsibilityManualSelection {
+	return v.TriageResponsibilityFields.ManualSelection
+}
+
+func (v *GetTriageResponsibilityTriageResponsibility) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*GetTriageResponsibilityTriageResponsibility
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.GetTriageResponsibilityTriageResponsibility = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.TriageResponsibilityFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalGetTriageResponsibilityTriageResponsibility struct {
+	Id string `json:"id"`
+
+	Action TriageResponsibilityAction `json:"action"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	Team *TriageResponsibilityFieldsTeam `json:"team"`
+
+	CurrentUser *TriageResponsibilityFieldsCurrentUser `json:"currentUser"`
+
+	TimeSchedule *TriageResponsibilityFieldsTimeSchedule `json:"timeSchedule"`
+
+	ManualSelection *TriageResponsibilityFieldsManualSelectionTriageResponsibilityManualSelection `json:"manualSelection"`
+}
+
+func (v *GetTriageResponsibilityTriageResponsibility) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *GetTriageResponsibilityTriageResponsibility) __premarshalJSON() (*__premarshalGetTriageResponsibilityTriageResponsibility, error) {
+	var retval __premarshalGetTriageResponsibilityTriageResponsibility
+
+	retval.Id = v.TriageResponsibilityFields.Id
+	retval.Action = v.TriageResponsibilityFields.Action
+	retval.CreatedAt = v.TriageResponsibilityFields.CreatedAt
+	retval.UpdatedAt = v.TriageResponsibilityFields.UpdatedAt
+	retval.Team = v.TriageResponsibilityFields.Team
+	retval.CurrentUser = v.TriageResponsibilityFields.CurrentUser
+	retval.TimeSchedule = v.TriageResponsibilityFields.TimeSchedule
+	retval.ManualSelection = v.TriageResponsibilityFields.ManualSelection
+	return &retval, nil
+}
+
 // GetUserByEmailResponse is returned by GetUserByEmail on success.
 type GetUserByEmailResponse struct {
 	// All users in the workspace. Supports filtering, sorting, and pagination.
@@ -15410,6 +15973,804 @@ func (v *GetWorkflowStateWorkflowState) __premarshalJSON() (*__premarshalGetWork
 	retval.Position = v.WorkflowStateFields.Position
 	retval.Team = v.WorkflowStateFields.Team
 	return &retval, nil
+}
+
+// GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayload includes the requested fields of the GraphQL type GitAutomationStatePayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a git automation state mutation.
+type GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The automation state that was created or updated.
+	GitAutomationState *GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayloadGitAutomationState `json:"gitAutomationState"`
+}
+
+// GetSuccess returns GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayload.Success, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetGitAutomationState returns GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayload.GitAutomationState, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayload) GetGitAutomationState() *GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayloadGitAutomationState {
+	return v.GitAutomationState
+}
+
+// GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayloadGitAutomationState includes the requested fields of the GraphQL type GitAutomationState.
+// The GraphQL type's documentation follows.
+//
+// A Git automation rule that automatically transitions issues to a specified
+// workflow state when a Git event occurs (e.g., when a PR is opened, move the
+// linked issue to 'In Review'). Each rule is scoped to a team and optionally to a
+// specific target branch. When no target branch is specified, the rule acts as the
+// default for all branches. Target-branch-specific rules override the defaults.
+type GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayloadGitAutomationState struct {
+	GitAutomationStateFields `json:"-"`
+}
+
+// GetId returns GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayloadGitAutomationState.Id, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayloadGitAutomationState) GetId() string {
+	return v.GitAutomationStateFields.Id
+}
+
+// GetEvent returns GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayloadGitAutomationState.Event, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayloadGitAutomationState) GetEvent() GitAutomationStates {
+	return v.GitAutomationStateFields.Event
+}
+
+// GetCreatedAt returns GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayloadGitAutomationState.CreatedAt, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayloadGitAutomationState) GetCreatedAt() time.Time {
+	return v.GitAutomationStateFields.CreatedAt
+}
+
+// GetState returns GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayloadGitAutomationState.State, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayloadGitAutomationState) GetState() *GitAutomationStateFieldsStateWorkflowState {
+	return v.GitAutomationStateFields.State
+}
+
+// GetTargetBranch returns GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayloadGitAutomationState.TargetBranch, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayloadGitAutomationState) GetTargetBranch() *GitAutomationStateFieldsTargetBranchGitAutomationTargetBranch {
+	return v.GitAutomationStateFields.TargetBranch
+}
+
+func (v *GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayloadGitAutomationState) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayloadGitAutomationState
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayloadGitAutomationState = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.GitAutomationStateFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalGitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayloadGitAutomationState struct {
+	Id string `json:"id"`
+
+	Event GitAutomationStates `json:"event"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	State *GitAutomationStateFieldsStateWorkflowState `json:"state"`
+
+	TargetBranch *GitAutomationStateFieldsTargetBranchGitAutomationTargetBranch `json:"targetBranch"`
+}
+
+func (v *GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayloadGitAutomationState) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayloadGitAutomationState) __premarshalJSON() (*__premarshalGitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayloadGitAutomationState, error) {
+	var retval __premarshalGitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayloadGitAutomationState
+
+	retval.Id = v.GitAutomationStateFields.Id
+	retval.Event = v.GitAutomationStateFields.Event
+	retval.CreatedAt = v.GitAutomationStateFields.CreatedAt
+	retval.State = v.GitAutomationStateFields.State
+	retval.TargetBranch = v.GitAutomationStateFields.TargetBranch
+	return &retval, nil
+}
+
+// Input for creating a new Git automation rule.
+type GitAutomationStateCreateInput struct {
+	// The event that triggers the automation.
+	Event GitAutomationStates `json:"event"`
+	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
+	Id *string `json:"id"`
+	// The associated workflow state. If null, will override default behaviour and take no action.
+	StateId *string `json:"stateId"`
+	// The associated target branch. If null, all branches are targeted.
+	TargetBranchId *string `json:"targetBranchId"`
+	// The team associated with the automation state.
+	TeamId string `json:"teamId"`
+}
+
+// GetEvent returns GitAutomationStateCreateInput.Event, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateCreateInput) GetEvent() GitAutomationStates { return v.Event }
+
+// GetId returns GitAutomationStateCreateInput.Id, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateCreateInput) GetId() *string { return v.Id }
+
+// GetStateId returns GitAutomationStateCreateInput.StateId, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateCreateInput) GetStateId() *string { return v.StateId }
+
+// GetTargetBranchId returns GitAutomationStateCreateInput.TargetBranchId, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateCreateInput) GetTargetBranchId() *string { return v.TargetBranchId }
+
+// GetTeamId returns GitAutomationStateCreateInput.TeamId, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateCreateInput) GetTeamId() string { return v.TeamId }
+
+// GitAutomationStateCreateResponse is returned by GitAutomationStateCreate on success.
+type GitAutomationStateCreateResponse struct {
+	// Creates a new Git automation rule that maps a Git event to a workflow state transition for a team.
+	GitAutomationStateCreate *GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayload `json:"gitAutomationStateCreate"`
+}
+
+// GetGitAutomationStateCreate returns GitAutomationStateCreateResponse.GitAutomationStateCreate, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateCreateResponse) GetGitAutomationStateCreate() *GitAutomationStateCreateGitAutomationStateCreateGitAutomationStatePayload {
+	return v.GitAutomationStateCreate
+}
+
+// GitAutomationStateDeleteGitAutomationStateDeleteDeletePayload includes the requested fields of the GraphQL type DeletePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity deletion mutations.
+type GitAutomationStateDeleteGitAutomationStateDeleteDeletePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+}
+
+// GetSuccess returns GitAutomationStateDeleteGitAutomationStateDeleteDeletePayload.Success, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateDeleteGitAutomationStateDeleteDeletePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GitAutomationStateDeleteResponse is returned by GitAutomationStateDelete on success.
+type GitAutomationStateDeleteResponse struct {
+	// Deletes a Git automation rule.
+	GitAutomationStateDelete *GitAutomationStateDeleteGitAutomationStateDeleteDeletePayload `json:"gitAutomationStateDelete"`
+}
+
+// GetGitAutomationStateDelete returns GitAutomationStateDeleteResponse.GitAutomationStateDelete, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateDeleteResponse) GetGitAutomationStateDelete() *GitAutomationStateDeleteGitAutomationStateDeleteDeletePayload {
+	return v.GitAutomationStateDelete
+}
+
+// GitAutomationStateFields includes the GraphQL fields of GitAutomationState requested by the fragment GitAutomationStateFields.
+// The GraphQL type's documentation follows.
+//
+// A Git automation rule that automatically transitions issues to a specified
+// workflow state when a Git event occurs (e.g., when a PR is opened, move the
+// linked issue to 'In Review'). Each rule is scoped to a team and optionally to a
+// specific target branch. When no target branch is specified, the rule acts as the
+// default for all branches. Target-branch-specific rules override the defaults.
+type GitAutomationStateFields struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The Git event that triggers this automation rule (e.g., branch created, PR opened for review, or PR merged).
+	Event GitAutomationStates `json:"event"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The workflow state that linked issues will be transitioned to when the Git
+	// event fires. Null if this rule is configured to take no action, overriding any
+	// default rule for the same event.
+	State *GitAutomationStateFieldsStateWorkflowState `json:"state"`
+	// The target branch that this automation rule applies to. When set, this rule
+	// only fires for pull requests targeting the specified branch pattern,
+	// overriding any default rule for the same event. Null if this is a default rule
+	// that applies to all branches.
+	TargetBranch *GitAutomationStateFieldsTargetBranchGitAutomationTargetBranch `json:"targetBranch"`
+}
+
+// GetId returns GitAutomationStateFields.Id, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateFields) GetId() string { return v.Id }
+
+// GetEvent returns GitAutomationStateFields.Event, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateFields) GetEvent() GitAutomationStates { return v.Event }
+
+// GetCreatedAt returns GitAutomationStateFields.CreatedAt, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateFields) GetCreatedAt() time.Time { return v.CreatedAt }
+
+// GetState returns GitAutomationStateFields.State, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateFields) GetState() *GitAutomationStateFieldsStateWorkflowState {
+	return v.State
+}
+
+// GetTargetBranch returns GitAutomationStateFields.TargetBranch, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateFields) GetTargetBranch() *GitAutomationStateFieldsTargetBranchGitAutomationTargetBranch {
+	return v.TargetBranch
+}
+
+// GitAutomationStateFieldsStateWorkflowState includes the requested fields of the GraphQL type WorkflowState.
+// The GraphQL type's documentation follows.
+//
+// A state in a team's workflow, representing an issue status such as Triage,
+// Backlog, Todo, In Progress, In Review, Done, or Canceled. Each team has its own
+// set of workflow states that define the progression of issues through the team's
+// process. Workflow states have a type that categorizes them (triage, backlog,
+// unstarted, started, completed, canceled), a position that determines their
+// display order, and a color for visual identification. States can be inherited
+// from parent teams to sub-teams.
+type GitAutomationStateFieldsStateWorkflowState struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The state's human-readable name (e.g., 'In Progress', 'Done', 'Backlog').
+	Name string `json:"name"`
+}
+
+// GetId returns GitAutomationStateFieldsStateWorkflowState.Id, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateFieldsStateWorkflowState) GetId() string { return v.Id }
+
+// GetName returns GitAutomationStateFieldsStateWorkflowState.Name, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateFieldsStateWorkflowState) GetName() string { return v.Name }
+
+// GitAutomationStateFieldsTargetBranchGitAutomationTargetBranch includes the requested fields of the GraphQL type GitAutomationTargetBranch.
+// The GraphQL type's documentation follows.
+//
+// A target branch definition used by Git automation rules to scope automations to
+// specific branches. The branch can be specified as an exact name (e.g., 'main')
+// or as a regular expression pattern (e.g., 'release/.*'). Each target branch
+// belongs to a team and can have multiple automation rules associated with it,
+// which override the team's default automation rules when a PR targets a matching branch.
+type GitAutomationStateFieldsTargetBranchGitAutomationTargetBranch struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The branch name or pattern to match against pull request target branches.
+	// Interpreted as a literal branch name unless isRegex is true, in which case it
+	// is treated as a regular expression.
+	BranchPattern string `json:"branchPattern"`
+	// Whether the branch pattern should be interpreted as a regular expression. When
+	// false, the pattern is matched as an exact branch name.
+	IsRegex bool `json:"isRegex"`
+}
+
+// GetId returns GitAutomationStateFieldsTargetBranchGitAutomationTargetBranch.Id, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateFieldsTargetBranchGitAutomationTargetBranch) GetId() string { return v.Id }
+
+// GetBranchPattern returns GitAutomationStateFieldsTargetBranchGitAutomationTargetBranch.BranchPattern, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateFieldsTargetBranchGitAutomationTargetBranch) GetBranchPattern() string {
+	return v.BranchPattern
+}
+
+// GetIsRegex returns GitAutomationStateFieldsTargetBranchGitAutomationTargetBranch.IsRegex, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateFieldsTargetBranchGitAutomationTargetBranch) GetIsRegex() bool {
+	return v.IsRegex
+}
+
+// GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayload includes the requested fields of the GraphQL type GitAutomationStatePayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a git automation state mutation.
+type GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The automation state that was created or updated.
+	GitAutomationState *GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayloadGitAutomationState `json:"gitAutomationState"`
+}
+
+// GetSuccess returns GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayload.Success, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetGitAutomationState returns GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayload.GitAutomationState, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayload) GetGitAutomationState() *GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayloadGitAutomationState {
+	return v.GitAutomationState
+}
+
+// GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayloadGitAutomationState includes the requested fields of the GraphQL type GitAutomationState.
+// The GraphQL type's documentation follows.
+//
+// A Git automation rule that automatically transitions issues to a specified
+// workflow state when a Git event occurs (e.g., when a PR is opened, move the
+// linked issue to 'In Review'). Each rule is scoped to a team and optionally to a
+// specific target branch. When no target branch is specified, the rule acts as the
+// default for all branches. Target-branch-specific rules override the defaults.
+type GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayloadGitAutomationState struct {
+	GitAutomationStateFields `json:"-"`
+}
+
+// GetId returns GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayloadGitAutomationState.Id, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayloadGitAutomationState) GetId() string {
+	return v.GitAutomationStateFields.Id
+}
+
+// GetEvent returns GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayloadGitAutomationState.Event, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayloadGitAutomationState) GetEvent() GitAutomationStates {
+	return v.GitAutomationStateFields.Event
+}
+
+// GetCreatedAt returns GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayloadGitAutomationState.CreatedAt, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayloadGitAutomationState) GetCreatedAt() time.Time {
+	return v.GitAutomationStateFields.CreatedAt
+}
+
+// GetState returns GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayloadGitAutomationState.State, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayloadGitAutomationState) GetState() *GitAutomationStateFieldsStateWorkflowState {
+	return v.GitAutomationStateFields.State
+}
+
+// GetTargetBranch returns GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayloadGitAutomationState.TargetBranch, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayloadGitAutomationState) GetTargetBranch() *GitAutomationStateFieldsTargetBranchGitAutomationTargetBranch {
+	return v.GitAutomationStateFields.TargetBranch
+}
+
+func (v *GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayloadGitAutomationState) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayloadGitAutomationState
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayloadGitAutomationState = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.GitAutomationStateFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalGitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayloadGitAutomationState struct {
+	Id string `json:"id"`
+
+	Event GitAutomationStates `json:"event"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	State *GitAutomationStateFieldsStateWorkflowState `json:"state"`
+
+	TargetBranch *GitAutomationStateFieldsTargetBranchGitAutomationTargetBranch `json:"targetBranch"`
+}
+
+func (v *GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayloadGitAutomationState) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayloadGitAutomationState) __premarshalJSON() (*__premarshalGitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayloadGitAutomationState, error) {
+	var retval __premarshalGitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayloadGitAutomationState
+
+	retval.Id = v.GitAutomationStateFields.Id
+	retval.Event = v.GitAutomationStateFields.Event
+	retval.CreatedAt = v.GitAutomationStateFields.CreatedAt
+	retval.State = v.GitAutomationStateFields.State
+	retval.TargetBranch = v.GitAutomationStateFields.TargetBranch
+	return &retval, nil
+}
+
+// Input for updating an existing Git automation rule.
+type GitAutomationStateUpdateInput struct {
+	// The event that triggers the automation.
+	Event *GitAutomationStates `json:"event"`
+	// The associated workflow state.
+	StateId *string `json:"stateId"`
+	// The associated target branch. If null, all branches are targeted.
+	TargetBranchId *string `json:"targetBranchId"`
+}
+
+// GetEvent returns GitAutomationStateUpdateInput.Event, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateUpdateInput) GetEvent() *GitAutomationStates { return v.Event }
+
+// GetStateId returns GitAutomationStateUpdateInput.StateId, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateUpdateInput) GetStateId() *string { return v.StateId }
+
+// GetTargetBranchId returns GitAutomationStateUpdateInput.TargetBranchId, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateUpdateInput) GetTargetBranchId() *string { return v.TargetBranchId }
+
+// GitAutomationStateUpdateResponse is returned by GitAutomationStateUpdate on success.
+type GitAutomationStateUpdateResponse struct {
+	// Updates an existing Git automation rule, including its workflow state, target branch, and triggering event.
+	GitAutomationStateUpdate *GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayload `json:"gitAutomationStateUpdate"`
+}
+
+// GetGitAutomationStateUpdate returns GitAutomationStateUpdateResponse.GitAutomationStateUpdate, and is useful for accessing the field via an interface.
+func (v *GitAutomationStateUpdateResponse) GetGitAutomationStateUpdate() *GitAutomationStateUpdateGitAutomationStateUpdateGitAutomationStatePayload {
+	return v.GitAutomationStateUpdate
+}
+
+// The Git events that can trigger an automation rule. Each value corresponds to a
+// pull/merge request lifecycle event (e.g., branch created, PR opened for review, PR merged).
+type GitAutomationStates string
+
+const (
+	GitAutomationStatesDraft     GitAutomationStates = "draft"
+	GitAutomationStatesStart     GitAutomationStates = "start"
+	GitAutomationStatesReview    GitAutomationStates = "review"
+	GitAutomationStatesMergeable GitAutomationStates = "mergeable"
+	GitAutomationStatesMerge     GitAutomationStates = "merge"
+)
+
+var AllGitAutomationStates = []GitAutomationStates{
+	GitAutomationStatesDraft,
+	GitAutomationStatesStart,
+	GitAutomationStatesReview,
+	GitAutomationStatesMergeable,
+	GitAutomationStatesMerge,
+}
+
+// GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayload includes the requested fields of the GraphQL type GitAutomationTargetBranchPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a git automation target branch mutation.
+type GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The Git target branch automation that was created or updated.
+	TargetBranch *GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch `json:"targetBranch"`
+}
+
+// GetSuccess returns GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayload.Success, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetTargetBranch returns GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayload.TargetBranch, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayload) GetTargetBranch() *GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch {
+	return v.TargetBranch
+}
+
+// GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch includes the requested fields of the GraphQL type GitAutomationTargetBranch.
+// The GraphQL type's documentation follows.
+//
+// A target branch definition used by Git automation rules to scope automations to
+// specific branches. The branch can be specified as an exact name (e.g., 'main')
+// or as a regular expression pattern (e.g., 'release/.*'). Each target branch
+// belongs to a team and can have multiple automation rules associated with it,
+// which override the team's default automation rules when a PR targets a matching branch.
+type GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch struct {
+	GitAutomationTargetBranchFields `json:"-"`
+}
+
+// GetId returns GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch.Id, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch) GetId() string {
+	return v.GitAutomationTargetBranchFields.Id
+}
+
+// GetBranchPattern returns GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch.BranchPattern, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch) GetBranchPattern() string {
+	return v.GitAutomationTargetBranchFields.BranchPattern
+}
+
+// GetIsRegex returns GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch.IsRegex, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch) GetIsRegex() bool {
+	return v.GitAutomationTargetBranchFields.IsRegex
+}
+
+// GetCreatedAt returns GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch.CreatedAt, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch) GetCreatedAt() time.Time {
+	return v.GitAutomationTargetBranchFields.CreatedAt
+}
+
+// GetUpdatedAt returns GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch) GetUpdatedAt() time.Time {
+	return v.GitAutomationTargetBranchFields.UpdatedAt
+}
+
+func (v *GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.GitAutomationTargetBranchFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalGitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch struct {
+	Id string `json:"id"`
+
+	BranchPattern string `json:"branchPattern"`
+
+	IsRegex bool `json:"isRegex"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+func (v *GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch) __premarshalJSON() (*__premarshalGitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch, error) {
+	var retval __premarshalGitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch
+
+	retval.Id = v.GitAutomationTargetBranchFields.Id
+	retval.BranchPattern = v.GitAutomationTargetBranchFields.BranchPattern
+	retval.IsRegex = v.GitAutomationTargetBranchFields.IsRegex
+	retval.CreatedAt = v.GitAutomationTargetBranchFields.CreatedAt
+	retval.UpdatedAt = v.GitAutomationTargetBranchFields.UpdatedAt
+	return &retval, nil
+}
+
+// Input for creating a new Git target branch definition.
+type GitAutomationTargetBranchCreateInput struct {
+	// The target branch pattern.
+	BranchPattern string `json:"branchPattern"`
+	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
+	Id *string `json:"id"`
+	// Whether the branch pattern is a regular expression.
+	IsRegex *bool `json:"isRegex"`
+	// The team associated with the Git target branch automation.
+	TeamId string `json:"teamId"`
+}
+
+// GetBranchPattern returns GitAutomationTargetBranchCreateInput.BranchPattern, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchCreateInput) GetBranchPattern() string { return v.BranchPattern }
+
+// GetId returns GitAutomationTargetBranchCreateInput.Id, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchCreateInput) GetId() *string { return v.Id }
+
+// GetIsRegex returns GitAutomationTargetBranchCreateInput.IsRegex, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchCreateInput) GetIsRegex() *bool { return v.IsRegex }
+
+// GetTeamId returns GitAutomationTargetBranchCreateInput.TeamId, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchCreateInput) GetTeamId() string { return v.TeamId }
+
+// GitAutomationTargetBranchCreateResponse is returned by GitAutomationTargetBranchCreate on success.
+type GitAutomationTargetBranchCreateResponse struct {
+	// Creates a new Git target branch definition that scopes automation rules to
+	// pull requests targeting a specific branch pattern.
+	GitAutomationTargetBranchCreate *GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayload `json:"gitAutomationTargetBranchCreate"`
+}
+
+// GetGitAutomationTargetBranchCreate returns GitAutomationTargetBranchCreateResponse.GitAutomationTargetBranchCreate, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchCreateResponse) GetGitAutomationTargetBranchCreate() *GitAutomationTargetBranchCreateGitAutomationTargetBranchCreateGitAutomationTargetBranchPayload {
+	return v.GitAutomationTargetBranchCreate
+}
+
+// GitAutomationTargetBranchDeleteGitAutomationTargetBranchDeleteDeletePayload includes the requested fields of the GraphQL type DeletePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity deletion mutations.
+type GitAutomationTargetBranchDeleteGitAutomationTargetBranchDeleteDeletePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+}
+
+// GetSuccess returns GitAutomationTargetBranchDeleteGitAutomationTargetBranchDeleteDeletePayload.Success, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchDeleteGitAutomationTargetBranchDeleteDeletePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GitAutomationTargetBranchDeleteResponse is returned by GitAutomationTargetBranchDelete on success.
+type GitAutomationTargetBranchDeleteResponse struct {
+	// Deletes a Git target branch definition and its associated automation rules.
+	GitAutomationTargetBranchDelete *GitAutomationTargetBranchDeleteGitAutomationTargetBranchDeleteDeletePayload `json:"gitAutomationTargetBranchDelete"`
+}
+
+// GetGitAutomationTargetBranchDelete returns GitAutomationTargetBranchDeleteResponse.GitAutomationTargetBranchDelete, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchDeleteResponse) GetGitAutomationTargetBranchDelete() *GitAutomationTargetBranchDeleteGitAutomationTargetBranchDeleteDeletePayload {
+	return v.GitAutomationTargetBranchDelete
+}
+
+// GitAutomationTargetBranchFields includes the GraphQL fields of GitAutomationTargetBranch requested by the fragment GitAutomationTargetBranchFields.
+// The GraphQL type's documentation follows.
+//
+// A target branch definition used by Git automation rules to scope automations to
+// specific branches. The branch can be specified as an exact name (e.g., 'main')
+// or as a regular expression pattern (e.g., 'release/.*'). Each target branch
+// belongs to a team and can have multiple automation rules associated with it,
+// which override the team's default automation rules when a PR targets a matching branch.
+type GitAutomationTargetBranchFields struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The branch name or pattern to match against pull request target branches.
+	// Interpreted as a literal branch name unless isRegex is true, in which case it
+	// is treated as a regular expression.
+	BranchPattern string `json:"branchPattern"`
+	// Whether the branch pattern should be interpreted as a regular expression. When
+	// false, the pattern is matched as an exact branch name.
+	IsRegex bool `json:"isRegex"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+	// been updated after creation.
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// GetId returns GitAutomationTargetBranchFields.Id, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchFields) GetId() string { return v.Id }
+
+// GetBranchPattern returns GitAutomationTargetBranchFields.BranchPattern, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchFields) GetBranchPattern() string { return v.BranchPattern }
+
+// GetIsRegex returns GitAutomationTargetBranchFields.IsRegex, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchFields) GetIsRegex() bool { return v.IsRegex }
+
+// GetCreatedAt returns GitAutomationTargetBranchFields.CreatedAt, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchFields) GetCreatedAt() time.Time { return v.CreatedAt }
+
+// GetUpdatedAt returns GitAutomationTargetBranchFields.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchFields) GetUpdatedAt() time.Time { return v.UpdatedAt }
+
+// GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayload includes the requested fields of the GraphQL type GitAutomationTargetBranchPayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a git automation target branch mutation.
+type GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The Git target branch automation that was created or updated.
+	TargetBranch *GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch `json:"targetBranch"`
+}
+
+// GetSuccess returns GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayload.Success, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetTargetBranch returns GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayload.TargetBranch, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayload) GetTargetBranch() *GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch {
+	return v.TargetBranch
+}
+
+// GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch includes the requested fields of the GraphQL type GitAutomationTargetBranch.
+// The GraphQL type's documentation follows.
+//
+// A target branch definition used by Git automation rules to scope automations to
+// specific branches. The branch can be specified as an exact name (e.g., 'main')
+// or as a regular expression pattern (e.g., 'release/.*'). Each target branch
+// belongs to a team and can have multiple automation rules associated with it,
+// which override the team's default automation rules when a PR targets a matching branch.
+type GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch struct {
+	GitAutomationTargetBranchFields `json:"-"`
+}
+
+// GetId returns GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch.Id, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch) GetId() string {
+	return v.GitAutomationTargetBranchFields.Id
+}
+
+// GetBranchPattern returns GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch.BranchPattern, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch) GetBranchPattern() string {
+	return v.GitAutomationTargetBranchFields.BranchPattern
+}
+
+// GetIsRegex returns GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch.IsRegex, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch) GetIsRegex() bool {
+	return v.GitAutomationTargetBranchFields.IsRegex
+}
+
+// GetCreatedAt returns GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch.CreatedAt, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch) GetCreatedAt() time.Time {
+	return v.GitAutomationTargetBranchFields.CreatedAt
+}
+
+// GetUpdatedAt returns GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch) GetUpdatedAt() time.Time {
+	return v.GitAutomationTargetBranchFields.UpdatedAt
+}
+
+func (v *GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.GitAutomationTargetBranchFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalGitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch struct {
+	Id string `json:"id"`
+
+	BranchPattern string `json:"branchPattern"`
+
+	IsRegex bool `json:"isRegex"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+func (v *GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch) __premarshalJSON() (*__premarshalGitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch, error) {
+	var retval __premarshalGitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayloadTargetBranchGitAutomationTargetBranch
+
+	retval.Id = v.GitAutomationTargetBranchFields.Id
+	retval.BranchPattern = v.GitAutomationTargetBranchFields.BranchPattern
+	retval.IsRegex = v.GitAutomationTargetBranchFields.IsRegex
+	retval.CreatedAt = v.GitAutomationTargetBranchFields.CreatedAt
+	retval.UpdatedAt = v.GitAutomationTargetBranchFields.UpdatedAt
+	return &retval, nil
+}
+
+// Input for updating an existing Git target branch definition.
+type GitAutomationTargetBranchUpdateInput struct {
+	// The target branch pattern.
+	BranchPattern *string `json:"branchPattern"`
+	// Whether the branch pattern is a regular expression.
+	IsRegex *bool `json:"isRegex"`
+}
+
+// GetBranchPattern returns GitAutomationTargetBranchUpdateInput.BranchPattern, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchUpdateInput) GetBranchPattern() *string { return v.BranchPattern }
+
+// GetIsRegex returns GitAutomationTargetBranchUpdateInput.IsRegex, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchUpdateInput) GetIsRegex() *bool { return v.IsRegex }
+
+// GitAutomationTargetBranchUpdateResponse is returned by GitAutomationTargetBranchUpdate on success.
+type GitAutomationTargetBranchUpdateResponse struct {
+	// Updates an existing Git target branch definition, including its branch pattern and regex flag.
+	GitAutomationTargetBranchUpdate *GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayload `json:"gitAutomationTargetBranchUpdate"`
+}
+
+// GetGitAutomationTargetBranchUpdate returns GitAutomationTargetBranchUpdateResponse.GitAutomationTargetBranchUpdate, and is useful for accessing the field via an interface.
+func (v *GitAutomationTargetBranchUpdateResponse) GetGitAutomationTargetBranchUpdate() *GitAutomationTargetBranchUpdateGitAutomationTargetBranchUpdateGitAutomationTargetBranchPayload {
+	return v.GitAutomationTargetBranchUpdate
 }
 
 // Comparator for identifiers.
@@ -25809,6 +27170,136 @@ func (v *ListDocumentsResponse) GetDocuments() *ListDocumentsDocumentsDocumentCo
 	return v.Documents
 }
 
+// ListEmojisEmojisEmojiConnection includes the requested fields of the GraphQL type EmojiConnection.
+type ListEmojisEmojisEmojiConnection struct {
+	Nodes    []*ListEmojisEmojisEmojiConnectionNodesEmoji `json:"nodes"`
+	PageInfo *ListEmojisEmojisEmojiConnectionPageInfo     `json:"pageInfo"`
+}
+
+// GetNodes returns ListEmojisEmojisEmojiConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ListEmojisEmojisEmojiConnection) GetNodes() []*ListEmojisEmojisEmojiConnectionNodesEmoji {
+	return v.Nodes
+}
+
+// GetPageInfo returns ListEmojisEmojisEmojiConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *ListEmojisEmojisEmojiConnection) GetPageInfo() *ListEmojisEmojisEmojiConnectionPageInfo {
+	return v.PageInfo
+}
+
+// ListEmojisEmojisEmojiConnectionNodesEmoji includes the requested fields of the GraphQL type Emoji.
+// The GraphQL type's documentation follows.
+//
+// A custom emoji defined in the workspace. Custom emojis are uploaded by users and
+// can be used in reactions and other places where standard emojis are supported.
+// Each emoji has a unique name within the workspace.
+type ListEmojisEmojisEmojiConnectionNodesEmoji struct {
+	EmojiFields `json:"-"`
+}
+
+// GetId returns ListEmojisEmojisEmojiConnectionNodesEmoji.Id, and is useful for accessing the field via an interface.
+func (v *ListEmojisEmojisEmojiConnectionNodesEmoji) GetId() string { return v.EmojiFields.Id }
+
+// GetName returns ListEmojisEmojisEmojiConnectionNodesEmoji.Name, and is useful for accessing the field via an interface.
+func (v *ListEmojisEmojisEmojiConnectionNodesEmoji) GetName() string { return v.EmojiFields.Name }
+
+// GetUrl returns ListEmojisEmojisEmojiConnectionNodesEmoji.Url, and is useful for accessing the field via an interface.
+func (v *ListEmojisEmojisEmojiConnectionNodesEmoji) GetUrl() string { return v.EmojiFields.Url }
+
+// GetSource returns ListEmojisEmojisEmojiConnectionNodesEmoji.Source, and is useful for accessing the field via an interface.
+func (v *ListEmojisEmojisEmojiConnectionNodesEmoji) GetSource() string { return v.EmojiFields.Source }
+
+// GetCreatedAt returns ListEmojisEmojisEmojiConnectionNodesEmoji.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ListEmojisEmojisEmojiConnectionNodesEmoji) GetCreatedAt() time.Time {
+	return v.EmojiFields.CreatedAt
+}
+
+// GetCreator returns ListEmojisEmojisEmojiConnectionNodesEmoji.Creator, and is useful for accessing the field via an interface.
+func (v *ListEmojisEmojisEmojiConnectionNodesEmoji) GetCreator() *EmojiFieldsCreatorUser {
+	return v.EmojiFields.Creator
+}
+
+func (v *ListEmojisEmojisEmojiConnectionNodesEmoji) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ListEmojisEmojisEmojiConnectionNodesEmoji
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ListEmojisEmojisEmojiConnectionNodesEmoji = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.EmojiFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalListEmojisEmojisEmojiConnectionNodesEmoji struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	Url string `json:"url"`
+
+	Source string `json:"source"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	Creator *EmojiFieldsCreatorUser `json:"creator"`
+}
+
+func (v *ListEmojisEmojisEmojiConnectionNodesEmoji) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ListEmojisEmojisEmojiConnectionNodesEmoji) __premarshalJSON() (*__premarshalListEmojisEmojisEmojiConnectionNodesEmoji, error) {
+	var retval __premarshalListEmojisEmojisEmojiConnectionNodesEmoji
+
+	retval.Id = v.EmojiFields.Id
+	retval.Name = v.EmojiFields.Name
+	retval.Url = v.EmojiFields.Url
+	retval.Source = v.EmojiFields.Source
+	retval.CreatedAt = v.EmojiFields.CreatedAt
+	retval.Creator = v.EmojiFields.Creator
+	return &retval, nil
+}
+
+// ListEmojisEmojisEmojiConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+type ListEmojisEmojisEmojiConnectionPageInfo struct {
+	// Indicates if there are more results when paginating forward.
+	HasNextPage bool `json:"hasNextPage"`
+	// Cursor representing the last result in the paginated results.
+	EndCursor *string `json:"endCursor"`
+}
+
+// GetHasNextPage returns ListEmojisEmojisEmojiConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *ListEmojisEmojisEmojiConnectionPageInfo) GetHasNextPage() bool { return v.HasNextPage }
+
+// GetEndCursor returns ListEmojisEmojisEmojiConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *ListEmojisEmojisEmojiConnectionPageInfo) GetEndCursor() *string { return v.EndCursor }
+
+// ListEmojisResponse is returned by ListEmojis on success.
+type ListEmojisResponse struct {
+	// All custom emojis in the workspace.
+	Emojis *ListEmojisEmojisEmojiConnection `json:"emojis"`
+}
+
+// GetEmojis returns ListEmojisResponse.Emojis, and is useful for accessing the field via an interface.
+func (v *ListEmojisResponse) GetEmojis() *ListEmojisEmojisEmojiConnection { return v.Emojis }
+
 // ListFavoritesFavoritesFavoriteConnection includes the requested fields of the GraphQL type FavoriteConnection.
 type ListFavoritesFavoritesFavoriteConnection struct {
 	Nodes    []*ListFavoritesFavoritesFavoriteConnectionNodesFavorite `json:"nodes"`
@@ -30124,6 +31615,329 @@ func (v *ListTemplatesTemplatesTemplate) __premarshalJSON() (*__premarshalListTe
 	retval.Creator = v.TemplateFields.Creator
 	retval.Team = v.TemplateFields.Team
 	return &retval, nil
+}
+
+// ListTimeSchedulesResponse is returned by ListTimeSchedules on success.
+type ListTimeSchedulesResponse struct {
+	// All time schedules.
+	TimeSchedules *ListTimeSchedulesTimeSchedulesTimeScheduleConnection `json:"timeSchedules"`
+}
+
+// GetTimeSchedules returns ListTimeSchedulesResponse.TimeSchedules, and is useful for accessing the field via an interface.
+func (v *ListTimeSchedulesResponse) GetTimeSchedules() *ListTimeSchedulesTimeSchedulesTimeScheduleConnection {
+	return v.TimeSchedules
+}
+
+// ListTimeSchedulesTimeSchedulesTimeScheduleConnection includes the requested fields of the GraphQL type TimeScheduleConnection.
+type ListTimeSchedulesTimeSchedulesTimeScheduleConnection struct {
+	Nodes    []*ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule `json:"nodes"`
+	PageInfo *ListTimeSchedulesTimeSchedulesTimeScheduleConnectionPageInfo            `json:"pageInfo"`
+}
+
+// GetNodes returns ListTimeSchedulesTimeSchedulesTimeScheduleConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ListTimeSchedulesTimeSchedulesTimeScheduleConnection) GetNodes() []*ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule {
+	return v.Nodes
+}
+
+// GetPageInfo returns ListTimeSchedulesTimeSchedulesTimeScheduleConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *ListTimeSchedulesTimeSchedulesTimeScheduleConnection) GetPageInfo() *ListTimeSchedulesTimeSchedulesTimeScheduleConnectionPageInfo {
+	return v.PageInfo
+}
+
+// ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule includes the requested fields of the GraphQL type TimeSchedule.
+// The GraphQL type's documentation follows.
+//
+// A time-based schedule defining on-call rotations or availability windows.
+// Schedules contain a series of time entries, each specifying a user and their
+// active period. They can be synced from external services (such as PagerDuty or
+// Opsgenie) via integrations, or created manually. Schedules are used by triage
+// responsibilities to determine who should be assigned or notified when issues enter triage.
+type ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule struct {
+	TimeScheduleFields `json:"-"`
+}
+
+// GetId returns ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule.Id, and is useful for accessing the field via an interface.
+func (v *ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule) GetId() string {
+	return v.TimeScheduleFields.Id
+}
+
+// GetName returns ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule.Name, and is useful for accessing the field via an interface.
+func (v *ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule) GetName() string {
+	return v.TimeScheduleFields.Name
+}
+
+// GetExternalId returns ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule.ExternalId, and is useful for accessing the field via an interface.
+func (v *ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule) GetExternalId() *string {
+	return v.TimeScheduleFields.ExternalId
+}
+
+// GetExternalUrl returns ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule.ExternalUrl, and is useful for accessing the field via an interface.
+func (v *ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule) GetExternalUrl() *string {
+	return v.TimeScheduleFields.ExternalUrl
+}
+
+// GetCreatedAt returns ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule) GetCreatedAt() time.Time {
+	return v.TimeScheduleFields.CreatedAt
+}
+
+// GetUpdatedAt returns ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule) GetUpdatedAt() time.Time {
+	return v.TimeScheduleFields.UpdatedAt
+}
+
+// GetIntegration returns ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule.Integration, and is useful for accessing the field via an interface.
+func (v *ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule) GetIntegration() *TimeScheduleFieldsIntegration {
+	return v.TimeScheduleFields.Integration
+}
+
+// GetEntries returns ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule.Entries, and is useful for accessing the field via an interface.
+func (v *ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule) GetEntries() []*TimeScheduleFieldsEntriesTimeScheduleEntry {
+	return v.TimeScheduleFields.Entries
+}
+
+func (v *ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.TimeScheduleFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	ExternalId *string `json:"externalId"`
+
+	ExternalUrl *string `json:"externalUrl"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	Integration *TimeScheduleFieldsIntegration `json:"integration"`
+
+	Entries []*TimeScheduleFieldsEntriesTimeScheduleEntry `json:"entries"`
+}
+
+func (v *ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule) __premarshalJSON() (*__premarshalListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule, error) {
+	var retval __premarshalListTimeSchedulesTimeSchedulesTimeScheduleConnectionNodesTimeSchedule
+
+	retval.Id = v.TimeScheduleFields.Id
+	retval.Name = v.TimeScheduleFields.Name
+	retval.ExternalId = v.TimeScheduleFields.ExternalId
+	retval.ExternalUrl = v.TimeScheduleFields.ExternalUrl
+	retval.CreatedAt = v.TimeScheduleFields.CreatedAt
+	retval.UpdatedAt = v.TimeScheduleFields.UpdatedAt
+	retval.Integration = v.TimeScheduleFields.Integration
+	retval.Entries = v.TimeScheduleFields.Entries
+	return &retval, nil
+}
+
+// ListTimeSchedulesTimeSchedulesTimeScheduleConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+type ListTimeSchedulesTimeSchedulesTimeScheduleConnectionPageInfo struct {
+	// Indicates if there are more results when paginating forward.
+	HasNextPage bool `json:"hasNextPage"`
+	// Cursor representing the last result in the paginated results.
+	EndCursor *string `json:"endCursor"`
+}
+
+// GetHasNextPage returns ListTimeSchedulesTimeSchedulesTimeScheduleConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *ListTimeSchedulesTimeSchedulesTimeScheduleConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// GetEndCursor returns ListTimeSchedulesTimeSchedulesTimeScheduleConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *ListTimeSchedulesTimeSchedulesTimeScheduleConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
+}
+
+// ListTriageResponsibilitiesResponse is returned by ListTriageResponsibilities on success.
+type ListTriageResponsibilitiesResponse struct {
+	// All triage responsibilities.
+	TriageResponsibilities *ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnection `json:"triageResponsibilities"`
+}
+
+// GetTriageResponsibilities returns ListTriageResponsibilitiesResponse.TriageResponsibilities, and is useful for accessing the field via an interface.
+func (v *ListTriageResponsibilitiesResponse) GetTriageResponsibilities() *ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnection {
+	return v.TriageResponsibilities
+}
+
+// ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnection includes the requested fields of the GraphQL type TriageResponsibilityConnection.
+type ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnection struct {
+	Nodes    []*ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility `json:"nodes"`
+	PageInfo *ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionPageInfo                    `json:"pageInfo"`
+}
+
+// GetNodes returns ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnection.Nodes, and is useful for accessing the field via an interface.
+func (v *ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnection) GetNodes() []*ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility {
+	return v.Nodes
+}
+
+// GetPageInfo returns ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnection.PageInfo, and is useful for accessing the field via an interface.
+func (v *ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnection) GetPageInfo() *ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionPageInfo {
+	return v.PageInfo
+}
+
+// ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility includes the requested fields of the GraphQL type TriageResponsibility.
+// The GraphQL type's documentation follows.
+//
+// A team's triage responsibility configuration that defines how issues entering
+// triage are handled. Each team can have one triage responsibility, which
+// specifies the action to take (notify or assign) and the responsible users,
+// determined either by a manual selection of specific users or by an on-call time schedule.
+type ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility struct {
+	TriageResponsibilityFields `json:"-"`
+}
+
+// GetId returns ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility.Id, and is useful for accessing the field via an interface.
+func (v *ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility) GetId() string {
+	return v.TriageResponsibilityFields.Id
+}
+
+// GetAction returns ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility.Action, and is useful for accessing the field via an interface.
+func (v *ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility) GetAction() TriageResponsibilityAction {
+	return v.TriageResponsibilityFields.Action
+}
+
+// GetCreatedAt returns ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility.CreatedAt, and is useful for accessing the field via an interface.
+func (v *ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility) GetCreatedAt() time.Time {
+	return v.TriageResponsibilityFields.CreatedAt
+}
+
+// GetUpdatedAt returns ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility) GetUpdatedAt() time.Time {
+	return v.TriageResponsibilityFields.UpdatedAt
+}
+
+// GetTeam returns ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility.Team, and is useful for accessing the field via an interface.
+func (v *ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility) GetTeam() *TriageResponsibilityFieldsTeam {
+	return v.TriageResponsibilityFields.Team
+}
+
+// GetCurrentUser returns ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility.CurrentUser, and is useful for accessing the field via an interface.
+func (v *ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility) GetCurrentUser() *TriageResponsibilityFieldsCurrentUser {
+	return v.TriageResponsibilityFields.CurrentUser
+}
+
+// GetTimeSchedule returns ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility.TimeSchedule, and is useful for accessing the field via an interface.
+func (v *ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility) GetTimeSchedule() *TriageResponsibilityFieldsTimeSchedule {
+	return v.TriageResponsibilityFields.TimeSchedule
+}
+
+// GetManualSelection returns ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility.ManualSelection, and is useful for accessing the field via an interface.
+func (v *ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility) GetManualSelection() *TriageResponsibilityFieldsManualSelectionTriageResponsibilityManualSelection {
+	return v.TriageResponsibilityFields.ManualSelection
+}
+
+func (v *ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.TriageResponsibilityFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility struct {
+	Id string `json:"id"`
+
+	Action TriageResponsibilityAction `json:"action"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	Team *TriageResponsibilityFieldsTeam `json:"team"`
+
+	CurrentUser *TriageResponsibilityFieldsCurrentUser `json:"currentUser"`
+
+	TimeSchedule *TriageResponsibilityFieldsTimeSchedule `json:"timeSchedule"`
+
+	ManualSelection *TriageResponsibilityFieldsManualSelectionTriageResponsibilityManualSelection `json:"manualSelection"`
+}
+
+func (v *ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility) __premarshalJSON() (*__premarshalListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility, error) {
+	var retval __premarshalListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionNodesTriageResponsibility
+
+	retval.Id = v.TriageResponsibilityFields.Id
+	retval.Action = v.TriageResponsibilityFields.Action
+	retval.CreatedAt = v.TriageResponsibilityFields.CreatedAt
+	retval.UpdatedAt = v.TriageResponsibilityFields.UpdatedAt
+	retval.Team = v.TriageResponsibilityFields.Team
+	retval.CurrentUser = v.TriageResponsibilityFields.CurrentUser
+	retval.TimeSchedule = v.TriageResponsibilityFields.TimeSchedule
+	retval.ManualSelection = v.TriageResponsibilityFields.ManualSelection
+	return &retval, nil
+}
+
+// ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionPageInfo includes the requested fields of the GraphQL type PageInfo.
+type ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionPageInfo struct {
+	// Indicates if there are more results when paginating forward.
+	HasNextPage bool `json:"hasNextPage"`
+	// Cursor representing the last result in the paginated results.
+	EndCursor *string `json:"endCursor"`
+}
+
+// GetHasNextPage returns ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionPageInfo.HasNextPage, and is useful for accessing the field via an interface.
+func (v *ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionPageInfo) GetHasNextPage() bool {
+	return v.HasNextPage
+}
+
+// GetEndCursor returns ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionPageInfo.EndCursor, and is useful for accessing the field via an interface.
+func (v *ListTriageResponsibilitiesTriageResponsibilitiesTriageResponsibilityConnectionPageInfo) GetEndCursor() *string {
+	return v.EndCursor
 }
 
 // ListUsersResponse is returned by ListUsers on success.
@@ -47836,6 +49650,971 @@ func (v *TemplateUpdateTemplateUpdateTemplatePayloadTemplate) __premarshalJSON()
 	return &retval, nil
 }
 
+// Input for creating a new time schedule.
+type TimeScheduleCreateInput struct {
+	// The schedule entries.
+	Entries []*TimeScheduleEntryInput `json:"entries,omitempty"`
+	// The unique identifier of the external schedule.
+	ExternalId *string `json:"externalId"`
+	// The URL to the external schedule.
+	ExternalUrl *string `json:"externalUrl"`
+	// The identifier in UUID v4 format. If none is provided, the backend will generate one.
+	Id *string `json:"id"`
+	// The name of the schedule.
+	Name string `json:"name"`
+}
+
+// GetEntries returns TimeScheduleCreateInput.Entries, and is useful for accessing the field via an interface.
+func (v *TimeScheduleCreateInput) GetEntries() []*TimeScheduleEntryInput { return v.Entries }
+
+// GetExternalId returns TimeScheduleCreateInput.ExternalId, and is useful for accessing the field via an interface.
+func (v *TimeScheduleCreateInput) GetExternalId() *string { return v.ExternalId }
+
+// GetExternalUrl returns TimeScheduleCreateInput.ExternalUrl, and is useful for accessing the field via an interface.
+func (v *TimeScheduleCreateInput) GetExternalUrl() *string { return v.ExternalUrl }
+
+// GetId returns TimeScheduleCreateInput.Id, and is useful for accessing the field via an interface.
+func (v *TimeScheduleCreateInput) GetId() *string { return v.Id }
+
+// GetName returns TimeScheduleCreateInput.Name, and is useful for accessing the field via an interface.
+func (v *TimeScheduleCreateInput) GetName() string { return v.Name }
+
+// TimeScheduleCreateResponse is returned by TimeScheduleCreate on success.
+type TimeScheduleCreateResponse struct {
+	// Creates a new time schedule.
+	TimeScheduleCreate *TimeScheduleCreateTimeScheduleCreateTimeSchedulePayload `json:"timeScheduleCreate"`
+}
+
+// GetTimeScheduleCreate returns TimeScheduleCreateResponse.TimeScheduleCreate, and is useful for accessing the field via an interface.
+func (v *TimeScheduleCreateResponse) GetTimeScheduleCreate() *TimeScheduleCreateTimeScheduleCreateTimeSchedulePayload {
+	return v.TimeScheduleCreate
+}
+
+// TimeScheduleCreateTimeScheduleCreateTimeSchedulePayload includes the requested fields of the GraphQL type TimeSchedulePayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a time schedule mutation.
+type TimeScheduleCreateTimeScheduleCreateTimeSchedulePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The time schedule that was created or updated.
+	TimeSchedule *TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule `json:"timeSchedule"`
+}
+
+// GetSuccess returns TimeScheduleCreateTimeScheduleCreateTimeSchedulePayload.Success, and is useful for accessing the field via an interface.
+func (v *TimeScheduleCreateTimeScheduleCreateTimeSchedulePayload) GetSuccess() bool { return v.Success }
+
+// GetTimeSchedule returns TimeScheduleCreateTimeScheduleCreateTimeSchedulePayload.TimeSchedule, and is useful for accessing the field via an interface.
+func (v *TimeScheduleCreateTimeScheduleCreateTimeSchedulePayload) GetTimeSchedule() *TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule {
+	return v.TimeSchedule
+}
+
+// TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule includes the requested fields of the GraphQL type TimeSchedule.
+// The GraphQL type's documentation follows.
+//
+// A time-based schedule defining on-call rotations or availability windows.
+// Schedules contain a series of time entries, each specifying a user and their
+// active period. They can be synced from external services (such as PagerDuty or
+// Opsgenie) via integrations, or created manually. Schedules are used by triage
+// responsibilities to determine who should be assigned or notified when issues enter triage.
+type TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule struct {
+	TimeScheduleFields `json:"-"`
+}
+
+// GetId returns TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule.Id, and is useful for accessing the field via an interface.
+func (v *TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule) GetId() string {
+	return v.TimeScheduleFields.Id
+}
+
+// GetName returns TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule.Name, and is useful for accessing the field via an interface.
+func (v *TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule) GetName() string {
+	return v.TimeScheduleFields.Name
+}
+
+// GetExternalId returns TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule.ExternalId, and is useful for accessing the field via an interface.
+func (v *TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule) GetExternalId() *string {
+	return v.TimeScheduleFields.ExternalId
+}
+
+// GetExternalUrl returns TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule.ExternalUrl, and is useful for accessing the field via an interface.
+func (v *TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule) GetExternalUrl() *string {
+	return v.TimeScheduleFields.ExternalUrl
+}
+
+// GetCreatedAt returns TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule.CreatedAt, and is useful for accessing the field via an interface.
+func (v *TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule) GetCreatedAt() time.Time {
+	return v.TimeScheduleFields.CreatedAt
+}
+
+// GetUpdatedAt returns TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule) GetUpdatedAt() time.Time {
+	return v.TimeScheduleFields.UpdatedAt
+}
+
+// GetIntegration returns TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule.Integration, and is useful for accessing the field via an interface.
+func (v *TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule) GetIntegration() *TimeScheduleFieldsIntegration {
+	return v.TimeScheduleFields.Integration
+}
+
+// GetEntries returns TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule.Entries, and is useful for accessing the field via an interface.
+func (v *TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule) GetEntries() []*TimeScheduleFieldsEntriesTimeScheduleEntry {
+	return v.TimeScheduleFields.Entries
+}
+
+func (v *TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.TimeScheduleFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalTimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	ExternalId *string `json:"externalId"`
+
+	ExternalUrl *string `json:"externalUrl"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	Integration *TimeScheduleFieldsIntegration `json:"integration"`
+
+	Entries []*TimeScheduleFieldsEntriesTimeScheduleEntry `json:"entries"`
+}
+
+func (v *TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *TimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule) __premarshalJSON() (*__premarshalTimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule, error) {
+	var retval __premarshalTimeScheduleCreateTimeScheduleCreateTimeSchedulePayloadTimeSchedule
+
+	retval.Id = v.TimeScheduleFields.Id
+	retval.Name = v.TimeScheduleFields.Name
+	retval.ExternalId = v.TimeScheduleFields.ExternalId
+	retval.ExternalUrl = v.TimeScheduleFields.ExternalUrl
+	retval.CreatedAt = v.TimeScheduleFields.CreatedAt
+	retval.UpdatedAt = v.TimeScheduleFields.UpdatedAt
+	retval.Integration = v.TimeScheduleFields.Integration
+	retval.Entries = v.TimeScheduleFields.Entries
+	return &retval, nil
+}
+
+// TimeScheduleDeleteResponse is returned by TimeScheduleDelete on success.
+type TimeScheduleDeleteResponse struct {
+	// Deletes a time schedule.
+	TimeScheduleDelete *TimeScheduleDeleteTimeScheduleDeleteDeletePayload `json:"timeScheduleDelete"`
+}
+
+// GetTimeScheduleDelete returns TimeScheduleDeleteResponse.TimeScheduleDelete, and is useful for accessing the field via an interface.
+func (v *TimeScheduleDeleteResponse) GetTimeScheduleDelete() *TimeScheduleDeleteTimeScheduleDeleteDeletePayload {
+	return v.TimeScheduleDelete
+}
+
+// TimeScheduleDeleteTimeScheduleDeleteDeletePayload includes the requested fields of the GraphQL type DeletePayload.
+// The GraphQL type's documentation follows.
+//
+// A generic payload return from entity deletion mutations.
+type TimeScheduleDeleteTimeScheduleDeleteDeletePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+}
+
+// GetSuccess returns TimeScheduleDeleteTimeScheduleDeleteDeletePayload.Success, and is useful for accessing the field via an interface.
+func (v *TimeScheduleDeleteTimeScheduleDeleteDeletePayload) GetSuccess() bool { return v.Success }
+
+type TimeScheduleEntryInput struct {
+	// The end time of the schedule entry in ISO 8601 date-time format.
+	EndsAt time.Time `json:"endsAt"`
+	// The start time of the schedule entry in ISO 8601 date-time format.
+	StartsAt time.Time `json:"startsAt"`
+	// The email, name or reference to the user on schedule. This is used in case the
+	// external user could not be mapped to a Linear user id.
+	UserEmail *string `json:"userEmail"`
+	// The Linear user id of the user on schedule. If the user cannot be mapped to a
+	// Linear user then `userEmail` can be used as a reference.
+	UserId *string `json:"userId"`
+}
+
+// GetEndsAt returns TimeScheduleEntryInput.EndsAt, and is useful for accessing the field via an interface.
+func (v *TimeScheduleEntryInput) GetEndsAt() time.Time { return v.EndsAt }
+
+// GetStartsAt returns TimeScheduleEntryInput.StartsAt, and is useful for accessing the field via an interface.
+func (v *TimeScheduleEntryInput) GetStartsAt() time.Time { return v.StartsAt }
+
+// GetUserEmail returns TimeScheduleEntryInput.UserEmail, and is useful for accessing the field via an interface.
+func (v *TimeScheduleEntryInput) GetUserEmail() *string { return v.UserEmail }
+
+// GetUserId returns TimeScheduleEntryInput.UserId, and is useful for accessing the field via an interface.
+func (v *TimeScheduleEntryInput) GetUserId() *string { return v.UserId }
+
+// TimeScheduleFields includes the GraphQL fields of TimeSchedule requested by the fragment TimeScheduleFields.
+// The GraphQL type's documentation follows.
+//
+// A time-based schedule defining on-call rotations or availability windows.
+// Schedules contain a series of time entries, each specifying a user and their
+// active period. They can be synced from external services (such as PagerDuty or
+// Opsgenie) via integrations, or created manually. Schedules are used by triage
+// responsibilities to determine who should be assigned or notified when issues enter triage.
+type TimeScheduleFields struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the schedule.
+	Name string `json:"name"`
+	// The identifier of the external schedule.
+	ExternalId *string `json:"externalId"`
+	// The URL to the external schedule.
+	ExternalUrl *string `json:"externalUrl"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+	// been updated after creation.
+	UpdatedAt time.Time `json:"updatedAt"`
+	// The identifier of the Linear integration populating the schedule.
+	Integration *TimeScheduleFieldsIntegration `json:"integration"`
+	// The schedule entries.
+	Entries []*TimeScheduleFieldsEntriesTimeScheduleEntry `json:"entries"`
+}
+
+// GetId returns TimeScheduleFields.Id, and is useful for accessing the field via an interface.
+func (v *TimeScheduleFields) GetId() string { return v.Id }
+
+// GetName returns TimeScheduleFields.Name, and is useful for accessing the field via an interface.
+func (v *TimeScheduleFields) GetName() string { return v.Name }
+
+// GetExternalId returns TimeScheduleFields.ExternalId, and is useful for accessing the field via an interface.
+func (v *TimeScheduleFields) GetExternalId() *string { return v.ExternalId }
+
+// GetExternalUrl returns TimeScheduleFields.ExternalUrl, and is useful for accessing the field via an interface.
+func (v *TimeScheduleFields) GetExternalUrl() *string { return v.ExternalUrl }
+
+// GetCreatedAt returns TimeScheduleFields.CreatedAt, and is useful for accessing the field via an interface.
+func (v *TimeScheduleFields) GetCreatedAt() time.Time { return v.CreatedAt }
+
+// GetUpdatedAt returns TimeScheduleFields.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *TimeScheduleFields) GetUpdatedAt() time.Time { return v.UpdatedAt }
+
+// GetIntegration returns TimeScheduleFields.Integration, and is useful for accessing the field via an interface.
+func (v *TimeScheduleFields) GetIntegration() *TimeScheduleFieldsIntegration { return v.Integration }
+
+// GetEntries returns TimeScheduleFields.Entries, and is useful for accessing the field via an interface.
+func (v *TimeScheduleFields) GetEntries() []*TimeScheduleFieldsEntriesTimeScheduleEntry {
+	return v.Entries
+}
+
+// TimeScheduleFieldsEntriesTimeScheduleEntry includes the requested fields of the GraphQL type TimeScheduleEntry.
+// The GraphQL type's documentation follows.
+//
+// A single entry in a time schedule, defining a time range and the user responsible during that period.
+type TimeScheduleFieldsEntriesTimeScheduleEntry struct {
+	// The start time of the schedule entry in ISO 8601 date-time format.
+	StartsAt time.Time `json:"startsAt"`
+	// The end time of the schedule entry in ISO 8601 date-time format.
+	EndsAt time.Time `json:"endsAt"`
+	// The Linear user id of the user on schedule. If the user cannot be mapped to a
+	// Linear user then `userEmail` can be used as a reference.
+	UserId *string `json:"userId"`
+	// The email, name or reference to the user on schedule. This is used in case the
+	// external user could not be mapped to a Linear user id.
+	UserEmail *string `json:"userEmail"`
+}
+
+// GetStartsAt returns TimeScheduleFieldsEntriesTimeScheduleEntry.StartsAt, and is useful for accessing the field via an interface.
+func (v *TimeScheduleFieldsEntriesTimeScheduleEntry) GetStartsAt() time.Time { return v.StartsAt }
+
+// GetEndsAt returns TimeScheduleFieldsEntriesTimeScheduleEntry.EndsAt, and is useful for accessing the field via an interface.
+func (v *TimeScheduleFieldsEntriesTimeScheduleEntry) GetEndsAt() time.Time { return v.EndsAt }
+
+// GetUserId returns TimeScheduleFieldsEntriesTimeScheduleEntry.UserId, and is useful for accessing the field via an interface.
+func (v *TimeScheduleFieldsEntriesTimeScheduleEntry) GetUserId() *string { return v.UserId }
+
+// GetUserEmail returns TimeScheduleFieldsEntriesTimeScheduleEntry.UserEmail, and is useful for accessing the field via an interface.
+func (v *TimeScheduleFieldsEntriesTimeScheduleEntry) GetUserEmail() *string { return v.UserEmail }
+
+// TimeScheduleFieldsIntegration includes the requested fields of the GraphQL type Integration.
+// The GraphQL type's documentation follows.
+//
+// An integration with an external service. Integrations connect Linear to tools
+// like Slack, GitHub, GitLab, Jira, Figma, Sentry, Zendesk, Intercom, Front,
+// PagerDuty, Opsgenie, Google Sheets, Microsoft Teams, Discord, Salesforce, and
+// others. Each integration record represents a single configured connection,
+// scoped to a workspace and optionally to a specific team, project, initiative, or
+// custom view. Personal integrations (e.g., Slack Personal, Jira Personal, GitHub
+// Personal) are scoped to the user who created them.
+type TimeScheduleFieldsIntegration struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The integration's type, identifying which external service this integration
+	// connects to (e.g., 'slack', 'github', 'jira', 'figma'). This determines the
+	// shape of the integration's settings and data.
+	Service string `json:"service"`
+}
+
+// GetId returns TimeScheduleFieldsIntegration.Id, and is useful for accessing the field via an interface.
+func (v *TimeScheduleFieldsIntegration) GetId() string { return v.Id }
+
+// GetService returns TimeScheduleFieldsIntegration.Service, and is useful for accessing the field via an interface.
+func (v *TimeScheduleFieldsIntegration) GetService() string { return v.Service }
+
+// TimeScheduleRefreshIntegrationScheduleResponse is returned by TimeScheduleRefreshIntegrationSchedule on success.
+type TimeScheduleRefreshIntegrationScheduleResponse struct {
+	// Refresh the integration schedule information.
+	TimeScheduleRefreshIntegrationSchedule *TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayload `json:"timeScheduleRefreshIntegrationSchedule"`
+}
+
+// GetTimeScheduleRefreshIntegrationSchedule returns TimeScheduleRefreshIntegrationScheduleResponse.TimeScheduleRefreshIntegrationSchedule, and is useful for accessing the field via an interface.
+func (v *TimeScheduleRefreshIntegrationScheduleResponse) GetTimeScheduleRefreshIntegrationSchedule() *TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayload {
+	return v.TimeScheduleRefreshIntegrationSchedule
+}
+
+// TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayload includes the requested fields of the GraphQL type TimeSchedulePayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a time schedule mutation.
+type TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The time schedule that was created or updated.
+	TimeSchedule *TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule `json:"timeSchedule"`
+}
+
+// GetSuccess returns TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayload.Success, and is useful for accessing the field via an interface.
+func (v *TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetTimeSchedule returns TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayload.TimeSchedule, and is useful for accessing the field via an interface.
+func (v *TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayload) GetTimeSchedule() *TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule {
+	return v.TimeSchedule
+}
+
+// TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule includes the requested fields of the GraphQL type TimeSchedule.
+// The GraphQL type's documentation follows.
+//
+// A time-based schedule defining on-call rotations or availability windows.
+// Schedules contain a series of time entries, each specifying a user and their
+// active period. They can be synced from external services (such as PagerDuty or
+// Opsgenie) via integrations, or created manually. Schedules are used by triage
+// responsibilities to determine who should be assigned or notified when issues enter triage.
+type TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule struct {
+	TimeScheduleFields `json:"-"`
+}
+
+// GetId returns TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule.Id, and is useful for accessing the field via an interface.
+func (v *TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule) GetId() string {
+	return v.TimeScheduleFields.Id
+}
+
+// GetName returns TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule.Name, and is useful for accessing the field via an interface.
+func (v *TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule) GetName() string {
+	return v.TimeScheduleFields.Name
+}
+
+// GetExternalId returns TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule.ExternalId, and is useful for accessing the field via an interface.
+func (v *TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule) GetExternalId() *string {
+	return v.TimeScheduleFields.ExternalId
+}
+
+// GetExternalUrl returns TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule.ExternalUrl, and is useful for accessing the field via an interface.
+func (v *TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule) GetExternalUrl() *string {
+	return v.TimeScheduleFields.ExternalUrl
+}
+
+// GetCreatedAt returns TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule.CreatedAt, and is useful for accessing the field via an interface.
+func (v *TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule) GetCreatedAt() time.Time {
+	return v.TimeScheduleFields.CreatedAt
+}
+
+// GetUpdatedAt returns TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule) GetUpdatedAt() time.Time {
+	return v.TimeScheduleFields.UpdatedAt
+}
+
+// GetIntegration returns TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule.Integration, and is useful for accessing the field via an interface.
+func (v *TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule) GetIntegration() *TimeScheduleFieldsIntegration {
+	return v.TimeScheduleFields.Integration
+}
+
+// GetEntries returns TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule.Entries, and is useful for accessing the field via an interface.
+func (v *TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule) GetEntries() []*TimeScheduleFieldsEntriesTimeScheduleEntry {
+	return v.TimeScheduleFields.Entries
+}
+
+func (v *TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.TimeScheduleFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalTimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	ExternalId *string `json:"externalId"`
+
+	ExternalUrl *string `json:"externalUrl"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	Integration *TimeScheduleFieldsIntegration `json:"integration"`
+
+	Entries []*TimeScheduleFieldsEntriesTimeScheduleEntry `json:"entries"`
+}
+
+func (v *TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *TimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule) __premarshalJSON() (*__premarshalTimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule, error) {
+	var retval __premarshalTimeScheduleRefreshIntegrationScheduleTimeScheduleRefreshIntegrationScheduleTimeSchedulePayloadTimeSchedule
+
+	retval.Id = v.TimeScheduleFields.Id
+	retval.Name = v.TimeScheduleFields.Name
+	retval.ExternalId = v.TimeScheduleFields.ExternalId
+	retval.ExternalUrl = v.TimeScheduleFields.ExternalUrl
+	retval.CreatedAt = v.TimeScheduleFields.CreatedAt
+	retval.UpdatedAt = v.TimeScheduleFields.UpdatedAt
+	retval.Integration = v.TimeScheduleFields.Integration
+	retval.Entries = v.TimeScheduleFields.Entries
+	return &retval, nil
+}
+
+// Input for updating an existing time schedule.
+type TimeScheduleUpdateInput struct {
+	// The schedule entries.
+	Entries []*TimeScheduleEntryInput `json:"entries,omitempty"`
+	// The unique identifier of the external schedule.
+	ExternalId *string `json:"externalId"`
+	// The URL to the external schedule.
+	ExternalUrl *string `json:"externalUrl"`
+	// The name of the schedule.
+	Name *string `json:"name"`
+}
+
+// GetEntries returns TimeScheduleUpdateInput.Entries, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpdateInput) GetEntries() []*TimeScheduleEntryInput { return v.Entries }
+
+// GetExternalId returns TimeScheduleUpdateInput.ExternalId, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpdateInput) GetExternalId() *string { return v.ExternalId }
+
+// GetExternalUrl returns TimeScheduleUpdateInput.ExternalUrl, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpdateInput) GetExternalUrl() *string { return v.ExternalUrl }
+
+// GetName returns TimeScheduleUpdateInput.Name, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpdateInput) GetName() *string { return v.Name }
+
+// TimeScheduleUpdateResponse is returned by TimeScheduleUpdate on success.
+type TimeScheduleUpdateResponse struct {
+	// Updates a time schedule.
+	TimeScheduleUpdate *TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayload `json:"timeScheduleUpdate"`
+}
+
+// GetTimeScheduleUpdate returns TimeScheduleUpdateResponse.TimeScheduleUpdate, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpdateResponse) GetTimeScheduleUpdate() *TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayload {
+	return v.TimeScheduleUpdate
+}
+
+// TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayload includes the requested fields of the GraphQL type TimeSchedulePayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a time schedule mutation.
+type TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The time schedule that was created or updated.
+	TimeSchedule *TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule `json:"timeSchedule"`
+}
+
+// GetSuccess returns TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayload.Success, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayload) GetSuccess() bool { return v.Success }
+
+// GetTimeSchedule returns TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayload.TimeSchedule, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayload) GetTimeSchedule() *TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule {
+	return v.TimeSchedule
+}
+
+// TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule includes the requested fields of the GraphQL type TimeSchedule.
+// The GraphQL type's documentation follows.
+//
+// A time-based schedule defining on-call rotations or availability windows.
+// Schedules contain a series of time entries, each specifying a user and their
+// active period. They can be synced from external services (such as PagerDuty or
+// Opsgenie) via integrations, or created manually. Schedules are used by triage
+// responsibilities to determine who should be assigned or notified when issues enter triage.
+type TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule struct {
+	TimeScheduleFields `json:"-"`
+}
+
+// GetId returns TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule.Id, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule) GetId() string {
+	return v.TimeScheduleFields.Id
+}
+
+// GetName returns TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule.Name, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule) GetName() string {
+	return v.TimeScheduleFields.Name
+}
+
+// GetExternalId returns TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule.ExternalId, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule) GetExternalId() *string {
+	return v.TimeScheduleFields.ExternalId
+}
+
+// GetExternalUrl returns TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule.ExternalUrl, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule) GetExternalUrl() *string {
+	return v.TimeScheduleFields.ExternalUrl
+}
+
+// GetCreatedAt returns TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule.CreatedAt, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule) GetCreatedAt() time.Time {
+	return v.TimeScheduleFields.CreatedAt
+}
+
+// GetUpdatedAt returns TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule) GetUpdatedAt() time.Time {
+	return v.TimeScheduleFields.UpdatedAt
+}
+
+// GetIntegration returns TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule.Integration, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule) GetIntegration() *TimeScheduleFieldsIntegration {
+	return v.TimeScheduleFields.Integration
+}
+
+// GetEntries returns TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule.Entries, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule) GetEntries() []*TimeScheduleFieldsEntriesTimeScheduleEntry {
+	return v.TimeScheduleFields.Entries
+}
+
+func (v *TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.TimeScheduleFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalTimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	ExternalId *string `json:"externalId"`
+
+	ExternalUrl *string `json:"externalUrl"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	Integration *TimeScheduleFieldsIntegration `json:"integration"`
+
+	Entries []*TimeScheduleFieldsEntriesTimeScheduleEntry `json:"entries"`
+}
+
+func (v *TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *TimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule) __premarshalJSON() (*__premarshalTimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule, error) {
+	var retval __premarshalTimeScheduleUpdateTimeScheduleUpdateTimeSchedulePayloadTimeSchedule
+
+	retval.Id = v.TimeScheduleFields.Id
+	retval.Name = v.TimeScheduleFields.Name
+	retval.ExternalId = v.TimeScheduleFields.ExternalId
+	retval.ExternalUrl = v.TimeScheduleFields.ExternalUrl
+	retval.CreatedAt = v.TimeScheduleFields.CreatedAt
+	retval.UpdatedAt = v.TimeScheduleFields.UpdatedAt
+	retval.Integration = v.TimeScheduleFields.Integration
+	retval.Entries = v.TimeScheduleFields.Entries
+	return &retval, nil
+}
+
+// TimeScheduleUpsertExternalResponse is returned by TimeScheduleUpsertExternal on success.
+type TimeScheduleUpsertExternalResponse struct {
+	// Upsert an external time schedule.
+	TimeScheduleUpsertExternal *TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayload `json:"timeScheduleUpsertExternal"`
+}
+
+// GetTimeScheduleUpsertExternal returns TimeScheduleUpsertExternalResponse.TimeScheduleUpsertExternal, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpsertExternalResponse) GetTimeScheduleUpsertExternal() *TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayload {
+	return v.TimeScheduleUpsertExternal
+}
+
+// TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayload includes the requested fields of the GraphQL type TimeSchedulePayload.
+// The GraphQL type's documentation follows.
+//
+// The result of a time schedule mutation.
+type TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayload struct {
+	// Whether the operation was successful.
+	Success bool `json:"success"`
+	// The time schedule that was created or updated.
+	TimeSchedule *TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule `json:"timeSchedule"`
+}
+
+// GetSuccess returns TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayload.Success, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayload) GetSuccess() bool {
+	return v.Success
+}
+
+// GetTimeSchedule returns TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayload.TimeSchedule, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayload) GetTimeSchedule() *TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule {
+	return v.TimeSchedule
+}
+
+// TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule includes the requested fields of the GraphQL type TimeSchedule.
+// The GraphQL type's documentation follows.
+//
+// A time-based schedule defining on-call rotations or availability windows.
+// Schedules contain a series of time entries, each specifying a user and their
+// active period. They can be synced from external services (such as PagerDuty or
+// Opsgenie) via integrations, or created manually. Schedules are used by triage
+// responsibilities to determine who should be assigned or notified when issues enter triage.
+type TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule struct {
+	TimeScheduleFields `json:"-"`
+}
+
+// GetId returns TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule.Id, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule) GetId() string {
+	return v.TimeScheduleFields.Id
+}
+
+// GetName returns TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule.Name, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule) GetName() string {
+	return v.TimeScheduleFields.Name
+}
+
+// GetExternalId returns TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule.ExternalId, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule) GetExternalId() *string {
+	return v.TimeScheduleFields.ExternalId
+}
+
+// GetExternalUrl returns TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule.ExternalUrl, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule) GetExternalUrl() *string {
+	return v.TimeScheduleFields.ExternalUrl
+}
+
+// GetCreatedAt returns TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule.CreatedAt, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule) GetCreatedAt() time.Time {
+	return v.TimeScheduleFields.CreatedAt
+}
+
+// GetUpdatedAt returns TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule) GetUpdatedAt() time.Time {
+	return v.TimeScheduleFields.UpdatedAt
+}
+
+// GetIntegration returns TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule.Integration, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule) GetIntegration() *TimeScheduleFieldsIntegration {
+	return v.TimeScheduleFields.Integration
+}
+
+// GetEntries returns TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule.Entries, and is useful for accessing the field via an interface.
+func (v *TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule) GetEntries() []*TimeScheduleFieldsEntriesTimeScheduleEntry {
+	return v.TimeScheduleFields.Entries
+}
+
+func (v *TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.TimeScheduleFields)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalTimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule struct {
+	Id string `json:"id"`
+
+	Name string `json:"name"`
+
+	ExternalId *string `json:"externalId"`
+
+	ExternalUrl *string `json:"externalUrl"`
+
+	CreatedAt time.Time `json:"createdAt"`
+
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	Integration *TimeScheduleFieldsIntegration `json:"integration"`
+
+	Entries []*TimeScheduleFieldsEntriesTimeScheduleEntry `json:"entries"`
+}
+
+func (v *TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *TimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule) __premarshalJSON() (*__premarshalTimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule, error) {
+	var retval __premarshalTimeScheduleUpsertExternalTimeScheduleUpsertExternalTimeSchedulePayloadTimeSchedule
+
+	retval.Id = v.TimeScheduleFields.Id
+	retval.Name = v.TimeScheduleFields.Name
+	retval.ExternalId = v.TimeScheduleFields.ExternalId
+	retval.ExternalUrl = v.TimeScheduleFields.ExternalUrl
+	retval.CreatedAt = v.TimeScheduleFields.CreatedAt
+	retval.UpdatedAt = v.TimeScheduleFields.UpdatedAt
+	retval.Integration = v.TimeScheduleFields.Integration
+	retval.Entries = v.TimeScheduleFields.Entries
+	return &retval, nil
+}
+
+// Which action should be taken after an issue is added to triage.
+type TriageResponsibilityAction string
+
+const (
+	TriageResponsibilityActionAssign TriageResponsibilityAction = "assign"
+	TriageResponsibilityActionNotify TriageResponsibilityAction = "notify"
+)
+
+var AllTriageResponsibilityAction = []TriageResponsibilityAction{
+	TriageResponsibilityActionAssign,
+	TriageResponsibilityActionNotify,
+}
+
+// TriageResponsibilityFields includes the GraphQL fields of TriageResponsibility requested by the fragment TriageResponsibilityFields.
+// The GraphQL type's documentation follows.
+//
+// A team's triage responsibility configuration that defines how issues entering
+// triage are handled. Each team can have one triage responsibility, which
+// specifies the action to take (notify or assign) and the responsible users,
+// determined either by a manual selection of specific users or by an on-call time schedule.
+type TriageResponsibilityFields struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The action to take when an issue is added to triage.
+	Action TriageResponsibilityAction `json:"action"`
+	// The time at which the entity was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The last time at which the entity was meaningfully updated. This is the same as the creation time if the entity hasn't
+	// been updated after creation.
+	UpdatedAt time.Time `json:"updatedAt"`
+	// The team to which the triage responsibility belongs to.
+	Team *TriageResponsibilityFieldsTeam `json:"team"`
+	// The user currently responsible for triage.
+	CurrentUser *TriageResponsibilityFieldsCurrentUser `json:"currentUser"`
+	// The time schedule used for scheduling.
+	TimeSchedule *TriageResponsibilityFieldsTimeSchedule `json:"timeSchedule"`
+	// Set of users used for triage responsibility.
+	ManualSelection *TriageResponsibilityFieldsManualSelectionTriageResponsibilityManualSelection `json:"manualSelection"`
+}
+
+// GetId returns TriageResponsibilityFields.Id, and is useful for accessing the field via an interface.
+func (v *TriageResponsibilityFields) GetId() string { return v.Id }
+
+// GetAction returns TriageResponsibilityFields.Action, and is useful for accessing the field via an interface.
+func (v *TriageResponsibilityFields) GetAction() TriageResponsibilityAction { return v.Action }
+
+// GetCreatedAt returns TriageResponsibilityFields.CreatedAt, and is useful for accessing the field via an interface.
+func (v *TriageResponsibilityFields) GetCreatedAt() time.Time { return v.CreatedAt }
+
+// GetUpdatedAt returns TriageResponsibilityFields.UpdatedAt, and is useful for accessing the field via an interface.
+func (v *TriageResponsibilityFields) GetUpdatedAt() time.Time { return v.UpdatedAt }
+
+// GetTeam returns TriageResponsibilityFields.Team, and is useful for accessing the field via an interface.
+func (v *TriageResponsibilityFields) GetTeam() *TriageResponsibilityFieldsTeam { return v.Team }
+
+// GetCurrentUser returns TriageResponsibilityFields.CurrentUser, and is useful for accessing the field via an interface.
+func (v *TriageResponsibilityFields) GetCurrentUser() *TriageResponsibilityFieldsCurrentUser {
+	return v.CurrentUser
+}
+
+// GetTimeSchedule returns TriageResponsibilityFields.TimeSchedule, and is useful for accessing the field via an interface.
+func (v *TriageResponsibilityFields) GetTimeSchedule() *TriageResponsibilityFieldsTimeSchedule {
+	return v.TimeSchedule
+}
+
+// GetManualSelection returns TriageResponsibilityFields.ManualSelection, and is useful for accessing the field via an interface.
+func (v *TriageResponsibilityFields) GetManualSelection() *TriageResponsibilityFieldsManualSelectionTriageResponsibilityManualSelection {
+	return v.ManualSelection
+}
+
+// TriageResponsibilityFieldsCurrentUser includes the requested fields of the GraphQL type User.
+// The GraphQL type's documentation follows.
+//
+// A user that belongs to a workspace. Users can have different roles (admin,
+// member, guest, or app) that determine their level of access. Users can be
+// members of multiple teams, and can be active or deactivated. Guest users have
+// limited access scoped to specific teams they are invited to.
+type TriageResponsibilityFieldsCurrentUser struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The user's full name.
+	Name string `json:"name"`
+	// The user's email address.
+	Email string `json:"email"`
+}
+
+// GetId returns TriageResponsibilityFieldsCurrentUser.Id, and is useful for accessing the field via an interface.
+func (v *TriageResponsibilityFieldsCurrentUser) GetId() string { return v.Id }
+
+// GetName returns TriageResponsibilityFieldsCurrentUser.Name, and is useful for accessing the field via an interface.
+func (v *TriageResponsibilityFieldsCurrentUser) GetName() string { return v.Name }
+
+// GetEmail returns TriageResponsibilityFieldsCurrentUser.Email, and is useful for accessing the field via an interface.
+func (v *TriageResponsibilityFieldsCurrentUser) GetEmail() string { return v.Email }
+
+// TriageResponsibilityFieldsManualSelectionTriageResponsibilityManualSelection includes the requested fields of the GraphQL type TriageResponsibilityManualSelection.
+// The GraphQL type's documentation follows.
+//
+// Manual triage responsibility configuration specifying a set of users to assign
+// triaged issues to, with optional round-robin rotation.
+type TriageResponsibilityFieldsManualSelectionTriageResponsibilityManualSelection struct {
+	// The set of users responsible for triage.
+	UserIds []string `json:"userIds"`
+	// [Internal] The index of the current userId used for the assign action when having more than one user.
+	AssignmentIndex *int `json:"assignmentIndex"`
+}
+
+// GetUserIds returns TriageResponsibilityFieldsManualSelectionTriageResponsibilityManualSelection.UserIds, and is useful for accessing the field via an interface.
+func (v *TriageResponsibilityFieldsManualSelectionTriageResponsibilityManualSelection) GetUserIds() []string {
+	return v.UserIds
+}
+
+// GetAssignmentIndex returns TriageResponsibilityFieldsManualSelectionTriageResponsibilityManualSelection.AssignmentIndex, and is useful for accessing the field via an interface.
+func (v *TriageResponsibilityFieldsManualSelectionTriageResponsibilityManualSelection) GetAssignmentIndex() *int {
+	return v.AssignmentIndex
+}
+
+// TriageResponsibilityFieldsTeam includes the requested fields of the GraphQL type Team.
+// The GraphQL type's documentation follows.
+//
+// A team is the primary organizational unit in Linear. Issues belong to teams, and
+// each team has its own workflow states, cycles, labels, and settings. Teams can
+// be public (visible to all workspace members), private (visible only to team
+// members), or restricted (visible only within an enclosing private-team
+// boundary). Teams can also have sub-teams that inherit settings from their parent.
+type TriageResponsibilityFieldsTeam struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The team's unique key, used as a prefix in issue identifiers (e.g., 'ENG' in 'ENG-123') and in URLs.
+	Key string `json:"key"`
+	// The team's name.
+	Name string `json:"name"`
+}
+
+// GetId returns TriageResponsibilityFieldsTeam.Id, and is useful for accessing the field via an interface.
+func (v *TriageResponsibilityFieldsTeam) GetId() string { return v.Id }
+
+// GetKey returns TriageResponsibilityFieldsTeam.Key, and is useful for accessing the field via an interface.
+func (v *TriageResponsibilityFieldsTeam) GetKey() string { return v.Key }
+
+// GetName returns TriageResponsibilityFieldsTeam.Name, and is useful for accessing the field via an interface.
+func (v *TriageResponsibilityFieldsTeam) GetName() string { return v.Name }
+
+// TriageResponsibilityFieldsTimeSchedule includes the requested fields of the GraphQL type TimeSchedule.
+// The GraphQL type's documentation follows.
+//
+// A time-based schedule defining on-call rotations or availability windows.
+// Schedules contain a series of time entries, each specifying a user and their
+// active period. They can be synced from external services (such as PagerDuty or
+// Opsgenie) via integrations, or created manually. Schedules are used by triage
+// responsibilities to determine who should be assigned or notified when issues enter triage.
+type TriageResponsibilityFieldsTimeSchedule struct {
+	// The unique identifier of the entity.
+	Id string `json:"id"`
+	// The name of the schedule.
+	Name string `json:"name"`
+}
+
+// GetId returns TriageResponsibilityFieldsTimeSchedule.Id, and is useful for accessing the field via an interface.
+func (v *TriageResponsibilityFieldsTimeSchedule) GetId() string { return v.Id }
+
+// GetName returns TriageResponsibilityFieldsTimeSchedule.Name, and is useful for accessing the field via an interface.
+func (v *TriageResponsibilityFieldsTimeSchedule) GetName() string { return v.Name }
+
 // UnresolveCommentCommentUnresolveCommentPayload includes the requested fields of the GraphQL type CommentPayload.
 // The GraphQL type's documentation follows.
 //
@@ -51084,6 +53863,22 @@ func (v *__DocumentUpdateInput) GetId() string { return v.Id }
 // GetInput returns __DocumentUpdateInput.Input, and is useful for accessing the field via an interface.
 func (v *__DocumentUpdateInput) GetInput() *DocumentUpdateInput { return v.Input }
 
+// __EmojiCreateInput is used internally by genqlient
+type __EmojiCreateInput struct {
+	Input *EmojiCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __EmojiCreateInput.Input, and is useful for accessing the field via an interface.
+func (v *__EmojiCreateInput) GetInput() *EmojiCreateInput { return v.Input }
+
+// __EmojiDeleteInput is used internally by genqlient
+type __EmojiDeleteInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __EmojiDeleteInput.Id, and is useful for accessing the field via an interface.
+func (v *__EmojiDeleteInput) GetId() string { return v.Id }
+
 // __FavoriteCreateInput is used internally by genqlient
 type __FavoriteCreateInput struct {
 	Input *FavoriteCreateInput `json:"input,omitempty"`
@@ -51175,6 +53970,14 @@ type __GetDocumentInput struct {
 
 // GetId returns __GetDocumentInput.Id, and is useful for accessing the field via an interface.
 func (v *__GetDocumentInput) GetId() string { return v.Id }
+
+// __GetEmojiInput is used internally by genqlient
+type __GetEmojiInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __GetEmojiInput.Id, and is useful for accessing the field via an interface.
+func (v *__GetEmojiInput) GetId() string { return v.Id }
 
 // __GetFavoriteInput is used internally by genqlient
 type __GetFavoriteInput struct {
@@ -51332,6 +54135,22 @@ type __GetTemplateInput struct {
 // GetId returns __GetTemplateInput.Id, and is useful for accessing the field via an interface.
 func (v *__GetTemplateInput) GetId() string { return v.Id }
 
+// __GetTimeScheduleInput is used internally by genqlient
+type __GetTimeScheduleInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __GetTimeScheduleInput.Id, and is useful for accessing the field via an interface.
+func (v *__GetTimeScheduleInput) GetId() string { return v.Id }
+
+// __GetTriageResponsibilityInput is used internally by genqlient
+type __GetTriageResponsibilityInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __GetTriageResponsibilityInput.Id, and is useful for accessing the field via an interface.
+func (v *__GetTriageResponsibilityInput) GetId() string { return v.Id }
+
 // __GetUserByEmailInput is used internally by genqlient
 type __GetUserByEmailInput struct {
 	Filter *UserFilter `json:"filter,omitempty"`
@@ -51355,6 +54174,66 @@ type __GetWorkflowStateInput struct {
 
 // GetId returns __GetWorkflowStateInput.Id, and is useful for accessing the field via an interface.
 func (v *__GetWorkflowStateInput) GetId() string { return v.Id }
+
+// __GitAutomationStateCreateInput is used internally by genqlient
+type __GitAutomationStateCreateInput struct {
+	Input *GitAutomationStateCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __GitAutomationStateCreateInput.Input, and is useful for accessing the field via an interface.
+func (v *__GitAutomationStateCreateInput) GetInput() *GitAutomationStateCreateInput { return v.Input }
+
+// __GitAutomationStateDeleteInput is used internally by genqlient
+type __GitAutomationStateDeleteInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __GitAutomationStateDeleteInput.Id, and is useful for accessing the field via an interface.
+func (v *__GitAutomationStateDeleteInput) GetId() string { return v.Id }
+
+// __GitAutomationStateUpdateInput is used internally by genqlient
+type __GitAutomationStateUpdateInput struct {
+	Id    string                         `json:"id"`
+	Input *GitAutomationStateUpdateInput `json:"input,omitempty"`
+}
+
+// GetId returns __GitAutomationStateUpdateInput.Id, and is useful for accessing the field via an interface.
+func (v *__GitAutomationStateUpdateInput) GetId() string { return v.Id }
+
+// GetInput returns __GitAutomationStateUpdateInput.Input, and is useful for accessing the field via an interface.
+func (v *__GitAutomationStateUpdateInput) GetInput() *GitAutomationStateUpdateInput { return v.Input }
+
+// __GitAutomationTargetBranchCreateInput is used internally by genqlient
+type __GitAutomationTargetBranchCreateInput struct {
+	Input *GitAutomationTargetBranchCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __GitAutomationTargetBranchCreateInput.Input, and is useful for accessing the field via an interface.
+func (v *__GitAutomationTargetBranchCreateInput) GetInput() *GitAutomationTargetBranchCreateInput {
+	return v.Input
+}
+
+// __GitAutomationTargetBranchDeleteInput is used internally by genqlient
+type __GitAutomationTargetBranchDeleteInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __GitAutomationTargetBranchDeleteInput.Id, and is useful for accessing the field via an interface.
+func (v *__GitAutomationTargetBranchDeleteInput) GetId() string { return v.Id }
+
+// __GitAutomationTargetBranchUpdateInput is used internally by genqlient
+type __GitAutomationTargetBranchUpdateInput struct {
+	Id    string                                `json:"id"`
+	Input *GitAutomationTargetBranchUpdateInput `json:"input,omitempty"`
+}
+
+// GetId returns __GitAutomationTargetBranchUpdateInput.Id, and is useful for accessing the field via an interface.
+func (v *__GitAutomationTargetBranchUpdateInput) GetId() string { return v.Id }
+
+// GetInput returns __GitAutomationTargetBranchUpdateInput.Input, and is useful for accessing the field via an interface.
+func (v *__GitAutomationTargetBranchUpdateInput) GetInput() *GitAutomationTargetBranchUpdateInput {
+	return v.Input
+}
 
 // __InitiativeAddLabelInput is used internally by genqlient
 type __InitiativeAddLabelInput struct {
@@ -51808,6 +54687,22 @@ func (v *__ListDocumentsInput) GetAfter() *string { return v.After }
 // GetOrderBy returns __ListDocumentsInput.OrderBy, and is useful for accessing the field via an interface.
 func (v *__ListDocumentsInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy }
 
+// __ListEmojisInput is used internally by genqlient
+type __ListEmojisInput struct {
+	First   *int               `json:"first"`
+	After   *string            `json:"after"`
+	OrderBy *PaginationOrderBy `json:"orderBy"`
+}
+
+// GetFirst returns __ListEmojisInput.First, and is useful for accessing the field via an interface.
+func (v *__ListEmojisInput) GetFirst() *int { return v.First }
+
+// GetAfter returns __ListEmojisInput.After, and is useful for accessing the field via an interface.
+func (v *__ListEmojisInput) GetAfter() *string { return v.After }
+
+// GetOrderBy returns __ListEmojisInput.OrderBy, and is useful for accessing the field via an interface.
+func (v *__ListEmojisInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy }
+
 // __ListFavoritesInput is used internally by genqlient
 type __ListFavoritesInput struct {
 	First   *int               `json:"first"`
@@ -52043,6 +54938,38 @@ func (v *__ListTeamsInput) GetAfter() *string { return v.After }
 
 // GetOrderBy returns __ListTeamsInput.OrderBy, and is useful for accessing the field via an interface.
 func (v *__ListTeamsInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy }
+
+// __ListTimeSchedulesInput is used internally by genqlient
+type __ListTimeSchedulesInput struct {
+	First   *int               `json:"first"`
+	After   *string            `json:"after"`
+	OrderBy *PaginationOrderBy `json:"orderBy"`
+}
+
+// GetFirst returns __ListTimeSchedulesInput.First, and is useful for accessing the field via an interface.
+func (v *__ListTimeSchedulesInput) GetFirst() *int { return v.First }
+
+// GetAfter returns __ListTimeSchedulesInput.After, and is useful for accessing the field via an interface.
+func (v *__ListTimeSchedulesInput) GetAfter() *string { return v.After }
+
+// GetOrderBy returns __ListTimeSchedulesInput.OrderBy, and is useful for accessing the field via an interface.
+func (v *__ListTimeSchedulesInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy }
+
+// __ListTriageResponsibilitiesInput is used internally by genqlient
+type __ListTriageResponsibilitiesInput struct {
+	First   *int               `json:"first"`
+	After   *string            `json:"after"`
+	OrderBy *PaginationOrderBy `json:"orderBy"`
+}
+
+// GetFirst returns __ListTriageResponsibilitiesInput.First, and is useful for accessing the field via an interface.
+func (v *__ListTriageResponsibilitiesInput) GetFirst() *int { return v.First }
+
+// GetAfter returns __ListTriageResponsibilitiesInput.After, and is useful for accessing the field via an interface.
+func (v *__ListTriageResponsibilitiesInput) GetAfter() *string { return v.After }
+
+// GetOrderBy returns __ListTriageResponsibilitiesInput.OrderBy, and is useful for accessing the field via an interface.
+func (v *__ListTriageResponsibilitiesInput) GetOrderBy() *PaginationOrderBy { return v.OrderBy }
 
 // __ListUsersInput is used internally by genqlient
 type __ListUsersInput struct {
@@ -52585,6 +55512,54 @@ func (v *__TemplateUpdateInput) GetId() string { return v.Id }
 
 // GetInput returns __TemplateUpdateInput.Input, and is useful for accessing the field via an interface.
 func (v *__TemplateUpdateInput) GetInput() *TemplateUpdateInput { return v.Input }
+
+// __TimeScheduleCreateInput is used internally by genqlient
+type __TimeScheduleCreateInput struct {
+	Input *TimeScheduleCreateInput `json:"input,omitempty"`
+}
+
+// GetInput returns __TimeScheduleCreateInput.Input, and is useful for accessing the field via an interface.
+func (v *__TimeScheduleCreateInput) GetInput() *TimeScheduleCreateInput { return v.Input }
+
+// __TimeScheduleDeleteInput is used internally by genqlient
+type __TimeScheduleDeleteInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __TimeScheduleDeleteInput.Id, and is useful for accessing the field via an interface.
+func (v *__TimeScheduleDeleteInput) GetId() string { return v.Id }
+
+// __TimeScheduleRefreshIntegrationScheduleInput is used internally by genqlient
+type __TimeScheduleRefreshIntegrationScheduleInput struct {
+	Id string `json:"id"`
+}
+
+// GetId returns __TimeScheduleRefreshIntegrationScheduleInput.Id, and is useful for accessing the field via an interface.
+func (v *__TimeScheduleRefreshIntegrationScheduleInput) GetId() string { return v.Id }
+
+// __TimeScheduleUpdateInput is used internally by genqlient
+type __TimeScheduleUpdateInput struct {
+	Id    string                   `json:"id"`
+	Input *TimeScheduleUpdateInput `json:"input,omitempty"`
+}
+
+// GetId returns __TimeScheduleUpdateInput.Id, and is useful for accessing the field via an interface.
+func (v *__TimeScheduleUpdateInput) GetId() string { return v.Id }
+
+// GetInput returns __TimeScheduleUpdateInput.Input, and is useful for accessing the field via an interface.
+func (v *__TimeScheduleUpdateInput) GetInput() *TimeScheduleUpdateInput { return v.Input }
+
+// __TimeScheduleUpsertExternalInput is used internally by genqlient
+type __TimeScheduleUpsertExternalInput struct {
+	ExternalId string                   `json:"externalId"`
+	Input      *TimeScheduleUpdateInput `json:"input,omitempty"`
+}
+
+// GetExternalId returns __TimeScheduleUpsertExternalInput.ExternalId, and is useful for accessing the field via an interface.
+func (v *__TimeScheduleUpsertExternalInput) GetExternalId() string { return v.ExternalId }
+
+// GetInput returns __TimeScheduleUpsertExternalInput.Input, and is useful for accessing the field via an interface.
+func (v *__TimeScheduleUpsertExternalInput) GetInput() *TimeScheduleUpdateInput { return v.Input }
 
 // __UnresolveCommentInput is used internally by genqlient
 type __UnresolveCommentInput struct {
@@ -54896,6 +57871,88 @@ func DocumentUpdate(
 	return data_, err_
 }
 
+// The mutation executed by EmojiCreate.
+const EmojiCreate_Operation = `
+mutation EmojiCreate ($input: EmojiCreateInput!) {
+	emojiCreate(input: $input) {
+		success
+		emoji {
+			... EmojiFields
+		}
+	}
+}
+fragment EmojiFields on Emoji {
+	id
+	name
+	url
+	source
+	createdAt
+	creator {
+		id
+		name
+	}
+}
+`
+
+func EmojiCreate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *EmojiCreateInput,
+) (data_ *EmojiCreateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "EmojiCreate",
+		Query:  EmojiCreate_Operation,
+		Variables: &__EmojiCreateInput{
+			Input: input,
+		},
+	}
+
+	data_ = &EmojiCreateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by EmojiDelete.
+const EmojiDelete_Operation = `
+mutation EmojiDelete ($id: String!) {
+	emojiDelete(id: $id) {
+		success
+	}
+}
+`
+
+func EmojiDelete(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *EmojiDeleteResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "EmojiDelete",
+		Query:  EmojiDelete_Operation,
+		Variables: &__EmojiDeleteInput{
+			Id: id,
+		},
+	}
+
+	data_ = &EmojiDeleteResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The mutation executed by FavoriteCreate.
 const FavoriteCreate_Operation = `
 mutation FavoriteCreate ($input: FavoriteCreateInput!) {
@@ -55470,6 +58527,51 @@ func GetDocument(
 	}
 
 	data_ = &GetDocumentResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by GetEmoji.
+const GetEmoji_Operation = `
+query GetEmoji ($id: String!) {
+	emoji(id: $id) {
+		... EmojiFields
+	}
+}
+fragment EmojiFields on Emoji {
+	id
+	name
+	url
+	source
+	createdAt
+	creator {
+		id
+		name
+	}
+}
+`
+
+func GetEmoji(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *GetEmojiResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetEmoji",
+		Query:  GetEmoji_Operation,
+		Variables: &__GetEmojiInput{
+			Id: id,
+		},
+	}
+
+	data_ = &GetEmojiResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -56886,6 +59988,116 @@ func GetTemplate(
 	return data_, err_
 }
 
+// The query executed by GetTimeSchedule.
+const GetTimeSchedule_Operation = `
+query GetTimeSchedule ($id: String!) {
+	timeSchedule(id: $id) {
+		... TimeScheduleFields
+	}
+}
+fragment TimeScheduleFields on TimeSchedule {
+	id
+	name
+	externalId
+	externalUrl
+	createdAt
+	updatedAt
+	integration {
+		id
+		service
+	}
+	entries {
+		startsAt
+		endsAt
+		userId
+		userEmail
+	}
+}
+`
+
+func GetTimeSchedule(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *GetTimeScheduleResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetTimeSchedule",
+		Query:  GetTimeSchedule_Operation,
+		Variables: &__GetTimeScheduleInput{
+			Id: id,
+		},
+	}
+
+	data_ = &GetTimeScheduleResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by GetTriageResponsibility.
+const GetTriageResponsibility_Operation = `
+query GetTriageResponsibility ($id: String!) {
+	triageResponsibility(id: $id) {
+		... TriageResponsibilityFields
+	}
+}
+fragment TriageResponsibilityFields on TriageResponsibility {
+	id
+	action
+	createdAt
+	updatedAt
+	team {
+		id
+		key
+		name
+	}
+	currentUser {
+		id
+		name
+		email
+	}
+	timeSchedule {
+		id
+		name
+	}
+	manualSelection {
+		userIds
+		assignmentIndex
+	}
+}
+`
+
+func GetTriageResponsibility(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *GetTriageResponsibilityResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GetTriageResponsibility",
+		Query:  GetTriageResponsibility_Operation,
+		Variables: &__GetTriageResponsibilityInput{
+			Id: id,
+		},
+	}
+
+	data_ = &GetTriageResponsibilityResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The query executed by GetUserByEmail.
 const GetUserByEmail_Operation = `
 query GetUserByEmail ($filter: UserFilter!) {
@@ -57099,6 +60311,268 @@ func GetWorkflowState(
 	}
 
 	data_ = &GetWorkflowStateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by GitAutomationStateCreate.
+const GitAutomationStateCreate_Operation = `
+mutation GitAutomationStateCreate ($input: GitAutomationStateCreateInput!) {
+	gitAutomationStateCreate(input: $input) {
+		success
+		gitAutomationState {
+			... GitAutomationStateFields
+		}
+	}
+}
+fragment GitAutomationStateFields on GitAutomationState {
+	id
+	event
+	createdAt
+	state {
+		id
+		name
+	}
+	targetBranch {
+		id
+		branchPattern
+		isRegex
+	}
+}
+`
+
+func GitAutomationStateCreate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *GitAutomationStateCreateInput,
+) (data_ *GitAutomationStateCreateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GitAutomationStateCreate",
+		Query:  GitAutomationStateCreate_Operation,
+		Variables: &__GitAutomationStateCreateInput{
+			Input: input,
+		},
+	}
+
+	data_ = &GitAutomationStateCreateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by GitAutomationStateDelete.
+const GitAutomationStateDelete_Operation = `
+mutation GitAutomationStateDelete ($id: String!) {
+	gitAutomationStateDelete(id: $id) {
+		success
+	}
+}
+`
+
+func GitAutomationStateDelete(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *GitAutomationStateDeleteResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GitAutomationStateDelete",
+		Query:  GitAutomationStateDelete_Operation,
+		Variables: &__GitAutomationStateDeleteInput{
+			Id: id,
+		},
+	}
+
+	data_ = &GitAutomationStateDeleteResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by GitAutomationStateUpdate.
+const GitAutomationStateUpdate_Operation = `
+mutation GitAutomationStateUpdate ($id: String!, $input: GitAutomationStateUpdateInput!) {
+	gitAutomationStateUpdate(id: $id, input: $input) {
+		success
+		gitAutomationState {
+			... GitAutomationStateFields
+		}
+	}
+}
+fragment GitAutomationStateFields on GitAutomationState {
+	id
+	event
+	createdAt
+	state {
+		id
+		name
+	}
+	targetBranch {
+		id
+		branchPattern
+		isRegex
+	}
+}
+`
+
+func GitAutomationStateUpdate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	input *GitAutomationStateUpdateInput,
+) (data_ *GitAutomationStateUpdateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GitAutomationStateUpdate",
+		Query:  GitAutomationStateUpdate_Operation,
+		Variables: &__GitAutomationStateUpdateInput{
+			Id:    id,
+			Input: input,
+		},
+	}
+
+	data_ = &GitAutomationStateUpdateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by GitAutomationTargetBranchCreate.
+const GitAutomationTargetBranchCreate_Operation = `
+mutation GitAutomationTargetBranchCreate ($input: GitAutomationTargetBranchCreateInput!) {
+	gitAutomationTargetBranchCreate(input: $input) {
+		success
+		targetBranch {
+			... GitAutomationTargetBranchFields
+		}
+	}
+}
+fragment GitAutomationTargetBranchFields on GitAutomationTargetBranch {
+	id
+	branchPattern
+	isRegex
+	createdAt
+	updatedAt
+}
+`
+
+func GitAutomationTargetBranchCreate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *GitAutomationTargetBranchCreateInput,
+) (data_ *GitAutomationTargetBranchCreateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GitAutomationTargetBranchCreate",
+		Query:  GitAutomationTargetBranchCreate_Operation,
+		Variables: &__GitAutomationTargetBranchCreateInput{
+			Input: input,
+		},
+	}
+
+	data_ = &GitAutomationTargetBranchCreateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by GitAutomationTargetBranchDelete.
+const GitAutomationTargetBranchDelete_Operation = `
+mutation GitAutomationTargetBranchDelete ($id: String!) {
+	gitAutomationTargetBranchDelete(id: $id) {
+		success
+	}
+}
+`
+
+func GitAutomationTargetBranchDelete(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *GitAutomationTargetBranchDeleteResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GitAutomationTargetBranchDelete",
+		Query:  GitAutomationTargetBranchDelete_Operation,
+		Variables: &__GitAutomationTargetBranchDeleteInput{
+			Id: id,
+		},
+	}
+
+	data_ = &GitAutomationTargetBranchDeleteResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by GitAutomationTargetBranchUpdate.
+const GitAutomationTargetBranchUpdate_Operation = `
+mutation GitAutomationTargetBranchUpdate ($id: String!, $input: GitAutomationTargetBranchUpdateInput!) {
+	gitAutomationTargetBranchUpdate(id: $id, input: $input) {
+		success
+		targetBranch {
+			... GitAutomationTargetBranchFields
+		}
+	}
+}
+fragment GitAutomationTargetBranchFields on GitAutomationTargetBranch {
+	id
+	branchPattern
+	isRegex
+	createdAt
+	updatedAt
+}
+`
+
+func GitAutomationTargetBranchUpdate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	input *GitAutomationTargetBranchUpdateInput,
+) (data_ *GitAutomationTargetBranchUpdateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "GitAutomationTargetBranchUpdate",
+		Query:  GitAutomationTargetBranchUpdate_Operation,
+		Variables: &__GitAutomationTargetBranchUpdateInput{
+			Id:    id,
+			Input: input,
+		},
+	}
+
+	data_ = &GitAutomationTargetBranchUpdateResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -59248,6 +62722,61 @@ func ListDocuments(
 	return data_, err_
 }
 
+// The query executed by ListEmojis.
+const ListEmojis_Operation = `
+query ListEmojis ($first: Int, $after: String, $orderBy: PaginationOrderBy) {
+	emojis(first: $first, after: $after, orderBy: $orderBy) {
+		nodes {
+			... EmojiFields
+		}
+		pageInfo {
+			hasNextPage
+			endCursor
+		}
+	}
+}
+fragment EmojiFields on Emoji {
+	id
+	name
+	url
+	source
+	createdAt
+	creator {
+		id
+		name
+	}
+}
+`
+
+func ListEmojis(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	first *int,
+	after *string,
+	orderBy *PaginationOrderBy,
+) (data_ *ListEmojisResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ListEmojis",
+		Query:  ListEmojis_Operation,
+		Variables: &__ListEmojisInput{
+			First:   first,
+			After:   after,
+			OrderBy: orderBy,
+		},
+	}
+
+	data_ = &ListEmojisResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
 // The query executed by ListFavorites.
 const ListFavorites_Operation = `
 query ListFavorites ($first: Int, $after: String, $orderBy: PaginationOrderBy) {
@@ -60216,6 +63745,136 @@ func ListTemplates(
 	}
 
 	data_ = &ListTemplatesResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by ListTimeSchedules.
+const ListTimeSchedules_Operation = `
+query ListTimeSchedules ($first: Int, $after: String, $orderBy: PaginationOrderBy) {
+	timeSchedules(first: $first, after: $after, orderBy: $orderBy) {
+		nodes {
+			... TimeScheduleFields
+		}
+		pageInfo {
+			hasNextPage
+			endCursor
+		}
+	}
+}
+fragment TimeScheduleFields on TimeSchedule {
+	id
+	name
+	externalId
+	externalUrl
+	createdAt
+	updatedAt
+	integration {
+		id
+		service
+	}
+	entries {
+		startsAt
+		endsAt
+		userId
+		userEmail
+	}
+}
+`
+
+func ListTimeSchedules(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	first *int,
+	after *string,
+	orderBy *PaginationOrderBy,
+) (data_ *ListTimeSchedulesResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ListTimeSchedules",
+		Query:  ListTimeSchedules_Operation,
+		Variables: &__ListTimeSchedulesInput{
+			First:   first,
+			After:   after,
+			OrderBy: orderBy,
+		},
+	}
+
+	data_ = &ListTimeSchedulesResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The query executed by ListTriageResponsibilities.
+const ListTriageResponsibilities_Operation = `
+query ListTriageResponsibilities ($first: Int, $after: String, $orderBy: PaginationOrderBy) {
+	triageResponsibilities(first: $first, after: $after, orderBy: $orderBy) {
+		nodes {
+			... TriageResponsibilityFields
+		}
+		pageInfo {
+			hasNextPage
+			endCursor
+		}
+	}
+}
+fragment TriageResponsibilityFields on TriageResponsibility {
+	id
+	action
+	createdAt
+	updatedAt
+	team {
+		id
+		key
+		name
+	}
+	currentUser {
+		id
+		name
+		email
+	}
+	timeSchedule {
+		id
+		name
+	}
+	manualSelection {
+		userIds
+		assignmentIndex
+	}
+}
+`
+
+func ListTriageResponsibilities(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	first *int,
+	after *string,
+	orderBy *PaginationOrderBy,
+) (data_ *ListTriageResponsibilitiesResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "ListTriageResponsibilities",
+		Query:  ListTriageResponsibilities_Operation,
+		Variables: &__ListTriageResponsibilitiesInput{
+			First:   first,
+			After:   after,
+			OrderBy: orderBy,
+		},
+	}
+
+	data_ = &ListTriageResponsibilitiesResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
@@ -62771,6 +66430,265 @@ func TemplateUpdate(
 	}
 
 	data_ = &TemplateUpdateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by TimeScheduleCreate.
+const TimeScheduleCreate_Operation = `
+mutation TimeScheduleCreate ($input: TimeScheduleCreateInput!) {
+	timeScheduleCreate(input: $input) {
+		success
+		timeSchedule {
+			... TimeScheduleFields
+		}
+	}
+}
+fragment TimeScheduleFields on TimeSchedule {
+	id
+	name
+	externalId
+	externalUrl
+	createdAt
+	updatedAt
+	integration {
+		id
+		service
+	}
+	entries {
+		startsAt
+		endsAt
+		userId
+		userEmail
+	}
+}
+`
+
+func TimeScheduleCreate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	input *TimeScheduleCreateInput,
+) (data_ *TimeScheduleCreateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "TimeScheduleCreate",
+		Query:  TimeScheduleCreate_Operation,
+		Variables: &__TimeScheduleCreateInput{
+			Input: input,
+		},
+	}
+
+	data_ = &TimeScheduleCreateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by TimeScheduleDelete.
+const TimeScheduleDelete_Operation = `
+mutation TimeScheduleDelete ($id: String!) {
+	timeScheduleDelete(id: $id) {
+		success
+	}
+}
+`
+
+func TimeScheduleDelete(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *TimeScheduleDeleteResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "TimeScheduleDelete",
+		Query:  TimeScheduleDelete_Operation,
+		Variables: &__TimeScheduleDeleteInput{
+			Id: id,
+		},
+	}
+
+	data_ = &TimeScheduleDeleteResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by TimeScheduleRefreshIntegrationSchedule.
+const TimeScheduleRefreshIntegrationSchedule_Operation = `
+mutation TimeScheduleRefreshIntegrationSchedule ($id: String!) {
+	timeScheduleRefreshIntegrationSchedule(id: $id) {
+		success
+		timeSchedule {
+			... TimeScheduleFields
+		}
+	}
+}
+fragment TimeScheduleFields on TimeSchedule {
+	id
+	name
+	externalId
+	externalUrl
+	createdAt
+	updatedAt
+	integration {
+		id
+		service
+	}
+	entries {
+		startsAt
+		endsAt
+		userId
+		userEmail
+	}
+}
+`
+
+func TimeScheduleRefreshIntegrationSchedule(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+) (data_ *TimeScheduleRefreshIntegrationScheduleResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "TimeScheduleRefreshIntegrationSchedule",
+		Query:  TimeScheduleRefreshIntegrationSchedule_Operation,
+		Variables: &__TimeScheduleRefreshIntegrationScheduleInput{
+			Id: id,
+		},
+	}
+
+	data_ = &TimeScheduleRefreshIntegrationScheduleResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by TimeScheduleUpdate.
+const TimeScheduleUpdate_Operation = `
+mutation TimeScheduleUpdate ($id: String!, $input: TimeScheduleUpdateInput!) {
+	timeScheduleUpdate(id: $id, input: $input) {
+		success
+		timeSchedule {
+			... TimeScheduleFields
+		}
+	}
+}
+fragment TimeScheduleFields on TimeSchedule {
+	id
+	name
+	externalId
+	externalUrl
+	createdAt
+	updatedAt
+	integration {
+		id
+		service
+	}
+	entries {
+		startsAt
+		endsAt
+		userId
+		userEmail
+	}
+}
+`
+
+func TimeScheduleUpdate(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	id string,
+	input *TimeScheduleUpdateInput,
+) (data_ *TimeScheduleUpdateResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "TimeScheduleUpdate",
+		Query:  TimeScheduleUpdate_Operation,
+		Variables: &__TimeScheduleUpdateInput{
+			Id:    id,
+			Input: input,
+		},
+	}
+
+	data_ = &TimeScheduleUpdateResponse{}
+	resp_ := &graphql.Response{Data: data_}
+
+	err_ = client_.MakeRequest(
+		ctx_,
+		req_,
+		resp_,
+	)
+
+	return data_, err_
+}
+
+// The mutation executed by TimeScheduleUpsertExternal.
+const TimeScheduleUpsertExternal_Operation = `
+mutation TimeScheduleUpsertExternal ($externalId: String!, $input: TimeScheduleUpdateInput!) {
+	timeScheduleUpsertExternal(externalId: $externalId, input: $input) {
+		success
+		timeSchedule {
+			... TimeScheduleFields
+		}
+	}
+}
+fragment TimeScheduleFields on TimeSchedule {
+	id
+	name
+	externalId
+	externalUrl
+	createdAt
+	updatedAt
+	integration {
+		id
+		service
+	}
+	entries {
+		startsAt
+		endsAt
+		userId
+		userEmail
+	}
+}
+`
+
+// Upserts a schedule keyed on an external identifier, for integration sync.
+func TimeScheduleUpsertExternal(
+	ctx_ context.Context,
+	client_ graphql.Client,
+	externalId string,
+	input *TimeScheduleUpdateInput,
+) (data_ *TimeScheduleUpsertExternalResponse, err_ error) {
+	req_ := &graphql.Request{
+		OpName: "TimeScheduleUpsertExternal",
+		Query:  TimeScheduleUpsertExternal_Operation,
+		Variables: &__TimeScheduleUpsertExternalInput{
+			ExternalId: externalId,
+			Input:      input,
+		},
+	}
+
+	data_ = &TimeScheduleUpsertExternalResponse{}
 	resp_ := &graphql.Response{Data: data_}
 
 	err_ = client_.MakeRequest(
