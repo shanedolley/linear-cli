@@ -1,25 +1,48 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var (
-    cfgFile   string
-    plaintext bool
-    jsonOut   bool
+	cfgFile   string
+	plaintext bool
+	jsonOut   bool
 )
 
 // version is set at build time via -ldflags
 // default value is for local dev builds
 var version = "dev"
+
+// derefStr returns the value of a *string, or an empty string when it is nil.
+// It keeps printf-style formatting safe for nullable schema fields.
+func derefStr(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+
+// preferFlag returns the primary flag's value when the user set it, and the
+// deprecated alias's value otherwise. It lets a renamed string flag keep its
+// old name working (registered hidden) without advertising it.
+func preferFlag(cmd *cobra.Command, primary, alias string) string {
+	if cmd.Flags().Changed(primary) {
+		v, _ := cmd.Flags().GetString(primary)
+		return v
+	}
+	v, _ := cmd.Flags().GetString(alias)
+	return v
+}
 
 // generateHeader creates a nice header box with proper Unicode box drawing
 func generateHeader() string {
@@ -67,16 +90,27 @@ func generateHeader() string {
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-    Use:     "lincli",
-    Short:   "A comprehensive Linear CLI tool",
-    Long:    color.New(color.FgCyan).Sprintf("%s\nA comprehensive CLI tool for Linear's API featuring:\n• Issue management (create, list, update, archive)\n• Project tracking and collaboration  \n• Team and user management\n• Comments and attachments\n• Webhook configuration\n• Table/plaintext/JSON output formats\n", generateHeader()),
-    Version: version,
+	Use:     "lincli",
+	Short:   "A comprehensive Linear CLI tool",
+	Long:    color.New(color.FgCyan).Sprintf("%s\nA comprehensive CLI tool for Linear's API featuring:\n• Issue management (create, list, update, archive)\n• Project tracking and collaboration  \n• Team and user management\n• Comments and attachments\n• Webhook configuration\n• Table/plaintext/JSON output formats\n", generateHeader()),
+	Version: version,
+	// Handlers are RunE and return their errors; Execute renders them once, in
+	// the active output mode. Silencing cobra's own error/usage printing keeps
+	// that the single error path (matching the previous os.Exit behavior).
+	SilenceErrors: true,
+	SilenceUsage:  true,
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
+// Execute runs the root command and renders any handler error in the active
+// output mode before exiting non-zero. Centralizing this lets handlers return
+// errors (RunE) instead of calling os.Exit, which is what makes them testable.
+// A handler that already rendered its own error output returns errSilent, which
+// Execute treats as "exit non-zero, print nothing more".
 func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
+	if err := rootCmd.Execute(); err != nil {
+		if !errors.Is(err, errSilent) {
+			output.Error(err.Error(), viper.GetBool("plaintext"), viper.GetBool("json"))
+		}
 		os.Exit(1)
 	}
 }

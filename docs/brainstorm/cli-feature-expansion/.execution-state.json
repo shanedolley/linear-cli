@@ -1,0 +1,47 @@
+{
+  "brainstorm": "cli-feature-expansion",
+  "complexity": "COMPLEX",
+  "branch": "feature/cli-feature-expansion",
+  "totalTasks": 12,
+  "totalSubtasks": 52,
+  "completed": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+  "inProgress": null,
+  "milestone": "All 12 tasks complete. Task 12 (docs + final verification): README and CLAUDE.md now cover every command domain across Tiers 1-5, with a name-or-ID note and the three output modes; stale 'coming soon' notes for issue archive and project create removed. Final gate green: make build clean, go vet clean, all go test pass, 126/126 smoke tests pass, 32 top-level commands registered, SD sandbox clean (no orphaned artifacts).",
+  "status": "all_tasks_complete",
+  "sandbox": { "project": "lincli-sandbox", "team": "SD", "teamId": "d5b746fb-e47d-48c0-a299-ca5ecb6d33f2" },
+  "planGate": {
+    "task8_tier4a": {
+      "customers": "write available (customerCreate/customerDelete verified in sandbox)",
+      "releases": "write BLOCKED - FEATURE_NOT_ACCESSIBLE 'releaseManagement' (Business plan required); read returns empty. Deferred per mandatory plan-availability gate.",
+      "probedAt": "2026-07-02"
+    },
+    "task9_tier4b": {
+      "emoji": "read available (emojis returns nodes)",
+      "triage": "read available (triageResponsibilities returns empty list, no plan error)",
+      "gitAutomation": "write available (gitAutomationTargetBranchCreate/Delete verified in SD sandbox). NOTE: root gitAutomationStates query is NOT exposed on the live API, so git commands are write-only (create/update/delete), matching the plan.",
+      "timeSchedule": "read available (timeSchedules returns empty list, no plan error)",
+      "probedAt": "2026-07-02"
+    },
+    "task10_tier4c": {
+      "attachmentLink": "write available (attachmentLinkURL + attachmentLinkGitHubPR verified in SD sandbox). Only url-shaped providers exposed (url/slack/github-issue/github-pr/salesforce); Discord/Zendesk/Jira/GitLab-MR need extra structured ids and Front/Intercom key on a conversationId, so they rely on the default url provider's auto-detection.",
+      "attachmentSyncToSlack": "available (graceful 'Entity not found' on a bogus id; happy path needs a real Slack attachment).",
+      "oauthApps": "DEFERRED - oauthApplications is FORBIDDEN 'Invalid scope: oauth:create required'. Personal API keys cannot hold oauth:create, so no oauth-app command is usable.",
+      "agents": "DEFERRED entirely (user decision). Reads work (agentSessions/agentSkills), but writes need an agent-app actor (appUserId) + untyped JSON payloads; not usable from a personal-key CLI.",
+      "probedAt": "2026-07-02"
+    },
+    "task11_tier5": {
+      "rateLimit": "available (real data: 2500 requests/hr, 3M complexity). Dead Client.GetRateLimit() placeholder removed; rate-limit now queries rateLimitStatus.",
+      "audit": "read available (auditEntries/auditEntryTypes return data with actor/IP/country).",
+      "search": "read available (searchProjects returns matches; semanticSearch returns typed issue/project/initiative/document results).",
+      "externalLinks": "write available (entityExternalLinkCreate/Update/Delete verified in SD sandbox). Only initiative/project parents exposed; team/release/cycle are [Internal], no document parent exists.",
+      "viewPreferences": "write available (viewPreferencesCreate/Update/Delete verified in SD sandbox). NOTE: the client's stripNulls drops empty maps, so --preferences must be a non-empty JSON object; commands guard against empty input.",
+      "issueRelationUpdate": "write available (issueRelationUpdate verified in SD sandbox: created a relation, changed its type, removed it). IssueId/RelatedIssueId accept TEAM-123 identifiers directly.",
+      "sla": "read available (slaConfigurations(teamId) returns [] on this workspace, no plan error). Read-only per plan; requires --team.",
+      "externalUsers": "read available (externalUsers/externalUser return data).",
+      "userSettings": "already shipped in an earlier task; extended with --dpa and --privacy-legal subscription flags.",
+      "probedAt": "2026-07-02"
+    }
+  },
+  "startedAt": "2026-07-02",
+  "updatedAt": "2026-07-02T18:30:00Z"
+}

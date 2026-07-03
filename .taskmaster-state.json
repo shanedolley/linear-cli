@@ -1,0 +1,31 @@
+{
+  "brainstorm": "cli-feature-expansion",
+  "branch": "feature/cli-feature-expansion",
+  "phase": "planned",
+  "prd": "docs/brainstorm/cli-feature-expansion/03-design-doc.md",
+  "plan": "docs/brainstorm/cli-feature-expansion/04-plan.md",
+  "tasks": ".taskmaster/tasks/tasks.json",
+  "complexityReport": ".taskmaster/reports/task-complexity-report.json",
+  "models": {
+    "main": "claude-code/opus",
+    "research": "claude-code/opus",
+    "fallback": "claude-code/opus"
+  },
+  "totals": {
+    "topLevelTasks": 12,
+    "subtasks": 52
+  },
+  "buildOrder": "Dependency order; one PR per tier; foundation (task 1) then Tier 1 (tasks 2-3) first",
+  "nextTask": 1,
+  "sandbox": {
+    "project": "lincli-sandbox",
+    "projectId": "39b8fc96-97b5-48da-9050-6d8b9e911dfb",
+    "team": "SD"
+  },
+  "baseline": {
+    "build": "pass",
+    "vet": "clean",
+    "smokeTests": "48/48 pass"
+  },
+  "updated": "2026-07-02"
+}

@@ -60,9 +60,37 @@ mutation CreateComment($input: CommentCreateInput!) {
   }
 }
 
-# Mutation: Update an existing comment
+# Mutation: Update an existing comment (wired by `comment edit`)
 mutation UpdateComment($id: String!, $input: CommentUpdateInput!) {
   commentUpdate(id: $id, input: $input) {
+    comment {
+      ...CommentFields
+    }
+  }
+}
+
+# Mutation: Delete a comment
+mutation DeleteComment($id: String!) {
+  commentDelete(id: $id) {
+    success
+    entityId
+  }
+}
+
+# Mutation: Resolve a comment thread
+mutation ResolveComment($id: String!) {
+  commentResolve(id: $id) {
+    success
+    comment {
+      ...CommentFields
+    }
+  }
+}
+
+# Mutation: Unresolve a previously resolved comment thread
+mutation UnresolveComment($id: String!) {
+  commentUnresolve(id: $id) {
+    success
     comment {
       ...CommentFields
     }

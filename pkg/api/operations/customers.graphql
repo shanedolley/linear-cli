@@ -1,0 +1,276 @@
+# Customer / CRM operations (Tier 4a).
+#
+# Covers customers and their needs, plus the workspace-wide customer status and
+# tier catalogs. Releases (the other Tier 4a domain) are deferred: writes
+# require Linear's Business plan (FEATURE_NOT_ACCESSIBLE 'releaseManagement'),
+# so no release operations ship here.
+#
+# customerNeed has no name/title; its content field (manual body, else the
+# source attachment's extracted text) is the human-readable summary.
+
+fragment CustomerFields on Customer {
+  id
+  name
+  revenue
+  size
+  domains
+  externalIds
+  slackChannelId
+  approximateNeedCount
+  url
+  createdAt
+  updatedAt
+  owner {
+    id
+    name
+    email
+  }
+  status {
+    id
+    name
+  }
+  tier {
+    id
+    name
+  }
+}
+
+fragment CustomerNeedFields on CustomerNeed {
+  id
+  body
+  content
+  priority
+  createdAt
+  updatedAt
+  customer {
+    id
+    name
+  }
+  issue {
+    id
+    identifier
+    title
+  }
+  project {
+    id
+    name
+  }
+  creator {
+    name
+  }
+}
+
+fragment CustomerStatusFields on CustomerStatus {
+  id
+  name
+  displayName
+  color
+  description
+  position
+}
+
+fragment CustomerTierFields on CustomerTier {
+  id
+  name
+  displayName
+  color
+  description
+  position
+}
+
+query ListCustomers($filter: CustomerFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
+  customers(filter: $filter, first: $first, after: $after, orderBy: $orderBy) {
+    nodes {
+      ...CustomerFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+query GetCustomer($id: String!) {
+  customer(id: $id) {
+    ...CustomerFields
+  }
+}
+
+query ListCustomerNeeds($filter: CustomerNeedFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
+  customerNeeds(filter: $filter, first: $first, after: $after, orderBy: $orderBy) {
+    nodes {
+      ...CustomerNeedFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+query GetCustomerNeed($id: String!) {
+  customerNeed(id: $id) {
+    ...CustomerNeedFields
+  }
+}
+
+query ListCustomerStatuses($first: Int, $after: String, $orderBy: PaginationOrderBy) {
+  customerStatuses(first: $first, after: $after, orderBy: $orderBy) {
+    nodes {
+      ...CustomerStatusFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+query ListCustomerTiers($first: Int, $after: String, $orderBy: PaginationOrderBy) {
+  customerTiers(first: $first, after: $after, orderBy: $orderBy) {
+    nodes {
+      ...CustomerTierFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+mutation CustomerCreate($input: CustomerCreateInput!) {
+  customerCreate(input: $input) {
+    success
+    customer {
+      ...CustomerFields
+    }
+  }
+}
+
+mutation CustomerUpdate($id: String!, $input: CustomerUpdateInput!) {
+  customerUpdate(id: $id, input: $input) {
+    success
+    customer {
+      ...CustomerFields
+    }
+  }
+}
+
+mutation CustomerDelete($id: String!) {
+  customerDelete(id: $id) {
+    success
+  }
+}
+
+# Merges source into target: source's needs move to target, source is archived.
+mutation CustomerMerge($sourceCustomerId: String!, $targetCustomerId: String!) {
+  customerMerge(sourceCustomerId: $sourceCustomerId, targetCustomerId: $targetCustomerId) {
+    success
+    customer {
+      ...CustomerFields
+    }
+  }
+}
+
+# Upserts keyed on an external identifier (externalId), for CRM sync.
+mutation CustomerUpsert($input: CustomerUpsertInput!) {
+  customerUpsert(input: $input) {
+    success
+    customer {
+      ...CustomerFields
+    }
+  }
+}
+
+mutation CustomerUnsync($id: String!) {
+  customerUnsync(id: $id) {
+    success
+    customer {
+      ...CustomerFields
+    }
+  }
+}
+
+mutation CustomerNeedCreate($input: CustomerNeedCreateInput!) {
+  customerNeedCreate(input: $input) {
+    success
+    need {
+      ...CustomerNeedFields
+    }
+  }
+}
+
+mutation CustomerNeedUpdate($id: String!, $input: CustomerNeedUpdateInput!) {
+  customerNeedUpdate(id: $id, input: $input) {
+    success
+    need {
+      ...CustomerNeedFields
+    }
+  }
+}
+
+mutation CustomerNeedDelete($id: String!) {
+  customerNeedDelete(id: $id) {
+    success
+  }
+}
+
+mutation CustomerNeedArchive($id: String!) {
+  customerNeedArchive(id: $id) {
+    success
+  }
+}
+
+mutation CustomerNeedUnarchive($id: String!) {
+  customerNeedUnarchive(id: $id) {
+    success
+  }
+}
+
+mutation CustomerStatusCreate($input: CustomerStatusCreateInput!) {
+  customerStatusCreate(input: $input) {
+    success
+    status {
+      ...CustomerStatusFields
+    }
+  }
+}
+
+mutation CustomerStatusUpdate($id: String!, $input: CustomerStatusUpdateInput!) {
+  customerStatusUpdate(id: $id, input: $input) {
+    success
+    status {
+      ...CustomerStatusFields
+    }
+  }
+}
+
+mutation CustomerStatusDelete($id: String!) {
+  customerStatusDelete(id: $id) {
+    success
+  }
+}
+
+mutation CustomerTierCreate($input: CustomerTierCreateInput!) {
+  customerTierCreate(input: $input) {
+    success
+    tier {
+      ...CustomerTierFields
+    }
+  }
+}
+
+mutation CustomerTierUpdate($id: String!, $input: CustomerTierUpdateInput!) {
+  customerTierUpdate(id: $id, input: $input) {
+    success
+    tier {
+      ...CustomerTierFields
+    }
+  }
+}
+
+mutation CustomerTierDelete($id: String!) {
+  customerTierDelete(id: $id) {
+    success
+  }
+}

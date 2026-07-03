@@ -20,9 +20,13 @@ go.work
 # IDE files
 .vscode/
 .idea/
+.obsidian/
 *.swp
 *.swo
 *~
+
+# Tooling metadata
+.serena/
 
 # OS files
 .DS_Store
@@ -52,3 +56,31 @@ coverage.html
 # Generated code from genqlient
 # Note: Keeping generated.go in git during migration for easier review.
 # Will be excluded from git after migration is stable and tested.
+
+# Claude local instructions (personal, not shared)
+CLAUDE.local.md
+**/CLAUDE.local.md
+
+# Logs
+logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dev-debug.log
+# Dependency directories
+node_modules/
+# Environment variables
+.env
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# OS specific
+
+# Task files
+# tasks.json
+# tasks/ 

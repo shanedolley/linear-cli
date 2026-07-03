@@ -1,0 +1,30 @@
+# External users (read-only). External users interact with Linear through
+# integrated services (Slack, Jira, GitHub) without a Linear account.
+
+query ListExternalUsers($first: Int, $after: String) {
+  externalUsers(first: $first, after: $after) {
+    nodes {
+      ...ExternalUserFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+query GetExternalUser($id: String!) {
+  externalUser(id: $id) {
+    ...ExternalUserFields
+  }
+}
+
+fragment ExternalUserFields on ExternalUser {
+  id
+  name
+  displayName
+  email
+  avatarUrl
+  lastSeen
+  createdAt
+}

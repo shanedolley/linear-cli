@@ -1,0 +1,53 @@
+# Triage responsibility operations (Tier 4b) - READ ONLY.
+#
+# A triage responsibility routes newly triaged issues for a team, either by
+# assigning/notifying a manual set of users or by following a time schedule
+# (on-call rotation). The `action` enum is assign | notify.
+#
+# Only the read operations ship: the write mutations
+# (triageResponsibilityCreate/Update/Delete) require Linear's Business plan
+# (FORBIDDEN, "Subscribe to the Business plan"), so they are deferred per the
+# plan-availability gate.
+
+fragment TriageResponsibilityFields on TriageResponsibility {
+  id
+  action
+  createdAt
+  updatedAt
+  team {
+    id
+    key
+    name
+  }
+  currentUser {
+    id
+    name
+    email
+  }
+  timeSchedule {
+    id
+    name
+  }
+  manualSelection {
+    userIds
+    assignmentIndex
+  }
+}
+
+query ListTriageResponsibilities($first: Int, $after: String, $orderBy: PaginationOrderBy) {
+  triageResponsibilities(first: $first, after: $after, orderBy: $orderBy) {
+    nodes {
+      ...TriageResponsibilityFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+query GetTriageResponsibility($id: String!) {
+  triageResponsibility(id: $id) {
+    ...TriageResponsibilityFields
+  }
+}

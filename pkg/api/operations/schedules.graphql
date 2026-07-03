@@ -1,0 +1,86 @@
+# Time schedule operations (Tier 4b).
+#
+# Time schedules define on-call rotations: a named list of entries, each a
+# start/end window and a user (by Linear id or, for unmapped external users, an
+# email). Schedules can be integration-backed (synced from an external on-call
+# tool) and refreshed, or upserted by external id for CRM/integration sync.
+
+fragment TimeScheduleFields on TimeSchedule {
+  id
+  name
+  externalId
+  externalUrl
+  createdAt
+  updatedAt
+  integration {
+    id
+    service
+  }
+  entries {
+    startsAt
+    endsAt
+    userId
+    userEmail
+  }
+}
+
+query ListTimeSchedules($first: Int, $after: String, $orderBy: PaginationOrderBy) {
+  timeSchedules(first: $first, after: $after, orderBy: $orderBy) {
+    nodes {
+      ...TimeScheduleFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+query GetTimeSchedule($id: String!) {
+  timeSchedule(id: $id) {
+    ...TimeScheduleFields
+  }
+}
+
+mutation TimeScheduleCreate($input: TimeScheduleCreateInput!) {
+  timeScheduleCreate(input: $input) {
+    success
+    timeSchedule {
+      ...TimeScheduleFields
+    }
+  }
+}
+
+mutation TimeScheduleUpdate($id: String!, $input: TimeScheduleUpdateInput!) {
+  timeScheduleUpdate(id: $id, input: $input) {
+    success
+    timeSchedule {
+      ...TimeScheduleFields
+    }
+  }
+}
+
+mutation TimeScheduleDelete($id: String!) {
+  timeScheduleDelete(id: $id) {
+    success
+  }
+}
+
+# Upserts a schedule keyed on an external identifier, for integration sync.
+mutation TimeScheduleUpsertExternal($externalId: String!, $input: TimeScheduleUpdateInput!) {
+  timeScheduleUpsertExternal(externalId: $externalId, input: $input) {
+    success
+    timeSchedule {
+      ...TimeScheduleFields
+    }
+  }
+}
+
+mutation TimeScheduleRefreshIntegrationSchedule($id: String!) {
+  timeScheduleRefreshIntegrationSchedule(id: $id) {
+    success
+    timeSchedule {
+      ...TimeScheduleFields
+    }
+  }
+}

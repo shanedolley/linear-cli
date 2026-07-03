@@ -54,3 +54,51 @@ query GetViewer {
     ...UserDetailFields
   }
 }
+
+# Mutation: Update a user's profile
+mutation UserUpdate($id: String!, $input: UserUpdateInput!) {
+  userUpdate(id: $id, input: $input) {
+    success
+    user {
+      ...UserDetailFields
+    }
+  }
+}
+
+# Mutation: Change a user's organization role (owner|admin|guest|user|app).
+# Distinct from team membership ownership; returns success only.
+mutation UserChangeRole($id: String!, $role: UserRoleType!) {
+  userChangeRole(id: $id, role: $role) {
+    success
+  }
+}
+
+# Mutation: Suspend a user (executes immediately)
+mutation UserSuspend($id: String!) {
+  userSuspend(id: $id) {
+    success
+  }
+}
+
+# Mutation: Unsuspend a user
+mutation UserUnsuspend($id: String!) {
+  userUnsuspend(id: $id) {
+    success
+  }
+}
+
+# Query: the authenticated user's settings. userSettingsUpdate is keyed on the
+# UserSettings ID (not the user ID), and Linear only exposes the viewer's own
+# settings, so `user settings update` is self-scoped.
+query GetUserSettings {
+  userSettings {
+    id
+  }
+}
+
+# Mutation: Update the authenticated user's settings
+mutation UserSettingsUpdate($id: String!, $input: UserSettingsUpdateInput!) {
+  userSettingsUpdate(id: $id, input: $input) {
+    success
+  }
+}

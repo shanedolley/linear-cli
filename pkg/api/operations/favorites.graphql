@@ -1,0 +1,94 @@
+# Favorite operations (Tier 3).
+#
+# Favorites are personal sidebar bookmarks that each reference exactly one
+# entity (an issue, project, cycle, document, custom view, label, user, or
+# initiative). FavoriteCreateInput exposes one *Id field per entity kind; the
+# `favorite add --entity <kind>` command sets the matching field.
+
+fragment FavoriteFields on Favorite {
+  id
+  type
+  title
+  url
+  folderName
+  sortOrder
+  createdAt
+  updatedAt
+  issue {
+    id
+    identifier
+    title
+  }
+  project {
+    id
+    name
+  }
+  cycle {
+    id
+    number
+    name
+  }
+  document {
+    id
+    title
+  }
+  customView {
+    id
+    name
+  }
+  label {
+    id
+    name
+  }
+  user {
+    id
+    name
+    email
+  }
+  initiative {
+    id
+    name
+  }
+}
+
+query ListFavorites($first: Int, $after: String, $orderBy: PaginationOrderBy) {
+  favorites(first: $first, after: $after, orderBy: $orderBy) {
+    nodes {
+      ...FavoriteFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+query GetFavorite($id: String!) {
+  favorite(id: $id) {
+    ...FavoriteFields
+  }
+}
+
+mutation FavoriteCreate($input: FavoriteCreateInput!) {
+  favoriteCreate(input: $input) {
+    success
+    favorite {
+      ...FavoriteFields
+    }
+  }
+}
+
+mutation FavoriteUpdate($id: String!, $input: FavoriteUpdateInput!) {
+  favoriteUpdate(id: $id, input: $input) {
+    success
+    favorite {
+      ...FavoriteFields
+    }
+  }
+}
+
+mutation FavoriteDelete($id: String!) {
+  favoriteDelete(id: $id) {
+    success
+  }
+}

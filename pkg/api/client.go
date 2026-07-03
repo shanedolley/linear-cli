@@ -5,10 +5,14 @@ package api
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
@@ -61,92 +65,61 @@ func NewClientWithURL(baseURL, authHeader string) *Client {
 	}
 }
 
-// Execute performs a GraphQL request
-func (c *Client) Execute(ctx context.Context, query string, variables map[string]interface{}, result interface{}) error {
-	reqBody := GraphQLRequest{
-		Query:     query,
-		Variables: variables,
+// NullSentinel is an unguessable, per-process marker. Assigning it to an
+// optional field asks stripNulls to send an explicit JSON null (to clear the
+// field) rather than omitting the field. genqlient generates mutation-input
+// fields as pointers without `omitempty`, so a nil pointer would serialize as
+// `null`; stripNulls drops those to distinguish "absent" from "clear", and this
+// sentinel is the way a command opts back in to sending an explicit null.
+//
+// The marker carries random bytes so that no user-supplied field value (an
+// issue title, a comment body) can ever equal it and be silently turned into
+// null. See docs/adr/0001-explicit-null-handling.md.
+var NullSentinel = newNullSentinel()
+
+func newNullSentinel() string {
+	buf := make([]byte, 16)
+	if _, err := rand.Read(buf); err != nil {
+		// crypto/rand should never fail; if it somehow does, fall back to a
+		// fixed marker. A collision with real Linear data remains unlikely.
+		return "__LINCLI_NULL__"
 	}
-
-	jsonBody, err := json.Marshal(reqBody)
-	if err != nil {
-		return fmt.Errorf("failed to marshal request: %w", err)
-	}
-
-	req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL, bytes.NewBuffer(jsonBody))
-	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", c.authHeader)
-	req.Header.Set("User-Agent", "lincli/0.1.0")
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return fmt.Errorf("request failed: %w", err)
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("failed to read response: %w", err)
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
-	}
-
-	var gqlResp GraphQLResponse
-	if err := json.Unmarshal(body, &gqlResp); err != nil {
-		return fmt.Errorf("failed to parse response: %w", err)
-	}
-
-	if len(gqlResp.Errors) > 0 {
-		return fmt.Errorf("GraphQL errors: %v", gqlResp.Errors)
-	}
-
-	if result != nil {
-		if err := json.Unmarshal(gqlResp.Data, result); err != nil {
-			return fmt.Errorf("failed to unmarshal data: %w", err)
-		}
-	}
-
-	return nil
+	return "__LINCLI_NULL__" + hex.EncodeToString(buf)
 }
 
-// Rate limiting helper
-func (c *Client) GetRateLimit(ctx context.Context) (*RateLimit, error) {
-	// This would query Linear's rate limiting info
-	// For now, we'll return a placeholder
-	return &RateLimit{
-		Limit:     5000,
-		Remaining: 4999,
-		Reset:     time.Now().Add(time.Hour),
-	}, nil
-}
-
-type RateLimit struct {
-	Limit     int       `json:"limit"`
-	Remaining int       `json:"remaining"`
-	Reset     time.Time `json:"reset"`
-}
-
-// stripNulls recursively removes null values from a map
+// stripNulls recursively removes null values from a map and converts
+// NullSentinel to null. Empty nested objects are preserved (not dropped), so a
+// caller can send an intentionally empty object; only Go nil values, which
+// genqlient emits for unset optional fields, are removed.
 func stripNulls(m map[string]interface{}) map[string]interface{} {
 	result := make(map[string]interface{})
 	for k, v := range m {
 		if v == nil {
 			continue
 		}
+		// Convert sentinel value to null
+		if strVal, ok := v.(string); ok && strVal == NullSentinel {
+			result[k] = nil
+			continue
+		}
 		if innerMap, ok := v.(map[string]interface{}); ok {
-			stripped := stripNulls(innerMap)
-			if len(stripped) > 0 {
-				result[k] = stripped
-			}
+			result[k] = stripNulls(innerMap)
 		} else if innerSlice, ok := v.([]interface{}); ok {
-			// Keep slices even if they contain nulls (they might be intentional)
-			result[k] = innerSlice
+			// Recurse into map elements so nested filter objects (for
+			// example the "or"/"and" arrays) get their null comparator
+			// fields stripped, the same way top-level filter fields are.
+			// Without this, Linear treats the extra null fields as
+			// constraints and the filter matches nothing. Non-map elements
+			// (for example ID strings in memberIds) are kept as-is.
+			strippedSlice := make([]interface{}, len(innerSlice))
+			for i, item := range innerSlice {
+				if itemMap, ok := item.(map[string]interface{}); ok {
+					strippedSlice[i] = stripNulls(itemMap)
+				} else {
+					strippedSlice[i] = item
+				}
+			}
+			result[k] = strippedSlice
 		} else {
 			result[k] = v
 		}
@@ -154,14 +127,55 @@ func stripNulls(m map[string]interface{}) map[string]interface{} {
 	return result
 }
 
+// sensitiveVarSubstrings marks a request variable as secret-bearing when its
+// normalized name contains any of these (for example a webhook signing secret).
+// LINCLI_DEBUG_GQL redacts matching variables so the debug dump can be shared
+// without leaking credentials. Matching is case-insensitive and ignores
+// separators, so compound names (clientSecret, signingSecret, personalApiKey,
+// api_key, accessToken) are covered, not just the bare word.
+var sensitiveVarSubstrings = []string{"secret", "token", "password", "apikey", "credential"}
+
+// isSensitiveVarKey reports whether a variable name looks secret-bearing.
+func isSensitiveVarKey(k string) bool {
+	norm := strings.NewReplacer("_", "", "-", "", " ", "").Replace(strings.ToLower(k))
+	for _, s := range sensitiveVarSubstrings {
+		if strings.Contains(norm, s) {
+			return true
+		}
+	}
+	return false
+}
+
+// redactSensitive returns a deep copy of v with the values of any
+// sensitive-named keys replaced by "[REDACTED]". It walks nested maps and
+// slices so secrets inside input objects are covered too.
+func redactSensitive(v interface{}) interface{} {
+	switch val := v.(type) {
+	case map[string]interface{}:
+		out := make(map[string]interface{}, len(val))
+		for k, child := range val {
+			if isSensitiveVarKey(k) {
+				out[k] = "[REDACTED]"
+				continue
+			}
+			out[k] = redactSensitive(child)
+		}
+		return out
+	case []interface{}:
+		out := make([]interface{}, len(val))
+		for i, child := range val {
+			out[i] = redactSensitive(child)
+		}
+		return out
+	default:
+		return v
+	}
+}
+
 // MakeRequest implements the graphql.Client interface required by genqlient
 func (c *Client) MakeRequest(ctx context.Context, req *graphql.Request, resp *graphql.Response) error {
-	// Build the GraphQL request body
-	// We need to strip null values from variables because Linear's API doesn't like them
-	type graphQLRequest struct {
-		Query     string                 `json:"query"`
-		Variables map[string]interface{} `json:"variables,omitempty"`
-	}
+	// Build the GraphQL request body.
+	// We strip null values from variables because Linear's API rejects them.
 
 	// Convert variables to map and strip nulls
 	var variables map[string]interface{}
@@ -177,7 +191,7 @@ func (c *Client) MakeRequest(ctx context.Context, req *graphql.Request, resp *gr
 		variables = stripNulls(variables)
 	}
 
-	reqBody := graphQLRequest{
+	reqBody := GraphQLRequest{
 		Query:     req.Query,
 		Variables: variables,
 	}
@@ -187,8 +201,19 @@ func (c *Client) MakeRequest(ctx context.Context, req *graphql.Request, resp *gr
 		return fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	// DEBUG: Print the request body for debugging
-	// fmt.Fprintf(os.Stderr, "DEBUG: GraphQL Request: %s\n", string(jsonBody))
+	// DEBUG: Print the request body for debugging, with any secret-bearing
+	// variables redacted so the dump is safe to share.
+	if os.Getenv("LINCLI_DEBUG_GQL") != "" {
+		debugBody := GraphQLRequest{Query: req.Query}
+		if variables != nil {
+			if redacted, ok := redactSensitive(variables).(map[string]interface{}); ok {
+				debugBody.Variables = redacted
+			}
+		}
+		if debugJSON, err := json.Marshal(debugBody); err == nil {
+			fmt.Fprintf(os.Stderr, "DEBUG: GraphQL Request: %s\n", string(debugJSON))
+		}
+	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", c.baseURL, bytes.NewBuffer(jsonBody))
 	if err != nil {

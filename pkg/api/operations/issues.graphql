@@ -378,3 +378,152 @@ mutation UpdateIssue($id: String!, $input: IssueUpdateInput!) {
     }
   }
 }
+
+# Mutation: Create a relation between two issues
+mutation CreateIssueRelation($input: IssueRelationCreateInput!) {
+  issueRelationCreate(input: $input) {
+    issueRelation {
+      id
+      type
+      issue {
+        id
+        identifier
+        title
+      }
+      relatedIssue {
+        id
+        identifier
+        title
+      }
+    }
+    success
+  }
+}
+
+# Mutation: Delete an issue relation
+mutation DeleteIssueRelation($id: String!) {
+  issueRelationDelete(id: $id) {
+    success
+  }
+}
+
+# --- Issue lifecycle (Tier 2) ---
+
+# Archive an issue. trash=true moves it to trash (soft delete with 30-day
+# grace) rather than plain archive.
+mutation IssueArchive($id: String!, $trash: Boolean) {
+  issueArchive(id: $id, trash: $trash) {
+    success
+    entity {
+      ...IssueListFields
+    }
+  }
+}
+
+mutation IssueUnarchive($id: String!) {
+  issueUnarchive(id: $id) {
+    success
+    entity {
+      ...IssueListFields
+    }
+  }
+}
+
+# Delete (trash) an issue. permanentlyDelete skips the 30-day grace period and
+# is admin-only.
+mutation IssueDelete($id: String!, $permanentlyDelete: Boolean) {
+  issueDelete(id: $id, permanentlyDelete: $permanentlyDelete) {
+    success
+    entity {
+      ...IssueListFields
+    }
+  }
+}
+
+# Subscribe/unsubscribe the given user (default: the current user) to an issue.
+mutation IssueSubscribe($id: String!, $userId: String) {
+  issueSubscribe(id: $id, userId: $userId) {
+    success
+    issue {
+      ...IssueListFields
+    }
+  }
+}
+
+mutation IssueUnsubscribe($id: String!, $userId: String) {
+  issueUnsubscribe(id: $id, userId: $userId) {
+    success
+    issue {
+      ...IssueListFields
+    }
+  }
+}
+
+# Schedule a reminder notification for an issue at the given time.
+mutation IssueReminder($id: String!, $reminderAt: DateTime!) {
+  issueReminder(id: $id, reminderAt: $reminderAt) {
+    success
+    issue {
+      ...IssueListFields
+    }
+  }
+}
+
+# Share/unshare an issue with a specific user.
+mutation IssueShare($id: String!, $userId: String!) {
+  issueShare(id: $id, userId: $userId) {
+    success
+    issue {
+      ...IssueListFields
+    }
+  }
+}
+
+mutation IssueUnshare($id: String!, $userId: String!) {
+  issueUnshare(id: $id, userId: $userId) {
+    success
+    issue {
+      ...IssueListFields
+    }
+  }
+}
+
+# --- Issue bulk operations (Tier 2) ---
+
+mutation IssueBatchCreate($input: IssueBatchCreateInput!) {
+  issueBatchCreate(input: $input) {
+    success
+    issues {
+      ...IssueListFields
+    }
+  }
+}
+
+# Update up to 50 issues at once with a single partial update.
+mutation IssueBatchUpdate($ids: [UUID!]!, $input: IssueUpdateInput!) {
+  issueBatchUpdate(ids: $ids, input: $input) {
+    success
+    issues {
+      ...IssueListFields
+    }
+  }
+}
+
+# Update an existing issue relation's type or endpoints (Tier 5). Complements
+# CreateIssueRelation/DeleteIssueRelation; the relation ID comes from the
+# Relations list on `issue get --json`.
+mutation UpdateIssueRelation($id: String!, $input: IssueRelationUpdateInput!) {
+  issueRelationUpdate(id: $id, input: $input) {
+    success
+    issueRelation {
+      id
+      type
+      issue {
+        identifier
+      }
+      relatedIssue {
+        identifier
+      }
+    }
+  }
+}

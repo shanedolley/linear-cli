@@ -1,0 +1,82 @@
+# Git automation operations (Tier 4b).
+#
+# Two related resources, both scoped to a team:
+#   - GitAutomationState: transitions linked issues to a workflow state when a
+#     Git event fires (event enum: draft | start | review | mergeable | merge).
+#   - GitAutomationTargetBranch: scopes automation rules to branches by exact
+#     name or regex pattern.
+#
+# These are write-only here (create/update/delete): the live Linear API does not
+# expose a root `gitAutomationStates` query, so there is no list/get. IDs come
+# from the create output (use --json).
+
+fragment GitAutomationStateFields on GitAutomationState {
+  id
+  event
+  createdAt
+  state {
+    id
+    name
+  }
+  targetBranch {
+    id
+    branchPattern
+    isRegex
+  }
+}
+
+fragment GitAutomationTargetBranchFields on GitAutomationTargetBranch {
+  id
+  branchPattern
+  isRegex
+  createdAt
+  updatedAt
+}
+
+mutation GitAutomationStateCreate($input: GitAutomationStateCreateInput!) {
+  gitAutomationStateCreate(input: $input) {
+    success
+    gitAutomationState {
+      ...GitAutomationStateFields
+    }
+  }
+}
+
+mutation GitAutomationStateUpdate($id: String!, $input: GitAutomationStateUpdateInput!) {
+  gitAutomationStateUpdate(id: $id, input: $input) {
+    success
+    gitAutomationState {
+      ...GitAutomationStateFields
+    }
+  }
+}
+
+mutation GitAutomationStateDelete($id: String!) {
+  gitAutomationStateDelete(id: $id) {
+    success
+  }
+}
+
+mutation GitAutomationTargetBranchCreate($input: GitAutomationTargetBranchCreateInput!) {
+  gitAutomationTargetBranchCreate(input: $input) {
+    success
+    targetBranch {
+      ...GitAutomationTargetBranchFields
+    }
+  }
+}
+
+mutation GitAutomationTargetBranchUpdate($id: String!, $input: GitAutomationTargetBranchUpdateInput!) {
+  gitAutomationTargetBranchUpdate(id: $id, input: $input) {
+    success
+    targetBranch {
+      ...GitAutomationTargetBranchFields
+    }
+  }
+}
+
+mutation GitAutomationTargetBranchDelete($id: String!) {
+  gitAutomationTargetBranchDelete(id: $id) {
+    success
+  }
+}

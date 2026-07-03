@@ -71,3 +71,90 @@ mutation AttachmentDelete($id: String!) {
     success
   }
 }
+
+# --- Typed link attachments (Tier 4c) ---
+#
+# Each mutation links a URL to an issue as a provider-typed attachment. When the
+# workspace has the matching integration, Linear builds a rich attachment (e.g.
+# status sync); otherwise a basic attachment. `attachment link --provider`
+# dispatches to these.
+#
+# Only the providers whose mutation takes just (issueId, url) are exposed: url,
+# slack, github-issue, github-pr, salesforce. The default `url` provider
+# auto-detects recognized integration URLs (Zendesk, Jira, GitLab, GitHub,
+# Slack, ...) and still builds the rich attachment, so it covers the providers
+# whose typed mutations require extra structured identifiers (Discord's
+# channelId/messageId, Zendesk's ticketId, Jira's jiraIssueId, GitLab's
+# number/projectPath) as well as Front/Intercom (which key on a conversationId).
+
+mutation AttachmentLinkURL($issueId: String!, $url: String!, $title: String) {
+  attachmentLinkURL(issueId: $issueId, url: $url, title: $title) {
+    success
+    attachment {
+      id
+      title
+      url
+      createdAt
+    }
+  }
+}
+
+mutation AttachmentLinkSlack($issueId: String!, $url: String!, $title: String, $syncToCommentThread: Boolean) {
+  attachmentLinkSlack(issueId: $issueId, url: $url, title: $title, syncToCommentThread: $syncToCommentThread) {
+    success
+    attachment {
+      id
+      title
+      url
+      createdAt
+    }
+  }
+}
+
+mutation AttachmentLinkGitHubIssue($issueId: String!, $url: String!, $title: String) {
+  attachmentLinkGitHubIssue(issueId: $issueId, url: $url, title: $title) {
+    success
+    attachment {
+      id
+      title
+      url
+      createdAt
+    }
+  }
+}
+
+mutation AttachmentLinkGitHubPR($issueId: String!, $url: String!, $title: String) {
+  attachmentLinkGitHubPR(issueId: $issueId, url: $url, title: $title) {
+    success
+    attachment {
+      id
+      title
+      url
+      createdAt
+    }
+  }
+}
+
+mutation AttachmentLinkSalesforce($issueId: String!, $url: String!, $title: String) {
+  attachmentLinkSalesforce(issueId: $issueId, url: $url, title: $title) {
+    success
+    attachment {
+      id
+      title
+      url
+      createdAt
+    }
+  }
+}
+
+# Sync an existing Slack attachment's thread to the issue comment thread.
+mutation AttachmentSyncToSlack($id: String!) {
+  attachmentSyncToSlack(id: $id) {
+    success
+    attachment {
+      id
+      title
+      url
+    }
+  }
+}

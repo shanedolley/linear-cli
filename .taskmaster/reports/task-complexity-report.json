@@ -1,0 +1,109 @@
+{
+	"meta": {
+		"generatedAt": "2026-07-01T15:52:57.385Z",
+		"tasksAnalyzed": 12,
+		"totalTasks": 12,
+		"analysisCount": 12,
+		"thresholdScore": 5,
+		"projectName": "Task Master",
+		"usedResearch": true
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 1,
+			"taskTitle": "Create Shared Resolver Infrastructure",
+			"complexityScore": 6,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down the resolver infrastructure task into: (1) Create cmd/resolve.go with ResolverCache struct and isUUID helper, (2) Implement ResolveTeam, ResolveUser, and ResolveProject functions extracting/refactoring existing inline code from cmd/issue.go, (3) Implement ResolveWorkflowState, ResolveCycle, ResolveLabel, ResolveMilestone functions with team-scoping, (4) Implement ResolveInitiative and refactor existing issue update commands to use shared resolvers with integration tests.",
+			"reasoning": "Existing patterns for user/state/project lookup exist inline in cmd/issue.go (lines 1032-1130) and can be extracted. The caching mechanism is new but straightforward (map-based, per-command scope). Key complexity: ensuring backward compatibility with existing --assignee, --state, --project flags while introducing shared infrastructure. ~8 resolver functions needed. Moderate complexity as it's primarily extraction and generalization of existing patterns, not novel logic."
+		},
+		{
+			"taskId": 2,
+			"taskTitle": "Implement Initiative Domain (Tier 1a - PR 1)",
+			"complexityScore": 8,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down initiative implementation into: (1) Create pkg/api/operations/initiatives.graphql with fragments and CRUD queries/mutations, (2) Create cmd/initiative.go with list/get/create/update base commands following existing issue.go patterns, (3) Add archive/unarchive/delete and set-lead commands with enum validation, (4) Implement nested 'initiative project' subgroup for project links with add/remove/reorder, (5) Implement nested 'initiative label' and 'initiative relate' subgroups, (6) Implement 'initiative update-post' nested commands for status updates with list/create/edit/archive/unarchive operations.",
+			"reasoning": "Largest coverage gap - zero existing commands. Must create ~15 new GraphQL operations and ~12 commands. Follows established patterns (compare to issue.go at 1620 lines) but substantial scope. Nested command groups (project, label, relate, update-post) add structural complexity. Enum validations (InitiativeStatus, InitiativeUpdateHealthType, InitiativeLeadTeamChangeMode) require careful handling. High but predictable effort since patterns exist."
+		},
+		{
+			"taskId": 3,
+			"taskTitle": "Extend Project Domain (Tier 1b - PR 2)",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down project extension into: (1) Add CreateProject/UpdateProject/ProjectDelete/ProjectUnarchive mutations to projects.graphql, (2) Implement project create/update/delete/unarchive commands in cmd/project.go, (3) Implement 'project milestone' nested group with CRUD operations, (4) Implement 'project update-post' nested group for status updates, (5) Implement 'project label', 'project relate', 'project status', and member management commands.",
+			"reasoning": "Extends existing project.go (620 lines) with write operations. Complex because: many nested subgroups (milestone, update-post, label, relate, status, members), project-status management is a separate entity (ProjectStatus CRUD), and critical PRD constraint that project update has NO --state or --health flags. Requires careful flag-regression testing on existing read commands. ~25 new GraphQL operations, ~15 new commands."
+		},
+		{
+			"taskId": 4,
+			"taskTitle": "Implement Cycles, Labels, States, Issue Extensions (Tier 2 - PR 3)",
+			"complexityScore": 8,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down into: (1) Create cmd/cycle.go with list/get/create/update/archive and shift/start-now commands plus cycles.graphql, (2) Create cmd/label.go with full CRUD and retire/restore operations plus labels.graphql, (3) Create cmd/state.go with get/create/update/archive operations plus states.graphql, (4) Add issue archive/unarchive/delete/subscribe/share commands to cmd/issue.go, (5) Extend buildIssueCreateInput/buildIssueUpdateInput with --label/--cycle/--milestone/--estimate/--parent flags, (6) Implement issue batch-create and batch-update commands with resolver caching and rate-limit retry logic.",
+			"reasoning": "Multi-domain task spanning 4 command files. Cycle commands need team scoping. Label commands need parent hierarchy and team/workspace scope distinction. State commands must use embedded team.states.nodes optimization. Issue extensions touch existing 1620-line file requiring careful flag regression testing. Batch operations introduce new patterns (JSON/CSV input, retry with backoff). High complexity due to breadth and interaction with existing code."
+		},
+		{
+			"taskId": 5,
+			"taskTitle": "Extend Comments and Add Documents (Tier 2 continued - PR 3)",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down into: (1) Extend cmd/comment.go with edit/delete/resolve/unresolve commands and wire existing commentUpdate operation, (2) Add reaction support for both comments and issues with shared helper function, (3) Create cmd/document.go with full CRUD, search, and content history display following existing patterns.",
+			"reasoning": "Moderate complexity. Comment extensions are mostly wiring existing unwired operations. Reaction helper is shared code between two domains. Document domain is new but straightforward - follows existing patterns (list/get/create/update/delete) with simpler structure than initiatives. Comment threading (--parent flag) adds minor complexity. ~10 GraphQL operations, ~12 commands across two files."
+		},
+		{
+			"taskId": 6,
+			"taskTitle": "Extend Teams and Users, Add Org (Tier 3 - PR 4)",
+			"complexityScore": 6,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down into: (1) Add team write operations (create/update/delete/unarchive) and membership management to cmd/team.go, (2) Implement team set-role with TeamRoleType validation, (3) Add user write operations (update/set-role/suspend/unsuspend/settings) to cmd/user.go with UserRoleType validation, (4) Create cmd/org.go with get/update and invite management commands.",
+			"reasoning": "Extends existing team.go (320 lines) and user.go (340 lines) with write operations. Critical distinction: team set-role (TeamRoleType: owner/member) vs user set-role (UserRoleType: owner/admin/guest/user/app) - NOT 'member'. New org domain is small (~5 commands). Delete/suspend execute immediately - accepted risk per PRD. Moderate complexity with clear scope boundaries."
+		},
+		{
+			"taskId": 7,
+			"taskTitle": "Add Favorites, Views, Notifications, Webhooks, Templates (Tier 3 - PR 4)",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down into: (1) Create cmd/favorite.go with list/add/remove and --entity flag for entity type selection, (2) Create cmd/view.go with custom view CRUD and view preferences management, (3) Create cmd/notification.go with list/read-all/archive/snooze and subscription management, (4) Create cmd/webhook.go with CRUD, URL validation (reject localhost/private IPs), and rotate-secret command, (5) Create cmd/template.go with CRUD and thread --template flag into issue/project create commands.",
+			"reasoning": "Five new command files with no existing foundation. Webhook URL validation requires security-conscious implementation. Notification subscription uses update with active=false (not delete). Template apply requires cross-domain coordination (touching issue create and project create). rotate-secret prints secret once - security-sensitive output. Breadth across 5 domains increases coordination complexity."
+		},
+		{
+			"taskId": 8,
+			"taskTitle": "Add Releases and Customers/CRM (Tier 4a - PR 5a)",
+			"complexityScore": 7,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down into: (1) Run plan-availability gate first - attempt one scoped write per domain in lincli-sandbox, record results before proceeding, (2) Create cmd/release.go with release CRUD plus nested pipeline/stage/note subgroups and issue link management, (3) Create cmd/customer.go with customer CRUD plus merge/upsert operations, (4) Implement customer need/status/tier nested subgroups with full lifecycle operations.",
+			"reasoning": "Two enterprise domains with plan-availability concerns. Release management has deep nesting (pipeline -> stages, release -> notes, release -> issues). Customer domain has complex operations (merge, upsert by external ID). Nested CRUD patterns are well-established but scope is broad. Plan-availability gate adds gating complexity - may need to defer entire domain based on workspace plan."
+		},
+		{
+			"taskId": 9,
+			"taskTitle": "Add Emoji, Triage, Git Automation, Schedules (Tier 4b - PR 5b)",
+			"complexityScore": 5,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down into: (1) Create cmd/emoji.go with list/create/delete for custom org emojis, (2) Create cmd/triage.go with full CRUD for triage responsibilities, (3) Create cmd/git.go with git automation state and target-branch management commands, (4) Create cmd/schedule.go with time schedule CRUD plus upsert-external and refresh operations.",
+			"reasoning": "Four small, self-contained domains. Emoji is minimal (3 operations). Triage is straightforward CRUD. Git automation has two sub-entities but simple operations. Schedules follow existing patterns. Lower complexity than other Tier 4 tasks due to smaller scope per domain and no deep nesting or cross-domain dependencies."
+		},
+		{
+			"taskId": 10,
+			"taskTitle": "Add OAuth Apps, Attachment Links, Agents (Tier 4c - PR 5c)",
+			"complexityScore": 6,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down into: (1) Create cmd/oauthapp.go with CRUD plus two rotate-secret commands (print once, security-sensitive), (2) Extend cmd/attachment.go with link command that dispatches to typed mutations based on --provider flag with validation, (3) Implement attachment sync-to-slack command, (4) Create cmd/agent.go with session/activity/skill management (build last, confirm use case first).",
+			"reasoning": "OAuth app involves security-sensitive secret rotation. Attachment link uses --provider to dispatch to ~12 different mutations (Slack, Discord, Front, GitHub, etc.) - requires clean dispatch pattern. Agents API is large but lowest priority and built last. Provider validation with helpful error messages adds detail work. Moderate complexity with security considerations."
+		},
+		{
+			"taskId": 11,
+			"taskTitle": "Add Tier 5 Cross-Cutting Operations (PR 6)",
+			"complexityScore": 6,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down into: (1) Create cmd/audit.go with list command and cmd/ratelimit.go replacing Client.GetRateLimit() placeholder with real rateLimitStatus query, (2) Extend search commands with project search and semantic search operations, (3) Create cmd/link.go for external links on any entity (initiatives/documents/etc), (4) Add SLA list (with plan-availability gate), external users, view preferences, user settings, and issue relation update operations.",
+			"reasoning": "Miscellaneous cross-cutting operations spanning multiple domains. Key technical task: removing/replacing hardcoded Client.GetRateLimit() placeholder with real API call. Semantic search is new capability. External links work across entity types. SLA requires plan-availability gate. User settings and view preferences extend existing domains. Moderate complexity due to breadth but each piece is small."
+		},
+		{
+			"taskId": 12,
+			"taskTitle": "Update Documentation and Final Verification",
+			"complexityScore": 4,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Break down into: (1) Update README.md with command reference for all new domains and workflow examples, (2) Update CLAUDE.md and create/extend local instruction files with new patterns (nested groups, resolver conventions, three-mode output), (3) Run final verification - complete smoke suite (~75+ tests), make build, manual documentation accuracy check, cleanup test artifacts.",
+			"reasoning": "Documentation and verification task. Lower technical complexity but requires thoroughness. Must document ~15 new domains with accurate command syntax. Final verification ensures all 75+ smoke tests pass. Cleanup of test artifacts from write verification. Well-defined scope with clear completion criteria. No novel engineering challenges."
+		}
+	]
+}

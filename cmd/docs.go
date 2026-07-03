@@ -26,8 +26,9 @@ Examples:
   lincli docs                    # Display documentation
   lincli docs | less            # View with pager
   lincli docs > lincli-docs.md  # Save to file`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Print(readmeContents)
+		return nil
 	},
 }
 

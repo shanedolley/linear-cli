@@ -1,0 +1,12 @@
+# SLA configuration (read-only). slaConfigurations lists a team's SLA rules:
+# each rule sets or removes an SLA when its workflow conditions match.
+
+query ListSlaConfigurations($teamId: String!) {
+  slaConfigurations(teamId: $teamId) {
+    id
+    name
+    sla
+    slaType
+    removesSla
+  }
+}

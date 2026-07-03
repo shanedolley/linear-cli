@@ -1,0 +1,64 @@
+# Template operations (Tier 3).
+#
+# Templates are reusable issue/project skeletons (Template.type is "issue" or
+# "project"). `templates` returns the whole workspace list (no filter/paging in
+# the schema), so `template list --template-type` filters client-side. templateData is a
+# JSON blob; create/update accept it raw so the CLI stays a thin pass-through.
+
+fragment TemplateFields on Template {
+  id
+  name
+  description
+  type
+  icon
+  color
+  sortOrder
+  createdAt
+  updatedAt
+  creator {
+    id
+    name
+  }
+  team {
+    id
+    key
+    name
+  }
+}
+
+query ListTemplates {
+  templates {
+    ...TemplateFields
+  }
+}
+
+query GetTemplate($id: String!) {
+  template(id: $id) {
+    ...TemplateFields
+    templateData
+  }
+}
+
+mutation TemplateCreate($input: TemplateCreateInput!) {
+  templateCreate(input: $input) {
+    success
+    template {
+      ...TemplateFields
+    }
+  }
+}
+
+mutation TemplateUpdate($id: String!, $input: TemplateUpdateInput!) {
+  templateUpdate(id: $id, input: $input) {
+    success
+    template {
+      ...TemplateFields
+    }
+  }
+}
+
+mutation TemplateDelete($id: String!) {
+  templateDelete(id: $id) {
+    success
+  }
+}

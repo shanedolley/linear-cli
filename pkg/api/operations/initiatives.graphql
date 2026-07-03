@@ -1,0 +1,504 @@
+# GraphQL operations for Initiative entity
+#
+# Note: Initiative has no `progress` field in the schema (unlike Project).
+# The closest analog is `health` (onTrack/atRisk/offTrack, derived from the
+# most recent initiative update), which is used in its place in list output.
+#
+# Nested subgroups (project links, labels, relations, and status-update
+# posts) below. A few things learned the hard way while wiring these up,
+# verified against the live API (not just the checked-in schema.graphql
+# snapshot, which was captured before some of these fields were added and no
+# longer perfectly matches production):
+#
+#   - Initiative has NO `initiativeToProjects` field (unlike Project, which
+#     does expose one). The only way to get a project's *link record* (its
+#     join id and sortOrder, needed to remove or reorder it) is from the
+#     Project side: `project(id).initiativeToProjects`. Since a project can
+#     only belong to one initiative in a hierarchy, this returns at most one
+#     relevant node. `Initiative.projects` only returns the raw Project
+#     entities, which is what's used for display in InitiativeDetailFields.
+#
+#   - Initiative has NO `relations` field. The closest read-only equivalent
+#     is `parentInitiatives`/`subInitiatives` (raw Initiative entities, safe
+#     to read on any plan). The join entity (InitiativeRelation, with its own
+#     id needed for InitiativeRelationDelete) is only reachable via the
+#     top-level `initiativeRelations` connection, which - unlike
+#     `initiativeToProjects` - has no filter argument at all, so finding a
+#     specific relation means paginating the whole workspace's relations
+#     client-side. InitiativeRelation is also a pure parent/child hierarchy
+#     edge: there is no relation-type enum (unlike IssueRelation's
+#     IssueRelationType) and InitiativeRelationCreateInput has no `type`
+#     field. Creating a relation is also gated behind Linear's Enterprise
+#     plan ("subInitiatives" feature), confirmed live via a
+#     FEATURE_NOT_ACCESSIBLE error - reading is unaffected.
+#
+#   - Initiative labels are a distinct `InitiativeLabel` entity/catalog, not
+#     `IssueLabel` - confirmed live (initiativeAddLabel rejects an IssueLabel
+#     id once the feature is enabled; also confirmed via schema
+#     introspection that InitiativeLabel has no cross-reference to
+#     IssueLabel). The `initiativeLabels`/`initiativeLabel` query fields used
+#     to resolve a label by name exist on the live API but are missing from
+#     the checked-in schema.graphql snapshot; they were added there by hand
+#     (see schema.graphql, near the `initiative(id)` query field) after
+#     confirming them via introspection. The whole feature ("Initiative
+#     labels, priority, and additional statuses") is workspace-gated, and
+#     critically, querying `Initiative.labels` inline alongside other detail
+#     fields fails the *entire* request (not just that field) on a workspace
+#     where the flag is off - the same failure mode already documented below
+#     for `identifier`. So labels are fetched via a separate, best-effort
+#     query (GetInitiativeLabels) rather than being part of
+#     InitiativeDetailFields.
+#
+# `identifier` is intentionally omitted from InitiativeDetailFields. It's
+# gated behind a workspace-level "Initiative IDs" feature flag; querying it
+# on a workspace where that feature isn't enabled fails the entire request
+# with a GraphQL error ("Feature 'Initiative IDs' is not enabled"), confirmed
+# against the live API.
+
+# Fragment for basic initiative fields used in list views
+fragment InitiativeListFields on Initiative {
+  id
+  name
+  status
+  health
+  icon
+  color
+  targetDate
+  url
+  createdAt
+  updatedAt
+  owner {
+    id
+    name
+    email
+  }
+}
+
+# Fragment for detailed initiative fields used in single initiative view
+fragment InitiativeDetailFields on Initiative {
+  id
+  slugId
+  name
+  description
+  content
+  icon
+  color
+  status
+  health
+  healthUpdatedAt
+  priority
+  startedAt
+  targetDate
+  targetDateResolution
+  visibility
+  url
+  createdAt
+  updatedAt
+  completedAt
+  canceledAt
+  archivedAt
+  creator {
+    id
+    name
+    email
+  }
+  owner {
+    id
+    name
+    email
+  }
+  leadTeam {
+    id
+    key
+    name
+  }
+  projects {
+    nodes {
+      id
+      name
+    }
+  }
+  parentInitiatives {
+    nodes {
+      id
+      name
+    }
+  }
+  subInitiatives {
+    nodes {
+      id
+      name
+    }
+  }
+}
+
+# Query: Get paginated list of initiatives with optional filtering.
+#
+# includeArchived is an addition beyond the base (filter, first, after,
+# orderBy) signature: Initiative has no state-based way to select archived
+# records (unlike Project's "completed"/"canceled" states), so the
+# connection's own includeArchived arg is the only way to support the
+# `initiative list --include-archived` flag.
+query ListInitiatives($filter: InitiativeFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy, $includeArchived: Boolean) {
+  initiatives(filter: $filter, first: $first, after: $after, orderBy: $orderBy, includeArchived: $includeArchived) {
+    nodes {
+      ...InitiativeListFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+# Query: Get a single initiative by ID with all details
+query GetInitiative($id: String!) {
+  initiative(id: $id) {
+    ...InitiativeDetailFields
+  }
+}
+
+# Query: Best-effort fetch of an initiative's labels, kept separate from
+# GetInitiative. See the header note above: querying `labels` inline with
+# other fields fails the whole request when the workspace-level initiative
+# labels feature is off, so callers issue this as its own request and treat
+# an error as "no labels to show" rather than a hard failure.
+query GetInitiativeLabels($id: String!) {
+  initiative(id: $id) {
+    labels {
+      nodes {
+        id
+        name
+        color
+      }
+    }
+  }
+}
+
+# Mutation: Create a new initiative
+mutation CreateInitiative($input: InitiativeCreateInput!) {
+  initiativeCreate(input: $input) {
+    success
+    initiative {
+      ...InitiativeListFields
+    }
+  }
+}
+
+# Mutation: Update an existing initiative's record (name, description, owner,
+# target date, status, etc). This is distinct from posting an initiative
+# status update, which is a separate InitiativeUpdate mutation not covered here.
+mutation UpdateInitiative($id: String!, $input: InitiativeUpdateInput!) {
+  initiativeUpdate(id: $id, input: $input) {
+    success
+    initiative {
+      ...InitiativeListFields
+    }
+  }
+}
+
+# Mutation: Archive an initiative
+mutation InitiativeArchive($id: String!) {
+  initiativeArchive(id: $id) {
+    success
+    entity {
+      id
+      name
+      archivedAt
+    }
+  }
+}
+
+# Mutation: Unarchive an initiative
+mutation InitiativeUnarchive($id: String!) {
+  initiativeUnarchive(id: $id) {
+    success
+    entity {
+      id
+      name
+      archivedAt
+    }
+  }
+}
+
+# Mutation: Delete (trash) an initiative
+mutation InitiativeDelete($id: String!) {
+  initiativeDelete(id: $id) {
+    success
+    entityId
+  }
+}
+
+# Mutation: Update an initiative's lead team, optionally cascading to
+# matching editable sub-initiatives.
+mutation InitiativeLeadTeamUpdate($id: String!, $leadTeamId: String, $mode: InitiativeLeadTeamChangeMode) {
+  initiativeLeadTeamUpdate(id: $id, leadTeamId: $leadTeamId, mode: $mode) {
+    success
+    initiative {
+      ...InitiativeListFields
+    }
+  }
+}
+
+# --- Initiative <-> Project links (InitiativeToProject) ---
+
+# Query: find the InitiativeToProject join record(s) for a project. Used to
+# locate the link id for a given (initiative, project) pair before calling
+# InitiativeToProjectDelete/InitiativeToProjectUpdate - see header note on
+# why this must be queried from the Project side.
+query GetProjectInitiativeLinks($projectId: String!) {
+  project(id: $projectId) {
+    initiativeToProjects {
+      nodes {
+        id
+        sortOrder
+        initiative {
+          id
+          name
+        }
+      }
+    }
+  }
+}
+
+# Mutation: Associate a project with an initiative
+mutation InitiativeToProjectCreate($input: InitiativeToProjectCreateInput!) {
+  initiativeToProjectCreate(input: $input) {
+    success
+    initiativeToProject {
+      id
+      sortOrder
+      initiative {
+        id
+        name
+      }
+      project {
+        id
+        name
+      }
+    }
+  }
+}
+
+# Mutation: Remove a project from an initiative
+mutation InitiativeToProjectDelete($id: String!) {
+  initiativeToProjectDelete(id: $id) {
+    success
+    entityId
+  }
+}
+
+# Mutation: Update an initiative-to-project association's sort order
+mutation InitiativeToProjectUpdate($id: String!, $input: InitiativeToProjectUpdateInput!) {
+  initiativeToProjectUpdate(id: $id, input: $input) {
+    success
+    initiativeToProject {
+      id
+      sortOrder
+      initiative {
+        id
+        name
+      }
+      project {
+        id
+        name
+      }
+    }
+  }
+}
+
+# --- Initiative labels (InitiativeLabel - distinct from IssueLabel) ---
+
+# Query: resolve an initiative label by name. See header note: `labelId` on
+# initiativeAddLabel/initiativeRemoveLabel is an InitiativeLabel id, not an
+# IssueLabel id.
+query ListInitiativeLabels($filter: InitiativeLabelFilter, $first: Int) {
+  initiativeLabels(filter: $filter, first: $first) {
+    nodes {
+      id
+      name
+      color
+    }
+  }
+}
+
+# Mutation: Add a label to an initiative
+mutation InitiativeAddLabel($id: String!, $labelId: String!) {
+  initiativeAddLabel(id: $id, labelId: $labelId) {
+    success
+    initiative {
+      ...InitiativeListFields
+    }
+  }
+}
+
+# Mutation: Remove a label from an initiative
+mutation InitiativeRemoveLabel($id: String!, $labelId: String!) {
+  initiativeRemoveLabel(id: $id, labelId: $labelId) {
+    success
+    initiative {
+      ...InitiativeListFields
+    }
+  }
+}
+
+# Query: minimal issue-label lookup, reused later by the labels domain
+# (issue label add/remove commands). Not used by the initiative label
+# commands above - those resolve against the separate InitiativeLabel
+# catalog via ListInitiativeLabels instead (see header note).
+# ListIssueLabels moved to labels.graphql (Tier 2) so every issue-label
+# operation is defined in one place. resolveLabel still uses it.
+
+# --- Initiative relations (parent/child hierarchy) ---
+
+# Query: list initiative parent-child relations in the workspace. There is
+# no filter argument on this connection (unlike most others in this
+# schema), so finding the join id for a specific (initiative,
+# relatedInitiative) pair means paginating this and matching client-side -
+# see header note.
+query ListInitiativeRelations($first: Int, $after: String) {
+  initiativeRelations(first: $first, after: $after) {
+    nodes {
+      id
+      initiative {
+        id
+        name
+      }
+      relatedInitiative {
+        id
+        name
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+# Mutation: Create a parent-child relation between two initiatives.
+# `initiativeId` is the parent, `relatedInitiativeId` is the child. Requires
+# the Linear Enterprise plan (sub-initiatives) - confirmed live.
+mutation InitiativeRelationCreate($input: InitiativeRelationCreateInput!) {
+  initiativeRelationCreate(input: $input) {
+    success
+    initiativeRelation {
+      id
+      sortOrder
+      initiative {
+        id
+        name
+      }
+      relatedInitiative {
+        id
+        name
+      }
+    }
+  }
+}
+
+# Mutation: Delete an initiative relation
+mutation InitiativeRelationDelete($id: String!) {
+  initiativeRelationDelete(id: $id) {
+    success
+    entityId
+  }
+}
+
+# --- Initiative status updates (InitiativeUpdate "posts") ---
+#
+# Kept clearly distinct from `initiative update` (which edits the
+# Initiative record itself): these are point-in-time status posts, named
+# `initiative update-post` in the CLI to avoid confusion.
+
+fragment InitiativeUpdateFields on InitiativeUpdate {
+  id
+  slugId
+  body
+  health
+  createdAt
+  updatedAt
+  editedAt
+  archivedAt
+  url
+  user {
+    id
+    name
+    email
+  }
+  initiative {
+    id
+    name
+  }
+}
+
+# Query: list status updates for an initiative (via InitiativeUpdateFilter's
+# `initiative` field, matched by id).
+query ListInitiativeUpdates($filter: InitiativeUpdateFilter, $first: Int, $after: String, $orderBy: PaginationOrderBy) {
+  initiativeUpdates(filter: $filter, first: $first, after: $after, orderBy: $orderBy) {
+    nodes {
+      ...InitiativeUpdateFields
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
+
+# Query: get a single status update by id
+query GetInitiativeUpdate($id: String!) {
+  initiativeUpdate(id: $id) {
+    ...InitiativeUpdateFields
+  }
+}
+
+# Mutation: post a new status update to an initiative
+mutation CreateInitiativeUpdate($input: InitiativeUpdateCreateInput!) {
+  initiativeUpdateCreate(input: $input) {
+    success
+    initiativeUpdate {
+      ...InitiativeUpdateFields
+    }
+  }
+}
+
+# Mutation: edit an existing status update's body/health
+mutation UpdateInitiativeUpdate($id: String!, $input: InitiativeUpdateUpdateInput!) {
+  initiativeUpdateUpdate(id: $id, input: $input) {
+    success
+    initiativeUpdate {
+      ...InitiativeUpdateFields
+    }
+  }
+}
+
+# Mutation: archive a status update
+mutation InitiativeUpdateArchive($id: String!) {
+  initiativeUpdateArchive(id: $id) {
+    success
+    entity {
+      id
+      archivedAt
+    }
+  }
+}
+
+# Mutation: unarchive a status update
+mutation InitiativeUpdateUnarchive($id: String!) {
+  initiativeUpdateUnarchive(id: $id) {
+    success
+    entity {
+      id
+      archivedAt
+    }
+  }
+}
+
+# Mutation: notify a user (defaults to the initiative owner) to post an
+# initiative status update.
+mutation CreateInitiativeUpdateReminder($initiativeId: String!, $userId: String) {
+  createInitiativeUpdateReminder(initiativeId: $initiativeId, userId: $userId) {
+    success
+  }
+}
