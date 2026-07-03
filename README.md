@@ -95,6 +95,9 @@ lincli auth status
 # Show current user
 lincli whoami
 
+# Show the CLI version
+lincli version
+
 # View full documentation
 lincli docs | less
 ```
@@ -237,6 +240,17 @@ lincli attachment delete <attachment-id>
 ### Name-or-ID Resolution
 
 Most commands accept a human-readable reference instead of a UUID: a team key, a project or initiative name, a user email, a cycle number, or a label name. lincli resolves the reference with one extra lookup; a UUID skips that lookup. Team keys are uppercase (e.g., `ENG`). User references are always email addresses.
+
+### Version
+```bash
+lincli version              # Version, Go toolchain, and platform
+lincli version --plaintext  # Just the version string, for scripts
+lincli version --json       # version, goVersion, and platform fields
+lincli --version            # Same version via the global flag
+```
+
+The version is the git tag or short commit the binary was built from, or `dev`
+for an un-stamped local build.
 
 ### Authentication Commands
 ```bash
