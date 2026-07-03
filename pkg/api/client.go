@@ -127,14 +127,23 @@ func stripNulls(m map[string]interface{}) map[string]interface{} {
 	return result
 }
 
-// sensitiveVarKeys names request variables whose values may carry a secret
-// (for example a webhook signing secret). LINCLI_DEBUG_GQL redacts them so the
-// debug dump can be shared without leaking credentials.
-var sensitiveVarKeys = map[string]bool{
-	"secret":   true,
-	"token":    true,
-	"password": true,
-	"apikey":   true,
+// sensitiveVarSubstrings marks a request variable as secret-bearing when its
+// normalized name contains any of these (for example a webhook signing secret).
+// LINCLI_DEBUG_GQL redacts matching variables so the debug dump can be shared
+// without leaking credentials. Matching is case-insensitive and ignores
+// separators, so compound names (clientSecret, signingSecret, personalApiKey,
+// api_key, accessToken) are covered, not just the bare word.
+var sensitiveVarSubstrings = []string{"secret", "token", "password", "apikey", "credential"}
+
+// isSensitiveVarKey reports whether a variable name looks secret-bearing.
+func isSensitiveVarKey(k string) bool {
+	norm := strings.NewReplacer("_", "", "-", "", " ", "").Replace(strings.ToLower(k))
+	for _, s := range sensitiveVarSubstrings {
+		if strings.Contains(norm, s) {
+			return true
+		}
+	}
+	return false
 }
 
 // redactSensitive returns a deep copy of v with the values of any
@@ -145,7 +154,7 @@ func redactSensitive(v interface{}) interface{} {
 	case map[string]interface{}:
 		out := make(map[string]interface{}, len(val))
 		for k, child := range val {
-			if sensitiveVarKeys[strings.ToLower(k)] {
+			if isSensitiveVarKey(k) {
 				out[k] = "[REDACTED]"
 				continue
 			}

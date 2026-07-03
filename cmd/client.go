@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"errors"
 
 	"github.com/Khan/genqlient/graphql"
@@ -29,16 +28,4 @@ var newGraphQLClient = func() (graphql.Client, error) {
 		return nil, errNotAuthenticated
 	}
 	return api.NewClient(authHeader), nil
-}
-
-// apiClient returns an authenticated client and a request context, collapsing
-// the auth-plus-client-plus-context setup that every handler needs into one
-// call. It returns an error (rather than exiting) so RunE handlers can return
-// it for central formatting.
-func apiClient() (graphql.Client, context.Context, error) {
-	client, err := newGraphQLClient()
-	if err != nil {
-		return nil, nil, err
-	}
-	return client, context.Background(), nil
 }

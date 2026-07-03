@@ -117,3 +117,23 @@ func TestRedactSensitive_RedactsNestedSecrets(t *testing.T) {
 		t.Errorf("redactSensitive mutated its input")
 	}
 }
+
+// Redaction must catch compound secret-bearing key names, not just the bare
+// words, so a future mutation variable like clientSecret or accessToken cannot
+// leak under LINCLI_DEBUG_GQL. Non-secret keys must pass through untouched.
+func TestRedactSensitive_CoversCompoundKeys(t *testing.T) {
+	sensitive := []string{"secret", "clientSecret", "signingSecret", "token", "accessToken", "apiKey", "api_key", "personalApiKey", "password", "credential"}
+	for _, k := range sensitive {
+		got := redactSensitive(map[string]interface{}{k: "s3cret"}).(map[string]interface{})
+		if got[k] != "[REDACTED]" {
+			t.Errorf("sensitive key %q was not redacted: got %#v", k, got[k])
+		}
+	}
+	safe := []string{"title", "name", "id", "url", "description", "email"}
+	for _, k := range safe {
+		got := redactSensitive(map[string]interface{}{k: "value"}).(map[string]interface{})
+		if got[k] != "value" {
+			t.Errorf("non-sensitive key %q was wrongly redacted: got %#v", k, got[k])
+		}
+	}
+}
