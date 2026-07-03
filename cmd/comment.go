@@ -4,13 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -287,8 +285,7 @@ var commentResolveCmd = &cobra.Command{
 	Long:  `Resolve a comment thread, marking the root comment as resolved.`,
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		runCommentResolution(cmd, args[0], true)
-		return nil
+		return runCommentResolution(cmd, args[0], true)
 	},
 }
 
@@ -298,24 +295,20 @@ var commentUnresolveCmd = &cobra.Command{
 	Long:  `Clear the resolved state on a previously resolved comment thread.`,
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		runCommentResolution(cmd, args[0], false)
-		return nil
+		return runCommentResolution(cmd, args[0], false)
 	},
 }
 
 // runCommentResolution handles resolve/unresolve, which share the same shape:
 // call the mutation, check success, report.
-func runCommentResolution(cmd *cobra.Command, id string, resolve bool) {
+func runCommentResolution(cmd *cobra.Command, id string, resolve bool) error {
 	plaintext := viper.GetBool("plaintext")
 	jsonOut := viper.GetBool("json")
 
-	authHeader, err := auth.GetAuthHeader()
+	client, err := newGraphQLClient()
 	if err != nil {
-		output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return err
 	}
-
-	client := api.NewClient(authHeader)
 	ctx := context.Background()
 
 	// verb (infinitive) is used in error messages; pastVerb in the success message.
@@ -328,29 +321,27 @@ func runCommentResolution(cmd *cobra.Command, id string, resolve bool) {
 	if resolve {
 		resp, err := api.ResolveComment(ctx, client, id)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to resolve comment: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to resolve comment: %v", err)
 		}
 		success = resp.CommentResolve != nil && resp.CommentResolve.Success
 	} else {
 		resp, err := api.UnresolveComment(ctx, client, id)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to unresolve comment: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to unresolve comment: %v", err)
 		}
 		success = resp.CommentUnresolve != nil && resp.CommentUnresolve.Success
 	}
 
 	if !success {
-		output.Error(fmt.Sprintf("Failed to %s comment", verb), plaintext, jsonOut)
-		os.Exit(1)
+		return fmt.Errorf("Failed to %s comment", verb)
 	}
 
 	if jsonOut {
 		output.JSON(map[string]interface{}{"success": true, "id": id})
-		return
+		return nil
 	}
 	output.Success(fmt.Sprintf("%s comment %s", pastVerb, id), plaintext, jsonOut)
+	return nil
 }
 
 var commentReactCmd = &cobra.Command{
@@ -363,8 +354,7 @@ Examples:
   lincli comment react COMMENT-ID --emoji 👍 --remove`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		runReaction(cmd, "comment", args[0])
-		return nil
+		return runReaction(cmd, "comment", args[0])
 	},
 }
 

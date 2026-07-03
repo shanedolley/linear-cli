@@ -4,12 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -427,8 +425,7 @@ This action executes immediately with no confirmation prompt. Reversible with
 'user unsuspend'.`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		runUserSuspension(cmd, args[0], true)
-		return nil
+		return runUserSuspension(cmd, args[0], true)
 	},
 }
 
@@ -438,31 +435,26 @@ var userUnsuspendCmd = &cobra.Command{
 	Long:  `Reactivate a suspended user, restoring their workspace access.`,
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		runUserSuspension(cmd, args[0], false)
-		return nil
+		return runUserSuspension(cmd, args[0], false)
 	},
 }
 
 // runUserSuspension handles suspend/unsuspend, which share the same shape:
 // resolve the user, call the mutation, report.
-func runUserSuspension(cmd *cobra.Command, ref string, suspend bool) {
+func runUserSuspension(cmd *cobra.Command, ref string, suspend bool) error {
 	plaintext := viper.GetBool("plaintext")
 	jsonOut := viper.GetBool("json")
 
-	authHeader, err := auth.GetAuthHeader()
+	client, err := newGraphQLClient()
 	if err != nil {
-		output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return err
 	}
-
-	client := api.NewClient(authHeader)
 	ctx := context.Background()
 	cache := newResolverCache()
 
 	userID, err := resolveUser(ctx, client, cache, ref)
 	if err != nil {
-		output.Error(err.Error(), plaintext, jsonOut)
-		os.Exit(1)
+		return err
 	}
 
 	verb, pastVerb := "suspend", "Suspended"
@@ -474,22 +466,19 @@ func runUserSuspension(cmd *cobra.Command, ref string, suspend bool) {
 	if suspend {
 		resp, err := api.UserSuspend(ctx, client, userID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to suspend user: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to suspend user: %v", err)
 		}
 		success = resp.UserSuspend != nil && resp.UserSuspend.Success
 	} else {
 		resp, err := api.UserUnsuspend(ctx, client, userID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to unsuspend user: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to unsuspend user: %v", err)
 		}
 		success = resp.UserUnsuspend != nil && resp.UserUnsuspend.Success
 	}
 
 	if !success {
-		output.Error(fmt.Sprintf("Failed to %s user", verb), plaintext, jsonOut)
-		os.Exit(1)
+		return fmt.Errorf("Failed to %s user", verb)
 	}
 
 	if jsonOut {
@@ -497,6 +486,7 @@ func runUserSuspension(cmd *cobra.Command, ref string, suspend bool) {
 	} else {
 		output.Success(fmt.Sprintf("%s user %s", pastVerb, ref), plaintext, jsonOut)
 	}
+	return nil
 }
 
 var userSettingsCmd = &cobra.Command{

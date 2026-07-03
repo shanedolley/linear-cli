@@ -12,7 +12,6 @@ import (
 	"github.com/Khan/genqlient/graphql"
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/shanedolley/lincli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -1442,8 +1441,7 @@ var issueSubscribeCmd = &cobra.Command{
 	Long:  `Subscribe a user to an issue. Defaults to yourself; use --user to subscribe someone else.`,
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		runIssueSubscription(cmd, args[0], true)
-		return nil
+		return runIssueSubscription(cmd, args[0], true)
 	},
 }
 
@@ -1453,24 +1451,20 @@ var issueUnsubscribeCmd = &cobra.Command{
 	Long:  `Unsubscribe a user from an issue. Defaults to yourself; use --user to unsubscribe someone else.`,
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		runIssueSubscription(cmd, args[0], false)
-		return nil
+		return runIssueSubscription(cmd, args[0], false)
 	},
 }
 
 // runIssueSubscription handles subscribe/unsubscribe, which share the same
 // shape. --user is optional; when omitted, Linear defaults to the current user.
-func runIssueSubscription(cmd *cobra.Command, issueID string, subscribe bool) {
+func runIssueSubscription(cmd *cobra.Command, issueID string, subscribe bool) error {
 	plaintext := viper.GetBool("plaintext")
 	jsonOut := viper.GetBool("json")
 
-	authHeader, err := auth.GetAuthHeader()
+	client, err := newGraphQLClient()
 	if err != nil {
-		output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
-		os.Exit(1)
+		return err
 	}
-
-	client := api.NewClient(authHeader)
 	ctx := context.Background()
 	cache := newResolverCache()
 
@@ -1478,8 +1472,7 @@ func runIssueSubscription(cmd *cobra.Command, issueID string, subscribe bool) {
 	if user, _ := cmd.Flags().GetString("user"); user != "" {
 		userID, err := resolveUser(ctx, client, cache, user)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return err
 		}
 		userIDPtr = &userID
 	}
@@ -1488,15 +1481,13 @@ func runIssueSubscription(cmd *cobra.Command, issueID string, subscribe bool) {
 	if subscribe {
 		resp, err := api.IssueSubscribe(ctx, client, issueID, userIDPtr)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to subscribe to issue: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to subscribe to issue: %v", err)
 		}
 		success = resp.IssueSubscribe.Success
 	} else {
 		resp, err := api.IssueUnsubscribe(ctx, client, issueID, userIDPtr)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to unsubscribe from issue: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to unsubscribe from issue: %v", err)
 		}
 		success = resp.IssueUnsubscribe.Success
 	}
@@ -1506,8 +1497,7 @@ func runIssueSubscription(cmd *cobra.Command, issueID string, subscribe bool) {
 		verb = "Unsubscribed from"
 	}
 	if !success {
-		output.Error(fmt.Sprintf("Failed to change subscription for issue %s", issueID), plaintext, jsonOut)
-		os.Exit(1)
+		return fmt.Errorf("Failed to change subscription for issue %s", issueID)
 	}
 
 	if jsonOut {
@@ -1515,6 +1505,7 @@ func runIssueSubscription(cmd *cobra.Command, issueID string, subscribe bool) {
 	} else {
 		output.Success(fmt.Sprintf("%s issue %s", verb, issueID), plaintext, jsonOut)
 	}
+	return nil
 }
 
 var issueReminderCmd = &cobra.Command{
@@ -1568,8 +1559,7 @@ var issueShareCmd = &cobra.Command{
 	Long:  `Share an issue with a specific user. --user is required.`,
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		runIssueShare(cmd, args[0], true)
-		return nil
+		return runIssueShare(cmd, args[0], true)
 	},
 }
 
@@ -1579,8 +1569,7 @@ var issueUnshareCmd = &cobra.Command{
 	Long:  `Stop sharing an issue with a specific user. --user is required.`,
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		runIssueShare(cmd, args[0], false)
-		return nil
+		return runIssueShare(cmd, args[0], false)
 	},
 }
 
@@ -1594,35 +1583,29 @@ Examples:
   lincli issue react LIN-123 --emoji 👍 --remove`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		runReaction(cmd, "issue", args[0])
-		return nil
+		return runReaction(cmd, "issue", args[0])
 	},
 }
 
 // runIssueShare handles share/unshare, which both require a target --user.
-func runIssueShare(cmd *cobra.Command, issueID string, share bool) {
+func runIssueShare(cmd *cobra.Command, issueID string, share bool) error {
 	plaintext := viper.GetBool("plaintext")
 	jsonOut := viper.GetBool("json")
 
-	authHeader, err := auth.GetAuthHeader()
+	client, err := newGraphQLClient()
 	if err != nil {
-		output.Error("Not authenticated. Run 'lincli auth' first.", plaintext, jsonOut)
-		os.Exit(1)
+		return err
 	}
-
-	client := api.NewClient(authHeader)
 	ctx := context.Background()
 	cache := newResolverCache()
 
 	user, _ := cmd.Flags().GetString("user")
 	if user == "" {
-		output.Error("A target user is required (--user)", plaintext, jsonOut)
-		os.Exit(1)
+		return errors.New("A target user is required (--user)")
 	}
 	userID, err := resolveUser(ctx, client, cache, user)
 	if err != nil {
-		output.Error(err.Error(), plaintext, jsonOut)
-		os.Exit(1)
+		return err
 	}
 
 	var success bool
@@ -1630,8 +1613,7 @@ func runIssueShare(cmd *cobra.Command, issueID string, share bool) {
 	if share {
 		resp, err := api.IssueShare(ctx, client, issueID, userID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to share issue: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to share issue: %v", err)
 		}
 		success = resp.IssueShare.Success
 		if resp.IssueShare.Issue != nil {
@@ -1640,8 +1622,7 @@ func runIssueShare(cmd *cobra.Command, issueID string, share bool) {
 	} else {
 		resp, err := api.IssueUnshare(ctx, client, issueID, userID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to unshare issue: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to unshare issue: %v", err)
 		}
 		success = resp.IssueUnshare.Success
 	}
@@ -1651,8 +1632,7 @@ func runIssueShare(cmd *cobra.Command, issueID string, share bool) {
 		verb = "Unshared"
 	}
 	if !success {
-		output.Error(fmt.Sprintf("Failed to change sharing for issue %s", issueID), plaintext, jsonOut)
-		os.Exit(1)
+		return fmt.Errorf("Failed to change sharing for issue %s", issueID)
 	}
 
 	if jsonOut {
@@ -1661,13 +1641,14 @@ func runIssueShare(cmd *cobra.Command, issueID string, share bool) {
 			result["url"] = shareURL
 		}
 		output.JSON(result)
-		return
+		return nil
 	}
 
 	output.Success(fmt.Sprintf("%s issue %s with %s", verb, issueID, user), plaintext, jsonOut)
 	if share && shareURL != "" {
 		fmt.Printf("  URL: %s\n", shareURL)
 	}
+	return nil
 }
 
 var issueLinkCmd = &cobra.Command{

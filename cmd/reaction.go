@@ -2,13 +2,13 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"os"
 	"sort"
 	"strings"
 
+	"github.com/Khan/genqlient/graphql"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -97,35 +97,30 @@ func addReactionFlags(cmd *cobra.Command) {
 // kind is "issue" or "comment"; ref is the issue identifier or comment ID as
 // the user supplied it (Linear's reactionCreate accepts an issue identifier
 // directly for issueId).
-func runReaction(cmd *cobra.Command, kind, ref string) {
+func runReaction(cmd *cobra.Command, kind, ref string) error {
 	plaintext := viper.GetBool("plaintext")
 	jsonOut := viper.GetBool("json")
 
 	emoji, _ := cmd.Flags().GetString("emoji")
 	if emoji == "" {
-		output.Error("Emoji is required (--emoji)", plaintext, jsonOut)
-		os.Exit(1)
+		return errors.New("Emoji is required (--emoji)")
 	}
 	remove, _ := cmd.Flags().GetBool("remove")
 
-	authHeader, err := auth.GetAuthHeader()
+	client, err := newGraphQLClient()
 	if err != nil {
-		output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return err
 	}
-
-	client := api.NewClient(authHeader)
 	ctx := context.Background()
 
 	if remove {
-		removeReaction(ctx, client, kind, ref, emoji, plaintext, jsonOut)
-		return
+		return removeReaction(ctx, client, kind, ref, emoji, plaintext, jsonOut)
 	}
-	addReaction(ctx, client, kind, ref, emoji, plaintext, jsonOut)
+	return addReaction(ctx, client, kind, ref, emoji, plaintext, jsonOut)
 }
 
 // addReaction creates a reaction on the given issue or comment.
-func addReaction(ctx context.Context, client *api.Client, kind, ref, emoji string, plaintext, jsonOut bool) {
+func addReaction(ctx context.Context, client graphql.Client, kind, ref, emoji string, plaintext, jsonOut bool) error {
 	input := &api.ReactionCreateInput{Emoji: emoji}
 	switch kind {
 	case "issue":
@@ -136,64 +131,59 @@ func addReaction(ctx context.Context, client *api.Client, kind, ref, emoji strin
 
 	resp, err := api.ReactionCreate(ctx, client, input)
 	if err != nil {
-		output.Error(fmt.Sprintf("Failed to add reaction: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return fmt.Errorf("Failed to add reaction: %v", err)
 	}
 	if resp.ReactionCreate == nil || !resp.ReactionCreate.Success {
-		output.Error("Failed to add reaction", plaintext, jsonOut)
-		os.Exit(1)
+		return errors.New("Failed to add reaction")
 	}
 
 	if jsonOut {
 		output.JSON(resp.ReactionCreate.Reaction)
-		return
+		return nil
 	}
 	output.Success(fmt.Sprintf("Added %s reaction to %s %s", emoji, kind, ref), plaintext, jsonOut)
+	return nil
 }
 
 // removeReaction deletes the current user's reaction with the given emoji from
 // the issue or comment. It resolves the viewer, fetches the parent's
 // reactions, and matches on emoji + owner.
-func removeReaction(ctx context.Context, client *api.Client, kind, ref, emoji string, plaintext, jsonOut bool) {
+func removeReaction(ctx context.Context, client graphql.Client, kind, ref, emoji string, plaintext, jsonOut bool) error {
 	viewer, err := api.GetViewer(ctx, client)
 	if err != nil {
-		output.Error(fmt.Sprintf("Failed to resolve current user: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return fmt.Errorf("Failed to resolve current user: %v", err)
 	}
 	viewerID := viewer.Viewer.UserDetailFields.Id
 
 	reactions, err := fetchReactions(ctx, client, kind, ref)
 	if err != nil {
-		output.Error(err.Error(), plaintext, jsonOut)
-		os.Exit(1)
+		return err
 	}
 
 	reactionID, err := findReactionID(reactions, emoji, viewerID)
 	if err != nil {
-		output.Error(err.Error(), plaintext, jsonOut)
-		os.Exit(1)
+		return err
 	}
 
 	resp, err := api.ReactionDelete(ctx, client, reactionID)
 	if err != nil {
-		output.Error(fmt.Sprintf("Failed to remove reaction: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return fmt.Errorf("Failed to remove reaction: %v", err)
 	}
 	if resp.ReactionDelete == nil || !resp.ReactionDelete.Success {
-		output.Error("Failed to remove reaction", plaintext, jsonOut)
-		os.Exit(1)
+		return errors.New("Failed to remove reaction")
 	}
 
 	if jsonOut {
 		output.JSON(map[string]interface{}{"success": true, "id": reactionID})
-		return
+		return nil
 	}
 	output.Success(fmt.Sprintf("Removed %s reaction from %s %s", emoji, kind, ref), plaintext, jsonOut)
+	return nil
 }
 
 // fetchReactions returns the current reactions on an issue or comment,
 // normalized to []reactionInfo for matching.
-func fetchReactions(ctx context.Context, client *api.Client, kind, ref string) ([]reactionInfo, error) {
+func fetchReactions(ctx context.Context, client graphql.Client, kind, ref string) ([]reactionInfo, error) {
 	switch kind {
 	case "issue":
 		resp, err := api.GetIssueReactions(ctx, client, ref)

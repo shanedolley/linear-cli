@@ -88,3 +88,51 @@ func TestUserExternalGetHandler_NotFoundIsCleanError(t *testing.T) {
 		t.Fatal("expected a not-found error, got nil")
 	}
 }
+
+// H2 regression: these mutating handlers previously built their own client from
+// disk auth and called os.Exit, bypassing the mock seam - so a test would reach
+// the live API (and, for destructive commands, real data). Each must now use the
+// injected client and return its error. The non-zero callCount is the proof the
+// mock, not the network, was reached.
+
+func TestTeamDeleteHandler_UsesInjectedClient(t *testing.T) {
+	mock := newMockGraphQLClient()
+	mock.errors["GetTeam"] = errors.New("boom")
+	withMockClient(t, mock)
+
+	err := teamDeleteCmd.RunE(teamDeleteCmd, []string{"ENG"})
+	if err == nil {
+		t.Fatal("expected an error from the injected client, got nil")
+	}
+	if mock.callCount("GetTeam") == 0 {
+		t.Error("handler bypassed the injected client: GetTeam count = 0")
+	}
+}
+
+func TestUserSuspendHandler_UsesInjectedClient(t *testing.T) {
+	mock := newMockGraphQLClient()
+	mock.errors["GetUserByEmail"] = errors.New("boom")
+	withMockClient(t, mock)
+
+	err := userSuspendCmd.RunE(userSuspendCmd, []string{"nobody@example.com"})
+	if err == nil {
+		t.Fatal("expected an error from the injected client, got nil")
+	}
+	if mock.callCount("GetUserByEmail") == 0 {
+		t.Error("handler bypassed the injected client: GetUserByEmail count = 0")
+	}
+}
+
+func TestCommentResolveHandler_UsesInjectedClient(t *testing.T) {
+	mock := newMockGraphQLClient()
+	mock.errors["ResolveComment"] = errors.New("boom")
+	withMockClient(t, mock)
+
+	err := commentResolveCmd.RunE(commentResolveCmd, []string{"comment-1"})
+	if err == nil {
+		t.Fatal("expected an error from the injected client, got nil")
+	}
+	if mock.callCount("ResolveComment") == 0 {
+		t.Error("handler bypassed the injected client: ResolveComment count = 0")
+	}
+}

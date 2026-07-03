@@ -4,12 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/api"
-	"github.com/shanedolley/lincli/pkg/auth"
 	"github.com/shanedolley/lincli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -423,8 +421,7 @@ prompt and archives the team along with its issues. Reversible with
 'team unarchive'.`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		runTeamStateChange(cmd, args[0], true)
-		return nil
+		return runTeamStateChange(cmd, args[0], true)
 	},
 }
 
@@ -435,8 +432,7 @@ var teamUnarchiveCmd = &cobra.Command{
 	Long:    `Restore a previously archived team.`,
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		runTeamStateChange(cmd, args[0], false)
-		return nil
+		return runTeamStateChange(cmd, args[0], false)
 	},
 }
 
@@ -444,24 +440,20 @@ var teamUnarchiveCmd = &cobra.Command{
 // resolve the team, call the mutation, report. delete returns a DeletePayload
 // (entityId); unarchive returns a TeamArchivePayload (entity), so the resolved
 // entity ID is read from the matching field.
-func runTeamStateChange(cmd *cobra.Command, teamRef string, del bool) {
+func runTeamStateChange(cmd *cobra.Command, teamRef string, del bool) error {
 	plaintext := viper.GetBool("plaintext")
 	jsonOut := viper.GetBool("json")
 
-	authHeader, err := auth.GetAuthHeader()
+	client, err := newGraphQLClient()
 	if err != nil {
-		output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return err
 	}
-
-	client := api.NewClient(authHeader)
 	ctx := context.Background()
 	cache := newResolverCache()
 
 	teamID, err := resolveTeam(ctx, client, cache, teamRef)
 	if err != nil {
-		output.Error(err.Error(), plaintext, jsonOut)
-		os.Exit(1)
+		return err
 	}
 
 	verb, pastVerb := "delete", "Deleted"
@@ -474,8 +466,7 @@ func runTeamStateChange(cmd *cobra.Command, teamRef string, del bool) {
 	if del {
 		resp, err := api.TeamDelete(ctx, client, teamID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete team: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete team: %v", err)
 		}
 		if resp.TeamDelete != nil {
 			success = resp.TeamDelete.Success
@@ -484,8 +475,7 @@ func runTeamStateChange(cmd *cobra.Command, teamRef string, del bool) {
 	} else {
 		resp, err := api.TeamUnarchive(ctx, client, teamID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to unarchive team: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to unarchive team: %v", err)
 		}
 		if resp.TeamUnarchive != nil {
 			success = resp.TeamUnarchive.Success
@@ -496,8 +486,7 @@ func runTeamStateChange(cmd *cobra.Command, teamRef string, del bool) {
 	}
 
 	if !success {
-		output.Error(fmt.Sprintf("Failed to %s team", verb), plaintext, jsonOut)
-		os.Exit(1)
+		return fmt.Errorf("Failed to %s team", verb)
 	}
 
 	if jsonOut {
@@ -505,6 +494,7 @@ func runTeamStateChange(cmd *cobra.Command, teamRef string, del bool) {
 	} else {
 		output.Success(fmt.Sprintf("%s team %s", pastVerb, teamRef), plaintext, jsonOut)
 	}
+	return nil
 }
 
 var teamMemberCmd = &cobra.Command{
