@@ -42,7 +42,7 @@ var loginCmd = &cobra.Command{
 
 		err := auth.Login(plaintext, jsonOut)
 		if err != nil {
-			return fmt.Errorf("Authentication failed: %v", err)
+			return fmt.Errorf("Authentication failed: %w", err)
 		}
 
 		if !plaintext && !jsonOut {
@@ -109,7 +109,7 @@ var logoutCmd = &cobra.Command{
 
 		err := auth.Logout()
 		if err != nil {
-			return fmt.Errorf("Logout failed: %v", err)
+			return fmt.Errorf("Logout failed: %w", err)
 		}
 
 		if jsonOut {

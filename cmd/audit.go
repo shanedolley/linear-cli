@@ -56,7 +56,7 @@ var auditListCmd = &cobra.Command{
 
 		resp, err := api.ListAuditEntries(ctx, client, filter, limitPtr, nil)
 		if err != nil {
-			return fmt.Errorf("Failed to list audit entries: %v", err)
+			return fmt.Errorf("Failed to list audit entries: %w", err)
 		}
 
 		if resp.AuditEntries == nil || len(resp.AuditEntries.Nodes) == 0 {
@@ -109,7 +109,7 @@ var auditTypesCmd = &cobra.Command{
 		}
 		resp, err := api.GetAuditEntryTypes(context.Background(), client)
 		if err != nil {
-			return fmt.Errorf("Failed to get audit entry types: %v", err)
+			return fmt.Errorf("Failed to get audit entry types: %w", err)
 		}
 
 		if len(resp.AuditEntryTypes) == 0 {

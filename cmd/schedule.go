@@ -57,12 +57,12 @@ var scheduleListCmd = &cobra.Command{
 		newerThan, _ := cmd.Flags().GetString("newer-than")
 		createdAtISO, err := utils.ParseTimeExpression(newerThan)
 		if err != nil {
-			return fmt.Errorf("Invalid newer-than value: %v", err)
+			return fmt.Errorf("Invalid newer-than value: %w", err)
 		}
 
 		resp, err := api.ListTimeSchedules(ctx, client, limitPtr, nil, nil)
 		if err != nil {
-			return fmt.Errorf("Failed to list schedules: %v", err)
+			return fmt.Errorf("Failed to list schedules: %w", err)
 		}
 
 		if resp.TimeSchedules == nil || len(resp.TimeSchedules.Nodes) == 0 {
@@ -141,7 +141,7 @@ var scheduleGetCmd = &cobra.Command{
 
 		resp, err := api.GetTimeSchedule(ctx, client, id)
 		if err != nil {
-			return fmt.Errorf("Failed to get schedule: %v", err)
+			return fmt.Errorf("Failed to get schedule: %w", err)
 		}
 		if resp.TimeSchedule == nil {
 			return fmt.Errorf("schedule %q not found", id)
@@ -216,7 +216,7 @@ Each --entry is "START|END|USER" (ISO-8601 timestamps; USER is an email, ID, or 
 
 		resp, err := api.TimeScheduleCreate(ctx, client, input)
 		if err != nil {
-			return fmt.Errorf("Failed to create schedule: %v", err)
+			return fmt.Errorf("Failed to create schedule: %w", err)
 		}
 		if resp.TimeScheduleCreate == nil || !resp.TimeScheduleCreate.Success {
 			return errors.New("Failed to create schedule")
@@ -284,7 +284,7 @@ var scheduleUpdateCmd = &cobra.Command{
 
 		resp, err := api.TimeScheduleUpdate(ctx, client, id, input)
 		if err != nil {
-			return fmt.Errorf("Failed to update schedule: %v", err)
+			return fmt.Errorf("Failed to update schedule: %w", err)
 		}
 		if resp.TimeScheduleUpdate == nil || !resp.TimeScheduleUpdate.Success {
 			return errors.New("Failed to update schedule")
@@ -321,7 +321,7 @@ var scheduleDeleteCmd = &cobra.Command{
 
 		resp, err := api.TimeScheduleDelete(ctx, client, id)
 		if err != nil {
-			return fmt.Errorf("Failed to delete schedule: %v", err)
+			return fmt.Errorf("Failed to delete schedule: %w", err)
 		}
 		if resp.TimeScheduleDelete == nil || !resp.TimeScheduleDelete.Success {
 			return errors.New("Failed to delete schedule")
@@ -376,7 +376,7 @@ that external identifier exists it is updated, otherwise a new one is created.
 
 		resp, err := api.TimeScheduleUpsertExternal(ctx, client, externalID, input)
 		if err != nil {
-			return fmt.Errorf("Failed to upsert schedule: %v", err)
+			return fmt.Errorf("Failed to upsert schedule: %w", err)
 		}
 		if resp.TimeScheduleUpsertExternal == nil || !resp.TimeScheduleUpsertExternal.Success {
 			return errors.New("Failed to upsert schedule")
@@ -413,7 +413,7 @@ var scheduleRefreshCmd = &cobra.Command{
 
 		resp, err := api.TimeScheduleRefreshIntegrationSchedule(ctx, client, id)
 		if err != nil {
-			return fmt.Errorf("Failed to refresh schedule: %v", err)
+			return fmt.Errorf("Failed to refresh schedule: %w", err)
 		}
 		if resp.TimeScheduleRefreshIntegrationSchedule == nil || !resp.TimeScheduleRefreshIntegrationSchedule.Success {
 			return errors.New("Failed to refresh schedule")

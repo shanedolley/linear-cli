@@ -56,7 +56,7 @@ var webhookListCmd = &cobra.Command{
 
 		resp, err := api.ListWebhooks(ctx, client, limitPtr, nil, nil)
 		if err != nil {
-			return fmt.Errorf("Failed to list webhooks: %v", err)
+			return fmt.Errorf("Failed to list webhooks: %w", err)
 		}
 
 		if resp.Webhooks == nil || len(resp.Webhooks.Nodes) == 0 {
@@ -107,7 +107,7 @@ var webhookGetCmd = &cobra.Command{
 
 		resp, err := api.GetWebhook(context.Background(), client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to get webhook: %v", err)
+			return fmt.Errorf("Failed to get webhook: %w", err)
 		}
 		if resp.Webhook == nil {
 			return fmt.Errorf("Webhook not found: %s", args[0])
@@ -206,7 +206,7 @@ fetches the URL server-side.`,
 
 		resp, err := api.WebhookCreate(ctx, client, input)
 		if err != nil {
-			return fmt.Errorf("Failed to create webhook: %v", err)
+			return fmt.Errorf("Failed to create webhook: %w", err)
 		}
 		if resp.WebhookCreate == nil || !resp.WebhookCreate.Success {
 			return errors.New("Failed to create webhook")
@@ -273,7 +273,7 @@ var webhookUpdateCmd = &cobra.Command{
 
 		resp, err := api.WebhookUpdate(context.Background(), client, args[0], input)
 		if err != nil {
-			return fmt.Errorf("Failed to update webhook: %v", err)
+			return fmt.Errorf("Failed to update webhook: %w", err)
 		}
 		if resp.WebhookUpdate == nil || !resp.WebhookUpdate.Success {
 			return errors.New("Failed to update webhook")
@@ -304,7 +304,7 @@ var webhookDeleteCmd = &cobra.Command{
 
 		resp, err := api.WebhookDelete(context.Background(), client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to delete webhook: %v", err)
+			return fmt.Errorf("Failed to delete webhook: %w", err)
 		}
 		if resp.WebhookDelete == nil || !resp.WebhookDelete.Success {
 			return errors.New("Failed to delete webhook")
@@ -338,7 +338,7 @@ it, and rotating again replaces it.`,
 
 		resp, err := api.WebhookRotateSecret(context.Background(), client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to rotate webhook secret: %v", err)
+			return fmt.Errorf("Failed to rotate webhook secret: %w", err)
 		}
 		if resp.WebhookRotateSecret == nil || !resp.WebhookRotateSecret.Success {
 			return errors.New("Failed to rotate webhook secret")
@@ -373,7 +373,7 @@ it, and rotating again replaces it.`,
 func validateWebhookURL(rawURL string) error {
 	u, err := url.Parse(rawURL)
 	if err != nil {
-		return fmt.Errorf("invalid webhook URL %q: %v", rawURL, err)
+		return fmt.Errorf("invalid webhook URL %q: %w", rawURL, err)
 	}
 	if u.Scheme != "http" && u.Scheme != "https" {
 		return fmt.Errorf("webhook URL %q must use http or https", rawURL)

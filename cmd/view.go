@@ -53,7 +53,7 @@ var viewListCmd = &cobra.Command{
 
 		resp, err := api.ListCustomViews(ctx, client, nil, limitPtr, nil, nil)
 		if err != nil {
-			return fmt.Errorf("Failed to list views: %v", err)
+			return fmt.Errorf("Failed to list views: %w", err)
 		}
 
 		if resp.CustomViews == nil || len(resp.CustomViews.Nodes) == 0 {
@@ -108,7 +108,7 @@ var viewGetCmd = &cobra.Command{
 
 		resp, err := api.GetCustomView(context.Background(), client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to get view: %v", err)
+			return fmt.Errorf("Failed to get view: %w", err)
 		}
 		if resp.CustomView == nil {
 			return fmt.Errorf("View not found: %s", args[0])
@@ -199,7 +199,7 @@ var viewCreateCmd = &cobra.Command{
 
 		resp, err := api.CustomViewCreate(ctx, client, input)
 		if err != nil {
-			return fmt.Errorf("Failed to create view: %v", err)
+			return fmt.Errorf("Failed to create view: %w", err)
 		}
 		if resp.CustomViewCreate == nil || !resp.CustomViewCreate.Success {
 			return errors.New("Failed to create view")
@@ -263,7 +263,7 @@ var viewUpdateCmd = &cobra.Command{
 
 		resp, err := api.CustomViewUpdate(context.Background(), client, args[0], input)
 		if err != nil {
-			return fmt.Errorf("Failed to update view: %v", err)
+			return fmt.Errorf("Failed to update view: %w", err)
 		}
 		if resp.CustomViewUpdate == nil || !resp.CustomViewUpdate.Success {
 			return errors.New("Failed to update view")
@@ -294,7 +294,7 @@ var viewDeleteCmd = &cobra.Command{
 
 		resp, err := api.CustomViewDelete(context.Background(), client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to delete view: %v", err)
+			return fmt.Errorf("Failed to delete view: %w", err)
 		}
 		if resp.CustomViewDelete == nil || !resp.CustomViewDelete.Success {
 			return errors.New("Failed to delete view")
@@ -356,7 +356,7 @@ association: --team, --project, --custom-view, or --label.
 		prefsRaw, _ := cmd.Flags().GetString("preferences")
 		prefs, err := parseJSONObject(prefsRaw)
 		if err != nil {
-			return fmt.Errorf("Invalid --preferences JSON: %v", err)
+			return fmt.Errorf("Invalid --preferences JSON: %w", err)
 		}
 		if len(prefs) == 0 {
 			return errors.New(`--preferences must be a non-empty JSON object, e.g. '{"grouping":"assignee"}'`)
@@ -406,7 +406,7 @@ association: --team, --project, --custom-view, or --label.
 
 		resp, err := api.ViewPreferencesCreate(ctx, client, input)
 		if err != nil {
-			return fmt.Errorf("Failed to create view preferences: %v", err)
+			return fmt.Errorf("Failed to create view preferences: %w", err)
 		}
 		if resp.ViewPreferencesCreate == nil || !resp.ViewPreferencesCreate.Success {
 			return errors.New("Failed to create view preferences")
@@ -436,7 +436,7 @@ var viewPrefsUpdateCmd = &cobra.Command{
 		prefsRaw, _ := cmd.Flags().GetString("preferences")
 		prefs, err := parseJSONObject(prefsRaw)
 		if err != nil {
-			return fmt.Errorf("Invalid --preferences JSON: %v", err)
+			return fmt.Errorf("Invalid --preferences JSON: %w", err)
 		}
 		if len(prefs) == 0 {
 			return errors.New(`--preferences must be a non-empty JSON object, e.g. '{"grouping":"assignee"}'`)
@@ -450,7 +450,7 @@ var viewPrefsUpdateCmd = &cobra.Command{
 
 		resp, err := api.ViewPreferencesUpdate(context.Background(), client, args[0], input)
 		if err != nil {
-			return fmt.Errorf("Failed to update view preferences: %v", err)
+			return fmt.Errorf("Failed to update view preferences: %w", err)
 		}
 		if resp.ViewPreferencesUpdate == nil || !resp.ViewPreferencesUpdate.Success {
 			return errors.New("Failed to update view preferences")
@@ -480,7 +480,7 @@ var viewPrefsDeleteCmd = &cobra.Command{
 		}
 		resp, err := api.ViewPreferencesDelete(context.Background(), client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to delete view preferences: %v", err)
+			return fmt.Errorf("Failed to delete view preferences: %w", err)
 		}
 		if resp.ViewPreferencesDelete == nil || !resp.ViewPreferencesDelete.Success {
 			return errors.New("Failed to delete view preferences")

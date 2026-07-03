@@ -85,7 +85,7 @@ var attachmentListCmd = &cobra.Command{
 		// Call API
 		resp, err := api.ListAttachments(ctx, client, issueID, limitPtr, nil, orderByEnum)
 		if err != nil {
-			return fmt.Errorf("Failed to list attachments: %v", err)
+			return fmt.Errorf("Failed to list attachments: %w", err)
 		}
 
 		// Check if issue exists
@@ -189,7 +189,7 @@ var attachmentCreateCmd = &cobra.Command{
 			var err error
 			metadataMap, err := parseMetadata(metadataStr)
 			if err != nil {
-				return fmt.Errorf("Invalid metadata: %v", err)
+				return fmt.Errorf("Invalid metadata: %w", err)
 			}
 			metadata = &metadataMap
 		}
@@ -220,7 +220,7 @@ var attachmentCreateCmd = &cobra.Command{
 		// Call API
 		resp, err := api.AttachmentCreate(ctx, client, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to create attachment: %v", err)
+			return fmt.Errorf("Failed to create attachment: %w", err)
 		}
 
 		if !resp.AttachmentCreate.Success {
@@ -751,7 +751,7 @@ To change a file or URL, delete the old attachment and create a new one.`,
 		if cmd.Flags().Changed("metadata") {
 			metadata, err := parseMetadata(metadataStr)
 			if err != nil {
-				return fmt.Errorf("Invalid metadata: %v", err)
+				return fmt.Errorf("Invalid metadata: %w", err)
 			}
 			input.Metadata = &metadata
 		}
@@ -759,7 +759,7 @@ To change a file or URL, delete the old attachment and create a new one.`,
 		// Call API
 		resp, err := api.AttachmentUpdate(ctx, client, attachmentID, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to update attachment: %v", err)
+			return fmt.Errorf("Failed to update attachment: %w", err)
 		}
 
 		if !resp.AttachmentUpdate.Success {
@@ -807,7 +807,7 @@ var attachmentDeleteCmd = &cobra.Command{
 		// Call API
 		resp, err := api.AttachmentDelete(ctx, client, attachmentID)
 		if err != nil {
-			return fmt.Errorf("Failed to delete attachment: %v", err)
+			return fmt.Errorf("Failed to delete attachment: %w", err)
 		}
 
 		if !resp.AttachmentDelete.Success {
@@ -916,7 +916,7 @@ Examples:
 		case "url":
 			resp, err := api.AttachmentLinkURL(ctx, client, issueID, url, titlePtr)
 			if err != nil {
-				return fmt.Errorf("Failed to link attachment: %v", err)
+				return fmt.Errorf("Failed to link attachment: %w", err)
 			}
 			if resp.AttachmentLinkURL != nil && resp.AttachmentLinkURL.Success {
 				if a := resp.AttachmentLinkURL.Attachment; a != nil {
@@ -932,7 +932,7 @@ Examples:
 			}
 			resp, err := api.AttachmentLinkSlack(ctx, client, issueID, url, titlePtr, syncPtr)
 			if err != nil {
-				return fmt.Errorf("Failed to link attachment: %v", err)
+				return fmt.Errorf("Failed to link attachment: %w", err)
 			}
 			if resp.AttachmentLinkSlack != nil && resp.AttachmentLinkSlack.Success {
 				if a := resp.AttachmentLinkSlack.Attachment; a != nil {
@@ -943,7 +943,7 @@ Examples:
 		case "github-issue":
 			resp, err := api.AttachmentLinkGitHubIssue(ctx, client, issueID, url, titlePtr)
 			if err != nil {
-				return fmt.Errorf("Failed to link attachment: %v", err)
+				return fmt.Errorf("Failed to link attachment: %w", err)
 			}
 			if resp.AttachmentLinkGitHubIssue != nil && resp.AttachmentLinkGitHubIssue.Success {
 				if a := resp.AttachmentLinkGitHubIssue.Attachment; a != nil {
@@ -954,7 +954,7 @@ Examples:
 		case "github-pr":
 			resp, err := api.AttachmentLinkGitHubPR(ctx, client, issueID, url, titlePtr)
 			if err != nil {
-				return fmt.Errorf("Failed to link attachment: %v", err)
+				return fmt.Errorf("Failed to link attachment: %w", err)
 			}
 			if resp.AttachmentLinkGitHubPR != nil && resp.AttachmentLinkGitHubPR.Success {
 				if a := resp.AttachmentLinkGitHubPR.Attachment; a != nil {
@@ -965,7 +965,7 @@ Examples:
 		case "salesforce":
 			resp, err := api.AttachmentLinkSalesforce(ctx, client, issueID, url, titlePtr)
 			if err != nil {
-				return fmt.Errorf("Failed to link attachment: %v", err)
+				return fmt.Errorf("Failed to link attachment: %w", err)
 			}
 			if resp.AttachmentLinkSalesforce != nil && resp.AttachmentLinkSalesforce.Success {
 				if a := resp.AttachmentLinkSalesforce.Attachment; a != nil {
@@ -1010,7 +1010,7 @@ var attachmentSyncToSlackCmd = &cobra.Command{
 
 		resp, err := api.AttachmentSyncToSlack(ctx, client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to sync attachment to Slack: %v", err)
+			return fmt.Errorf("Failed to sync attachment to Slack: %w", err)
 		}
 		if resp.AttachmentSyncToSlack == nil || !resp.AttachmentSyncToSlack.Success {
 			return errors.New("Failed to sync attachment to Slack")

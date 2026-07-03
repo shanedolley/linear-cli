@@ -66,7 +66,7 @@ var labelListCmd = &cobra.Command{
 
 		resp, err := api.ListIssueLabels(ctx, client, filter, limitPtr)
 		if err != nil {
-			return fmt.Errorf("Failed to list labels: %v", err)
+			return fmt.Errorf("Failed to list labels: %w", err)
 		}
 
 		if len(resp.IssueLabels.Nodes) == 0 {
@@ -140,7 +140,7 @@ var labelGetCmd = &cobra.Command{
 
 		resp, err := api.GetIssueLabel(ctx, client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to get label: %v", err)
+			return fmt.Errorf("Failed to get label: %w", err)
 		}
 		if resp.IssueLabel == nil {
 			return fmt.Errorf("Label not found: %s", args[0])
@@ -222,14 +222,14 @@ var labelCreateCmd = &cobra.Command{
 		if parent, _ := cmd.Flags().GetString("parent"); parent != "" {
 			parentID, err := resolveLabel(ctx, client, cache, parent)
 			if err != nil {
-				return fmt.Errorf("Failed to find parent label '%s': %v", parent, err)
+				return fmt.Errorf("Failed to find parent label '%s': %w", parent, err)
 			}
 			input.ParentId = &parentID
 		}
 
 		resp, err := api.IssueLabelCreate(ctx, client, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to create label: %v", err)
+			return fmt.Errorf("Failed to create label: %w", err)
 		}
 		if !resp.IssueLabelCreate.Success {
 			return errors.New("Failed to create label")
@@ -282,7 +282,7 @@ var labelUpdateCmd = &cobra.Command{
 			parent, _ := cmd.Flags().GetString("parent")
 			parentID, err := resolveLabel(ctx, client, cache, parent)
 			if err != nil {
-				return fmt.Errorf("Failed to find parent label '%s': %v", parent, err)
+				return fmt.Errorf("Failed to find parent label '%s': %w", parent, err)
 			}
 			input.ParentId = &parentID
 			hasUpdates = true
@@ -294,7 +294,7 @@ var labelUpdateCmd = &cobra.Command{
 
 		resp, err := api.IssueLabelUpdate(ctx, client, args[0], &input)
 		if err != nil {
-			return fmt.Errorf("Failed to update label: %v", err)
+			return fmt.Errorf("Failed to update label: %w", err)
 		}
 		if !resp.IssueLabelUpdate.Success {
 			return errors.New("Failed to update label")
@@ -326,7 +326,7 @@ var labelDeleteCmd = &cobra.Command{
 
 		resp, err := api.IssueLabelDelete(ctx, client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to delete label: %v", err)
+			return fmt.Errorf("Failed to delete label: %w", err)
 		}
 		if !resp.IssueLabelDelete.Success {
 			return errors.New("Failed to delete label")
@@ -377,13 +377,13 @@ func runLabelStateChange(cmd *cobra.Command, id, action string) error {
 	if action == "retire" {
 		resp, err := api.IssueLabelRetire(ctx, client, id)
 		if err != nil {
-			return fmt.Errorf("Failed to retire label: %v", err)
+			return fmt.Errorf("Failed to retire label: %w", err)
 		}
 		success = resp.IssueLabelRetire.Success
 	} else {
 		resp, err := api.IssueLabelRestore(ctx, client, id)
 		if err != nil {
-			return fmt.Errorf("Failed to restore label: %v", err)
+			return fmt.Errorf("Failed to restore label: %w", err)
 		}
 		success = resp.IssueLabelRestore.Success
 	}

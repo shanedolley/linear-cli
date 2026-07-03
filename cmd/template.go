@@ -49,7 +49,7 @@ var templateListCmd = &cobra.Command{
 
 		resp, err := api.ListTemplates(ctx, client)
 		if err != nil {
-			return fmt.Errorf("Failed to list templates: %v", err)
+			return fmt.Errorf("Failed to list templates: %w", err)
 		}
 
 		// The `templates` query returns all templates with no server-side filter,
@@ -117,7 +117,7 @@ var templateGetCmd = &cobra.Command{
 
 		resp, err := api.GetTemplate(context.Background(), client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to get template: %v", err)
+			return fmt.Errorf("Failed to get template: %w", err)
 		}
 		if resp.Template == nil {
 			return fmt.Errorf("Template not found: %s", args[0])
@@ -208,7 +208,7 @@ passes it through unchanged, so it must be valid JSON.`,
 
 		resp, err := api.TemplateCreate(ctx, client, input)
 		if err != nil {
-			return fmt.Errorf("Failed to create template: %v", err)
+			return fmt.Errorf("Failed to create template: %w", err)
 		}
 		if resp.TemplateCreate == nil || !resp.TemplateCreate.Success {
 			return errors.New("Failed to create template")
@@ -266,7 +266,7 @@ var templateUpdateCmd = &cobra.Command{
 
 		resp, err := api.TemplateUpdate(context.Background(), client, args[0], input)
 		if err != nil {
-			return fmt.Errorf("Failed to update template: %v", err)
+			return fmt.Errorf("Failed to update template: %w", err)
 		}
 		if resp.TemplateUpdate == nil || !resp.TemplateUpdate.Success {
 			return errors.New("Failed to update template")
@@ -297,7 +297,7 @@ var templateDeleteCmd = &cobra.Command{
 
 		resp, err := api.TemplateDelete(context.Background(), client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to delete template: %v", err)
+			return fmt.Errorf("Failed to delete template: %w", err)
 		}
 		if resp.TemplateDelete == nil || !resp.TemplateDelete.Success {
 			return errors.New("Failed to delete template")
@@ -319,7 +319,7 @@ var templateDeleteCmd = &cobra.Command{
 func parseTemplateData(dataStr string) (interface{}, error) {
 	var data interface{}
 	if err := json.Unmarshal([]byte(dataStr), &data); err != nil {
-		return nil, fmt.Errorf("invalid --data JSON: %v", err)
+		return nil, fmt.Errorf("invalid --data JSON: %w", err)
 	}
 	return data, nil
 }

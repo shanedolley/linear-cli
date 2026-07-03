@@ -70,7 +70,7 @@ var teamListCmd = &cobra.Command{
 		// Get teams
 		resp, err := api.ListTeams(context.Background(), client, limitPtr, nil, orderByEnum)
 		if err != nil {
-			return fmt.Errorf("Failed to list teams: %v", err)
+			return fmt.Errorf("Failed to list teams: %w", err)
 		}
 
 		// Handle output
@@ -160,7 +160,7 @@ var teamGetCmd = &cobra.Command{
 		// Get team details
 		resp, err := api.GetTeam(context.Background(), client, teamKey)
 		if err != nil {
-			return fmt.Errorf("Failed to get team: %v", err)
+			return fmt.Errorf("Failed to get team: %w", err)
 		}
 		if resp.Team == nil {
 			return fmt.Errorf("team %q not found", teamKey)
@@ -223,7 +223,7 @@ var teamMembersCmd = &cobra.Command{
 		// Get team members
 		resp, err := api.GetTeamMembers(context.Background(), client, teamKey)
 		if err != nil {
-			return fmt.Errorf("Failed to get team members: %v", err)
+			return fmt.Errorf("Failed to get team members: %w", err)
 		}
 		members := resp.Team.Members.Nodes
 
@@ -329,7 +329,7 @@ var teamCreateCmd = &cobra.Command{
 
 		resp, err := api.TeamCreate(context.Background(), client, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to create team: %v", err)
+			return fmt.Errorf("Failed to create team: %w", err)
 		}
 		if resp.TeamCreate == nil || !resp.TeamCreate.Success || resp.TeamCreate.Team == nil {
 			return errors.New("Failed to create team")
@@ -398,7 +398,7 @@ var teamUpdateCmd = &cobra.Command{
 
 		resp, err := api.TeamUpdate(ctx, client, teamID, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to update team: %v", err)
+			return fmt.Errorf("Failed to update team: %w", err)
 		}
 		if resp.TeamUpdate == nil || !resp.TeamUpdate.Success {
 			return errors.New("Failed to update team")
@@ -466,7 +466,7 @@ func runTeamStateChange(cmd *cobra.Command, teamRef string, del bool) error {
 	if del {
 		resp, err := api.TeamDelete(ctx, client, teamID)
 		if err != nil {
-			return fmt.Errorf("Failed to delete team: %v", err)
+			return fmt.Errorf("Failed to delete team: %w", err)
 		}
 		if resp.TeamDelete != nil {
 			success = resp.TeamDelete.Success
@@ -475,7 +475,7 @@ func runTeamStateChange(cmd *cobra.Command, teamRef string, del bool) error {
 	} else {
 		resp, err := api.TeamUnarchive(ctx, client, teamID)
 		if err != nil {
-			return fmt.Errorf("Failed to unarchive team: %v", err)
+			return fmt.Errorf("Failed to unarchive team: %w", err)
 		}
 		if resp.TeamUnarchive != nil {
 			success = resp.TeamUnarchive.Success
@@ -531,7 +531,7 @@ var teamMemberAddCmd = &cobra.Command{
 		input := api.TeamMembershipCreateInput{TeamId: teamID, UserId: userID}
 		resp, err := api.TeamMembershipCreate(ctx, client, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to add member: %v", err)
+			return fmt.Errorf("Failed to add member: %w", err)
 		}
 		if resp.TeamMembershipCreate == nil || !resp.TeamMembershipCreate.Success {
 			return errors.New("Failed to add member")
@@ -570,7 +570,7 @@ var teamMemberRemoveCmd = &cobra.Command{
 
 		resp, err := api.TeamMembershipDelete(ctx, client, membershipID)
 		if err != nil {
-			return fmt.Errorf("Failed to remove member: %v", err)
+			return fmt.Errorf("Failed to remove member: %w", err)
 		}
 		if resp.TeamMembershipDelete == nil || !resp.TeamMembershipDelete.Success {
 			return errors.New("Failed to remove member")
@@ -617,7 +617,7 @@ user's org role (admin, guest, and so on).`,
 		input := api.TeamMembershipUpdateInput{Owner: &owner}
 		resp, err := api.TeamMembershipUpdate(ctx, client, membershipID, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to set role: %v", err)
+			return fmt.Errorf("Failed to set role: %w", err)
 		}
 		if resp.TeamMembershipUpdate == nil || !resp.TeamMembershipUpdate.Success {
 			return errors.New("Failed to set role")

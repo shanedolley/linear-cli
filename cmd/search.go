@@ -51,7 +51,7 @@ var searchProjectsCmd = &cobra.Command{
 
 		resp, err := api.SearchProjects(ctx, client, args[0], limitPtr, &includeComments)
 		if err != nil {
-			return fmt.Errorf("Failed to search projects: %v", err)
+			return fmt.Errorf("Failed to search projects: %w", err)
 		}
 
 		if len(resp.SearchProjects.Nodes) == 0 {
@@ -117,7 +117,7 @@ Examples:
 
 		resp, err := api.SemanticSearch(ctx, client, args[0], maxPtr, types)
 		if err != nil {
-			return fmt.Errorf("Failed to run semantic search: %v", err)
+			return fmt.Errorf("Failed to run semantic search: %w", err)
 		}
 
 		if len(resp.SemanticSearch.Results) == 0 {

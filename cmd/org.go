@@ -44,7 +44,7 @@ var orgGetCmd = &cobra.Command{
 
 		resp, err := api.GetOrganization(ctx, client)
 		if err != nil {
-			return fmt.Errorf("Failed to get organization: %v", err)
+			return fmt.Errorf("Failed to get organization: %w", err)
 		}
 		if resp.Organization == nil {
 			return errors.New("Organization not found")
@@ -102,7 +102,7 @@ var orgUpdateCmd = &cobra.Command{
 
 		resp, err := api.OrganizationUpdate(ctx, client, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to update organization: %v", err)
+			return fmt.Errorf("Failed to update organization: %w", err)
 		}
 		if resp.OrganizationUpdate == nil || !resp.OrganizationUpdate.Success {
 			return errors.New("Failed to update organization")
@@ -146,7 +146,7 @@ var orgInviteListCmd = &cobra.Command{
 
 		resp, err := api.ListOrganizationInvites(ctx, client, limitPtr, nil)
 		if err != nil {
-			return fmt.Errorf("Failed to list invites: %v", err)
+			return fmt.Errorf("Failed to list invites: %w", err)
 		}
 		if resp.OrganizationInvites == nil || len(resp.OrganizationInvites.Nodes) == 0 {
 			output.Info("No invites found", plaintext, jsonOut)
@@ -211,7 +211,7 @@ var orgInviteCreateCmd = &cobra.Command{
 
 		resp, err := api.OrganizationInviteCreate(ctx, client, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to create invite: %v", err)
+			return fmt.Errorf("Failed to create invite: %w", err)
 		}
 		if resp.OrganizationInviteCreate == nil || !resp.OrganizationInviteCreate.Success {
 			return errors.New("Failed to create invite")
@@ -244,7 +244,7 @@ var orgInviteDeleteCmd = &cobra.Command{
 
 		resp, err := api.OrganizationInviteDelete(ctx, client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to delete invite: %v", err)
+			return fmt.Errorf("Failed to delete invite: %w", err)
 		}
 		if resp.OrganizationInviteDelete == nil || !resp.OrganizationInviteDelete.Success {
 			return errors.New("Failed to delete invite")
@@ -276,7 +276,7 @@ var orgInviteResendCmd = &cobra.Command{
 
 		resp, err := api.ResendOrganizationInvite(ctx, client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to resend invite: %v", err)
+			return fmt.Errorf("Failed to resend invite: %w", err)
 		}
 		if resp.ResendOrganizationInvite == nil || !resp.ResendOrganizationInvite.Success {
 			return errors.New("Failed to resend invite")

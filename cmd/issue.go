@@ -94,7 +94,7 @@ var issueListCmd = &cobra.Command{
 
 		resp, err := api.ListIssues(context.Background(), client, filterTyped, limitPtr, nil, orderByEnum)
 		if err != nil {
-			return fmt.Errorf("Failed to fetch issues: %v", err)
+			return fmt.Errorf("Failed to fetch issues: %w", err)
 		}
 
 		// Check if empty
@@ -247,7 +247,7 @@ Examples:
 
 		resp, err := api.SearchIssues(context.Background(), client, query, filterTyped, limitPtr, nil, orderByEnum, includeArchivedPtr)
 		if err != nil {
-			return fmt.Errorf("Failed to search issues: %v", err)
+			return fmt.Errorf("Failed to search issues: %w", err)
 		}
 
 		// Check if empty
@@ -347,7 +347,7 @@ var issueGetCmd = &cobra.Command{
 		}
 		resp, err := api.GetIssue(context.Background(), client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to fetch issue: %v", err)
+			return fmt.Errorf("Failed to fetch issue: %w", err)
 		}
 		if resp.Issue == nil {
 			return fmt.Errorf("issue %q not found", args[0])
@@ -883,7 +883,7 @@ func resolveIssueLabels(ctx context.Context, client graphql.Client, cache *Resol
 	for _, label := range labels {
 		id, err := resolveLabel(ctx, client, cache, label)
 		if err != nil {
-			return nil, fmt.Errorf("Failed to find label '%s': %v", label, err)
+			return nil, fmt.Errorf("Failed to find label '%s': %w", label, err)
 		}
 		ids = append(ids, id)
 	}
@@ -895,7 +895,7 @@ func resolveIssueLabels(ctx context.Context, client graphql.Client, cache *Resol
 func resolveParentIssueID(ctx context.Context, client graphql.Client, ref string) (string, error) {
 	id, err := resolveIssueID(ctx, client, ref)
 	if err != nil {
-		return "", fmt.Errorf("Failed to find parent %v", err)
+		return "", fmt.Errorf("Failed to find parent %w", err)
 	}
 	return id, nil
 }
@@ -917,7 +917,7 @@ var issueAssignCmd = &cobra.Command{
 		// Get current user
 		viewerResp, err := api.GetViewer(context.Background(), client)
 		if err != nil {
-			return fmt.Errorf("Failed to get current user: %v", err)
+			return fmt.Errorf("Failed to get current user: %w", err)
 		}
 		viewerID := viewerResp.Viewer.UserDetailFields.Id
 
@@ -928,7 +928,7 @@ var issueAssignCmd = &cobra.Command{
 
 		updateResp, err := api.UpdateIssue(context.Background(), client, args[0], &input)
 		if err != nil {
-			return fmt.Errorf("Failed to assign issue: %v", err)
+			return fmt.Errorf("Failed to assign issue: %w", err)
 		}
 		issue := updateResp.IssueUpdate.Issue
 
@@ -991,7 +991,7 @@ Examples:
 		// Get team ID from key
 		teamID, err := resolveTeam(ctx, client, cache, teamKey)
 		if err != nil {
-			return fmt.Errorf("Failed to find team '%s': %v", teamKey, err)
+			return fmt.Errorf("Failed to find team '%s': %w", teamKey, err)
 		}
 
 		// Build input
@@ -1000,7 +1000,7 @@ Examples:
 		if assignToMe {
 			viewerID, err := resolveUser(ctx, client, cache, "me")
 			if err != nil {
-				return fmt.Errorf("Failed to get current user: %v", err)
+				return fmt.Errorf("Failed to get current user: %w", err)
 			}
 			input.AssigneeId = &viewerID
 		}
@@ -1091,7 +1091,7 @@ Examples:
 		// Create issue
 		createResp, err := api.CreateIssue(ctx, client, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to create issue: %v", err)
+			return fmt.Errorf("Failed to create issue: %w", err)
 		}
 		issue := createResp.IssueCreate.Issue
 
@@ -1176,7 +1176,7 @@ Examples:
 			if issueDetail == nil {
 				issueResp, err := api.GetIssue(ctx, client, args[0])
 				if err != nil {
-					return nil, fmt.Errorf("Failed to get issue: %v", err)
+					return nil, fmt.Errorf("Failed to get issue: %w", err)
 				}
 				if issueResp.Issue == nil {
 					return nil, fmt.Errorf("issue %q not found", args[0])
@@ -1328,7 +1328,7 @@ Examples:
 		// Update the issue using generated function
 		updateResp, err := api.UpdateIssue(ctx, client, args[0], &input)
 		if err != nil {
-			return fmt.Errorf("Failed to update issue: %v", err)
+			return fmt.Errorf("Failed to update issue: %w", err)
 		}
 		updatedIssue := updateResp.IssueUpdate.Issue
 
@@ -1366,7 +1366,7 @@ var issueArchiveCmd = &cobra.Command{
 
 		resp, err := api.IssueArchive(ctx, client, args[0], trashPtr)
 		if err != nil {
-			return fmt.Errorf("Failed to archive issue: %v", err)
+			return fmt.Errorf("Failed to archive issue: %w", err)
 		}
 		if !resp.IssueArchive.Success {
 			return errors.New("Failed to archive issue")
@@ -1398,7 +1398,7 @@ var issueUnarchiveCmd = &cobra.Command{
 
 		resp, err := api.IssueUnarchive(ctx, client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to unarchive issue: %v", err)
+			return fmt.Errorf("Failed to unarchive issue: %w", err)
 		}
 		if !resp.IssueUnarchive.Success {
 			return errors.New("Failed to unarchive issue")
@@ -1437,7 +1437,7 @@ only).`,
 
 		resp, err := api.IssueDelete(ctx, client, args[0], permanentPtr)
 		if err != nil {
-			return fmt.Errorf("Failed to delete issue: %v", err)
+			return fmt.Errorf("Failed to delete issue: %w", err)
 		}
 		if !resp.IssueDelete.Success {
 			return errors.New("Failed to delete issue")
@@ -1498,13 +1498,13 @@ func runIssueSubscription(cmd *cobra.Command, issueID string, subscribe bool) er
 	if subscribe {
 		resp, err := api.IssueSubscribe(ctx, client, issueID, userIDPtr)
 		if err != nil {
-			return fmt.Errorf("Failed to subscribe to issue: %v", err)
+			return fmt.Errorf("Failed to subscribe to issue: %w", err)
 		}
 		success = resp.IssueSubscribe.Success
 	} else {
 		resp, err := api.IssueUnsubscribe(ctx, client, issueID, userIDPtr)
 		if err != nil {
-			return fmt.Errorf("Failed to unsubscribe from issue: %v", err)
+			return fmt.Errorf("Failed to unsubscribe from issue: %w", err)
 		}
 		success = resp.IssueUnsubscribe.Success
 	}
@@ -1555,7 +1555,7 @@ Examples:
 
 		resp, err := api.IssueReminder(ctx, client, args[0], reminderAt)
 		if err != nil {
-			return fmt.Errorf("Failed to set reminder: %v", err)
+			return fmt.Errorf("Failed to set reminder: %w", err)
 		}
 		if !resp.IssueReminder.Success {
 			return errors.New("Failed to set reminder")
@@ -1630,7 +1630,7 @@ func runIssueShare(cmd *cobra.Command, issueID string, share bool) error {
 	if share {
 		resp, err := api.IssueShare(ctx, client, issueID, userID)
 		if err != nil {
-			return fmt.Errorf("Failed to share issue: %v", err)
+			return fmt.Errorf("Failed to share issue: %w", err)
 		}
 		success = resp.IssueShare.Success
 		if resp.IssueShare.Issue != nil {
@@ -1639,7 +1639,7 @@ func runIssueShare(cmd *cobra.Command, issueID string, share bool) error {
 	} else {
 		resp, err := api.IssueUnshare(ctx, client, issueID, userID)
 		if err != nil {
-			return fmt.Errorf("Failed to unshare issue: %v", err)
+			return fmt.Errorf("Failed to unshare issue: %w", err)
 		}
 		success = resp.IssueUnshare.Success
 	}
@@ -1757,7 +1757,7 @@ func handleParentChildLink(ctx context.Context, client graphql.Client, sourceIss
 
 		_, err := api.UpdateIssue(ctx, client, issueToUpdate, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to remove parent relationship: %v", err)
+			return fmt.Errorf("Failed to remove parent relationship: %w", err)
 		}
 
 		if jsonOut {
@@ -1789,7 +1789,7 @@ func handleParentChildLink(ctx context.Context, client graphql.Client, sourceIss
 	// Get parent issue to get its ID
 	parentResp, err := api.GetIssue(ctx, client, parentIssue)
 	if err != nil {
-		return fmt.Errorf("Failed to get parent issue: %v", err)
+		return fmt.Errorf("Failed to get parent issue: %w", err)
 	}
 	if parentResp.Issue == nil {
 		return fmt.Errorf("Parent issue %q not found", parentIssue)
@@ -1803,7 +1803,7 @@ func handleParentChildLink(ctx context.Context, client graphql.Client, sourceIss
 
 	updateResp, err := api.UpdateIssue(ctx, client, childIssue, &input)
 	if err != nil {
-		return fmt.Errorf("Failed to create parent relationship: %v", err)
+		return fmt.Errorf("Failed to create parent relationship: %w", err)
 	}
 
 	if jsonOut {
@@ -1830,7 +1830,7 @@ func handleRelationLink(ctx context.Context, client graphql.Client, sourceIssue,
 	// Get issue IDs first
 	sourceResp, err := api.GetIssue(ctx, client, sourceIssue)
 	if err != nil {
-		return fmt.Errorf("Failed to get source issue: %v", err)
+		return fmt.Errorf("Failed to get source issue: %w", err)
 	}
 	if sourceResp.Issue == nil {
 		return fmt.Errorf("Source issue %q not found", sourceIssue)
@@ -1839,7 +1839,7 @@ func handleRelationLink(ctx context.Context, client graphql.Client, sourceIssue,
 
 	targetResp, err := api.GetIssue(ctx, client, targetIssue)
 	if err != nil {
-		return fmt.Errorf("Failed to get target issue: %v", err)
+		return fmt.Errorf("Failed to get target issue: %w", err)
 	}
 	if targetResp.Issue == nil {
 		return fmt.Errorf("Target issue %q not found", targetIssue)
@@ -1868,7 +1868,7 @@ func handleRelationLink(ctx context.Context, client graphql.Client, sourceIssue,
 					if rel.RelatedIssue != nil && rel.RelatedIssue.Id == sourceID && rel.Type == "blocks" {
 						_, err := api.DeleteIssueRelation(ctx, client, rel.Id)
 						if err != nil {
-							return fmt.Errorf("Failed to delete relation: %v", err)
+							return fmt.Errorf("Failed to delete relation: %w", err)
 						}
 						if jsonOut {
 							output.JSON(map[string]interface{}{
@@ -1909,7 +1909,7 @@ func handleRelationLink(ctx context.Context, client graphql.Client, sourceIssue,
 
 		_, err = api.DeleteIssueRelation(ctx, client, relationID)
 		if err != nil {
-			return fmt.Errorf("Failed to delete relation: %v", err)
+			return fmt.Errorf("Failed to delete relation: %w", err)
 		}
 
 		if jsonOut {
@@ -1961,7 +1961,7 @@ func handleRelationLink(ctx context.Context, client graphql.Client, sourceIssue,
 
 	resp, err := api.CreateIssueRelation(ctx, client, &input)
 	if err != nil {
-		return fmt.Errorf("Failed to create relation: %v", err)
+		return fmt.Errorf("Failed to create relation: %w", err)
 	}
 
 	if jsonOut {
@@ -2143,7 +2143,7 @@ func buildIssueFilterTyped(cmd *cobra.Command) (*api.IssueFilter, error) {
 	newerThan, _ := cmd.Flags().GetString("newer-than")
 	createdAt, err := utils.ParseTimeExpression(newerThan)
 	if err != nil {
-		return nil, fmt.Errorf("Invalid newer-than value: %v", err)
+		return nil, fmt.Errorf("Invalid newer-than value: %w", err)
 	}
 	if createdAt != "" {
 		filter.CreatedAt = dateGte(createdAt)

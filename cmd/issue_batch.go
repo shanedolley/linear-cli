@@ -117,7 +117,7 @@ nothing is created.`,
 		for i, row := range rows {
 			input, err := buildBatchCreateInput(ctx, client, cache, row)
 			if err != nil {
-				return fmt.Errorf("Row %d: %v", i+1, err)
+				return fmt.Errorf("Row %d: %w", i+1, err)
 			}
 			inputs = append(inputs, input)
 		}
@@ -129,7 +129,7 @@ nothing is created.`,
 			return e
 		})
 		if err != nil {
-			return fmt.Errorf("Failed to create issues: %v", err)
+			return fmt.Errorf("Failed to create issues: %w", err)
 		}
 		if !resp.IssueBatchCreate.Success {
 			return errors.New("Failed to create issues")
@@ -190,7 +190,7 @@ Examples:
 			}
 			detail, err := resolveIssueDetail(ctx, client, ref)
 			if err != nil {
-				return fmt.Errorf("Failed to find %v", err)
+				return fmt.Errorf("Failed to find %w", err)
 			}
 			ids = append(ids, detail.Id)
 			if firstDetail == nil {
@@ -301,7 +301,7 @@ Examples:
 			return e
 		})
 		if err != nil {
-			return fmt.Errorf("Failed to update issues: %v", err)
+			return fmt.Errorf("Failed to update issues: %w", err)
 		}
 		if !resp.IssueBatchUpdate.Success {
 			return errors.New("Failed to update issues")

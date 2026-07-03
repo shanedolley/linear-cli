@@ -91,7 +91,7 @@ var cycleListCmd = &cobra.Command{
 
 		resp, err := api.ListCycles(ctx, client, &filter, limitPtr, nil, orderByEnum)
 		if err != nil {
-			return fmt.Errorf("Failed to list cycles: %v", err)
+			return fmt.Errorf("Failed to list cycles: %w", err)
 		}
 
 		if len(resp.Cycles.Nodes) == 0 {
@@ -171,7 +171,7 @@ var cycleGetCmd = &cobra.Command{
 		}
 		resp, err := api.GetCycle(ctx, client, cycleID)
 		if err != nil {
-			return fmt.Errorf("Failed to get cycle: %v", err)
+			return fmt.Errorf("Failed to get cycle: %w", err)
 		}
 		if resp.Cycle == nil {
 			return fmt.Errorf("Cycle not found: %s", args[0])
@@ -265,7 +265,7 @@ var cycleCreateCmd = &cobra.Command{
 
 		resp, err := api.CycleCreate(ctx, client, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to create cycle: %v", err)
+			return fmt.Errorf("Failed to create cycle: %w", err)
 		}
 		if !resp.CycleCreate.Success {
 			return errors.New("Failed to create cycle")
@@ -343,7 +343,7 @@ var cycleUpdateCmd = &cobra.Command{
 
 		resp, err := api.CycleUpdate(ctx, client, cycleID, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to update cycle: %v", err)
+			return fmt.Errorf("Failed to update cycle: %w", err)
 		}
 		if !resp.CycleUpdate.Success {
 			return errors.New("Failed to update cycle")
@@ -381,7 +381,7 @@ var cycleArchiveCmd = &cobra.Command{
 
 		resp, err := api.CycleArchive(ctx, client, cycleID)
 		if err != nil {
-			return fmt.Errorf("Failed to archive cycle: %v", err)
+			return fmt.Errorf("Failed to archive cycle: %w", err)
 		}
 		if !resp.CycleArchive.Success {
 			return errors.New("Failed to archive cycle")
@@ -428,7 +428,7 @@ number to move later, or a negative number to move earlier.`,
 		input := api.CycleShiftAllInput{Id: cycleID, DaysToShift: days}
 		resp, err := api.CycleShiftAll(ctx, client, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to shift cycles: %v", err)
+			return fmt.Errorf("Failed to shift cycles: %w", err)
 		}
 		if !resp.CycleShiftAll.Success {
 			return errors.New("Failed to shift cycles")
@@ -469,7 +469,7 @@ not yet ended.`,
 
 		resp, err := api.CycleStartUpcomingCycleToday(ctx, client, cycleID)
 		if err != nil {
-			return fmt.Errorf("Failed to start cycle: %v", err)
+			return fmt.Errorf("Failed to start cycle: %w", err)
 		}
 		if !resp.CycleStartUpcomingCycleToday.Success {
 			return errors.New("Failed to start cycle")
@@ -501,7 +501,7 @@ func buildCycleFilterTyped(ctx context.Context, client graphql.Client, cache *Re
 	newerThan, _ := cmd.Flags().GetString("newer-than")
 	createdAt, err := utils.ParseTimeExpression(newerThan)
 	if err != nil {
-		return filter, fmt.Errorf("Invalid newer-than value: %v", err)
+		return filter, fmt.Errorf("Invalid newer-than value: %w", err)
 	}
 	if createdAt != "" {
 		filter.CreatedAt = &api.DateComparator{Gte: &createdAt}

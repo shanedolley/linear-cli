@@ -80,7 +80,7 @@ release, cycle) are tagged internal, so they are intentionally left out.`,
 
 		resp, err := api.EntityExternalLinkCreate(ctx, client, input)
 		if err != nil {
-			return fmt.Errorf("Failed to create link: %v", err)
+			return fmt.Errorf("Failed to create link: %w", err)
 		}
 		if resp.EntityExternalLinkCreate == nil || !resp.EntityExternalLinkCreate.Success {
 			return errors.New("Failed to create link")
@@ -125,7 +125,7 @@ var linkUpdateCmd = &cobra.Command{
 		}
 		resp, err := api.EntityExternalLinkUpdate(context.Background(), client, args[0], input)
 		if err != nil {
-			return fmt.Errorf("Failed to update link: %v", err)
+			return fmt.Errorf("Failed to update link: %w", err)
 		}
 		if resp.EntityExternalLinkUpdate == nil || !resp.EntityExternalLinkUpdate.Success {
 			return errors.New("Failed to update link")
@@ -155,7 +155,7 @@ var linkRemoveCmd = &cobra.Command{
 		}
 		resp, err := api.EntityExternalLinkDelete(context.Background(), client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to remove link: %v", err)
+			return fmt.Errorf("Failed to remove link: %w", err)
 		}
 		if resp.EntityExternalLinkDelete == nil || !resp.EntityExternalLinkDelete.Success {
 			return errors.New("Failed to remove link")
@@ -185,7 +185,7 @@ var linkGetCmd = &cobra.Command{
 		}
 		resp, err := api.GetEntityExternalLink(context.Background(), client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to get link: %v", err)
+			return fmt.Errorf("Failed to get link: %w", err)
 		}
 		f := resp.EntityExternalLink.EntityExternalLinkFields
 

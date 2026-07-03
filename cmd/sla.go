@@ -50,7 +50,7 @@ var slaListCmd = &cobra.Command{
 
 		resp, err := api.ListSlaConfigurations(ctx, client, teamID)
 		if err != nil {
-			return fmt.Errorf("Failed to list SLA rules: %v", err)
+			return fmt.Errorf("Failed to list SLA rules: %w", err)
 		}
 
 		if len(resp.SlaConfigurations) == 0 {

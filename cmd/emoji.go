@@ -46,7 +46,7 @@ var emojiListCmd = &cobra.Command{
 
 		resp, err := api.ListEmojis(ctx, client, limitPtr, nil, nil)
 		if err != nil {
-			return fmt.Errorf("Failed to list emoji: %v", err)
+			return fmt.Errorf("Failed to list emoji: %w", err)
 		}
 
 		if resp.Emojis == nil || len(resp.Emojis.Nodes) == 0 {
@@ -121,7 +121,7 @@ uses the resulting asset URL.`,
 
 		resp, err := api.EmojiCreate(ctx, client, input)
 		if err != nil {
-			return fmt.Errorf("Failed to create emoji: %v", err)
+			return fmt.Errorf("Failed to create emoji: %w", err)
 		}
 		if resp.EmojiCreate == nil || !resp.EmojiCreate.Success {
 			return errors.New("Failed to create emoji")
@@ -158,7 +158,7 @@ var emojiDeleteCmd = &cobra.Command{
 
 		resp, err := api.EmojiDelete(ctx, client, id)
 		if err != nil {
-			return fmt.Errorf("Failed to delete emoji: %v", err)
+			return fmt.Errorf("Failed to delete emoji: %w", err)
 		}
 		if resp.EmojiDelete == nil || !resp.EmojiDelete.Success {
 			return errors.New("Failed to delete emoji")

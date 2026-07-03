@@ -49,7 +49,7 @@ var favoriteListCmd = &cobra.Command{
 
 		resp, err := api.ListFavorites(ctx, client, limitPtr, nil, nil)
 		if err != nil {
-			return fmt.Errorf("Failed to list favorites: %v", err)
+			return fmt.Errorf("Failed to list favorites: %w", err)
 		}
 
 		if resp.Favorites == nil || len(resp.Favorites.Nodes) == 0 {
@@ -154,7 +154,7 @@ for cycle, document, and view, pass the entity's ID.`,
 
 		resp, err := api.FavoriteCreate(ctx, client, input)
 		if err != nil {
-			return fmt.Errorf("Failed to add favorite: %v", err)
+			return fmt.Errorf("Failed to add favorite: %w", err)
 		}
 		if resp.FavoriteCreate == nil || !resp.FavoriteCreate.Success {
 			return errors.New("Failed to add favorite")
@@ -186,7 +186,7 @@ var favoriteRemoveCmd = &cobra.Command{
 
 		resp, err := api.FavoriteDelete(context.Background(), client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to remove favorite: %v", err)
+			return fmt.Errorf("Failed to remove favorite: %w", err)
 		}
 		if resp.FavoriteDelete == nil || !resp.FavoriteDelete.Success {
 			return errors.New("Failed to remove favorite")

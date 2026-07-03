@@ -131,7 +131,7 @@ func addReaction(ctx context.Context, client graphql.Client, kind, ref, emoji st
 
 	resp, err := api.ReactionCreate(ctx, client, input)
 	if err != nil {
-		return fmt.Errorf("Failed to add reaction: %v", err)
+		return fmt.Errorf("Failed to add reaction: %w", err)
 	}
 	if resp.ReactionCreate == nil || !resp.ReactionCreate.Success {
 		return errors.New("Failed to add reaction")
@@ -151,7 +151,7 @@ func addReaction(ctx context.Context, client graphql.Client, kind, ref, emoji st
 func removeReaction(ctx context.Context, client graphql.Client, kind, ref, emoji string, plaintext, jsonOut bool) error {
 	viewer, err := api.GetViewer(ctx, client)
 	if err != nil {
-		return fmt.Errorf("Failed to resolve current user: %v", err)
+		return fmt.Errorf("Failed to resolve current user: %w", err)
 	}
 	viewerID := viewer.Viewer.UserDetailFields.Id
 
@@ -167,7 +167,7 @@ func removeReaction(ctx context.Context, client graphql.Client, kind, ref, emoji
 
 	resp, err := api.ReactionDelete(ctx, client, reactionID)
 	if err != nil {
-		return fmt.Errorf("Failed to remove reaction: %v", err)
+		return fmt.Errorf("Failed to remove reaction: %w", err)
 	}
 	if resp.ReactionDelete == nil || !resp.ReactionDelete.Success {
 		return errors.New("Failed to remove reaction")

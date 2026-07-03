@@ -54,7 +54,7 @@ var triageListCmd = &cobra.Command{
 
 		resp, err := api.ListTriageResponsibilities(ctx, client, limitPtr, nil, nil)
 		if err != nil {
-			return fmt.Errorf("Failed to list triage responsibilities: %v", err)
+			return fmt.Errorf("Failed to list triage responsibilities: %w", err)
 		}
 
 		if resp.TriageResponsibilities == nil || len(resp.TriageResponsibilities.Nodes) == 0 {
@@ -110,7 +110,7 @@ var triageGetCmd = &cobra.Command{
 
 		resp, err := api.GetTriageResponsibility(ctx, client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to get triage responsibility: %v", err)
+			return fmt.Errorf("Failed to get triage responsibility: %w", err)
 		}
 		if resp.TriageResponsibility == nil {
 			return fmt.Errorf("triage responsibility %q not found", args[0])

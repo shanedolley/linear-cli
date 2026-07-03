@@ -62,7 +62,7 @@ var stateListCmd = &cobra.Command{
 		// a key or an ID directly.
 		resp, err := api.GetTeamStates(ctx, client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to list workflow states: %v", err)
+			return fmt.Errorf("Failed to list workflow states: %w", err)
 		}
 		if resp.Team == nil || resp.Team.States == nil || len(resp.Team.States.Nodes) == 0 {
 			output.Info(fmt.Sprintf("No workflow states found for team '%s'", args[0]), plaintext, jsonOut)
@@ -122,7 +122,7 @@ var stateGetCmd = &cobra.Command{
 
 		resp, err := api.GetWorkflowState(ctx, client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to get workflow state: %v", err)
+			return fmt.Errorf("Failed to get workflow state: %w", err)
 		}
 		if resp.WorkflowState == nil {
 			return fmt.Errorf("Workflow state not found: %s", args[0])
@@ -213,7 +213,7 @@ var stateCreateCmd = &cobra.Command{
 
 		resp, err := api.WorkflowStateCreate(ctx, client, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to create workflow state: %v", err)
+			return fmt.Errorf("Failed to create workflow state: %w", err)
 		}
 		if !resp.WorkflowStateCreate.Success {
 			return errors.New("Failed to create workflow state")
@@ -272,7 +272,7 @@ var stateUpdateCmd = &cobra.Command{
 
 		resp, err := api.WorkflowStateUpdate(ctx, client, args[0], &input)
 		if err != nil {
-			return fmt.Errorf("Failed to update workflow state: %v", err)
+			return fmt.Errorf("Failed to update workflow state: %w", err)
 		}
 		if !resp.WorkflowStateUpdate.Success {
 			return errors.New("Failed to update workflow state")
@@ -303,7 +303,7 @@ var stateArchiveCmd = &cobra.Command{
 
 		resp, err := api.WorkflowStateArchive(ctx, client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to archive workflow state: %v", err)
+			return fmt.Errorf("Failed to archive workflow state: %w", err)
 		}
 		if !resp.WorkflowStateArchive.Success {
 			return errors.New("Failed to archive workflow state")

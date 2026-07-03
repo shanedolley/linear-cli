@@ -51,13 +51,13 @@ var notificationListCmd = &cobra.Command{
 
 		unreadResp, err := api.NotificationsUnreadCount(ctx, client)
 		if err != nil {
-			return fmt.Errorf("Failed to get unread count: %v", err)
+			return fmt.Errorf("Failed to get unread count: %w", err)
 		}
 		unread := unreadResp.NotificationsUnreadCount
 
 		resp, err := api.ListNotifications(ctx, client, nil, limitPtr, nil, nil)
 		if err != nil {
-			return fmt.Errorf("Failed to list notifications: %v", err)
+			return fmt.Errorf("Failed to list notifications: %w", err)
 		}
 
 		nodes := []api.ListNotificationsNotificationsNotificationConnectionNodesNotification{}
@@ -120,7 +120,7 @@ var notificationReadAllCmd = &cobra.Command{
 
 		resp, err := api.NotificationMarkReadAll(ctx, client, input, time.Now())
 		if err != nil {
-			return fmt.Errorf("Failed to mark notifications read: %v", err)
+			return fmt.Errorf("Failed to mark notifications read: %w", err)
 		}
 		if resp.NotificationMarkReadAll == nil || !resp.NotificationMarkReadAll.Success {
 			return errors.New("Failed to mark notifications read")
@@ -147,7 +147,7 @@ var notificationUnreadAllCmd = &cobra.Command{
 
 		resp, err := api.NotificationMarkUnreadAll(ctx, client, input)
 		if err != nil {
-			return fmt.Errorf("Failed to mark notifications unread: %v", err)
+			return fmt.Errorf("Failed to mark notifications unread: %w", err)
 		}
 		if resp.NotificationMarkUnreadAll == nil || !resp.NotificationMarkUnreadAll.Success {
 			return errors.New("Failed to mark notifications unread")
@@ -172,7 +172,7 @@ var notificationArchiveCmd = &cobra.Command{
 
 		resp, err := api.NotificationArchive(ctx, client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to archive notification: %v", err)
+			return fmt.Errorf("Failed to archive notification: %w", err)
 		}
 		if resp.NotificationArchive == nil || !resp.NotificationArchive.Success {
 			return errors.New("Failed to archive notification")
@@ -213,7 +213,7 @@ var notificationSnoozeCmd = &cobra.Command{
 		input := &api.NotificationUpdateInput{SnoozedUntilAt: &snoozeUntil}
 		resp, err := api.NotificationUpdate(ctx, client, args[0], input)
 		if err != nil {
-			return fmt.Errorf("Failed to snooze notification: %v", err)
+			return fmt.Errorf("Failed to snooze notification: %w", err)
 		}
 		if resp.NotificationUpdate == nil || !resp.NotificationUpdate.Success {
 			return errors.New("Failed to snooze notification")
@@ -245,7 +245,7 @@ var notificationArchiveAllCmd = &cobra.Command{
 
 		resp, err := api.NotificationArchiveAll(ctx, client, input)
 		if err != nil {
-			return fmt.Errorf("Failed to archive notifications: %v", err)
+			return fmt.Errorf("Failed to archive notifications: %w", err)
 		}
 		if resp.NotificationArchiveAll == nil || !resp.NotificationArchiveAll.Success {
 			return errors.New("Failed to archive notifications")
@@ -282,7 +282,7 @@ a single issue's notifications.`,
 
 		resp, err := api.NotificationSnoozeAll(ctx, client, input, snoozeUntil)
 		if err != nil {
-			return fmt.Errorf("Failed to snooze notifications: %v", err)
+			return fmt.Errorf("Failed to snooze notifications: %w", err)
 		}
 		if resp.NotificationSnoozeAll == nil || !resp.NotificationSnoozeAll.Success {
 			return errors.New("Failed to snooze notifications")
@@ -314,7 +314,7 @@ var notificationSubscribeCmd = &cobra.Command{
 
 		resp, err := api.NotificationSubscriptionCreate(ctx, client, input)
 		if err != nil {
-			return fmt.Errorf("Failed to subscribe: %v", err)
+			return fmt.Errorf("Failed to subscribe: %w", err)
 		}
 		if resp.NotificationSubscriptionCreate == nil || !resp.NotificationSubscriptionCreate.Success {
 			return errors.New("Failed to subscribe")
@@ -348,7 +348,7 @@ deprecated delete). Get the ID from the subscription created by 'subscribe'.`,
 		input := &api.NotificationSubscriptionUpdateInput{Active: &active}
 		resp, err := api.NotificationSubscriptionUpdate(ctx, client, args[0], input)
 		if err != nil {
-			return fmt.Errorf("Failed to unsubscribe: %v", err)
+			return fmt.Errorf("Failed to unsubscribe: %w", err)
 		}
 		if resp.NotificationSubscriptionUpdate == nil || !resp.NotificationSubscriptionUpdate.Success {
 			return errors.New("Failed to unsubscribe")

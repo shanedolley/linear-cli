@@ -71,7 +71,7 @@ var userListCmd = &cobra.Command{
 		// Get users
 		resp, err := api.ListUsers(context.Background(), client, limitPtr, nil, orderByEnum)
 		if err != nil {
-			return fmt.Errorf("Failed to list users: %v", err)
+			return fmt.Errorf("Failed to list users: %w", err)
 		}
 
 		// Filter active users if requested
@@ -178,7 +178,7 @@ var userGetCmd = &cobra.Command{
 
 		userResp, err := api.GetUserByEmail(context.Background(), client, filter)
 		if err != nil {
-			return fmt.Errorf("Failed to get user: %v", err)
+			return fmt.Errorf("Failed to get user: %w", err)
 		}
 
 		if len(userResp.Users.Nodes) == 0 {
@@ -255,7 +255,7 @@ var userMeCmd = &cobra.Command{
 		// Get current user
 		resp, err := api.GetViewer(context.Background(), client)
 		if err != nil {
-			return fmt.Errorf("Failed to get current user: %v", err)
+			return fmt.Errorf("Failed to get current user: %w", err)
 		}
 		user := resp.Viewer.UserDetailFields
 
@@ -356,7 +356,7 @@ var userUpdateCmd = &cobra.Command{
 
 		resp, err := api.UserUpdate(ctx, client, userID, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to update user: %v", err)
+			return fmt.Errorf("Failed to update user: %w", err)
 		}
 		if resp.UserUpdate == nil || !resp.UserUpdate.Success {
 			return errors.New("Failed to update user")
@@ -402,7 +402,7 @@ user's role within a team.`,
 
 		resp, err := api.UserChangeRole(ctx, client, userID, role)
 		if err != nil {
-			return fmt.Errorf("Failed to set role: %v", err)
+			return fmt.Errorf("Failed to set role: %w", err)
 		}
 		if resp.UserChangeRole == nil || !resp.UserChangeRole.Success {
 			return errors.New("Failed to set role")
@@ -466,13 +466,13 @@ func runUserSuspension(cmd *cobra.Command, ref string, suspend bool) error {
 	if suspend {
 		resp, err := api.UserSuspend(ctx, client, userID)
 		if err != nil {
-			return fmt.Errorf("Failed to suspend user: %v", err)
+			return fmt.Errorf("Failed to suspend user: %w", err)
 		}
 		success = resp.UserSuspend != nil && resp.UserSuspend.Success
 	} else {
 		resp, err := api.UserUnsuspend(ctx, client, userID)
 		if err != nil {
-			return fmt.Errorf("Failed to unsuspend user: %v", err)
+			return fmt.Errorf("Failed to unsuspend user: %w", err)
 		}
 		success = resp.UserUnsuspend != nil && resp.UserUnsuspend.Success
 	}
@@ -540,7 +540,7 @@ exposes the current user's own settings, so this always targets you.`,
 
 		settingsResp, err := api.GetUserSettings(ctx, client)
 		if err != nil {
-			return fmt.Errorf("Failed to load your settings: %v", err)
+			return fmt.Errorf("Failed to load your settings: %w", err)
 		}
 		if settingsResp.UserSettings == nil {
 			return errors.New("Could not resolve your settings")
@@ -548,7 +548,7 @@ exposes the current user's own settings, so this always targets you.`,
 
 		resp, err := api.UserSettingsUpdate(ctx, client, settingsResp.UserSettings.Id, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to update settings: %v", err)
+			return fmt.Errorf("Failed to update settings: %w", err)
 		}
 		if resp.UserSettingsUpdate == nil || !resp.UserSettingsUpdate.Success {
 			return errors.New("Failed to update settings")

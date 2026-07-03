@@ -140,7 +140,7 @@ func loginWithAPIKey(plaintext, jsonOut bool) error {
 	client := api.NewClient(apiKey)
 	viewerResp, err := api.GetViewer(context.Background(), client)
 	if err != nil {
-		return fmt.Errorf("invalid API key: %v", err)
+		return fmt.Errorf("invalid API key: %w", err)
 	}
 
 	// Save the API key

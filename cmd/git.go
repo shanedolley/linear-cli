@@ -88,7 +88,7 @@ rule to a target branch (omit it to apply to all branches).`,
 
 		resp, err := api.GitAutomationStateCreate(ctx, client, input)
 		if err != nil {
-			return fmt.Errorf("Failed to create Git automation state: %v", err)
+			return fmt.Errorf("Failed to create Git automation state: %w", err)
 		}
 		if resp.GitAutomationStateCreate == nil || !resp.GitAutomationStateCreate.Success {
 			return errors.New("Failed to create Git automation state")
@@ -157,7 +157,7 @@ name rather than an ID, so the name can be resolved within that team.`,
 
 		resp, err := api.GitAutomationStateUpdate(ctx, client, args[0], input)
 		if err != nil {
-			return fmt.Errorf("Failed to update Git automation state: %v", err)
+			return fmt.Errorf("Failed to update Git automation state: %w", err)
 		}
 		if resp.GitAutomationStateUpdate == nil || !resp.GitAutomationStateUpdate.Success {
 			return errors.New("Failed to update Git automation state")
@@ -187,7 +187,7 @@ var gitStateDeleteCmd = &cobra.Command{
 
 		resp, err := api.GitAutomationStateDelete(ctx, client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to delete Git automation state: %v", err)
+			return fmt.Errorf("Failed to delete Git automation state: %w", err)
 		}
 		if resp.GitAutomationStateDelete == nil || !resp.GitAutomationStateDelete.Success {
 			return errors.New("Failed to delete Git automation state")
@@ -249,7 +249,7 @@ var gitTargetBranchCreateCmd = &cobra.Command{
 
 		resp, err := api.GitAutomationTargetBranchCreate(ctx, client, input)
 		if err != nil {
-			return fmt.Errorf("Failed to create target branch: %v", err)
+			return fmt.Errorf("Failed to create target branch: %w", err)
 		}
 		if resp.GitAutomationTargetBranchCreate == nil || !resp.GitAutomationTargetBranchCreate.Success {
 			return errors.New("Failed to create target branch")
@@ -296,7 +296,7 @@ var gitTargetBranchUpdateCmd = &cobra.Command{
 
 		resp, err := api.GitAutomationTargetBranchUpdate(ctx, client, args[0], input)
 		if err != nil {
-			return fmt.Errorf("Failed to update target branch: %v", err)
+			return fmt.Errorf("Failed to update target branch: %w", err)
 		}
 		if resp.GitAutomationTargetBranchUpdate == nil || !resp.GitAutomationTargetBranchUpdate.Success {
 			return errors.New("Failed to update target branch")
@@ -326,7 +326,7 @@ var gitTargetBranchDeleteCmd = &cobra.Command{
 
 		resp, err := api.GitAutomationTargetBranchDelete(ctx, client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to delete target branch: %v", err)
+			return fmt.Errorf("Failed to delete target branch: %w", err)
 		}
 		if resp.GitAutomationTargetBranchDelete == nil || !resp.GitAutomationTargetBranchDelete.Success {
 			return errors.New("Failed to delete target branch")

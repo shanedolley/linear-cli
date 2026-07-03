@@ -72,7 +72,7 @@ var documentListCmd = &cobra.Command{
 		newerThan, _ := cmd.Flags().GetString("newer-than")
 		createdAt, err := utils.ParseTimeExpression(newerThan)
 		if err != nil {
-			return fmt.Errorf("Invalid newer-than value: %v", err)
+			return fmt.Errorf("Invalid newer-than value: %w", err)
 		}
 		if createdAt != "" {
 			filter.CreatedAt = &api.DateComparator{Gte: &createdAt}
@@ -93,7 +93,7 @@ var documentListCmd = &cobra.Command{
 
 		resp, err := api.ListDocuments(ctx, client, filter, limitPtr, nil, orderBy)
 		if err != nil {
-			return fmt.Errorf("Failed to list documents: %v", err)
+			return fmt.Errorf("Failed to list documents: %w", err)
 		}
 
 		if resp.Documents == nil || len(resp.Documents.Nodes) == 0 {
@@ -169,7 +169,7 @@ var documentSearchCmd = &cobra.Command{
 
 		resp, err := api.SearchDocuments(ctx, client, args[0], limitPtr)
 		if err != nil {
-			return fmt.Errorf("Failed to search documents: %v", err)
+			return fmt.Errorf("Failed to search documents: %w", err)
 		}
 
 		if resp.SearchDocuments == nil || len(resp.SearchDocuments.Nodes) == 0 {
@@ -222,7 +222,7 @@ Use --history to also show the document's content revision history
 
 		resp, err := api.GetDocument(ctx, client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to get document: %v", err)
+			return fmt.Errorf("Failed to get document: %w", err)
 		}
 		if resp.Document == nil {
 			return fmt.Errorf("Document not found: %s", args[0])
@@ -238,7 +238,7 @@ Use --history to also show the document's content revision history
 		if showHistory && d.DocumentContentId != nil {
 			history, err = api.DocumentContentHistory(ctx, client, *d.DocumentContentId)
 			if err != nil {
-				return fmt.Errorf("Failed to load content history: %v", err)
+				return fmt.Errorf("Failed to load content history: %w", err)
 			}
 		}
 
@@ -343,7 +343,7 @@ var documentCreateCmd = &cobra.Command{
 
 		resp, err := api.DocumentCreate(ctx, client, input)
 		if err != nil {
-			return fmt.Errorf("Failed to create document: %v", err)
+			return fmt.Errorf("Failed to create document: %w", err)
 		}
 		if resp.DocumentCreate == nil || !resp.DocumentCreate.Success {
 			return errors.New("Failed to create document")
@@ -397,7 +397,7 @@ var documentUpdateCmd = &cobra.Command{
 
 		resp, err := api.DocumentUpdate(context.Background(), client, args[0], input)
 		if err != nil {
-			return fmt.Errorf("Failed to update document: %v", err)
+			return fmt.Errorf("Failed to update document: %w", err)
 		}
 		if resp.DocumentUpdate == nil || !resp.DocumentUpdate.Success {
 			return errors.New("Failed to update document")
@@ -429,7 +429,7 @@ var documentDeleteCmd = &cobra.Command{
 
 		resp, err := api.DocumentDelete(context.Background(), client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to delete document: %v", err)
+			return fmt.Errorf("Failed to delete document: %w", err)
 		}
 		if resp.DocumentDelete == nil || !resp.DocumentDelete.Success {
 			return errors.New("Failed to delete document")
@@ -461,7 +461,7 @@ var documentUnarchiveCmd = &cobra.Command{
 
 		resp, err := api.DocumentUnarchive(context.Background(), client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to unarchive document: %v", err)
+			return fmt.Errorf("Failed to unarchive document: %w", err)
 		}
 		if resp.DocumentUnarchive == nil || !resp.DocumentUnarchive.Success {
 			return errors.New("Failed to unarchive document")

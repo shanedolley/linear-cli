@@ -46,7 +46,7 @@ var userExternalListCmd = &cobra.Command{
 
 		resp, err := api.ListExternalUsers(ctx, client, limitPtr, nil)
 		if err != nil {
-			return fmt.Errorf("Failed to list external users: %v", err)
+			return fmt.Errorf("Failed to list external users: %w", err)
 		}
 
 		if resp.ExternalUsers == nil || len(resp.ExternalUsers.Nodes) == 0 {
@@ -100,7 +100,7 @@ var userExternalGetCmd = &cobra.Command{
 		}
 		resp, err := api.GetExternalUser(context.Background(), client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to get external user: %v", err)
+			return fmt.Errorf("Failed to get external user: %w", err)
 		}
 		if resp.ExternalUser == nil {
 			return fmt.Errorf("external user %q not found", args[0])

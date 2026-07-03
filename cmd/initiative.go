@@ -147,7 +147,7 @@ var initiativeListCmd = &cobra.Command{
 
 		resp, err := api.ListInitiatives(ctx, client, &filter, limitPtr, nil, orderByEnum, includeArchivedPtr)
 		if err != nil {
-			return fmt.Errorf("Failed to list initiatives: %v", err)
+			return fmt.Errorf("Failed to list initiatives: %w", err)
 		}
 
 		if len(resp.Initiatives.Nodes) == 0 {
@@ -261,7 +261,7 @@ var initiativeGetCmd = &cobra.Command{
 
 		resp, err := api.GetInitiative(ctx, client, initiativeID)
 		if err != nil {
-			return fmt.Errorf("Failed to get initiative: %v", err)
+			return fmt.Errorf("Failed to get initiative: %w", err)
 		}
 		if resp.Initiative == nil {
 			return fmt.Errorf("initiative %q not found", initiativeID)
@@ -514,7 +514,7 @@ var initiativeCreateCmd = &cobra.Command{
 		if owner, _ := cmd.Flags().GetString("owner"); owner != "" {
 			ownerID, err := resolveUser(ctx, client, cache, owner)
 			if err != nil {
-				return fmt.Errorf("Failed to find owner '%s': %v", owner, err)
+				return fmt.Errorf("Failed to find owner '%s': %w", owner, err)
 			}
 			input.OwnerId = &ownerID
 		}
@@ -533,7 +533,7 @@ var initiativeCreateCmd = &cobra.Command{
 
 		createResp, err := api.CreateInitiative(ctx, client, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to create initiative: %v", err)
+			return fmt.Errorf("Failed to create initiative: %w", err)
 		}
 
 		if !createResp.InitiativeCreate.Success {
@@ -610,7 +610,7 @@ Examples:
 			default:
 				ownerID, err := resolveUser(ctx, client, cache, owner)
 				if err != nil {
-					return fmt.Errorf("Failed to find owner '%s': %v", owner, err)
+					return fmt.Errorf("Failed to find owner '%s': %w", owner, err)
 				}
 				input.OwnerId = &ownerID
 			}
@@ -647,7 +647,7 @@ Examples:
 
 		updateResp, err := api.UpdateInitiative(ctx, client, initiativeID, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to update initiative: %v", err)
+			return fmt.Errorf("Failed to update initiative: %w", err)
 		}
 
 		if !updateResp.InitiativeUpdate.Success {
@@ -690,7 +690,7 @@ var initiativeArchiveCmd = &cobra.Command{
 
 		resp, err := api.InitiativeArchive(ctx, client, initiativeID)
 		if err != nil {
-			return fmt.Errorf("Failed to archive initiative: %v", err)
+			return fmt.Errorf("Failed to archive initiative: %w", err)
 		}
 
 		if !resp.InitiativeArchive.Success {
@@ -736,7 +736,7 @@ var initiativeUnarchiveCmd = &cobra.Command{
 
 		resp, err := api.InitiativeUnarchive(ctx, client, initiativeID)
 		if err != nil {
-			return fmt.Errorf("Failed to unarchive initiative: %v", err)
+			return fmt.Errorf("Failed to unarchive initiative: %w", err)
 		}
 
 		if !resp.InitiativeUnarchive.Success {
@@ -782,7 +782,7 @@ var initiativeDeleteCmd = &cobra.Command{
 
 		resp, err := api.InitiativeDelete(ctx, client, initiativeID)
 		if err != nil {
-			return fmt.Errorf("Failed to delete initiative: %v", err)
+			return fmt.Errorf("Failed to delete initiative: %w", err)
 		}
 
 		if !resp.InitiativeDelete.Success {
@@ -861,14 +861,14 @@ Examples:
 		} else {
 			id, err := resolveTeam(ctx, client, cache, team)
 			if err != nil {
-				return fmt.Errorf("Failed to find team '%s': %v", team, err)
+				return fmt.Errorf("Failed to find team '%s': %w", team, err)
 			}
 			leadTeamID = &id
 		}
 
 		resp, err := api.InitiativeLeadTeamUpdate(ctx, client, initiativeID, leadTeamID, mode)
 		if err != nil {
-			return fmt.Errorf("Failed to update lead team: %v", err)
+			return fmt.Errorf("Failed to update lead team: %w", err)
 		}
 
 		if !resp.InitiativeLeadTeamUpdate.Success {
@@ -955,7 +955,7 @@ var initiativeProjectAddCmd = &cobra.Command{
 
 		resp, err := api.InitiativeToProjectCreate(ctx, client, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to add project to initiative: %v", err)
+			return fmt.Errorf("Failed to add project to initiative: %w", err)
 		}
 		if !resp.InitiativeToProjectCreate.Success {
 			return errors.New("Failed to add project to initiative")
@@ -1007,7 +1007,7 @@ var initiativeProjectRemoveCmd = &cobra.Command{
 
 		resp, err := api.InitiativeToProjectDelete(ctx, client, linkID)
 		if err != nil {
-			return fmt.Errorf("Failed to remove project from initiative: %v", err)
+			return fmt.Errorf("Failed to remove project from initiative: %w", err)
 		}
 		if !resp.InitiativeToProjectDelete.Success {
 			return errors.New("Failed to remove project from initiative")
@@ -1062,7 +1062,7 @@ var initiativeProjectReorderCmd = &cobra.Command{
 		input := api.InitiativeToProjectUpdateInput{SortOrder: &sortOrder}
 		resp, err := api.InitiativeToProjectUpdate(ctx, client, linkID, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to reorder project: %v", err)
+			return fmt.Errorf("Failed to reorder project: %w", err)
 		}
 		if !resp.InitiativeToProjectUpdate.Success {
 			return errors.New("Failed to reorder project")
@@ -1122,7 +1122,7 @@ var initiativeLabelAddCmd = &cobra.Command{
 
 		resp, err := api.InitiativeAddLabel(ctx, client, initiativeID, labelID)
 		if err != nil {
-			return fmt.Errorf("Failed to add label to initiative: %v", err)
+			return fmt.Errorf("Failed to add label to initiative: %w", err)
 		}
 		if !resp.InitiativeAddLabel.Success {
 			return errors.New("Failed to add label to initiative")
@@ -1169,7 +1169,7 @@ var initiativeLabelRemoveCmd = &cobra.Command{
 
 		resp, err := api.InitiativeRemoveLabel(ctx, client, initiativeID, labelID)
 		if err != nil {
-			return fmt.Errorf("Failed to remove label from initiative: %v", err)
+			return fmt.Errorf("Failed to remove label from initiative: %w", err)
 		}
 		if !resp.InitiativeRemoveLabel.Success {
 			return errors.New("Failed to remove label from initiative")
@@ -1235,7 +1235,7 @@ Examples:
 
 		resp, err := api.InitiativeRelationCreate(ctx, client, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to create initiative relation: %v", err)
+			return fmt.Errorf("Failed to create initiative relation: %w", err)
 		}
 		if !resp.InitiativeRelationCreate.Success {
 			return errors.New("Failed to create initiative relation")
@@ -1289,7 +1289,7 @@ var initiativeUnrelateCmd = &cobra.Command{
 		for after := (*string)(nil); ; {
 			resp, err := api.ListInitiativeRelations(ctx, client, &limit, after)
 			if err != nil {
-				return fmt.Errorf("Failed to look up initiative relations: %v", err)
+				return fmt.Errorf("Failed to look up initiative relations: %w", err)
 			}
 			for _, node := range resp.InitiativeRelations.Nodes {
 				if node.Initiative != nil && node.RelatedInitiative != nil &&
@@ -1310,7 +1310,7 @@ var initiativeUnrelateCmd = &cobra.Command{
 
 		resp, err := api.InitiativeRelationDelete(ctx, client, relID)
 		if err != nil {
-			return fmt.Errorf("Failed to remove initiative relation: %v", err)
+			return fmt.Errorf("Failed to remove initiative relation: %w", err)
 		}
 		if !resp.InitiativeRelationDelete.Success {
 			return errors.New("Failed to remove initiative relation")
@@ -1380,7 +1380,7 @@ var initiativeUpdatePostListCmd = &cobra.Command{
 
 		resp, err := api.ListInitiativeUpdates(ctx, client, filter, limitPtr, nil, nil)
 		if err != nil {
-			return fmt.Errorf("Failed to list initiative updates: %v", err)
+			return fmt.Errorf("Failed to list initiative updates: %w", err)
 		}
 
 		updates := resp.InitiativeUpdates.Nodes
@@ -1475,7 +1475,7 @@ var initiativeUpdatePostCreateCmd = &cobra.Command{
 
 		resp, err := api.CreateInitiativeUpdate(ctx, client, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to post initiative update: %v", err)
+			return fmt.Errorf("Failed to post initiative update: %w", err)
 		}
 		if !resp.InitiativeUpdateCreate.Success {
 			return errors.New("Failed to post initiative update")
@@ -1528,7 +1528,7 @@ var initiativeUpdatePostEditCmd = &cobra.Command{
 
 		resp, err := api.UpdateInitiativeUpdate(ctx, client, updateID, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to edit status update: %v", err)
+			return fmt.Errorf("Failed to edit status update: %w", err)
 		}
 		if !resp.InitiativeUpdateUpdate.Success {
 			return errors.New("Failed to edit status update")
@@ -1565,7 +1565,7 @@ var initiativeUpdatePostArchiveCmd = &cobra.Command{
 
 		resp, err := api.InitiativeUpdateArchive(ctx, client, updateID)
 		if err != nil {
-			return fmt.Errorf("Failed to archive status update: %v", err)
+			return fmt.Errorf("Failed to archive status update: %w", err)
 		}
 		if !resp.InitiativeUpdateArchive.Success {
 			return errors.New("Failed to archive status update")
@@ -1600,7 +1600,7 @@ var initiativeUpdatePostUnarchiveCmd = &cobra.Command{
 
 		resp, err := api.InitiativeUpdateUnarchive(ctx, client, updateID)
 		if err != nil {
-			return fmt.Errorf("Failed to unarchive status update: %v", err)
+			return fmt.Errorf("Failed to unarchive status update: %w", err)
 		}
 		if !resp.InitiativeUpdateUnarchive.Success {
 			return errors.New("Failed to unarchive status update")
@@ -1647,14 +1647,14 @@ Examples:
 		if user, _ := cmd.Flags().GetString("user"); user != "" {
 			id, err := resolveUser(ctx, client, cache, user)
 			if err != nil {
-				return fmt.Errorf("Failed to find user '%s': %v", user, err)
+				return fmt.Errorf("Failed to find user '%s': %w", user, err)
 			}
 			userID = &id
 		}
 
 		resp, err := api.CreateInitiativeUpdateReminder(ctx, client, initiativeID, userID)
 		if err != nil {
-			return fmt.Errorf("Failed to send update reminder: %v", err)
+			return fmt.Errorf("Failed to send update reminder: %w", err)
 		}
 		if !resp.CreateInitiativeUpdateReminder.Success {
 			return errors.New("Failed to send update reminder")
@@ -1763,7 +1763,7 @@ func buildInitiativeFilterTyped(cmd *cobra.Command) (api.InitiativeFilter, error
 	newerThan, _ := cmd.Flags().GetString("newer-than")
 	createdAt, err := utils.ParseTimeExpression(newerThan)
 	if err != nil {
-		return filter, fmt.Errorf("Invalid newer-than value: %v", err)
+		return filter, fmt.Errorf("Invalid newer-than value: %w", err)
 	}
 	if createdAt != "" {
 		filter.CreatedAt = &api.DateComparator{

@@ -165,7 +165,7 @@ var projectListCmd = &cobra.Command{
 		// Get projects
 		resp, err := api.ListProjects(context.Background(), client, &filterTyped, limitPtr, nil, orderByEnum)
 		if err != nil {
-			return fmt.Errorf("Failed to list projects: %v", err)
+			return fmt.Errorf("Failed to list projects: %w", err)
 		}
 
 		// Handle output
@@ -293,7 +293,7 @@ var projectGetCmd = &cobra.Command{
 		// Get project details
 		resp, err := api.GetProject(context.Background(), client, projectID)
 		if err != nil {
-			return fmt.Errorf("Failed to get project: %v", err)
+			return fmt.Errorf("Failed to get project: %w", err)
 		}
 		if resp.Project == nil {
 			return fmt.Errorf("project %q not found", projectID)
@@ -723,7 +723,7 @@ var projectCreateCmd = &cobra.Command{
 
 		teamID, err := resolveTeam(ctx, client, cache, team)
 		if err != nil {
-			return fmt.Errorf("Failed to find team '%s': %v", team, err)
+			return fmt.Errorf("Failed to find team '%s': %w", team, err)
 		}
 
 		input := api.ProjectCreateInput{
@@ -738,7 +738,7 @@ var projectCreateCmd = &cobra.Command{
 		if lead, _ := cmd.Flags().GetString("lead"); lead != "" {
 			leadID, err := resolveUser(ctx, client, cache, lead)
 			if err != nil {
-				return fmt.Errorf("Failed to find lead '%s': %v", lead, err)
+				return fmt.Errorf("Failed to find lead '%s': %w", lead, err)
 			}
 			input.LeadId = &leadID
 		}
@@ -772,7 +772,7 @@ var projectCreateCmd = &cobra.Command{
 
 		createResp, err := api.CreateProject(ctx, client, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to create project: %v", err)
+			return fmt.Errorf("Failed to create project: %w", err)
 		}
 		if !createResp.ProjectCreate.Success || createResp.ProjectCreate.Project == nil {
 			return errors.New("Failed to create project")
@@ -849,7 +849,7 @@ Examples:
 			default:
 				leadID, err := resolveUser(ctx, client, cache, lead)
 				if err != nil {
-					return fmt.Errorf("Failed to find lead '%s': %v", lead, err)
+					return fmt.Errorf("Failed to find lead '%s': %w", lead, err)
 				}
 				input.LeadId = &leadID
 			}
@@ -897,7 +897,7 @@ Examples:
 
 		updateResp, err := api.UpdateProject(ctx, client, projectID, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to update project: %v", err)
+			return fmt.Errorf("Failed to update project: %w", err)
 		}
 		if !updateResp.ProjectUpdate.Success || updateResp.ProjectUpdate.Project == nil {
 			return errors.New("Failed to update project")
@@ -939,7 +939,7 @@ var projectDeleteCmd = &cobra.Command{
 
 		resp, err := api.ProjectDelete(ctx, client, projectID)
 		if err != nil {
-			return fmt.Errorf("Failed to delete project: %v", err)
+			return fmt.Errorf("Failed to delete project: %w", err)
 		}
 		if !resp.ProjectDelete.Success {
 			return errors.New("Failed to delete project")
@@ -984,7 +984,7 @@ var projectUnarchiveCmd = &cobra.Command{
 
 		resp, err := api.ProjectUnarchive(ctx, client, projectID)
 		if err != nil {
-			return fmt.Errorf("Failed to unarchive project: %v", err)
+			return fmt.Errorf("Failed to unarchive project: %w", err)
 		}
 		if !resp.ProjectUnarchive.Success {
 			return errors.New("Failed to unarchive project")
@@ -1054,7 +1054,7 @@ var projectMembersCmd = &cobra.Command{
 
 		resp, err := api.GetProject(ctx, client, projectID)
 		if err != nil {
-			return fmt.Errorf("Failed to get project: %v", err)
+			return fmt.Errorf("Failed to get project: %w", err)
 		}
 		if resp.Project == nil {
 			return errors.New("Project not found")
@@ -1137,7 +1137,7 @@ var projectMemberAddCmd = &cobra.Command{
 		}
 		userID, err := resolveUser(ctx, client, cache, args[1])
 		if err != nil {
-			return fmt.Errorf("Failed to find user '%s': %v", args[1], err)
+			return fmt.Errorf("Failed to find user '%s': %w", args[1], err)
 		}
 
 		memberIDs, projectName, err := getProjectMemberIDs(ctx, client, projectID)
@@ -1155,7 +1155,7 @@ var projectMemberAddCmd = &cobra.Command{
 		input := api.ProjectUpdateInput{MemberIds: memberIDs}
 		resp, err := api.UpdateProject(ctx, client, projectID, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to add member to project: %v", err)
+			return fmt.Errorf("Failed to add member to project: %w", err)
 		}
 		if !resp.ProjectUpdate.Success {
 			return errors.New("Failed to add member to project")
@@ -1195,7 +1195,7 @@ var projectMemberRemoveCmd = &cobra.Command{
 		}
 		userID, err := resolveUser(ctx, client, cache, args[1])
 		if err != nil {
-			return fmt.Errorf("Failed to find user '%s': %v", args[1], err)
+			return fmt.Errorf("Failed to find user '%s': %w", args[1], err)
 		}
 
 		memberIDs, projectName, err := getProjectMemberIDs(ctx, client, projectID)
@@ -1219,7 +1219,7 @@ var projectMemberRemoveCmd = &cobra.Command{
 		input := api.ProjectUpdateInput{MemberIds: filtered}
 		resp, err := api.UpdateProject(ctx, client, projectID, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to remove member from project: %v", err)
+			return fmt.Errorf("Failed to remove member from project: %w", err)
 		}
 		if !resp.ProjectUpdate.Success {
 			return errors.New("Failed to remove member from project")
@@ -1305,7 +1305,7 @@ var projectMilestoneListCmd = &cobra.Command{
 
 		resp, err := api.ListProjectMilestones(ctx, client, projectID, limitPtr)
 		if err != nil {
-			return fmt.Errorf("Failed to list milestones: %v", err)
+			return fmt.Errorf("Failed to list milestones: %w", err)
 		}
 		if resp.Project == nil || resp.Project.ProjectMilestones == nil {
 			return errors.New("Project not found")
@@ -1386,7 +1386,7 @@ var projectMilestoneGetCmd = &cobra.Command{
 
 		resp, err := api.GetProjectMilestone(ctx, client, milestoneID)
 		if err != nil {
-			return fmt.Errorf("Failed to get milestone: %v", err)
+			return fmt.Errorf("Failed to get milestone: %w", err)
 		}
 		if resp.ProjectMilestone == nil {
 			return errors.New("Milestone not found")
@@ -1479,7 +1479,7 @@ var projectMilestoneCreateCmd = &cobra.Command{
 
 		resp, err := api.ProjectMilestoneCreate(ctx, client, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to create milestone: %v", err)
+			return fmt.Errorf("Failed to create milestone: %w", err)
 		}
 		if !resp.ProjectMilestoneCreate.Success || resp.ProjectMilestoneCreate.ProjectMilestone == nil {
 			return errors.New("Failed to create milestone")
@@ -1550,7 +1550,7 @@ var projectMilestoneUpdateCmd = &cobra.Command{
 
 		resp, err := api.ProjectMilestoneUpdate(ctx, client, milestoneID, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to update milestone: %v", err)
+			return fmt.Errorf("Failed to update milestone: %w", err)
 		}
 		if !resp.ProjectMilestoneUpdate.Success || resp.ProjectMilestoneUpdate.ProjectMilestone == nil {
 			return errors.New("Failed to update milestone")
@@ -1611,7 +1611,7 @@ a separate update call to set the sort order.`,
 		input := api.ProjectMilestoneMoveInput{ProjectId: projectID}
 		resp, err := api.ProjectMilestoneMove(ctx, client, milestoneID, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to move milestone: %v", err)
+			return fmt.Errorf("Failed to move milestone: %w", err)
 		}
 		if !resp.ProjectMilestoneMove.Success || resp.ProjectMilestoneMove.ProjectMilestone == nil {
 			return errors.New("Failed to move milestone")
@@ -1628,7 +1628,7 @@ a separate update call to set the sort order.`,
 			updateInput := api.ProjectMilestoneUpdateInput{SortOrder: &sortOrder}
 			updateResp, err := api.ProjectMilestoneUpdate(ctx, client, milestoneID, &updateInput)
 			if err != nil {
-				return fmt.Errorf("Milestone moved to %s, but failed to set sort order: %v", projectName, err)
+				return fmt.Errorf("Milestone moved to %s, but failed to set sort order: %w", projectName, err)
 			}
 			if !updateResp.ProjectMilestoneUpdate.Success || updateResp.ProjectMilestoneUpdate.ProjectMilestone == nil {
 				return fmt.Errorf("Milestone moved to %s, but failed to set sort order", projectName)
@@ -1679,7 +1679,7 @@ var projectMilestoneDeleteCmd = &cobra.Command{
 
 		resp, err := api.ProjectMilestoneDelete(ctx, client, milestoneID)
 		if err != nil {
-			return fmt.Errorf("Failed to delete milestone: %v", err)
+			return fmt.Errorf("Failed to delete milestone: %w", err)
 		}
 		if !resp.ProjectMilestoneDelete.Success {
 			return errors.New("Failed to delete milestone")
@@ -1751,7 +1751,7 @@ var projectUpdatePostListCmd = &cobra.Command{
 
 		resp, err := api.ListProjectUpdates(ctx, client, filter, limitPtr, nil, nil)
 		if err != nil {
-			return fmt.Errorf("Failed to list project updates: %v", err)
+			return fmt.Errorf("Failed to list project updates: %w", err)
 		}
 
 		updates := resp.ProjectUpdates.Nodes
@@ -1846,7 +1846,7 @@ var projectUpdatePostCreateCmd = &cobra.Command{
 
 		resp, err := api.ProjectUpdateCreate(ctx, client, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to post project update: %v", err)
+			return fmt.Errorf("Failed to post project update: %w", err)
 		}
 		if !resp.ProjectUpdateCreate.Success {
 			return errors.New("Failed to post project update")
@@ -1899,7 +1899,7 @@ var projectUpdatePostEditCmd = &cobra.Command{
 
 		resp, err := api.ProjectUpdateUpdate(ctx, client, updateID, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to edit status update: %v", err)
+			return fmt.Errorf("Failed to edit status update: %w", err)
 		}
 		if !resp.ProjectUpdateUpdate.Success {
 			return errors.New("Failed to edit status update")
@@ -1936,7 +1936,7 @@ var projectUpdatePostArchiveCmd = &cobra.Command{
 
 		resp, err := api.ProjectUpdateArchive(ctx, client, updateID)
 		if err != nil {
-			return fmt.Errorf("Failed to archive status update: %v", err)
+			return fmt.Errorf("Failed to archive status update: %w", err)
 		}
 		if !resp.ProjectUpdateArchive.Success {
 			return errors.New("Failed to archive status update")
@@ -1971,7 +1971,7 @@ var projectUpdatePostUnarchiveCmd = &cobra.Command{
 
 		resp, err := api.ProjectUpdateUnarchive(ctx, client, updateID)
 		if err != nil {
-			return fmt.Errorf("Failed to unarchive status update: %v", err)
+			return fmt.Errorf("Failed to unarchive status update: %w", err)
 		}
 		if !resp.ProjectUpdateUnarchive.Success {
 			return errors.New("Failed to unarchive status update")
@@ -2018,14 +2018,14 @@ Examples:
 		if user, _ := cmd.Flags().GetString("user"); user != "" {
 			id, err := resolveUser(ctx, client, cache, user)
 			if err != nil {
-				return fmt.Errorf("Failed to find user '%s': %v", user, err)
+				return fmt.Errorf("Failed to find user '%s': %w", user, err)
 			}
 			userID = &id
 		}
 
 		resp, err := api.CreateProjectUpdateReminder(ctx, client, projectID, userID)
 		if err != nil {
-			return fmt.Errorf("Failed to send update reminder: %v", err)
+			return fmt.Errorf("Failed to send update reminder: %w", err)
 		}
 		if !resp.CreateProjectUpdateReminder.Success {
 			return errors.New("Failed to send update reminder")
@@ -2084,7 +2084,7 @@ var projectLabelListCmd = &cobra.Command{
 
 		resp, err := api.ListProjectLabels(ctx, client, nil, limitPtr)
 		if err != nil {
-			return fmt.Errorf("Failed to list project labels: %v", err)
+			return fmt.Errorf("Failed to list project labels: %w", err)
 		}
 
 		labels := []*api.ListProjectLabelsProjectLabelsProjectLabelConnectionNodesProjectLabel{}
@@ -2168,7 +2168,7 @@ var projectLabelCreateCmd = &cobra.Command{
 
 		resp, err := api.ProjectLabelCreate(ctx, client, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to create project label: %v", err)
+			return fmt.Errorf("Failed to create project label: %w", err)
 		}
 		if !resp.ProjectLabelCreate.Success || resp.ProjectLabelCreate.ProjectLabel == nil {
 			return errors.New("Failed to create project label")
@@ -2227,7 +2227,7 @@ var projectLabelUpdateCmd = &cobra.Command{
 
 		resp, err := api.ProjectLabelUpdate(ctx, client, labelID, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to update project label: %v", err)
+			return fmt.Errorf("Failed to update project label: %w", err)
 		}
 		if !resp.ProjectLabelUpdate.Success || resp.ProjectLabelUpdate.ProjectLabel == nil {
 			return errors.New("Failed to update project label")
@@ -2269,7 +2269,7 @@ var projectLabelDeleteCmd = &cobra.Command{
 
 		resp, err := api.ProjectLabelDelete(ctx, client, labelID)
 		if err != nil {
-			return fmt.Errorf("Failed to delete project label: %v", err)
+			return fmt.Errorf("Failed to delete project label: %w", err)
 		}
 		if !resp.ProjectLabelDelete.Success {
 			return errors.New("Failed to delete project label")
@@ -2309,7 +2309,7 @@ var projectLabelRetireCmd = &cobra.Command{
 
 		resp, err := api.ProjectLabelRetire(ctx, client, labelID)
 		if err != nil {
-			return fmt.Errorf("Failed to retire project label: %v", err)
+			return fmt.Errorf("Failed to retire project label: %w", err)
 		}
 		if !resp.ProjectLabelRetire.Success {
 			return errors.New("Failed to retire project label")
@@ -2354,7 +2354,7 @@ var projectLabelRestoreCmd = &cobra.Command{
 
 		resp, err := api.ProjectLabelRestore(ctx, client, labelID)
 		if err != nil {
-			return fmt.Errorf("Failed to restore project label: %v", err)
+			return fmt.Errorf("Failed to restore project label: %w", err)
 		}
 		if !resp.ProjectLabelRestore.Success {
 			return errors.New("Failed to restore project label")
@@ -2402,7 +2402,7 @@ var projectLabelAddCmd = &cobra.Command{
 
 		resp, err := api.ProjectAddLabel(ctx, client, projectID, labelID)
 		if err != nil {
-			return fmt.Errorf("Failed to add label to project: %v", err)
+			return fmt.Errorf("Failed to add label to project: %w", err)
 		}
 		if !resp.ProjectAddLabel.Success {
 			return errors.New("Failed to add label to project")
@@ -2465,7 +2465,7 @@ var projectLabelRemoveCmd = &cobra.Command{
 
 		resp, err := api.ProjectRemoveLabel(ctx, client, projectID, labelID)
 		if err != nil {
-			return fmt.Errorf("Failed to remove label from project: %v", err)
+			return fmt.Errorf("Failed to remove label from project: %w", err)
 		}
 		if !resp.ProjectRemoveLabel.Success {
 			return errors.New("Failed to remove label from project")
@@ -2592,7 +2592,7 @@ Examples:
 
 		resp, err := api.ProjectRelationCreate(ctx, client, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to create project relation: %v", err)
+			return fmt.Errorf("Failed to create project relation: %w", err)
 		}
 		if !resp.ProjectRelationCreate.Success {
 			return errors.New("Failed to create project relation")
@@ -2643,7 +2643,7 @@ var projectUnrelateCmd = &cobra.Command{
 
 		resp, err := api.ProjectRelationDelete(ctx, client, relID)
 		if err != nil {
-			return fmt.Errorf("Failed to remove project relation: %v", err)
+			return fmt.Errorf("Failed to remove project relation: %w", err)
 		}
 		if !resp.ProjectRelationDelete.Success {
 			return errors.New("Failed to remove project relation")
@@ -2693,7 +2693,7 @@ var projectStatusListCmd = &cobra.Command{
 		limit := 250
 		resp, err := api.ListProjectStatuses(ctx, client, &limit)
 		if err != nil {
-			return fmt.Errorf("Failed to list project statuses: %v", err)
+			return fmt.Errorf("Failed to list project statuses: %w", err)
 		}
 
 		statuses := []*api.ListProjectStatusesProjectStatusesProjectStatusConnectionNodesProjectStatus{}
@@ -2780,7 +2780,7 @@ var projectStatusCreateCmd = &cobra.Command{
 
 		resp, err := api.ProjectStatusCreate(ctx, client, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to create project status: %v", err)
+			return fmt.Errorf("Failed to create project status: %w", err)
 		}
 		if !resp.ProjectStatusCreate.Success || resp.ProjectStatusCreate.Status == nil {
 			return errors.New("Failed to create project status")
@@ -2851,7 +2851,7 @@ var projectStatusUpdateCmd = &cobra.Command{
 
 		resp, err := api.ProjectStatusUpdate(ctx, client, statusID, &input)
 		if err != nil {
-			return fmt.Errorf("Failed to update project status: %v", err)
+			return fmt.Errorf("Failed to update project status: %w", err)
 		}
 		if !resp.ProjectStatusUpdate.Success || resp.ProjectStatusUpdate.Status == nil {
 			return errors.New("Failed to update project status")
@@ -2893,7 +2893,7 @@ var projectStatusArchiveCmd = &cobra.Command{
 
 		resp, err := api.ProjectStatusArchive(ctx, client, statusID)
 		if err != nil {
-			return fmt.Errorf("Failed to archive project status: %v", err)
+			return fmt.Errorf("Failed to archive project status: %w", err)
 		}
 		if !resp.ProjectStatusArchive.Success {
 			return errors.New("Failed to archive project status")
@@ -2938,7 +2938,7 @@ var projectStatusUnarchiveCmd = &cobra.Command{
 
 		resp, err := api.ProjectStatusUnarchive(ctx, client, statusID)
 		if err != nil {
-			return fmt.Errorf("Failed to unarchive project status: %v", err)
+			return fmt.Errorf("Failed to unarchive project status: %w", err)
 		}
 		if !resp.ProjectStatusUnarchive.Success {
 			return errors.New("Failed to unarchive project status")
@@ -2998,7 +2998,7 @@ Examples:
 
 		resp, err := api.ProjectReassignStatus(ctx, client, fromID, toID)
 		if err != nil {
-			return fmt.Errorf("Failed to reassign project status: %v", err)
+			return fmt.Errorf("Failed to reassign project status: %w", err)
 		}
 		if !resp.ProjectReassignStatus.Success {
 			return errors.New("Failed to reassign project status")
@@ -3208,7 +3208,7 @@ func buildProjectFilterTyped(cmd *cobra.Command) (api.ProjectFilter, error) {
 	newerThan, _ := cmd.Flags().GetString("newer-than")
 	createdAt, err := utils.ParseTimeExpression(newerThan)
 	if err != nil {
-		return filter, fmt.Errorf("Invalid newer-than value: %v", err)
+		return filter, fmt.Errorf("Invalid newer-than value: %w", err)
 	}
 	if createdAt != "" {
 		filter.CreatedAt = &api.DateComparator{

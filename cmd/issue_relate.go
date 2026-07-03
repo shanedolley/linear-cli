@@ -69,7 +69,7 @@ issue identifier such as TEAM-123 or a UUID).`,
 		}
 		resp, err := api.UpdateIssueRelation(context.Background(), client, args[0], input)
 		if err != nil {
-			return fmt.Errorf("Failed to update relation: %v", err)
+			return fmt.Errorf("Failed to update relation: %w", err)
 		}
 		if resp.IssueRelationUpdate == nil || !resp.IssueRelationUpdate.Success {
 			return errors.New("Failed to update relation")

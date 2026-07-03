@@ -82,7 +82,7 @@ var commentListCmd = &cobra.Command{
 		// Get comments using generated function
 		resp, err := api.ListComments(context.Background(), client, issueID, limitPtr, nil, orderByEnum)
 		if err != nil {
-			return fmt.Errorf("Failed to list comments: %v", err)
+			return fmt.Errorf("Failed to list comments: %w", err)
 		}
 
 		// Check if no comments
@@ -186,7 +186,7 @@ Examples:
 		// Create comment
 		createResp, err := api.CreateComment(context.Background(), client, input)
 		if err != nil {
-			return fmt.Errorf("Failed to create comment: %v", err)
+			return fmt.Errorf("Failed to create comment: %w", err)
 		}
 		comment := createResp.CommentCreate.Comment
 
@@ -230,7 +230,7 @@ var commentEditCmd = &cobra.Command{
 		input := &api.CommentUpdateInput{Body: &body}
 		resp, err := api.UpdateComment(context.Background(), client, args[0], input)
 		if err != nil {
-			return fmt.Errorf("Failed to edit comment: %v", err)
+			return fmt.Errorf("Failed to edit comment: %w", err)
 		}
 		if resp.CommentUpdate == nil || resp.CommentUpdate.Comment == nil {
 			return errors.New("Failed to edit comment")
@@ -264,7 +264,7 @@ comment-restore API, so a deleted comment cannot be recovered.`,
 
 		resp, err := api.DeleteComment(context.Background(), client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to delete comment: %v", err)
+			return fmt.Errorf("Failed to delete comment: %w", err)
 		}
 		if resp.CommentDelete == nil || !resp.CommentDelete.Success {
 			return errors.New("Failed to delete comment")
@@ -321,13 +321,13 @@ func runCommentResolution(cmd *cobra.Command, id string, resolve bool) error {
 	if resolve {
 		resp, err := api.ResolveComment(ctx, client, id)
 		if err != nil {
-			return fmt.Errorf("Failed to resolve comment: %v", err)
+			return fmt.Errorf("Failed to resolve comment: %w", err)
 		}
 		success = resp.CommentResolve != nil && resp.CommentResolve.Success
 	} else {
 		resp, err := api.UnresolveComment(ctx, client, id)
 		if err != nil {
-			return fmt.Errorf("Failed to unresolve comment: %v", err)
+			return fmt.Errorf("Failed to unresolve comment: %w", err)
 		}
 		success = resp.CommentUnresolve != nil && resp.CommentUnresolve.Success
 	}

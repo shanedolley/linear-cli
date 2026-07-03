@@ -61,7 +61,7 @@ var customerListCmd = &cobra.Command{
 		newerThan, _ := cmd.Flags().GetString("newer-than")
 		createdAt, err := utils.ParseTimeExpression(newerThan)
 		if err != nil {
-			return fmt.Errorf("Invalid newer-than value: %v", err)
+			return fmt.Errorf("Invalid newer-than value: %w", err)
 		}
 		if createdAt != "" {
 			filter.CreatedAt = &api.DateComparator{Gte: &createdAt}
@@ -69,7 +69,7 @@ var customerListCmd = &cobra.Command{
 
 		resp, err := api.ListCustomers(ctx, client, filter, limitPtr, nil, nil)
 		if err != nil {
-			return fmt.Errorf("Failed to list customers: %v", err)
+			return fmt.Errorf("Failed to list customers: %w", err)
 		}
 
 		if resp.Customers == nil || len(resp.Customers.Nodes) == 0 {
@@ -134,7 +134,7 @@ var customerGetCmd = &cobra.Command{
 
 		resp, err := api.GetCustomer(ctx, client, id)
 		if err != nil {
-			return fmt.Errorf("Failed to get customer: %v", err)
+			return fmt.Errorf("Failed to get customer: %w", err)
 		}
 		if resp.Customer == nil {
 			return fmt.Errorf("customer %q not found", id)
@@ -229,7 +229,7 @@ var customerCreateCmd = &cobra.Command{
 
 		resp, err := api.CustomerCreate(ctx, client, input)
 		if err != nil {
-			return fmt.Errorf("Failed to create customer: %v", err)
+			return fmt.Errorf("Failed to create customer: %w", err)
 		}
 		if resp.CustomerCreate == nil || !resp.CustomerCreate.Success {
 			return errors.New("Failed to create customer")
@@ -310,7 +310,7 @@ var customerUpdateCmd = &cobra.Command{
 
 		resp, err := api.CustomerUpdate(ctx, client, id, input)
 		if err != nil {
-			return fmt.Errorf("Failed to update customer: %v", err)
+			return fmt.Errorf("Failed to update customer: %w", err)
 		}
 		if resp.CustomerUpdate == nil || !resp.CustomerUpdate.Success {
 			return errors.New("Failed to update customer")
@@ -347,7 +347,7 @@ var customerDeleteCmd = &cobra.Command{
 
 		resp, err := api.CustomerDelete(ctx, client, id)
 		if err != nil {
-			return fmt.Errorf("Failed to delete customer: %v", err)
+			return fmt.Errorf("Failed to delete customer: %w", err)
 		}
 		if resp.CustomerDelete == nil || !resp.CustomerDelete.Success {
 			return errors.New("Failed to delete customer")
@@ -389,7 +389,7 @@ target and the source is archived. Executes immediately with no prompt.`,
 
 		resp, err := api.CustomerMerge(ctx, client, sourceID, targetID)
 		if err != nil {
-			return fmt.Errorf("Failed to merge customers: %v", err)
+			return fmt.Errorf("Failed to merge customers: %w", err)
 		}
 		if resp.CustomerMerge == nil || !resp.CustomerMerge.Success {
 			return errors.New("Failed to merge customers")
@@ -444,7 +444,7 @@ external identifier exists it is updated, otherwise a new one is created.
 
 		resp, err := api.CustomerUpsert(ctx, client, input)
 		if err != nil {
-			return fmt.Errorf("Failed to upsert customer: %v", err)
+			return fmt.Errorf("Failed to upsert customer: %w", err)
 		}
 		if resp.CustomerUpsert == nil || !resp.CustomerUpsert.Success {
 			return errors.New("Failed to upsert customer")
@@ -480,7 +480,7 @@ var customerUnsyncCmd = &cobra.Command{
 
 		resp, err := api.CustomerUnsync(ctx, client, id)
 		if err != nil {
-			return fmt.Errorf("Failed to unsync customer: %v", err)
+			return fmt.Errorf("Failed to unsync customer: %w", err)
 		}
 		if resp.CustomerUnsync == nil || !resp.CustomerUnsync.Success {
 			return errors.New("Failed to unsync customer")
@@ -534,7 +534,7 @@ var customerNeedListCmd = &cobra.Command{
 
 		resp, err := api.ListCustomerNeeds(ctx, client, filter, limitPtr, nil, nil)
 		if err != nil {
-			return fmt.Errorf("Failed to list customer needs: %v", err)
+			return fmt.Errorf("Failed to list customer needs: %w", err)
 		}
 
 		if resp.CustomerNeeds == nil || len(resp.CustomerNeeds.Nodes) == 0 {
@@ -592,7 +592,7 @@ var customerNeedGetCmd = &cobra.Command{
 
 		resp, err := api.GetCustomerNeed(ctx, client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to get customer need: %v", err)
+			return fmt.Errorf("Failed to get customer need: %w", err)
 		}
 		f := resp.CustomerNeed.CustomerNeedFields
 
@@ -683,7 +683,7 @@ attachmentUrl inputs) is not yet wired; pass the content with --body instead.`,
 
 		resp, err := api.CustomerNeedCreate(ctx, client, input)
 		if err != nil {
-			return fmt.Errorf("Failed to create customer need: %v", err)
+			return fmt.Errorf("Failed to create customer need: %w", err)
 		}
 		if resp.CustomerNeedCreate == nil || !resp.CustomerNeedCreate.Success {
 			return errors.New("Failed to create customer need")
@@ -750,7 +750,7 @@ var customerNeedUpdateCmd = &cobra.Command{
 
 		resp, err := api.CustomerNeedUpdate(ctx, client, args[0], input)
 		if err != nil {
-			return fmt.Errorf("Failed to update customer need: %v", err)
+			return fmt.Errorf("Failed to update customer need: %w", err)
 		}
 		if resp.CustomerNeedUpdate == nil || !resp.CustomerNeedUpdate.Success {
 			return errors.New("Failed to update customer need")
@@ -781,7 +781,7 @@ var customerNeedDeleteCmd = &cobra.Command{
 
 		resp, err := api.CustomerNeedDelete(ctx, client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to delete customer need: %v", err)
+			return fmt.Errorf("Failed to delete customer need: %w", err)
 		}
 		if resp.CustomerNeedDelete == nil || !resp.CustomerNeedDelete.Success {
 			return errors.New("Failed to delete customer need")
@@ -811,7 +811,7 @@ var customerNeedArchiveCmd = &cobra.Command{
 
 		resp, err := api.CustomerNeedArchive(ctx, client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to archive customer need: %v", err)
+			return fmt.Errorf("Failed to archive customer need: %w", err)
 		}
 		if resp.CustomerNeedArchive == nil || !resp.CustomerNeedArchive.Success {
 			return errors.New("Failed to archive customer need")
@@ -842,7 +842,7 @@ var customerNeedUnarchiveCmd = &cobra.Command{
 
 		resp, err := api.CustomerNeedUnarchive(ctx, client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to unarchive customer need: %v", err)
+			return fmt.Errorf("Failed to unarchive customer need: %w", err)
 		}
 		if resp.CustomerNeedUnarchive == nil || !resp.CustomerNeedUnarchive.Success {
 			return errors.New("Failed to unarchive customer need")
@@ -880,7 +880,7 @@ var customerStatusListCmd = &cobra.Command{
 		limit := 250
 		resp, err := api.ListCustomerStatuses(ctx, client, &limit, nil, nil)
 		if err != nil {
-			return fmt.Errorf("Failed to list customer statuses: %v", err)
+			return fmt.Errorf("Failed to list customer statuses: %w", err)
 		}
 
 		if resp.CustomerStatuses == nil || len(resp.CustomerStatuses.Nodes) == 0 {
@@ -933,7 +933,7 @@ var customerStatusCreateCmd = &cobra.Command{
 
 		resp, err := api.CustomerStatusCreate(ctx, client, input)
 		if err != nil {
-			return fmt.Errorf("Failed to create customer status: %v", err)
+			return fmt.Errorf("Failed to create customer status: %w", err)
 		}
 		if resp.CustomerStatusCreate == nil || !resp.CustomerStatusCreate.Success {
 			return errors.New("Failed to create customer status")
@@ -985,7 +985,7 @@ var customerStatusUpdateCmd = &cobra.Command{
 
 		resp, err := api.CustomerStatusUpdate(ctx, client, args[0], input)
 		if err != nil {
-			return fmt.Errorf("Failed to update customer status: %v", err)
+			return fmt.Errorf("Failed to update customer status: %w", err)
 		}
 		if resp.CustomerStatusUpdate == nil || !resp.CustomerStatusUpdate.Success {
 			return errors.New("Failed to update customer status")
@@ -1016,7 +1016,7 @@ var customerStatusDeleteCmd = &cobra.Command{
 
 		resp, err := api.CustomerStatusDelete(ctx, client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to delete customer status: %v", err)
+			return fmt.Errorf("Failed to delete customer status: %w", err)
 		}
 		if resp.CustomerStatusDelete == nil || !resp.CustomerStatusDelete.Success {
 			return errors.New("Failed to delete customer status")
@@ -1054,7 +1054,7 @@ var customerTierListCmd = &cobra.Command{
 		limit := 250
 		resp, err := api.ListCustomerTiers(ctx, client, &limit, nil, nil)
 		if err != nil {
-			return fmt.Errorf("Failed to list customer tiers: %v", err)
+			return fmt.Errorf("Failed to list customer tiers: %w", err)
 		}
 
 		if resp.CustomerTiers == nil || len(resp.CustomerTiers.Nodes) == 0 {
@@ -1107,7 +1107,7 @@ var customerTierCreateCmd = &cobra.Command{
 
 		resp, err := api.CustomerTierCreate(ctx, client, input)
 		if err != nil {
-			return fmt.Errorf("Failed to create customer tier: %v", err)
+			return fmt.Errorf("Failed to create customer tier: %w", err)
 		}
 		if resp.CustomerTierCreate == nil || !resp.CustomerTierCreate.Success {
 			return errors.New("Failed to create customer tier")
@@ -1159,7 +1159,7 @@ var customerTierUpdateCmd = &cobra.Command{
 
 		resp, err := api.CustomerTierUpdate(ctx, client, args[0], input)
 		if err != nil {
-			return fmt.Errorf("Failed to update customer tier: %v", err)
+			return fmt.Errorf("Failed to update customer tier: %w", err)
 		}
 		if resp.CustomerTierUpdate == nil || !resp.CustomerTierUpdate.Success {
 			return errors.New("Failed to update customer tier")
@@ -1190,7 +1190,7 @@ var customerTierDeleteCmd = &cobra.Command{
 
 		resp, err := api.CustomerTierDelete(ctx, client, args[0])
 		if err != nil {
-			return fmt.Errorf("Failed to delete customer tier: %v", err)
+			return fmt.Errorf("Failed to delete customer tier: %w", err)
 		}
 		if resp.CustomerTierDelete == nil || !resp.CustomerTierDelete.Success {
 			return errors.New("Failed to delete customer tier")

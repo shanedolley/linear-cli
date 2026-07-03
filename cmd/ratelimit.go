@@ -33,7 +33,7 @@ Examples:
 		}
 		resp, err := api.RateLimitStatus(context.Background(), client)
 		if err != nil {
-			return fmt.Errorf("Failed to get rate-limit status: %v", err)
+			return fmt.Errorf("Failed to get rate-limit status: %w", err)
 		}
 
 		status := resp.RateLimitStatus
