@@ -216,7 +216,11 @@ Examples:
 			}
 		}
 		if cmd.Flags().Changed("label") {
-			input.LabelIds = resolveIssueLabels(ctx, client, cache, cmd, plaintext, jsonOut)
+			ids, err := resolveIssueLabels(ctx, client, cache, cmd)
+			if err != nil {
+				return err
+			}
+			input.LabelIds = ids
 		}
 		if cmd.Flags().Changed("project") {
 			projectName, _ := cmd.Flags().GetString("project")
@@ -278,7 +282,10 @@ Examples:
 				nullVal := api.NullSentinel
 				input.ParentId = &nullVal
 			} else {
-				parentID := resolveParentIssueID(ctx, client, parent, plaintext, jsonOut)
+				parentID, err := resolveParentIssueID(ctx, client, parent)
+				if err != nil {
+					return err
+				}
 				input.ParentId = &parentID
 			}
 		}

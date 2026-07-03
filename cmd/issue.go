@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"sort"
 	"strings"
 	"time"
@@ -58,7 +57,10 @@ var issueListCmd = &cobra.Command{
 		}
 
 		// Build typed filter from flags
-		filterTyped := buildIssueFilterTyped(cmd)
+		filterTyped, err := buildIssueFilterTyped(cmd)
+		if err != nil {
+			return err
+		}
 
 		limit, _ := cmd.Flags().GetInt("limit")
 		if limit == 0 {
@@ -205,7 +207,10 @@ Examples:
 		}
 
 		// Build typed filter from flags
-		filterTyped := buildIssueFilterTyped(cmd)
+		filterTyped, err := buildIssueFilterTyped(cmd)
+		if err != nil {
+			return err
+		}
 
 		limit, _ := cmd.Flags().GetInt("limit")
 		if limit == 0 {
@@ -871,30 +876,28 @@ func buildIssueUpdateInput(cmd *cobra.Command) api.IssueUpdateInput {
 
 // resolveIssueLabels resolves each --label value to a label ID, returning the
 // ID slice for use as IssueCreateInput.LabelIds / IssueUpdateInput.LabelIds.
-// A resolution failure aborts the command (matching the other flag handlers).
-func resolveIssueLabels(ctx context.Context, client graphql.Client, cache *ResolverCache, cmd *cobra.Command, plaintext, jsonOut bool) []string {
+// A resolution failure returns an error for the caller to surface.
+func resolveIssueLabels(ctx context.Context, client graphql.Client, cache *ResolverCache, cmd *cobra.Command) ([]string, error) {
 	labels, _ := cmd.Flags().GetStringSlice("label")
 	ids := make([]string, 0, len(labels))
 	for _, label := range labels {
 		id, err := resolveLabel(ctx, client, cache, label)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to find label '%s': %v", label, err), plaintext, jsonOut)
-			os.Exit(1)
+			return nil, fmt.Errorf("Failed to find label '%s': %v", label, err)
 		}
 		ids = append(ids, id)
 	}
-	return ids
+	return ids, nil
 }
 
 // resolveParentIssueID resolves a parent issue reference (identifier or UUID)
 // to its UUID via GetIssue, matching how `issue link` resolves parents.
-func resolveParentIssueID(ctx context.Context, client graphql.Client, ref string, plaintext, jsonOut bool) string {
+func resolveParentIssueID(ctx context.Context, client graphql.Client, ref string) (string, error) {
 	id, err := resolveIssueID(ctx, client, ref)
 	if err != nil {
-		output.Error(fmt.Sprintf("Failed to find parent %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return "", fmt.Errorf("Failed to find parent %v", err)
 	}
-	return id
+	return id, nil
 }
 
 var issueAssignCmd = &cobra.Command{
@@ -1026,7 +1029,11 @@ Examples:
 		}
 
 		if cmd.Flags().Changed("label") {
-			input.LabelIds = resolveIssueLabels(ctx, client, cache, cmd, plaintext, jsonOut)
+			ids, err := resolveIssueLabels(ctx, client, cache, cmd)
+			if err != nil {
+				return err
+			}
+			input.LabelIds = ids
 		}
 
 		if cmd.Flags().Changed("cycle") {
@@ -1040,7 +1047,10 @@ Examples:
 
 		if cmd.Flags().Changed("parent") {
 			parent, _ := cmd.Flags().GetString("parent")
-			parentID := resolveParentIssueID(ctx, client, parent, plaintext, jsonOut)
+			parentID, err := resolveParentIssueID(ctx, client, parent)
+			if err != nil {
+				return err
+			}
 			input.ParentId = &parentID
 		}
 
@@ -1232,7 +1242,11 @@ Examples:
 		}
 
 		if cmd.Flags().Changed("label") {
-			input.LabelIds = resolveIssueLabels(ctx, client, cache, cmd, plaintext, jsonOut)
+			ids, err := resolveIssueLabels(ctx, client, cache, cmd)
+			if err != nil {
+				return err
+			}
+			input.LabelIds = ids
 		}
 
 		// --cycle resolves within the issue's team (unless a UUID is given).
@@ -1285,7 +1299,10 @@ Examples:
 				nullVal := api.NullSentinel
 				input.ParentId = &nullVal
 			} else {
-				parentID := resolveParentIssueID(ctx, client, parent, plaintext, jsonOut)
+				parentID, err := resolveParentIssueID(ctx, client, parent)
+				if err != nil {
+					return err
+				}
 				input.ParentId = &parentID
 			}
 		}
@@ -1709,17 +1726,15 @@ Examples:
 
 		// Handle parent/child types differently - they use IssueUpdateInput.parentId
 		if linkType == "parent-of" || linkType == "sub-issue-of" {
-			handleParentChildLink(ctx, client, sourceIssue, targetIssue, linkType, remove, plaintext, jsonOut)
-			return nil
+			return handleParentChildLink(ctx, client, sourceIssue, targetIssue, linkType, remove, plaintext, jsonOut)
 		}
 
 		// Handle relation types (blocks, blocked-by, related, duplicate)
-		handleRelationLink(ctx, client, sourceIssue, targetIssue, linkType, remove, plaintext, jsonOut)
-		return nil
+		return handleRelationLink(ctx, client, sourceIssue, targetIssue, linkType, remove, plaintext, jsonOut)
 	},
 }
 
-func handleParentChildLink(ctx context.Context, client graphql.Client, sourceIssue, targetIssue, linkType string, remove bool, plaintext, jsonOut bool) {
+func handleParentChildLink(ctx context.Context, client graphql.Client, sourceIssue, targetIssue, linkType string, remove bool, plaintext, jsonOut bool) error {
 	// For parent-of: target's parentId = source's id
 	// For sub-issue-of: source's parentId = target's id
 
@@ -1742,8 +1757,7 @@ func handleParentChildLink(ctx context.Context, client graphql.Client, sourceIss
 
 		_, err := api.UpdateIssue(ctx, client, issueToUpdate, &input)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to remove parent relationship: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to remove parent relationship: %v", err)
 		}
 
 		if jsonOut {
@@ -1759,7 +1773,7 @@ func handleParentChildLink(ctx context.Context, client graphql.Client, sourceIss
 		} else {
 			output.Success(fmt.Sprintf("Removed %s relationship between %s and %s", linkType, sourceIssue, targetIssue), plaintext, jsonOut)
 		}
-		return
+		return nil
 	}
 
 	// Get the issue IDs
@@ -1775,12 +1789,10 @@ func handleParentChildLink(ctx context.Context, client graphql.Client, sourceIss
 	// Get parent issue to get its ID
 	parentResp, err := api.GetIssue(ctx, client, parentIssue)
 	if err != nil {
-		output.Error(fmt.Sprintf("Failed to get parent issue: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return fmt.Errorf("Failed to get parent issue: %v", err)
 	}
 	if parentResp.Issue == nil {
-		output.Error(fmt.Sprintf("Parent issue %q not found", parentIssue), plaintext, jsonOut)
-		os.Exit(1)
+		return fmt.Errorf("Parent issue %q not found", parentIssue)
 	}
 	parentID := parentResp.Issue.IssueDetailFields.Id
 
@@ -1791,8 +1803,7 @@ func handleParentChildLink(ctx context.Context, client graphql.Client, sourceIss
 
 	updateResp, err := api.UpdateIssue(ctx, client, childIssue, &input)
 	if err != nil {
-		output.Error(fmt.Sprintf("Failed to create parent relationship: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return fmt.Errorf("Failed to create parent relationship: %v", err)
 	}
 
 	if jsonOut {
@@ -1812,29 +1823,26 @@ func handleParentChildLink(ctx context.Context, client graphql.Client, sourceIss
 			linkType,
 			color.New(color.FgCyan).Sprint(targetIssue))
 	}
+	return nil
 }
 
-func handleRelationLink(ctx context.Context, client graphql.Client, sourceIssue, targetIssue, linkType string, remove bool, plaintext, jsonOut bool) {
+func handleRelationLink(ctx context.Context, client graphql.Client, sourceIssue, targetIssue, linkType string, remove bool, plaintext, jsonOut bool) error {
 	// Get issue IDs first
 	sourceResp, err := api.GetIssue(ctx, client, sourceIssue)
 	if err != nil {
-		output.Error(fmt.Sprintf("Failed to get source issue: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return fmt.Errorf("Failed to get source issue: %v", err)
 	}
 	if sourceResp.Issue == nil {
-		output.Error(fmt.Sprintf("Source issue %q not found", sourceIssue), plaintext, jsonOut)
-		os.Exit(1)
+		return fmt.Errorf("Source issue %q not found", sourceIssue)
 	}
 	sourceID := sourceResp.Issue.IssueDetailFields.Id
 
 	targetResp, err := api.GetIssue(ctx, client, targetIssue)
 	if err != nil {
-		output.Error(fmt.Sprintf("Failed to get target issue: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return fmt.Errorf("Failed to get target issue: %v", err)
 	}
 	if targetResp.Issue == nil {
-		output.Error(fmt.Sprintf("Target issue %q not found", targetIssue), plaintext, jsonOut)
-		os.Exit(1)
+		return fmt.Errorf("Target issue %q not found", targetIssue)
 	}
 	targetID := targetResp.Issue.IssueDetailFields.Id
 
@@ -1843,8 +1851,7 @@ func handleRelationLink(ctx context.Context, client graphql.Client, sourceIssue,
 		// Need to find the relation ID from the source issue's relations
 		relations := sourceResp.Issue.IssueDetailFields.Relations
 		if relations == nil || len(relations.Nodes) == 0 {
-			output.Error(fmt.Sprintf("No relations found on issue %s", sourceIssue), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("No relations found on issue %s", sourceIssue)
 		}
 
 		// Map CLI type to API type for matching
@@ -1861,8 +1868,7 @@ func handleRelationLink(ctx context.Context, client graphql.Client, sourceIssue,
 					if rel.RelatedIssue != nil && rel.RelatedIssue.Id == sourceID && rel.Type == "blocks" {
 						_, err := api.DeleteIssueRelation(ctx, client, rel.Id)
 						if err != nil {
-							output.Error(fmt.Sprintf("Failed to delete relation: %v", err), plaintext, jsonOut)
-							os.Exit(1)
+							return fmt.Errorf("Failed to delete relation: %v", err)
 						}
 						if jsonOut {
 							output.JSON(map[string]interface{}{
@@ -1877,12 +1883,11 @@ func handleRelationLink(ctx context.Context, client graphql.Client, sourceIssue,
 						} else {
 							output.Success(fmt.Sprintf("Removed %s relationship between %s and %s", linkType, sourceIssue, targetIssue), plaintext, jsonOut)
 						}
-						return
+						return nil
 					}
 				}
 			}
-			output.Error(fmt.Sprintf("No %s relation found between %s and %s", linkType, sourceIssue, targetIssue), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("No %s relation found between %s and %s", linkType, sourceIssue, targetIssue)
 		case "related":
 			apiType = "related"
 		case "duplicate":
@@ -1899,14 +1904,12 @@ func handleRelationLink(ctx context.Context, client graphql.Client, sourceIssue,
 		}
 
 		if relationID == "" {
-			output.Error(fmt.Sprintf("No %s relation found between %s and %s", linkType, sourceIssue, targetIssue), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("No %s relation found between %s and %s", linkType, sourceIssue, targetIssue)
 		}
 
 		_, err = api.DeleteIssueRelation(ctx, client, relationID)
 		if err != nil {
-			output.Error(fmt.Sprintf("Failed to delete relation: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Failed to delete relation: %v", err)
 		}
 
 		if jsonOut {
@@ -1922,7 +1925,7 @@ func handleRelationLink(ctx context.Context, client graphql.Client, sourceIssue,
 		} else {
 			output.Success(fmt.Sprintf("Removed %s relationship between %s and %s", linkType, sourceIssue, targetIssue), plaintext, jsonOut)
 		}
-		return
+		return nil
 	}
 
 	// Create the relation
@@ -1958,8 +1961,7 @@ func handleRelationLink(ctx context.Context, client graphql.Client, sourceIssue,
 
 	resp, err := api.CreateIssueRelation(ctx, client, &input)
 	if err != nil {
-		output.Error(fmt.Sprintf("Failed to create relation: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return fmt.Errorf("Failed to create relation: %v", err)
 	}
 
 	if jsonOut {
@@ -1979,6 +1981,7 @@ func handleRelationLink(ctx context.Context, client graphql.Client, sourceIssue,
 			linkType,
 			color.New(color.FgCyan).Sprint(targetIssue))
 	}
+	return nil
 }
 
 func init() {
@@ -2092,7 +2095,7 @@ func dateGte(val string) *api.DateComparator {
 }
 
 // buildIssueFilterTyped builds a typed IssueFilter from command flags
-func buildIssueFilterTyped(cmd *cobra.Command) *api.IssueFilter {
+func buildIssueFilterTyped(cmd *cobra.Command) (*api.IssueFilter, error) {
 	filter := &api.IssueFilter{}
 
 	// Assignee filter
@@ -2140,14 +2143,11 @@ func buildIssueFilterTyped(cmd *cobra.Command) *api.IssueFilter {
 	newerThan, _ := cmd.Flags().GetString("newer-than")
 	createdAt, err := utils.ParseTimeExpression(newerThan)
 	if err != nil {
-		plaintext := viper.GetBool("plaintext")
-		jsonOut := viper.GetBool("json")
-		output.Error(fmt.Sprintf("Invalid newer-than value: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return nil, fmt.Errorf("Invalid newer-than value: %v", err)
 	}
 	if createdAt != "" {
 		filter.CreatedAt = dateGte(createdAt)
 	}
 
-	return filter
+	return filter, nil
 }

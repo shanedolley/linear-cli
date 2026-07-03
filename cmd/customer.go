@@ -666,7 +666,10 @@ attachmentUrl inputs) is not yet wired; pass the content with --body instead.`,
 		}
 		if cmd.Flags().Changed("issue") {
 			issue, _ := cmd.Flags().GetString("issue")
-			issueID := resolveParentIssueID(ctx, client, issue, plaintext, jsonOut)
+			issueID, err := resolveParentIssueID(ctx, client, issue)
+			if err != nil {
+				return err
+			}
 			input.IssueId = &issueID
 		}
 		if cmd.Flags().Changed("project") {
@@ -724,7 +727,10 @@ var customerNeedUpdateCmd = &cobra.Command{
 		}
 		if cmd.Flags().Changed("issue") {
 			issue, _ := cmd.Flags().GetString("issue")
-			issueID := resolveParentIssueID(ctx, client, issue, plaintext, jsonOut)
+			issueID, err := resolveParentIssueID(ctx, client, issue)
+			if err != nil {
+				return err
+			}
 			input.IssueId = &issueID
 			changed = true
 		}

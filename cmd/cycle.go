@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/Khan/genqlient/graphql"
@@ -85,7 +84,10 @@ var cycleListCmd = &cobra.Command{
 			return fmt.Errorf("Invalid sort option: %s. Valid options are: linear, created, updated", sortBy)
 		}
 
-		filter := buildCycleFilterTyped(ctx, client, cache, cmd, plaintext, jsonOut)
+		filter, err := buildCycleFilterTyped(ctx, client, cache, cmd)
+		if err != nil {
+			return err
+		}
 
 		resp, err := api.ListCycles(ctx, client, &filter, limitPtr, nil, orderByEnum)
 		if err != nil {
@@ -163,7 +165,10 @@ var cycleGetCmd = &cobra.Command{
 		ctx := context.Background()
 		cache := newResolverCache()
 
-		cycleID := resolveCycleArg(ctx, client, cache, cmd, args[0], plaintext, jsonOut)
+		cycleID, err := resolveCycleArg(ctx, client, cache, cmd, args[0])
+		if err != nil {
+			return err
+		}
 		resp, err := api.GetCycle(ctx, client, cycleID)
 		if err != nil {
 			return fmt.Errorf("Failed to get cycle: %v", err)
@@ -295,7 +300,10 @@ var cycleUpdateCmd = &cobra.Command{
 		ctx := context.Background()
 		cache := newResolverCache()
 
-		cycleID := resolveCycleArg(ctx, client, cache, cmd, args[0], plaintext, jsonOut)
+		cycleID, err := resolveCycleArg(ctx, client, cache, cmd, args[0])
+		if err != nil {
+			return err
+		}
 
 		input := api.CycleUpdateInput{}
 		hasUpdates := false
@@ -366,7 +374,10 @@ var cycleArchiveCmd = &cobra.Command{
 		ctx := context.Background()
 		cache := newResolverCache()
 
-		cycleID := resolveCycleArg(ctx, client, cache, cmd, args[0], plaintext, jsonOut)
+		cycleID, err := resolveCycleArg(ctx, client, cache, cmd, args[0])
+		if err != nil {
+			return err
+		}
 
 		resp, err := api.CycleArchive(ctx, client, cycleID)
 		if err != nil {
@@ -409,7 +420,10 @@ number to move later, or a negative number to move earlier.`,
 			return errors.New("Specify a non-zero number of days with --by")
 		}
 
-		cycleID := resolveCycleArg(ctx, client, cache, cmd, args[0], plaintext, jsonOut)
+		cycleID, err := resolveCycleArg(ctx, client, cache, cmd, args[0])
+		if err != nil {
+			return err
+		}
 
 		input := api.CycleShiftAllInput{Id: cycleID, DaysToShift: days}
 		resp, err := api.CycleShiftAll(ctx, client, &input)
@@ -448,7 +462,10 @@ not yet ended.`,
 		ctx := context.Background()
 		cache := newResolverCache()
 
-		cycleID := resolveCycleArg(ctx, client, cache, cmd, args[0], plaintext, jsonOut)
+		cycleID, err := resolveCycleArg(ctx, client, cache, cmd, args[0])
+		if err != nil {
+			return err
+		}
 
 		resp, err := api.CycleStartUpcomingCycleToday(ctx, client, cycleID)
 		if err != nil {
@@ -470,14 +487,13 @@ not yet ended.`,
 // buildCycleFilterTyped builds a CycleFilter from the list flags: an optional
 // team filter (by resolved team ID) and a created-after bound from
 // --newer-than (which defaults to all_time for cycles).
-func buildCycleFilterTyped(ctx context.Context, client graphql.Client, cache *ResolverCache, cmd *cobra.Command, plaintext, jsonOut bool) api.CycleFilter {
+func buildCycleFilterTyped(ctx context.Context, client graphql.Client, cache *ResolverCache, cmd *cobra.Command) (api.CycleFilter, error) {
 	filter := api.CycleFilter{}
 
 	if team, _ := cmd.Flags().GetString("team"); team != "" {
 		teamID, err := resolveTeam(ctx, client, cache, team)
 		if err != nil {
-			output.Error(err.Error(), plaintext, jsonOut)
-			os.Exit(1)
+			return filter, err
 		}
 		filter.Team = &api.TeamFilter{Id: &api.IDComparator{Eq: &teamID}}
 	}
@@ -485,39 +501,35 @@ func buildCycleFilterTyped(ctx context.Context, client graphql.Client, cache *Re
 	newerThan, _ := cmd.Flags().GetString("newer-than")
 	createdAt, err := utils.ParseTimeExpression(newerThan)
 	if err != nil {
-		output.Error(fmt.Sprintf("Invalid newer-than value: %v", err), plaintext, jsonOut)
-		os.Exit(1)
+		return filter, fmt.Errorf("Invalid newer-than value: %v", err)
 	}
 	if createdAt != "" {
 		filter.CreatedAt = &api.DateComparator{Gte: &createdAt}
 	}
 
-	return filter
+	return filter, nil
 }
 
 // resolveCycleArg resolves a cycle argument that may be a UUID (returned as-is)
 // or a cycle number/name. Number/name resolution needs a team, taken from the
 // --team flag; without it, a non-UUID reference is an error.
-func resolveCycleArg(ctx context.Context, client graphql.Client, cache *ResolverCache, cmd *cobra.Command, ref string, plaintext, jsonOut bool) string {
+func resolveCycleArg(ctx context.Context, client graphql.Client, cache *ResolverCache, cmd *cobra.Command, ref string) (string, error) {
 	if isUUID(ref) {
-		return ref
+		return ref, nil
 	}
 	team, _ := cmd.Flags().GetString("team")
 	if team == "" {
-		output.Error(fmt.Sprintf("Resolving cycle '%s' by number or name requires --team (or pass a cycle UUID)", ref), plaintext, jsonOut)
-		os.Exit(1)
+		return "", fmt.Errorf("Resolving cycle '%s' by number or name requires --team (or pass a cycle UUID)", ref)
 	}
 	teamID, err := resolveTeam(ctx, client, cache, team)
 	if err != nil {
-		output.Error(err.Error(), plaintext, jsonOut)
-		os.Exit(1)
+		return "", err
 	}
 	cycleID, err := resolveCycle(ctx, client, cache, teamID, ref)
 	if err != nil {
-		output.Error(err.Error(), plaintext, jsonOut)
-		os.Exit(1)
+		return "", err
 	}
-	return cycleID
+	return cycleID, nil
 }
 
 // cycleLabel builds a human-friendly label for a cycle: its name if set,
