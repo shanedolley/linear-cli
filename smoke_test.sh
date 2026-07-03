@@ -73,6 +73,11 @@ if [ $TESTS_FAILED -gt 0 ]; then
     exit 1
 fi
 
+# Test version
+run_test "version" "go run main.go version" "lincli version"
+run_test "version (plaintext)" "go run main.go version -p"
+run_test "version (json)" "go run main.go version -j" "\"version\""
+
 # Test whoami
 echo -e "\n${YELLOW}Testing user commands...${NC}"
 run_test "whoami" "go run main.go whoami" "@"
