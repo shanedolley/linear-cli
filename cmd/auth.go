@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/fatih/color"
 	"github.com/shanedolley/lincli/pkg/auth"
@@ -22,9 +21,9 @@ Examples:
   lincli auth login        # Same as above
   lincli auth status       # Check authentication status
   lincli auth logout       # Clear stored credentials`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		// Default behavior is to run login
-		loginCmd.Run(cmd, args)
+		return loginCmd.RunE(cmd, args)
 	},
 }
 
@@ -32,7 +31,7 @@ var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Login to Linear",
 	Long:  `Authenticate with Linear using Personal API Key.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
@@ -43,8 +42,7 @@ var loginCmd = &cobra.Command{
 
 		err := auth.Login(plaintext, jsonOut)
 		if err != nil {
-			output.Error(fmt.Sprintf("Authentication failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Authentication failed: %v", err)
 		}
 
 		if !plaintext && !jsonOut {
@@ -57,6 +55,7 @@ var loginCmd = &cobra.Command{
 		} else {
 			fmt.Println("Successfully authenticated with Linear")
 		}
+		return nil
 	},
 }
 
@@ -64,7 +63,7 @@ var statusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Check authentication status",
 	Long:  `Check if you are currently authenticated with Linear.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
@@ -80,7 +79,8 @@ var statusCmd = &cobra.Command{
 			} else {
 				fmt.Println("Not authenticated")
 			}
-			os.Exit(1)
+			// Output already rendered above; errSilent exits non-zero quietly.
+			return errSilent
 		}
 
 		if jsonOut {
@@ -95,6 +95,7 @@ var statusCmd = &cobra.Command{
 			fmt.Printf("User: %s\n", color.New(color.FgCyan).Sprint(user.Name))
 			fmt.Printf("Email: %s\n", color.New(color.FgCyan).Sprint(user.Email))
 		}
+		return nil
 	},
 }
 
@@ -102,14 +103,13 @@ var logoutCmd = &cobra.Command{
 	Use:   "logout",
 	Short: "Logout from Linear",
 	Long:  `Clear stored Linear credentials.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		plaintext := viper.GetBool("plaintext")
 		jsonOut := viper.GetBool("json")
 
 		err := auth.Logout()
 		if err != nil {
-			output.Error(fmt.Sprintf("Logout failed: %v", err), plaintext, jsonOut)
-			os.Exit(1)
+			return fmt.Errorf("Logout failed: %v", err)
 		}
 
 		if jsonOut {
@@ -122,6 +122,7 @@ var logoutCmd = &cobra.Command{
 		} else {
 			fmt.Println(color.New(color.FgGreen).Sprint("✅ Successfully logged out"))
 		}
+		return nil
 	},
 }
 
@@ -129,8 +130,8 @@ var whoamiCmd = &cobra.Command{
 	Use:   "whoami",
 	Short: "Show current user",
 	Long:  `Display information about the currently authenticated user.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		statusCmd.Run(cmd, args)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return statusCmd.RunE(cmd, args)
 	},
 }
 
